@@ -13,9 +13,9 @@ public abstract class AbstractMonitorable<T> implements Monitorable<T> {
 
     protected final Logger LOG;
     
-    private final Monitor<?>[] NO_MONITORS = {};
+    private final Monitor[] NO_MONITORS = {};
 
-    private volatile Monitor<?>[] monitors = NO_MONITORS;
+    private volatile Monitor[] monitors = NO_MONITORS;
 
     private final String name;
 
@@ -46,18 +46,18 @@ public abstract class AbstractMonitorable<T> implements Monitorable<T> {
         return type;
     }
 
-    public synchronized void attachMonitor(Monitor<T> monitor) {
+    public synchronized void attachMonitor(Monitor monitor) {
         if (!isAttached(monitor)) {
-            Monitor<?>[] newMonitors = new Monitor[monitors.length + 1];
+            Monitor[] newMonitors = new Monitor[monitors.length + 1];
             System.arraycopy(monitors, 0, newMonitors, 0, monitors.length);
             newMonitors[monitors.length] = monitor;
             monitors = newMonitors;
         }
     }
 
-    public synchronized void removeMonitor(Monitor<T> monitor) {
+    public synchronized void removeMonitor(Monitor monitor) {
         if (isAttached(monitor)) {
-            Monitor<?>[] newMonitors = new Monitor[monitors.length - 1];
+            Monitor[] newMonitors = new Monitor[monitors.length - 1];
             for (int i = 0, j = 0; i < monitors.length; i++) {
                 if (monitors[i] != monitor) {
                     newMonitors[j++] = monitors[i];
@@ -67,8 +67,8 @@ public abstract class AbstractMonitorable<T> implements Monitorable<T> {
         }
     }
 
-    private boolean isAttached(Monitor<T> monitorToFind) {
-        for (Monitor<?> monitor : monitors) {
+    private boolean isAttached(Monitor monitorToFind) {
+        for (Monitor monitor : monitors) {
             if (monitor.equals(monitorToFind)) {
                 return true;
             }
@@ -81,7 +81,7 @@ public abstract class AbstractMonitorable<T> implements Monitorable<T> {
         // it's possible it could be changed while the following loop is executing.
         logValue();
         Monitor[] monitorsCopy = monitors;
-        for (Monitor<T> monitor : monitorsCopy) {
+        for (Monitor monitor : monitorsCopy) {
             monitor.valueChanged(this);
         }
     }

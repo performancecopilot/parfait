@@ -6,8 +6,8 @@ package com.aconex.monitoring;
  *
  * @author ohutchison
  */
-public interface Monitor<T> {
+public interface Monitor {
 
-    void valueChanged(Monitorable<T> monitorable);
+    void valueChanged(Monitorable<?> monitorable);
 
 }

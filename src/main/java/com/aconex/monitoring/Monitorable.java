@@ -33,10 +33,10 @@ public interface Monitorable<T> {
      * Attaches the provided Monitor. Once attached the Monitor will be notified whenever the value
      * of this Monitorable changes.
      */
-    void attachMonitor(Monitor<T> m);
+    void attachMonitor(Monitor m);
 
     /**
      * Removed the provided Monitor from the list of attached Monitors.
      */
-    void removeMonitor(Monitor<T> m);
+    void removeMonitor(Monitor m);
 }

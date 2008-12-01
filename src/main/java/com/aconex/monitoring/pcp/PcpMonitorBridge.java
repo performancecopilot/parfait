@@ -398,9 +398,9 @@ public class PcpMonitorBridge implements Lifecycle {
      * pending update. This class will never block, if the update queue is ever full then the we
      * just do nothing.
      */
-    private class PcpMonitorBridgeMonitor<T> implements Monitor<T> {
+    private class PcpMonitorBridgeMonitor implements Monitor {
 
-        public void valueChanged(Monitorable<T> monitorable) {
+        public void valueChanged(Monitorable<?> monitorable) {
             /*
              * If the master-arm switch to output values to a file is off, then abandon quickly. The
              * only reason it would be turned off is because we have suspected it is causing
