@@ -301,7 +301,7 @@ public class PcpMonitorBridge implements Lifecycle {
         }
     }
 
-    private String getTypeName(Class type) {
+    private String getTypeName(Class<?> type) {
         if (type == Boolean.class) {
             return "int";
         } else if (type == Integer.class || type == AtomicInteger.class) {
@@ -398,9 +398,9 @@ public class PcpMonitorBridge implements Lifecycle {
      * pending update. This class will never block, if the update queue is ever full then the we
      * just do nothing.
      */
-    private class PcpMonitorBridgeMonitor implements Monitor {
+    private class PcpMonitorBridgeMonitor<T> implements Monitor<T> {
 
-        public void valueChanged(Monitorable monitorable) {
+        public void valueChanged(Monitorable<T> monitorable) {
             /*
              * If the master-arm switch to output values to a file is off, then abandon quickly. The
              * only reason it would be turned off is because we have suspected it is causing

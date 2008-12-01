@@ -29,7 +29,7 @@ public class MonitoredValue<T> extends AbstractMonitorable<T> {
     private volatile T value;
 
     public MonitoredValue(String name, String description, T initialValue) {
-        super(name, description, initialValue.getClass());
+        super(name, description, (Class<T>) initialValue.getClass());
         Assert.notNull(initialValue, "Monitored value can not be null");
         this.value = initialValue;
         registerSelf();

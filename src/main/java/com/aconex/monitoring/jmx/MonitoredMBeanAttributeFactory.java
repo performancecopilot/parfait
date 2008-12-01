@@ -126,7 +126,7 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean {
         }
     }
 
-    public Class getObjectType() {
+    public Class<?> getObjectType() {
         return MonitoredValue.class;
     }
 
