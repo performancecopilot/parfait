@@ -30,8 +30,8 @@ public abstract class AbstractMonitorable<T> implements Monitorable<T> {
         LOG = Logger.getLogger("pcp."+name);
     }
 
-    protected void registerSelf() {
-        MonitorableRegistry.register(this);
+    protected void registerSelf(MonitorableRegistry registry) {
+        registry.register(this);
     }
 
     public String getName() {

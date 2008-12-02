@@ -21,9 +21,13 @@ public class MonitoredCounter extends AbstractMonitorable<Long> {
     private final AtomicLong value;
 
     public MonitoredCounter(String name, String description) {
+    	this(name, description, MonitorableRegistry.DEFAULT_REGISTRY);
+    }
+
+    public MonitoredCounter(String name, String description, MonitorableRegistry registry) {
         super(name, description, Long.class);
         value = new AtomicLong(0L);
-        registerSelf();
+        registerSelf(registry);
     }
 
     public Long get() {

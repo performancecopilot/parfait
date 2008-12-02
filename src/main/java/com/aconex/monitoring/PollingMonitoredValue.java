@@ -25,9 +25,15 @@ public class PollingMonitoredValue<T> extends MonitoredValue<T> {
 
     private final Poller<T> poller;
 
-    public PollingMonitoredValue(String name, String description, int updateInterval,
-            Poller<T> poller) {
-        super(name, description, poller.poll());
+	public PollingMonitoredValue(String name, String description,
+			int updateInterval, Poller<T> poller) {
+		this(name, description, MonitorableRegistry.DEFAULT_REGISTRY,
+				updateInterval, poller);
+	}
+    
+	public PollingMonitoredValue(String name, String description,
+			MonitorableRegistry registry, int updateInterval, Poller<T> poller) {
+        super(name, description, registry, poller.poll());
         this.poller = poller;
         Assert.isTrue(updateInterval >= MIN_UPDATE_INTERVAL, "updateInterval is too short.");
         pollingTimer.scheduleAtFixedRate(new PollerTask(), updateInterval, updateInterval);

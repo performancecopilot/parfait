@@ -8,15 +8,16 @@ import java.util.TreeMap;
 import com.aconex.utilities.Assert;
 
 public class MonitorableRegistry {
-
+	public static final MonitorableRegistry DEFAULT_REGISTRY = new MonitorableRegistry();
+	
     /**
      * This is a TreeMap so that the monitorables a maintained in alphabetical order.
      */
-    private static final Map<String, Monitorable<?>> monitorables = new TreeMap<String, Monitorable<?>>();
+    private final Map<String, Monitorable<?>> monitorables = new TreeMap<String, Monitorable<?>>();
 
-    private static boolean isMonitorBridgeStarted = false;
+    private boolean isMonitorBridgeStarted = false;
 
-    public static synchronized <T> void register(Monitorable<T> monitorable) {
+    public synchronized <T> void register(Monitorable<T> monitorable) {
         if (isMonitorBridgeStarted) {
             throw new IllegalStateException("Cannot register monitorable " + monitorable.getName()
                     + " after MonitorBridge has been started");
@@ -32,7 +33,7 @@ public class MonitorableRegistry {
     /**
      * Useful only in Unit tests
      */
-    public static void shutdown() {
+    public void shutdown() {
         if (isMonitorBridgeStarted) {
             isMonitorBridgeStarted = false;
         }
@@ -44,10 +45,9 @@ public class MonitorableRegistry {
 
     }
 
-    public static synchronized Collection<Monitorable<?>> getMonitorables() {
+    public synchronized Collection<Monitorable<?>> getMonitorables() {
         Assert.isFalse(isMonitorBridgeStarted, "PCP Monitor Bridge should have not been started!");
         isMonitorBridgeStarted = true;
         return Collections.unmodifiableCollection(monitorables.values());
     }
-
 }

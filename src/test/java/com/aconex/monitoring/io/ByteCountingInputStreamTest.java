@@ -14,18 +14,14 @@ public class ByteCountingInputStreamTest extends TestCase {
     private MonitoredCounter counter = null;
     private ByteArrayInputStream bais;
     private ByteCountingInputStream pcpCS;
+    private MonitorableRegistry registry = new MonitorableRegistry();
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        counter = new MonitoredCounter("food", "");
+        counter = new MonitoredCounter("food", "", registry);
         this.bais = new ByteArrayInputStream(TEST_BYTES);
         this.pcpCS = new ByteCountingInputStream(this.bais, counter);
-        /*
-         * this 'starts' the registry so that the call to shutdown() in the tearDown method will
-         * clear the state for the next unit test
-         */
-        MonitorableRegistry.getMonitorables();
     }
 
     public void testBytesRead() throws IOException {
@@ -111,6 +107,5 @@ public class ByteCountingInputStreamTest extends TestCase {
         this.bais = null;
         this.pcpCS = null;
         super.tearDown();
-        MonitorableRegistry.shutdown();
     }
 }

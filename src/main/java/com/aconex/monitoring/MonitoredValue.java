@@ -28,13 +28,19 @@ public class MonitoredValue<T> extends AbstractMonitorable<T> {
 
     private volatile T value;
 
-    @SuppressWarnings("unchecked")
 	public MonitoredValue(String name, String description, T initialValue) {
-        super(name, description, (Class<T>) initialValue.getClass());
-        Assert.notNull(initialValue, "Monitored value can not be null");
-        this.value = initialValue;
-        registerSelf();
-    }
+		this(name, description, MonitorableRegistry.DEFAULT_REGISTRY,
+				initialValue);
+	}
+
+	@SuppressWarnings("unchecked")
+	public MonitoredValue(String name, String description,
+			MonitorableRegistry registry, T initialValue) {
+		super(name, description, (Class<T>) initialValue.getClass());
+		Assert.notNull(initialValue, "Monitored value can not be null");
+		this.value = initialValue;
+		registerSelf(registry);
+	}
 
     public T get() {
         return value;

@@ -14,17 +14,13 @@ public class ByteCountingOutputStreamTest extends TestCase {
     private MonitoredCounter counter = null;
     private ByteArrayOutputStream baos;
     private ByteCountingOutputStream pcpCS;
+    private MonitorableRegistry registry = new MonitorableRegistry();
 
     protected void setUp() throws Exception {
         super.setUp();
-        counter = new MonitoredCounter("food", "");
+        counter = new MonitoredCounter("food", "", registry);
         this.baos = new ByteArrayOutputStream();
         this.pcpCS = new ByteCountingOutputStream(this.baos, counter);
-        /*
-         * this 'starts' the registry so that the call to shutdown() in the tearDown method will
-         * clear the state for the next unit test
-         */
-        MonitorableRegistry.getMonitorables();
     }
 
     @SuppressWarnings("deprecation")
@@ -33,7 +29,6 @@ public class ByteCountingOutputStreamTest extends TestCase {
         this.baos = null;
         this.pcpCS = null;
         super.tearDown();
-        MonitorableRegistry.shutdown();
     }
 
     public void testWriteInt() throws IOException {

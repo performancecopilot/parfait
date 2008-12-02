@@ -24,6 +24,8 @@ public class PcpMonitorBridgeTest extends TestCase {
     private MonitoredValue<Long> longValue = null;
     private MonitoredValue<Double> doubleValue = null;
     private MonitoredValue<String> stringValue = null;
+    
+    private MonitorableRegistry registry = new MonitorableRegistry();
 
     private PcpMonitorBridge pcp = null;
 
@@ -31,18 +33,17 @@ public class PcpMonitorBridgeTest extends TestCase {
     }
 
     public void setUp() {
-        boolanValue = new MonitoredValue<Boolean>("boolean.value", "boolean.value.desc", true);
-        intValue = new MonitoredValue<Integer>("int.value", "int.value.desc", 1);
-        longValue = new MonitoredValue<Long>("long.value", "long.value.desc", 1l);
-        doubleValue = new MonitoredValue<Double>("double.value", "double.value.desc", 1d);
-        stringValue = new MonitoredValue<String>("string.value", "string.value.desc", "!");
+        boolanValue = new MonitoredValue<Boolean>("boolean.value", "boolean.value.desc", registry, true);
+        intValue = new MonitoredValue<Integer>("int.value", "int.value.desc", registry, 1);
+        longValue = new MonitoredValue<Long>("long.value", "long.value.desc", registry, 1l);
+        doubleValue = new MonitoredValue<Double>("double.value", "double.value.desc", registry, 1d);
+        stringValue = new MonitoredValue<String>("string.value", "string.value.desc", registry, "!");
 
-        pcp = new PcpMonitorBridge("test", System.getProperty("java.io.tmpdir"));
+        pcp = new PcpMonitorBridge("test", System.getProperty("java.io.tmpdir"), registry);
 
     }
 
     public void tearDown() {
-        MonitorableRegistry.shutdown();
         pcp.stop();
     }
 

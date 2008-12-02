@@ -73,6 +73,8 @@ public class PcpMonitorBridge implements Lifecycle {
 
     private final File dataFileDir;
 
+    private final MonitorableRegistry registry;
+    
     /*
      * Determines whether value changes detected are written out to an external file for external
      * monitoring by the Aconex PCP agent.
@@ -88,7 +90,12 @@ public class PcpMonitorBridge implements Lifecycle {
 
     private boolean deleteFilesOnExit = false;
 
+
     public PcpMonitorBridge(String serverName, String dataFileDir) {
+    	this(serverName, dataFileDir, MonitorableRegistry.DEFAULT_REGISTRY);
+    }
+
+    public PcpMonitorBridge(String serverName, String dataFileDir, MonitorableRegistry registry) {
         Assert.hasText(serverName, "Sever name can not be blank");
         this.serverName = serverName;
         this.dataFileDir = new File(dataFileDir);
@@ -100,6 +107,8 @@ public class PcpMonitorBridge implements Lifecycle {
         this.updateThread = new Thread(new Updater());
         this.updateThread.setName("PcpMonitorBridge-Updater");
         this.updateThread.setDaemon(true);
+        Assert.notNull(registry);
+        this.registry = registry;
     }
 
     public boolean isRunning() {
@@ -120,7 +129,7 @@ public class PcpMonitorBridge implements Lifecycle {
 
     private void startMonitoring() {
         try {
-            Collection<Monitorable<?>> monitorables = MonitorableRegistry.getMonitorables();
+            Collection<Monitorable<?>> monitorables = registry.getMonitorables();
 
             setupJmxValues(monitorables);
 
