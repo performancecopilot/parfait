@@ -63,7 +63,7 @@ public class PcpMonitorBridge implements Lifecycle {
     private final Map<Monitorable<?>, Integer> monitorableOffsets = new HashMap<Monitorable<?>, Integer>();
 
     private final ArrayBlockingQueue<Monitorable<?>> monitorablesPendingUpdate = new ArrayBlockingQueue<Monitorable<?>>(
-            1024);
+    		UPDATE_QUEUE_SIZE);
 
     private final Monitor monitor = new PcpMonitorBridgeMonitor();
 
