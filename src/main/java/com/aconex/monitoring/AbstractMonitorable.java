@@ -87,8 +87,4 @@ public abstract class AbstractMonitorable<T> implements Monitorable<T> {
     }
         
     protected abstract void logValue();
-    
-    public static void main(String[] args) {
-		System.out.println("Boo");
-	}
 }
