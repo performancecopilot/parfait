@@ -1,8 +1,5 @@
 package com.aconex.monitoring;
 
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-
 import org.apache.commons.lang.ObjectUtils;
 
 import com.aconex.utilities.Assert;
@@ -26,7 +23,7 @@ import com.aconex.utilities.Assert;
  */
 public class MonitoredValue<T> extends AbstractMonitorable<T> {
 
-    private volatile T value;
+    protected volatile T value;
 
 	public MonitoredValue(String name, String description, T initialValue) {
 		this(name, description, MonitorableRegistry.DEFAULT_REGISTRY,
@@ -52,36 +49,6 @@ public class MonitoredValue<T> extends AbstractMonitorable<T> {
         }
         Assert.notNull(newValue, "Monitored value can not be null");
         this.value = newValue;
-        notifyMonitors();
-    }
-
-    /**
-     * Convenience method to increment atomic numeric types. Note that this MonitoredValue must be
-     * of type AtomicInteger or AtomicLong for this method to work.
-     */
-    public void inc() {
-        Assert.isTrue(value instanceof AtomicInteger || value instanceof AtomicLong,
-                "MonitoredValue type has no increment capability");
-        if (value instanceof AtomicInteger) {
-            ((AtomicInteger) value).incrementAndGet();
-        } else if (value instanceof AtomicLong) {
-            ((AtomicLong) value).incrementAndGet();
-        }
-        notifyMonitors();
-    }
-
-    /**
-     * Convenience method to decrement atomic numeric types. Note that this MonitoredValue must be
-     * of type AtomicInteger or AtomicLong for this method to work.
-     */
-    public void dec() {
-        Assert.isTrue(value instanceof AtomicInteger || value instanceof AtomicLong,
-                "MonitoredValue type has no decrement capability");
-        if (value instanceof AtomicInteger) {
-            ((AtomicInteger) value).decrementAndGet();
-        } else if (value instanceof AtomicLong) {
-            ((AtomicLong) value).decrementAndGet();
-        }
         notifyMonitors();
     }
 
