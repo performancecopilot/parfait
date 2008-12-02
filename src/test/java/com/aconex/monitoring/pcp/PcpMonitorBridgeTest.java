@@ -17,7 +17,7 @@ import com.aconex.monitoring.MonitorableRegistry;
 import com.aconex.monitoring.MonitoredValue;
 
 public class PcpMonitorBridgeTest extends TestCase {
-    private MonitoredValue<Boolean> boolanValue = null;
+    private MonitoredValue<Boolean> booleanValue = null;
 
     private MonitoredValue<Integer> intValue = null;
 
@@ -33,7 +33,7 @@ public class PcpMonitorBridgeTest extends TestCase {
     }
 
     public void setUp() {
-        boolanValue = new MonitoredValue<Boolean>("boolean.value", "boolean.value.desc", registry, true);
+        booleanValue = new MonitoredValue<Boolean>("boolean.value", "boolean.value.desc", registry, true);
         intValue = new MonitoredValue<Integer>("int.value", "int.value.desc", registry, 1);
         longValue = new MonitoredValue<Long>("long.value", "long.value.desc", registry, 1l);
         doubleValue = new MonitoredValue<Double>("double.value", "double.value.desc", registry, 1d);
@@ -54,10 +54,10 @@ public class PcpMonitorBridgeTest extends TestCase {
 
         checkDataValues(generationNumber);
 
-        boolanValue.set(false);
+        booleanValue.set(false);
         checkDataValues(generationNumber);
 
-        boolanValue.set(true);
+        booleanValue.set(true);
         checkDataValues(generationNumber);
 
         intValue.set(0);
@@ -163,7 +163,7 @@ public class PcpMonitorBridgeTest extends TestCase {
         assertEquals(generationNumber, dataBuffer.getLong(0));
         assertEquals(PcpMonitorBridge.PROTOCOL_VERSION, dataBuffer.get(8));
 
-        assertEquals(boolanValue.get() ? 1 : 0, dataBuffer.getInt(12));
+        assertEquals(booleanValue.get() ? 1 : 0, dataBuffer.getInt(12));
         assertEquals(doubleValue.get(), dataBuffer.getDouble(16));
         assertEquals((int) intValue.get(), dataBuffer.getInt(24));
         assertEquals((long) longValue.get(), dataBuffer.getLong(32));
