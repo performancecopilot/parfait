@@ -7,20 +7,20 @@ import junit.framework.TestCase;
 
 import com.aconex.monitoring.MonitorableRegistry;
 import com.aconex.monitoring.MonitoredCounter;
-import com.aconex.monitoring.io.PcpCountingInputStream;
+import com.aconex.monitoring.io.ByteCountingInputStream;
 
-public class PcpCountingInputStreamTest extends TestCase {
+public class ByteCountingInputStreamTest extends TestCase {
     private static final byte[] TEST_BYTES = new byte[] { 0, 1, 2, 3, 4 };
     private MonitoredCounter counter = null;
     private ByteArrayInputStream bais;
-    private PcpCountingInputStream pcpCS;
+    private ByteCountingInputStream pcpCS;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         counter = new MonitoredCounter("food", "");
         this.bais = new ByteArrayInputStream(TEST_BYTES);
-        this.pcpCS = new PcpCountingInputStream(this.bais, counter);
+        this.pcpCS = new ByteCountingInputStream(this.bais, counter);
         /*
          * this 'starts' the registry so that the call to shutdown() in the tearDown method will
          * clear the state for the next unit test

@@ -9,18 +9,18 @@ import com.aconex.monitoring.MonitoredCounter;
 
 /**
  * Used to calculate the rate at which data is sent (downloaded) . When download outputstream
- * wrapped in a PcpCoutingOutputStream it can update the counters as byte or byte[] chunks are sent ,
+ * wrapped in a ByteCountingOutputStream it can update the counters as byte or byte[] chunks are sent ,
  * allowing us to truly see the actual rate of transfers happening.
  * 
  * @author rmohammed
  */
 
-public class PcpCountingOutputStream extends ProxyOutputStream {
+public class ByteCountingOutputStream extends ProxyOutputStream {
 
     private final MonitoredCounter byteCounter;
 
     /**
-     * Constructs a PcpCoutingOutputStream
+     * Constructs a ByteCountingOutputStream
      * 
      * @param out
      *            OutputStream to be wrapped
@@ -28,7 +28,7 @@ public class PcpCountingOutputStream extends ProxyOutputStream {
      *            PCP metric counter to be updated
      */
 
-    public PcpCountingOutputStream(OutputStream out, MonitoredCounter counter) {
+    public ByteCountingOutputStream(OutputStream out, MonitoredCounter counter) {
         super(out);
         this.byteCounter = counter;
     }

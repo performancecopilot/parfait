@@ -5,21 +5,21 @@ import java.io.IOException;
 
 import com.aconex.monitoring.MonitorableRegistry;
 import com.aconex.monitoring.MonitoredCounter;
-import com.aconex.monitoring.io.PcpCountingOutputStream;
+import com.aconex.monitoring.io.ByteCountingOutputStream;
 
 import junit.framework.TestCase;
 
-public class PcpCountingOutputStreamTest extends TestCase {
+public class ByteCountingOutputStreamTest extends TestCase {
 
     private MonitoredCounter counter = null;
     private ByteArrayOutputStream baos;
-    private PcpCountingOutputStream pcpCS;
+    private ByteCountingOutputStream pcpCS;
 
     protected void setUp() throws Exception {
         super.setUp();
         counter = new MonitoredCounter("food", "");
         this.baos = new ByteArrayOutputStream();
-        this.pcpCS = new PcpCountingOutputStream(this.baos, counter);
+        this.pcpCS = new ByteCountingOutputStream(this.baos, counter);
         /*
          * this 'starts' the registry so that the call to shutdown() in the tearDown method will
          * clear the state for the next unit test

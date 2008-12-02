@@ -8,7 +8,7 @@ import org.apache.commons.io.input.ProxyInputStream;
 import com.aconex.monitoring.MonitoredCounter;
 import com.aconex.utilities.Assert;
 
-public class PcpCountingInputStream extends ProxyInputStream {
+public class ByteCountingInputStream extends ProxyInputStream {
 
 	private final MonitoredCounter monitoredCounter;
 
@@ -27,7 +27,7 @@ public class PcpCountingInputStream extends ProxyInputStream {
 
     }
 
-    public PcpCountingInputStream(InputStream streamToWrap,
+    public ByteCountingInputStream(InputStream streamToWrap,
 			MonitoredCounter counter) {
 	    super(streamToWrap);
 		Assert.notNull(counter, "MonitoredCounter cannot be null");
