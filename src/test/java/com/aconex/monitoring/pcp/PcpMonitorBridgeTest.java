@@ -121,9 +121,9 @@ public class PcpMonitorBridgeTest extends TestCase {
         checkDataValues(generationNumber);
     }
 
-    private String createString(int lenght) {
+    private String createString(int length) {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < lenght; i++) {
+        for (int i = 0; i < length; i++) {
             sb.append(Math.max(1, i & 255));
         }
         return sb.toString();
