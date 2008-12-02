@@ -113,16 +113,16 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean {
                     + "] does not have a data item called [" + compositeDataItem + "]");
         }
 
-        if (updateInterval != DO_NOT_UPDATE_VALUE) {
-            return new PollingMonitoredValue<T>(name, description, updateInterval, new Poller<T>() {
-
-                public T poll() {
-                    return getAttributeValue();
-                }
-
-            });
+        if (updateInterval == DO_NOT_UPDATE_VALUE) {
+        	return new MonitoredValue<T>(name, description, getAttributeValue());
         } else {
-            return new MonitoredValue<T>(name, description, getAttributeValue());
+        	return new PollingMonitoredValue<T>(name, description, updateInterval, new Poller<T>() {
+        		
+        		public T poll() {
+        			return getAttributeValue();
+        		}
+        		
+        	});
         }
     }
 
