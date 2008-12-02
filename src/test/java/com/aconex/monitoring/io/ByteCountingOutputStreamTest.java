@@ -23,9 +23,7 @@ public class ByteCountingOutputStreamTest extends TestCase {
         this.pcpCS = new ByteCountingOutputStream(this.baos, counter);
     }
 
-    @SuppressWarnings("deprecation")
 	protected void tearDown() throws Exception {
-        counter.reset();
         this.baos = null;
         this.pcpCS = null;
         super.tearDown();

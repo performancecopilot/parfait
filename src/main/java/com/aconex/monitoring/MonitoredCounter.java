@@ -53,17 +53,6 @@ public class MonitoredCounter extends AbstractMonitorable<Long> {
         notifyMonitors();
     }
 
-    /**
-     * Resets the counter.
-     * 
-     * @deprecated Usage of this is strongly discouraged, as a counter should be continuous - what
-     *             we should be measuring is the rate over time, not the total-to-date.
-     */
-    public void reset() {
-        value.set(0L);
-        notifyMonitors();
-    }
-
     protected void logValue() {
         if (LOG.isTraceEnabled()) {
             LOG.trace(getName() + "=" + get());
