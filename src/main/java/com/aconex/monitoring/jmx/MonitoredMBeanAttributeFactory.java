@@ -117,12 +117,12 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean {
             return new PollingMonitoredValue<T>(name, description, updateInterval, new Poller<T>() {
 
                 public T poll() {
-                    return (T) getAttributeValue();
+                    return getAttributeValue();
                 }
 
             });
         } else {
-            return new MonitoredValue<T>(name, description, (T) getAttributeValue());
+            return new MonitoredValue<T>(name, description, getAttributeValue());
         }
     }
 
@@ -134,13 +134,14 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean {
         return true;
     }
 
-    protected Object getAttributeValue() {
+    @SuppressWarnings("unchecked")
+	protected T getAttributeValue() {
         try {
             if (compositeDataItem != null) {
                 CompositeData data = (CompositeData) server.getAttribute(mBeanName, attributeName);
-                return data.get(compositeDataItem);
+                return (T) data.get(compositeDataItem);
             } else {
-                return server.getAttribute(mBeanName, attributeName);
+                return (T) server.getAttribute(mBeanName, attributeName);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

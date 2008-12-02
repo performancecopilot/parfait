@@ -27,7 +27,8 @@ public class PcpCountingOutputStreamTest extends TestCase {
         MonitorableRegistry.getMonitorables();
     }
 
-    protected void tearDown() throws Exception {
+    @SuppressWarnings("deprecation")
+	protected void tearDown() throws Exception {
         counter.reset();
         this.baos = null;
         this.pcpCS = null;
