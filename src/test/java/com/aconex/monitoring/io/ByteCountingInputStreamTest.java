@@ -11,7 +11,7 @@ import com.aconex.monitoring.io.ByteCountingInputStream;
 
 public class ByteCountingInputStreamTest extends TestCase {
     private static final byte[] TEST_BYTES = new byte[] { 0, 1, 2, 3, 4 };
-    private MonitoredCounter counter = null;
+    private MonitoredCounter counter;
     private ByteArrayInputStream bais;
     private ByteCountingInputStream bcis;
     private MonitorableRegistry registry = new MonitorableRegistry();
@@ -101,11 +101,4 @@ public class ByteCountingInputStreamTest extends TestCase {
                 .longValue());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        counter = null;
-        this.bais = null;
-        this.bcis = null;
-        super.tearDown();
-    }
 }
