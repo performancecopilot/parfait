@@ -129,6 +129,7 @@ public class PcpMonitorBridge implements Lifecycle {
 
     private void startMonitoring() {
         try {
+        	registry.freeze();
             Collection<Monitorable<?>> monitorables = registry.getMonitorables();
 
             setupJmxValues(monitorables);

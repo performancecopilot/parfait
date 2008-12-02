@@ -11,16 +11,16 @@ public class MonitorableRegistry {
 	public static final MonitorableRegistry DEFAULT_REGISTRY = new MonitorableRegistry();
 	
     /**
-     * This is a TreeMap so that the monitorables a maintained in alphabetical order.
+     * This is a TreeMap so that the Monitorables are maintained in alphabetical order.
      */
     private final Map<String, Monitorable<?>> monitorables = new TreeMap<String, Monitorable<?>>();
 
-    private boolean isMonitorBridgeStarted = false;
+    private boolean stateFrozen = false;
 
     public synchronized <T> void register(Monitorable<T> monitorable) {
-        if (isMonitorBridgeStarted) {
+        if (stateFrozen) {
             throw new IllegalStateException("Cannot register monitorable " + monitorable.getName()
-                    + " after MonitorBridge has been started");
+                    + " after MonitorableRegistry has been frozen");
         }
         if (monitorables.containsKey(monitorable.getName())) {
             throw new UnsupportedOperationException(
@@ -30,9 +30,13 @@ public class MonitorableRegistry {
         monitorables.put(monitorable.getName(), monitorable);
     }
 
+    public synchronized void freeze() {
+    	stateFrozen = true;
+    }
+    
     public synchronized Collection<Monitorable<?>> getMonitorables() {
-        Assert.isFalse(isMonitorBridgeStarted, "PCP Monitor Bridge should have not been started!");
-        isMonitorBridgeStarted = true;
+        Assert.isTrue(stateFrozen, "MonitorableRegistry must be frozen before retrieving monitorable list");
+        stateFrozen = true;
         return Collections.unmodifiableCollection(monitorables.values());
     }
 }
