@@ -13,25 +13,25 @@ public class ByteCountingOutputStreamTest extends TestCase {
 
     private MonitoredCounter counter = null;
     private ByteArrayOutputStream baos;
-    private ByteCountingOutputStream pcpCS;
+    private ByteCountingOutputStream bcos;
     private MonitorableRegistry registry = new MonitorableRegistry();
 
     protected void setUp() throws Exception {
         super.setUp();
         counter = new MonitoredCounter("food", "", registry);
         this.baos = new ByteArrayOutputStream();
-        this.pcpCS = new ByteCountingOutputStream(this.baos, counter);
+        this.bcos = new ByteCountingOutputStream(this.baos, counter);
     }
 
 	protected void tearDown() throws Exception {
         this.baos = null;
-        this.pcpCS = null;
+        this.bcos = null;
         super.tearDown();
     }
 
     public void testWriteInt() throws IOException {
         assertEquals(0, counter.get().longValue());
-        this.pcpCS.write(5);// write an integer ( 4 bytes)
+        this.bcos.write(5);// write an integer ( 4 bytes)
         assertEquals(4, counter.get().longValue());
 
     }
@@ -40,7 +40,7 @@ public class ByteCountingOutputStreamTest extends TestCase {
         assertEquals(0, counter.get().longValue());
         String ex = "Nothing is impossible in this world except rizwan winning a lottery";
         byte[] buf = ex.getBytes();
-        this.pcpCS.write(buf);
+        this.bcos.write(buf);
         assertEquals(buf.length, counter.get().longValue());
     }
 
@@ -48,7 +48,7 @@ public class ByteCountingOutputStreamTest extends TestCase {
         assertEquals(0, counter.get().longValue());
         String ex = "Nothing is impossible in this world except rizwan winning a lottery";
         byte[] buf = ex.getBytes();
-        this.pcpCS.write(buf, 0, 10);
+        this.bcos.write(buf, 0, 10);
         assertEquals(10, counter.get().longValue());
     }
 
