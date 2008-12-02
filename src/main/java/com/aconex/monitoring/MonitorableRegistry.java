@@ -30,21 +30,6 @@ public class MonitorableRegistry {
         monitorables.put(monitorable.getName(), monitorable);
     }
 
-    /**
-     * Useful only in Unit tests
-     */
-    public void shutdown() {
-        if (isMonitorBridgeStarted) {
-            isMonitorBridgeStarted = false;
-        }
-        /*
-         * We clear this anyway, because unit tests may have registered Monitorables even though the Registry
-         * is not started.  Without this, subsequent unit tests might fail when they try to register the Monitorable again.
-         */
-        monitorables.clear();
-
-    }
-
     public synchronized Collection<Monitorable<?>> getMonitorables() {
         Assert.isFalse(isMonitorBridgeStarted, "PCP Monitor Bridge should have not been started!");
         isMonitorBridgeStarted = true;
