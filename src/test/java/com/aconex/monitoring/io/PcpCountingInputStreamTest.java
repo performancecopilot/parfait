@@ -1,4 +1,4 @@
-package com.aconex.monitoring.pcp;
+package com.aconex.monitoring.io;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -7,6 +7,7 @@ import junit.framework.TestCase;
 
 import com.aconex.monitoring.MonitorableRegistry;
 import com.aconex.monitoring.MonitoredCounter;
+import com.aconex.monitoring.io.PcpCountingInputStream;
 
 public class PcpCountingInputStreamTest extends TestCase {
     private static final byte[] TEST_BYTES = new byte[] { 0, 1, 2, 3, 4 };

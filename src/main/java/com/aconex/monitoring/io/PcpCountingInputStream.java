@@ -1,4 +1,4 @@
-package com.aconex.monitoring.pcp;
+package com.aconex.monitoring.io;
 
 import java.io.IOException;
 import java.io.InputStream;

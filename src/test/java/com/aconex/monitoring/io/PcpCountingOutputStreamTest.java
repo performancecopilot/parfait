@@ -1,11 +1,11 @@
-package com.aconex.monitoring.pcp;
+package com.aconex.monitoring.io;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import com.aconex.monitoring.MonitorableRegistry;
 import com.aconex.monitoring.MonitoredCounter;
-import com.aconex.monitoring.pcp.PcpCountingOutputStream;
+import com.aconex.monitoring.io.PcpCountingOutputStream;
 
 import junit.framework.TestCase;
 
