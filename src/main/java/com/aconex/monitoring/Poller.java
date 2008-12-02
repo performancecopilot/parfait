@@ -1,7 +1,7 @@
 package com.aconex.monitoring;
 
 /**
- * A Poller is called at regular intervals to retrive a value from some source.
+ * A Poller is called at regular intervals to retrieve a value from some source.
  *
  * @author ohutchison
  */
