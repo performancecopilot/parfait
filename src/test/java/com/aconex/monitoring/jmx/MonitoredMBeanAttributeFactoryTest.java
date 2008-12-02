@@ -14,16 +14,16 @@ public class MonitoredMBeanAttributeFactoryTest extends TestCase {
 
     public void testCanMonitorCompositeDataItem() throws InstanceNotFoundException,
             IntrospectionException, ReflectionException, AttributeNotFoundException, MBeanException {
-        MonitoredMBeanAttributeFactory f = new MonitoredMBeanAttributeFactory("aconex.free.memory",
+        MonitoredMBeanAttributeFactory<Long> f = new MonitoredMBeanAttributeFactory<Long>("aconex.free.memory",
                 "", 1000, "java.lang:type=Memory", "HeapMemoryUsage", "max");
         assertEquals(ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getMax(), f
-                .getObject().get());
+                .getObject().get().longValue());
     }
 
     public void testCanMonitorStandardAttribute() throws InstanceNotFoundException,
             IntrospectionException, ReflectionException, AttributeNotFoundException, MBeanException {
-        MonitoredMBeanAttributeFactory f = new MonitoredMBeanAttributeFactory(
+        MonitoredMBeanAttributeFactory<Long> f = new MonitoredMBeanAttributeFactory<Long>(
                 "aconex.system.startTime", "", 1000, "java.lang:type=Runtime", "StartTime");
-        assertEquals(ManagementFactory.getRuntimeMXBean().getStartTime(), f.getObject().get());
+        assertEquals(ManagementFactory.getRuntimeMXBean().getStartTime(), f.getObject().get().longValue());
     }
 }
