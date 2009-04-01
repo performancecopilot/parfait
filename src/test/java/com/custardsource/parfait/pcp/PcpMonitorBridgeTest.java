@@ -1,4 +1,4 @@
-package com.aconex.monitoring.pcp;
+package com.custardsource.parfait.pcp;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,8 +13,8 @@ import junit.framework.TestCase;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.aconex.monitoring.MonitorableRegistry;
-import com.aconex.monitoring.MonitoredValue;
+import com.custardsource.parfait.MonitorableRegistry;
+import com.custardsource.parfait.MonitoredValue;
 
 public class PcpMonitorBridgeTest extends TestCase {
     private MonitoredValue<Boolean> booleanValue = null;

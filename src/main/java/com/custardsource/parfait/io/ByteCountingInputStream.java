@@ -1,11 +1,11 @@
-package com.aconex.monitoring.io;
+package com.custardsource.parfait.io;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.commons.io.input.ProxyInputStream;
 
-import com.aconex.monitoring.MonitoredCounter;
+import com.custardsource.parfait.MonitoredCounter;
 import com.aconex.utilities.Assert;
 
 public class ByteCountingInputStream extends ProxyInputStream {

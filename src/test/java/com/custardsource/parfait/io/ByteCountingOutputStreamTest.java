@@ -1,11 +1,11 @@
-package com.aconex.monitoring.io;
+package com.custardsource.parfait.io;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import com.aconex.monitoring.MonitorableRegistry;
-import com.aconex.monitoring.MonitoredCounter;
-import com.aconex.monitoring.io.ByteCountingOutputStream;
+import com.custardsource.parfait.MonitorableRegistry;
+import com.custardsource.parfait.MonitoredCounter;
+import com.custardsource.parfait.io.ByteCountingOutputStream;
 
 import junit.framework.TestCase;
 

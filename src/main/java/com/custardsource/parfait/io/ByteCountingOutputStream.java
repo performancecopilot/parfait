@@ -1,11 +1,11 @@
-package com.aconex.monitoring.io;
+package com.custardsource.parfait.io;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
 import org.apache.commons.io.output.ProxyOutputStream;
 
-import com.aconex.monitoring.MonitoredCounter;
+import com.custardsource.parfait.MonitoredCounter;
 
 /**
  * Used to calculate the rate at which data is sent (downloaded) . When download outputstream

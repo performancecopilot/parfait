@@ -1,4 +1,4 @@
-package com.aconex.monitoring.pcp;
+package com.custardsource.parfait.pcp;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -33,9 +33,9 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.util.Assert;
 
-import com.aconex.monitoring.Monitor;
-import com.aconex.monitoring.Monitorable;
-import com.aconex.monitoring.MonitorableRegistry;
+import com.custardsource.parfait.Monitor;
+import com.custardsource.parfait.Monitorable;
+import com.custardsource.parfait.MonitorableRegistry;
 
 /**
  * PcpMonitorBridge bridges between the set of {@link Monitorable}s in the current system and a PCP

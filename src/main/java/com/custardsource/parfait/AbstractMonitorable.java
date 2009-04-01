@@ -1,4 +1,4 @@
-package com.aconex.monitoring;
+package com.custardsource.parfait;
 
 import org.apache.log4j.Logger;
 

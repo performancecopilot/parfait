@@ -1,4 +1,4 @@
-package com.aconex.monitoring;
+package com.custardsource.parfait;
 
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;

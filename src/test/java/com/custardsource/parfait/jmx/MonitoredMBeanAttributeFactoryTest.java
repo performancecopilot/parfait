@@ -1,4 +1,4 @@
-package com.aconex.monitoring.jmx;
+package com.custardsource.parfait.jmx;
 
 import java.lang.management.ManagementFactory;
 

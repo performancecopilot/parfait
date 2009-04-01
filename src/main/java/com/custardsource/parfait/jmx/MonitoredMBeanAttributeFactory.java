@@ -1,4 +1,4 @@
-package com.aconex.monitoring.jmx;
+package com.custardsource.parfait.jmx;
 
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
@@ -17,9 +17,9 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.jmx.support.JmxUtils;
 
-import com.aconex.monitoring.MonitoredValue;
-import com.aconex.monitoring.Poller;
-import com.aconex.monitoring.PollingMonitoredValue;
+import com.custardsource.parfait.MonitoredValue;
+import com.custardsource.parfait.Poller;
+import com.custardsource.parfait.PollingMonitoredValue;
 import com.aconex.utilities.Assert;
 
 /**

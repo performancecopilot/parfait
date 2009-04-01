@@ -1,13 +1,13 @@
-package com.aconex.monitoring.io;
+package com.custardsource.parfait.io;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 import junit.framework.TestCase;
 
-import com.aconex.monitoring.MonitorableRegistry;
-import com.aconex.monitoring.MonitoredCounter;
-import com.aconex.monitoring.io.ByteCountingInputStream;
+import com.custardsource.parfait.MonitorableRegistry;
+import com.custardsource.parfait.MonitoredCounter;
+import com.custardsource.parfait.io.ByteCountingInputStream;
 
 public class ByteCountingInputStreamTest extends TestCase {
     private static final byte[] TEST_BYTES = new byte[] { 0, 1, 2, 3, 4 };
