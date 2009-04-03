@@ -19,16 +19,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
-import javax.management.openmbean.CompositeData;
-import javax.management.openmbean.CompositeDataSupport;
-import javax.management.openmbean.CompositeType;
-import javax.management.openmbean.OpenDataException;
-import javax.management.openmbean.OpenType;
-import javax.management.openmbean.SimpleType;
-
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
-import org.springframework.context.Lifecycle;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.util.Assert;
@@ -36,6 +27,7 @@ import org.springframework.util.Assert;
 import com.custardsource.parfait.Monitor;
 import com.custardsource.parfait.Monitorable;
 import com.custardsource.parfait.MonitorableRegistry;
+import com.custardsource.parfait.MonitoringView;
 
 /**
  * PcpMonitorBridge bridges between the set of {@link Monitorable}s in the current system and a PCP
@@ -48,7 +40,7 @@ import com.custardsource.parfait.MonitorableRegistry;
  * @author ohutchison
  */
 @ManagedResource
-public class PcpMonitorBridge implements Lifecycle {
+public class PcpMonitorBridge extends MonitoringView {
 
     private final Logger LOG = Logger.getLogger(PcpMonitorBridge.class);
 
@@ -73,8 +65,6 @@ public class PcpMonitorBridge implements Lifecycle {
 
     private final File dataFileDir;
 
-    private final MonitorableRegistry registry;
-    
     /*
      * Determines whether value changes detected are written out to an external file for external
      * monitoring by the Aconex PCP agent.
@@ -82,11 +72,6 @@ public class PcpMonitorBridge implements Lifecycle {
     private boolean outputValuesToPCPFile = true;
 
     private volatile ByteBuffer dataFileBuffer = null;
-
-    private CompositeType monitoredType;
-    private String[] jmxMonitoredNames;
-    private Object[] jmxMonitoredValues;
-    private Map<String, Integer> jmxArrayIndexMap;
 
     private boolean deleteFilesOnExit = false;
 
@@ -96,6 +81,7 @@ public class PcpMonitorBridge implements Lifecycle {
     }
 
     public PcpMonitorBridge(String serverName, String dataFileDir, MonitorableRegistry registry) {
+        super(registry);
         Assert.hasText(serverName, "Sever name can not be blank");
         this.serverName = serverName;
         this.dataFileDir = new File(dataFileDir);
@@ -108,32 +94,23 @@ public class PcpMonitorBridge implements Lifecycle {
         this.updateThread.setName("PcpMonitorBridge-Updater");
         this.updateThread.setDaemon(true);
         Assert.notNull(registry);
-        this.registry = registry;
     }
 
-    public boolean isRunning() {
-        return dataFileBuffer != null;
-    }
-
-    public void start() {
-        startMonitoring();
-    }
-
-    public void stop() {
+    @Override
+    public void stopMonitoring(Collection<Monitorable<?>> monitorables) {
         dataFileBuffer = null;
+        for (Monitorable<?> monitorable : monitorables) {
+            monitorable.removeMonitor(monitor);
+        }
     }
 
     public boolean hasUpdatesPending() {
         return monitorablesPendingUpdate.size() > 0;
     }
 
-    private void startMonitoring() {
+    @Override
+    protected void startMonitoring(Collection<Monitorable<?>> monitorables) {
         try {
-        	registry.freeze();
-            Collection<Monitorable<?>> monitorables = registry.getMonitorables();
-
-            setupJmxValues(monitorables);
-
             // Calculate the data file offsets
             int dataFileOffset = 9; // 8 bytes for the version number and 1 for the protocol version
             for (Monitorable<?> monitorable : monitorables) {
@@ -180,57 +157,6 @@ public class PcpMonitorBridge implements Lifecycle {
         }
     }
 
-    private void setupJmxValues(Collection<Monitorable<?>> monitorables) {
-        try {
-            jmxMonitoredNames = new String[monitorables.size()];
-            String[] descriptions = new String[monitorables.size()];
-            jmxMonitoredValues = new Object[monitorables.size()];
-            OpenType<?>[] types = new OpenType<?>[monitorables.size()];
-            jmxArrayIndexMap = new HashMap<String, Integer>(monitorables.size());
-            int index = 0;
-
-            for (Monitorable<?> monitorable : monitorables) {
-                jmxMonitoredNames[index] = monitorable.getName();
-                descriptions[index] = StringUtils.defaultIfEmpty(monitorable.getDescription(),
-                        "(unknown)");
-                types[index] = getJmxType(monitorable.getType());
-                jmxArrayIndexMap.put(monitorable.getName(), index);
-                index++;
-            }
-
-            monitoredType = new CompositeType("Exposed PCP metrics",
-                    "Details of all exposed PCP metrics", jmxMonitoredNames, descriptions, types);
-        } catch (OpenDataException e) {
-            throw new UnsupportedOperationException("Unable to configure JMX types", e);
-        }
-    }
-
-    private OpenType<?> getJmxType(Class<?> type) {
-        if (type == Boolean.class) {
-            return SimpleType.BOOLEAN;
-        } else if (type == Integer.class || type == AtomicInteger.class) {
-            return SimpleType.INTEGER;
-        } else if (type == Long.class || type == AtomicLong.class) {
-            return SimpleType.LONG;
-        } else if (type == Double.class) {
-            return SimpleType.DOUBLE;
-        } else if (type == String.class) {
-            return SimpleType.STRING;
-        } else {
-            throw new UnsupportedOperationException(
-                    "Don't know how to process Monitorable of type [" + type + "]");
-        }
-    }
-
-    @ManagedAttribute(description = "All exposed PCP metrics")
-    public CompositeData getExposedMetrics() {
-        try {
-            return new CompositeDataSupport(monitoredType, jmxMonitoredNames, jmxMonitoredValues);
-        } catch (OpenDataException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     private int align(int offset, int dataSize) {
         int alignmentBoundry = dataSize == 8 ? 8 : 4;
         if (offset % alignmentBoundry != 0) {
@@ -249,32 +175,24 @@ public class PcpMonitorBridge implements Lifecycle {
 
         Class<?> type = monitorable.getType();
         localFileBuffer.position(monitorableOffsets.get(monitorable));
-        Object jmxValue;
 
         if (type == Boolean.class) {
             int value = ((Boolean) monitorable.get()) ? 1 : 0;
             localFileBuffer.putInt(value);
-            jmxValue = value;
         } else if (type == Integer.class) {
-            int value = (Integer) monitorable.get();
             localFileBuffer.putInt((Integer) monitorable.get());
-            jmxValue = value;
         } else if (type == AtomicInteger.class) {
             int value = ((AtomicInteger) monitorable.get()).intValue();
             localFileBuffer.putInt(value);
-            jmxValue = value;
         } else if (type == Long.class) {
             long value = (Long) monitorable.get();
             localFileBuffer.putLong(value);
-            jmxValue = value;
         } else if (type == AtomicLong.class) {
             long value = ((AtomicLong) monitorable.get()).longValue();
             localFileBuffer.putLong(value);
-            jmxValue = value;
         } else if (type == Double.class) {
             double value = (Double) monitorable.get();
             localFileBuffer.putDouble(value);
-            jmxValue = value;
         } else if (type == String.class) {
             try {
                 String value = (String) monitorable.get();
@@ -282,7 +200,6 @@ public class PcpMonitorBridge implements Lifecycle {
                 int length = Math.min(stringData.length, MAX_STRING_LENGTH - 1);
                 localFileBuffer.put(stringData, 0, length);
                 localFileBuffer.put((byte) 0);
-                jmxValue = value;
             } catch (UnsupportedEncodingException e) {
                 throw new UnsupportedOperationException(e);
             }
@@ -290,8 +207,6 @@ public class PcpMonitorBridge implements Lifecycle {
             throw new UnsupportedOperationException(
                     "Don't know how to process Monitorable of type [" + type + "]");
         }
-
-        jmxMonitoredValues[jmxArrayIndexMap.get(monitorable.getName())] = jmxValue;
     }
 
     private int getTypeSize(Class<?> type) {
