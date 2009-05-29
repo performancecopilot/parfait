@@ -8,7 +8,7 @@ import java.util.TreeMap;
 import com.aconex.utilities.Assert;
 
 public class MonitorableRegistry {
-	public static final MonitorableRegistry DEFAULT_REGISTRY = new MonitorableRegistry();
+	public static MonitorableRegistry DEFAULT_REGISTRY = new MonitorableRegistry();
 	
     /**
      * This is a TreeMap so that the Monitorables are maintained in alphabetical order.
@@ -38,5 +38,12 @@ public class MonitorableRegistry {
         Assert.isTrue(stateFrozen, "MonitorableRegistry must be frozen before retrieving monitorable list");
         stateFrozen = true;
         return Collections.unmodifiableCollection(monitorables.values());
+    }
+    
+    /*
+     * Testing only -- should be eliminated once the default registry is gone
+     */
+    public static void clearDefaultRegistry() {
+        DEFAULT_REGISTRY = new MonitorableRegistry();
     }
 }
