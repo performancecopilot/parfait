@@ -13,8 +13,6 @@ import com.custardsource.parfait.timing.ControllerMetricCollector.MonitoredCount
 /**
  * A class to provide a {@link ControllerMetricCollector} to each controller on demand, guaranteed
  * to be thread-safe as long is it's only ever used by the requesting thread.
- * 
- * @author pcowan
  */
 public class ControllerMetricCollectorFactory {
 

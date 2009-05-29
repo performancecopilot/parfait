@@ -27,8 +27,6 @@ import com.aconex.utilities.Assert;
  * <p>
  * Support is provided for monitoring simple attributes and also the data items of attributes that
  * are of type {@link CompositeData}.
- *
- * @author ohutchison
  */
 public class MonitoredMBeanAttributeFactory<T> implements FactoryBean {
 

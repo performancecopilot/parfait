@@ -13,8 +13,6 @@ import java.util.concurrent.atomic.AtomicLong;
  * the number of JMS messages sent. Note that this class explicitly provides an atomic increment
  * operation only. Decrement and set methods should not be added.
  * <p>
- * 
- * @author ohutchison
  */
 public class MonitoredCounter extends AbstractMonitorable<Long> {
 

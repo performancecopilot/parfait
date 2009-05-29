@@ -10,8 +10,6 @@ import com.aconex.utilities.Assert;
 
 /**
  * Monitors the value returned by calls at the provided interval to the the provided {@link Poller}.
- *
- * @author ohutchison
  */
 public class PollingMonitoredValue<T> extends MonitoredValue<T> {
     private static final Logger LOG = Logger.getLogger("pcp.polling");

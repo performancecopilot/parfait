@@ -9,8 +9,6 @@ import com.custardsource.parfait.MonitoredCounter;
  * counter for the same metric but its value is a total value across all controllers. It is
  * important to ensure that the total counter is the same instance of the class across all
  * ControllerCounterSet objects which are measuring the same metric.
- * 
- * @author msezgin
  */
 public class ControllerCounterSet {
     private final MonitoredCounter controllerCounter;

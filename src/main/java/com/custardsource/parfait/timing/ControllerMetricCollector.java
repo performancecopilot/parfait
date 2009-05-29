@@ -15,8 +15,6 @@ import org.apache.log4j.Logger;
  * <p>
  * Not thread-safe, should be used only by one thread at a time.
  * </p>
- * 
- * @author pcowan
  */
 public class ControllerMetricCollector {
     private ControllerMetricSet current = null;

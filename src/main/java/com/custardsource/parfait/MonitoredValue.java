@@ -18,8 +18,6 @@ import com.aconex.utilities.Assert;
  * version number.
  * <p>
  * It is recommended that counters be implemented using the class {@link MonitoredCounter}.
- * 
- * @author ohutchison
  */
 public class MonitoredValue<T> extends AbstractMonitorable<T> {
 

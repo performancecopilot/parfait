@@ -5,8 +5,6 @@ import org.springframework.stereotype.Controller;
 /**
  * A {@link Controller} that implements some form of metric collection via a
  * {@link ControllerMetricCollectorFactory}.
- * 
- * @author awinters
  */
 public interface MetricCollectorController {
 

@@ -6,8 +6,6 @@ import org.apache.log4j.Logger;
  * Convenience base class for implementing {@link Monitorable}. Provides implementations for
  * meta-data methods and a high performance synchronization free implementation of {@link Monitor}
  * notification.
- *
- * @author ohutchison
  */
 public abstract class AbstractMonitorable<T> implements Monitorable<T> {
 

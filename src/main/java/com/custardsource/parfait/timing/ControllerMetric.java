@@ -9,8 +9,6 @@ import com.aconex.utilities.Assert;
  * measures of the chosen metric for the 'total' and 'own' time spent in each (that is, e.g. how
  * long the execution of the controller took from start to finish, and how long was actually spent
  * in this controller's code as opposed to forwarding elsewhere).
- * 
- * @author pcowan
  */
 class ControllerMetric {
     private Long startValue;

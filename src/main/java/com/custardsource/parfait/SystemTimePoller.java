@@ -4,8 +4,6 @@ import java.util.Calendar;
 
 /**
  * An implementation of {@link Poller} to get the System time.
- *
- * @author mjerkovic
  */
 
 public class SystemTimePoller implements Poller<Long> {

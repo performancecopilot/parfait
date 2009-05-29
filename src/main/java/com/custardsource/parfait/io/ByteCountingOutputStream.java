@@ -11,8 +11,6 @@ import com.custardsource.parfait.MonitoredCounter;
  * Used to calculate the rate at which data is sent (downloaded) . When download outputstream
  * wrapped in a ByteCountingOutputStream it can update the counters as byte or byte[] chunks are sent ,
  * allowing us to truly see the actual rate of transfers happening.
- * 
- * @author rmohammed
  */
 
 public class ByteCountingOutputStream extends ProxyOutputStream {

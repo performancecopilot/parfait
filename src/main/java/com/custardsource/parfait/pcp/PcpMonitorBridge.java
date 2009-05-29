@@ -36,8 +36,6 @@ import com.custardsource.parfait.MonitoringView;
  * <p>
  * The format of the shared address space is specified in an associated header file. A full
  * description of the communication protocol can be found under the issue ACX-5426.
- * 
- * @author ohutchison
  */
 @ManagedResource
 public class PcpMonitorBridge extends MonitoringView {

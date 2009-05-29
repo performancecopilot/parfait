@@ -4,7 +4,6 @@ package com.custardsource.parfait;
  * The Monitorable interface must be implemented by any value that needs to be monitored using the
  * Aconex monitoring system.
  *
- * @author ohutchison
  * @see MonitoredValue
  * @see MonitoredCounter
  */
