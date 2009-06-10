@@ -3,7 +3,7 @@ package com.custardsource.parfait.timing;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 
-public class MetricSources {
+public class StandardThreadMetrics {
 
     public static final ThreadMetric CLOCK_TIME_METRIC_SOURCE = new AbstractThreadMetric(
             "Elapsed time", "ms") {

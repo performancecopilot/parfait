@@ -72,40 +72,40 @@ public class ControllerMetricCollectorFactory {
                 "time",
                 "Total time (in ms) spent in controller %s after direct invocation by a user request",
                 "Total time (in ms) spent in all controllers after direct invocation by a user request");
-        counters.addMetric(MetricSources.CLOCK_TIME_METRIC_SOURCE, timingCounter);
+        counters.addMetric(StandardThreadMetrics.CLOCK_TIME_METRIC_SOURCE, timingCounter);
 
         ControllerCounterSet userTimeCounter = createControllerMonitoredCounter(beanName, "utime",
                 "User CPU time spent in controller %s after direct invocation",
                 "User CPU time spent in all controllers after direct invocation");
-        counters.addMetric(MetricSources.USER_CPU_TIME_METRIC_SOURCE, userTimeCounter);
+        counters.addMetric(StandardThreadMetrics.USER_CPU_TIME_METRIC_SOURCE, userTimeCounter);
 
         ControllerCounterSet systemTimeCounter = createControllerMonitoredCounter(beanName,
                 "stime", "System CPU time spent in controller %s after direct invocation",
                 "System CPU time spent in all controllers after direct invocation");
-        counters.addMetric(MetricSources.SYSTEM_CPU_TIME_METRIC_SOURCE, systemTimeCounter);
+        counters.addMetric(StandardThreadMetrics.SYSTEM_CPU_TIME_METRIC_SOURCE, systemTimeCounter);
 
         ControllerCounterSet blockedCountCounter = createControllerMonitoredCounter(beanName,
                 "blocked.count",
                 "Number of times thread entered BLOCKED state during controller %s",
                 "Number of times BLOCKED state entered in all controllers");
-        counters.addMetric(MetricSources.BLOCKED_COUNT_METRIC_SOURCE, blockedCountCounter);
+        counters.addMetric(StandardThreadMetrics.BLOCKED_COUNT_METRIC_SOURCE, blockedCountCounter);
 
         ControllerCounterSet blockedTimeCounter = createControllerMonitoredCounter(beanName,
                 "blocked.time", "ms spent in BLOCKED state during controller %s",
                 "ms spent in BLOCKED state in all controllers");
-        counters.addMetric(MetricSources.BLOCKED_TIME_METRIC_SOURCE, blockedTimeCounter);
+        counters.addMetric(StandardThreadMetrics.BLOCKED_TIME_METRIC_SOURCE, blockedTimeCounter);
 
         ControllerCounterSet waitedCountCounter = createControllerMonitoredCounter(
                 beanName,
                 "waited.count",
                 "Number of times thread entered WAITING or TIMED_WAITING state during controller %s",
                 "Number of times WAITING or TIMED_WAITING state entered in all controllers");
-        counters.addMetric(MetricSources.WAITED_COUNT_METRIC_SOURCE, waitedCountCounter);
+        counters.addMetric(StandardThreadMetrics.WAITED_COUNT_METRIC_SOURCE, waitedCountCounter);
 
         ControllerCounterSet waitedTimeCounter = createControllerMonitoredCounter(beanName,
                 "waited.time", "ms spent in WAITED or TIMED_WAITING state during controller %s",
                 "ms spent in WAITED or TIMED_WAITING state in all controllers");
-        counters.addMetric(MetricSources.WAITED_TIME_METRIC_SOURCE, waitedTimeCounter);
+        counters.addMetric(StandardThreadMetrics.WAITED_TIME_METRIC_SOURCE, waitedTimeCounter);
 
         // TODO - db and error metrics
         return counters;
