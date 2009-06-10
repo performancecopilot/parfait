@@ -1,10 +1,10 @@
 package com.custardsource.parfait.timing;
 
-public abstract class AbstractMetricSource implements ThreadMetric {
+public abstract class AbstractThreadMetric implements ThreadMetric {
     private final String name;
     private final String unit;
 
-    public AbstractMetricSource(String name, String unit) {
+    public AbstractThreadMetric(String name, String unit) {
         this.name = name;
         this.unit = unit;
     }
