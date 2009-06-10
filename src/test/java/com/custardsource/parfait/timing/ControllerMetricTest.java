@@ -6,7 +6,7 @@ import com.aconex.utilities.AssertionFailedException;
 
 public class ControllerMetricTest extends TestCase {
     public void testCannotStartTwice() {
-        ControllerMetric timing = new ControllerMetric(StandardThreadMetrics.CLOCK_TIME_METRIC_SOURCE);
+        ControllerMetric timing = new ControllerMetric(StandardThreadMetrics.CLOCK_TIME);
         timing.startTimer();
         try {
             timing.startTimer();
@@ -17,7 +17,7 @@ public class ControllerMetricTest extends TestCase {
     }
 
     public void testCannotPauseBeforeStarted() {
-        ControllerMetric timing = new ControllerMetric(StandardThreadMetrics.CLOCK_TIME_METRIC_SOURCE);
+        ControllerMetric timing = new ControllerMetric(StandardThreadMetrics.CLOCK_TIME);
         try {
             timing.pauseOwnTime();
             fail();
@@ -27,7 +27,7 @@ public class ControllerMetricTest extends TestCase {
     }
 
     public void testCannotResumeBeforeStarted() {
-        ControllerMetric timing = new ControllerMetric(StandardThreadMetrics.CLOCK_TIME_METRIC_SOURCE);
+        ControllerMetric timing = new ControllerMetric(StandardThreadMetrics.CLOCK_TIME);
         try {
             timing.resumeOwnTime();
             fail();
@@ -37,7 +37,7 @@ public class ControllerMetricTest extends TestCase {
     }
 
     public void testCannotStopBeforeStarted() {
-        ControllerMetric timing = new ControllerMetric(StandardThreadMetrics.CLOCK_TIME_METRIC_SOURCE);
+        ControllerMetric timing = new ControllerMetric(StandardThreadMetrics.CLOCK_TIME);
         try {
             timing.stopTimer();
             fail();
@@ -47,7 +47,7 @@ public class ControllerMetricTest extends TestCase {
     }
 
     public void testCannotPauseWhenPaused() {
-        ControllerMetric timing = new ControllerMetric(StandardThreadMetrics.CLOCK_TIME_METRIC_SOURCE);
+        ControllerMetric timing = new ControllerMetric(StandardThreadMetrics.CLOCK_TIME);
         timing.startTimer();
         timing.pauseOwnTime();
         try {
@@ -59,7 +59,7 @@ public class ControllerMetricTest extends TestCase {
     }
 
     public void testCannotPauseAfterStop() {
-        ControllerMetric timing = new ControllerMetric(StandardThreadMetrics.CLOCK_TIME_METRIC_SOURCE);
+        ControllerMetric timing = new ControllerMetric(StandardThreadMetrics.CLOCK_TIME);
         timing.startTimer();
         timing.stopTimer();
         try {
@@ -71,7 +71,7 @@ public class ControllerMetricTest extends TestCase {
     }
 
     public void testCannotResumeIfNotPaused() {
-        ControllerMetric timing = new ControllerMetric(StandardThreadMetrics.CLOCK_TIME_METRIC_SOURCE);
+        ControllerMetric timing = new ControllerMetric(StandardThreadMetrics.CLOCK_TIME);
         timing.startTimer();
         try {
             timing.resumeOwnTime();
@@ -82,7 +82,7 @@ public class ControllerMetricTest extends TestCase {
     }
 
     public void testCannotResumeAfterStop() {
-        ControllerMetric timing = new ControllerMetric(StandardThreadMetrics.CLOCK_TIME_METRIC_SOURCE);
+        ControllerMetric timing = new ControllerMetric(StandardThreadMetrics.CLOCK_TIME);
         timing.startTimer();
         timing.stopTimer();
         try {
@@ -94,7 +94,7 @@ public class ControllerMetricTest extends TestCase {
     }
 
     public void testCannotStopUnlessStarted() {
-        ControllerMetric timing = new ControllerMetric(StandardThreadMetrics.CLOCK_TIME_METRIC_SOURCE);
+        ControllerMetric timing = new ControllerMetric(StandardThreadMetrics.CLOCK_TIME);
         try {
             timing.stopTimer();
             fail();
@@ -104,7 +104,7 @@ public class ControllerMetricTest extends TestCase {
     }
 
     public void testCannotAccessTotalTimeUntilStopped() {
-        ControllerMetric timing = new ControllerMetric(StandardThreadMetrics.CLOCK_TIME_METRIC_SOURCE);
+        ControllerMetric timing = new ControllerMetric(StandardThreadMetrics.CLOCK_TIME);
         timing.startTimer();
         try {
             timing.totalValue();
@@ -115,7 +115,7 @@ public class ControllerMetricTest extends TestCase {
     }
 
     public void testCannotAccessOwnTimeUntilStopped() {
-        ControllerMetric timing = new ControllerMetric(StandardThreadMetrics.CLOCK_TIME_METRIC_SOURCE);
+        ControllerMetric timing = new ControllerMetric(StandardThreadMetrics.CLOCK_TIME);
         timing.startTimer();
         try {
             timing.ownTimeValue();
@@ -128,7 +128,7 @@ public class ControllerMetricTest extends TestCase {
     public void testSanityOfNumbers() {
         // This test is unlikely to ever pick anything up but we may as well sanity check that the
         // numbers make sense (own time isn't > than total time)
-        ControllerMetric timing = new ControllerMetric(StandardThreadMetrics.CLOCK_TIME_METRIC_SOURCE);
+        ControllerMetric timing = new ControllerMetric(StandardThreadMetrics.CLOCK_TIME);
         timing.startTimer();
         timing.pauseOwnTime();
         timing.resumeOwnTime();
@@ -139,15 +139,15 @@ public class ControllerMetricTest extends TestCase {
     }
 
     public void testMetricName() {
-        ControllerMetric timing = new ControllerMetric(StandardThreadMetrics.CLOCK_TIME_METRIC_SOURCE);
-        assertEquals(StandardThreadMetrics.CLOCK_TIME_METRIC_SOURCE.getMetricName(), timing.getMetricName());
+        ControllerMetric timing = new ControllerMetric(StandardThreadMetrics.CLOCK_TIME);
+        assertEquals(StandardThreadMetrics.CLOCK_TIME.getMetricName(), timing.getMetricName());
     }
 
     public void testUnitDisplay() {
-        ControllerMetric timing = new ControllerMetric(StandardThreadMetrics.CLOCK_TIME_METRIC_SOURCE);
+        ControllerMetric timing = new ControllerMetric(StandardThreadMetrics.CLOCK_TIME);
         timing.startTimer();
         timing.stopTimer();
         assertTrue("Metric value should end with correct unit name", timing.ownTimeValueFormatted()
-                .endsWith(StandardThreadMetrics.CLOCK_TIME_METRIC_SOURCE.getUnit()));
+                .endsWith(StandardThreadMetrics.CLOCK_TIME.getUnit()));
     }
 }
