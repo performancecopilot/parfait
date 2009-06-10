@@ -1,7 +1,7 @@
 package com.custardsource.parfait.timing;
 
 
-public interface MetricSource {
+public interface ThreadMetric {
     long getCurrentValue();
 
     String getMetricName();

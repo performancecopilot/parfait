@@ -37,7 +37,7 @@ public class ControllerMetricCollector {
     public void startTiming(Object controller, String action) {
         ControllerMetricSet newTiming = new ControllerMetricSet(current, controller.getClass(),
                 action);
-        for (MetricSource metric : perControllerCounters.get(controller).getMetricSources()) {
+        for (ThreadMetric metric : perControllerCounters.get(controller).getMetricSources()) {
             newTiming.addMetricInstance(new ControllerMetric(metric));
         }
         current = newTiming;
@@ -82,7 +82,7 @@ public class ControllerMetricCollector {
     }
 
     static class MonitoredCounterSet {
-        private final Map<MetricSource, ControllerCounterSet> metrics = new LinkedHashMap<MetricSource, ControllerCounterSet>();
+        private final Map<ThreadMetric, ControllerCounterSet> metrics = new LinkedHashMap<ThreadMetric, ControllerCounterSet>();
         private final ControllerCounterSet invocationCounter;
 
         public MonitoredCounterSet(ControllerCounterSet invocationCounter) {
@@ -93,19 +93,19 @@ public class ControllerMetricCollector {
             return invocationCounter;
         }
 
-        public void addMetric(MetricSource metric) {
+        public void addMetric(ThreadMetric metric) {
             addMetric(metric, null);
         }
 
-        public void addMetric(MetricSource metric, ControllerCounterSet counter) {
+        public void addMetric(ThreadMetric metric, ControllerCounterSet counter) {
             metrics.put(metric, counter);
         }
 
-        private Collection<MetricSource> getMetricSources() {
+        private Collection<ThreadMetric> getMetricSources() {
             return metrics.keySet();
         }
 
-        private ControllerCounterSet getCounterForMetric(MetricSource metric) {
+        private ControllerCounterSet getCounterForMetric(ThreadMetric metric) {
             return metrics.get(metric);
         }
 
@@ -113,7 +113,7 @@ public class ControllerMetricCollector {
             return metrics.values().size();
         }
 
-        Map<MetricSource, ControllerCounterSet> getMetrics() {
+        Map<ThreadMetric, ControllerCounterSet> getMetrics() {
             return Collections.unmodifiableMap(metrics);
         }
     }

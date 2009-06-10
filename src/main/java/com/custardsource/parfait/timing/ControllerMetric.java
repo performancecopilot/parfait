@@ -15,9 +15,9 @@ class ControllerMetric {
     private Long endValue;
     private Long lastStartOwnTimeValue;
     private long ownValueSoFar = 0L;
-    private MetricSource metricSource;
+    private ThreadMetric metricSource;
 
-    public ControllerMetric(MetricSource metricSource) {
+    public ControllerMetric(ThreadMetric metricSource) {
         this.metricSource = metricSource;
     }
 
@@ -69,7 +69,7 @@ class ControllerMetric {
         return totalValue() + metricSource.getUnit();
     }
 
-    public MetricSource getMetricSource() {
+    public ThreadMetric getMetricSource() {
         return metricSource;
     }
 }

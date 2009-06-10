@@ -5,26 +5,26 @@ import java.lang.management.ThreadInfo;
 
 public class MetricSources {
 
-    public static final MetricSource CLOCK_TIME_METRIC_SOURCE = new AbstractMetricSource(
+    public static final ThreadMetric CLOCK_TIME_METRIC_SOURCE = new AbstractMetricSource(
             "Elapsed time", "ms") {
         public long getCurrentValue() {
             return System.currentTimeMillis();
         }
     };
-    public static final MetricSource TOTAL_CPU_TIME_METRIC_SOURCE = new AbstractMetricSource(
+    public static final ThreadMetric TOTAL_CPU_TIME_METRIC_SOURCE = new AbstractMetricSource(
             "Total CPU", "ms") {
         public long getCurrentValue() {
             return nanosToMillis(ManagementFactory.getThreadMXBean().getCurrentThreadCpuTime());
         }
     };
-    public static final MetricSource USER_CPU_TIME_METRIC_SOURCE = new AbstractMetricSource(
+    public static final ThreadMetric USER_CPU_TIME_METRIC_SOURCE = new AbstractMetricSource(
             "User CPU", "ms") {
         public long getCurrentValue() {
             return nanosToMillis(ManagementFactory.getThreadMXBean().getCurrentThreadUserTime());
         }
     };
 
-    public static final MetricSource SYSTEM_CPU_TIME_METRIC_SOURCE = new AbstractMetricSource(
+    public static final ThreadMetric SYSTEM_CPU_TIME_METRIC_SOURCE = new AbstractMetricSource(
             "System CPU", "ms") {
         public long getCurrentValue() {
             return nanosToMillis(ManagementFactory.getThreadMXBean().getCurrentThreadCpuTime()
@@ -32,28 +32,28 @@ public class MetricSources {
         }
     };
 
-    public static final MetricSource BLOCKED_COUNT_METRIC_SOURCE = new AbstractMetricSource(
+    public static final ThreadMetric BLOCKED_COUNT_METRIC_SOURCE = new AbstractMetricSource(
             "Blocked count", "") {
         public long getCurrentValue() {
             return getCurrentThreadInfo().getBlockedCount();
         }
     };
 
-    public static final MetricSource BLOCKED_TIME_METRIC_SOURCE = new AbstractMetricSource(
+    public static final ThreadMetric BLOCKED_TIME_METRIC_SOURCE = new AbstractMetricSource(
             "Blocked time", "ms") {
         public long getCurrentValue() {
             return getCurrentThreadInfo().getBlockedTime();
         }
     };
 
-    public static final MetricSource WAITED_COUNT_METRIC_SOURCE = new AbstractMetricSource(
+    public static final ThreadMetric WAITED_COUNT_METRIC_SOURCE = new AbstractMetricSource(
             "Wait count", "") {
         public long getCurrentValue() {
             return getCurrentThreadInfo().getWaitedCount();
         }
     };
 
-    public static final MetricSource WAITED_TIME_METRIC_SOURCE = new AbstractMetricSource(
+    public static final ThreadMetric WAITED_TIME_METRIC_SOURCE = new AbstractMetricSource(
             "Wait time", "ms") {
         public long getCurrentValue() {
             return getCurrentThreadInfo().getWaitedTime();

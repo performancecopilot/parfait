@@ -81,7 +81,7 @@ public class ControllerMetricCollectorFactoryTest extends TestCase {
         assertNotNull("Couldnt obtain counter set for attachments controller",
                 attachmentsCounterSet);
 
-        for (MetricSource metric : wizardCounterSet.getMetrics().keySet()) {
+        for (ThreadMetric metric : wizardCounterSet.getMetrics().keySet()) {
             ControllerCounterSet wizardCounter = wizardCounterSet.getMetrics().get(metric);
             assertNotNull("Couldnt obtain wizard counter for metric " + metric.getMetricName(),
                     wizardCounter);

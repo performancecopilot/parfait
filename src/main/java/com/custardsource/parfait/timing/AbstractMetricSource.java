@@ -1,6 +1,6 @@
 package com.custardsource.parfait.timing;
 
-public abstract class AbstractMetricSource implements MetricSource {
+public abstract class AbstractMetricSource implements ThreadMetric {
     private final String name;
     private final String unit;
 
