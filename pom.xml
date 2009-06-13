@@ -8,6 +8,7 @@
   <description>Java performance monitoring framework, including PCP bridge</description>
   <modules>
     <module>parfait-core</module>
+    <module>dxm</module>
   </modules>
   <url>http://code.google.com/p/parfait/</url>
   <inceptionYear>2009</inceptionYear>
