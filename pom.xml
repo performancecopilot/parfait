@@ -118,7 +118,4 @@
       <url>ftp://repo.custardsource.com/repo.custardsource.com/releases</url>
     </repository>
   </distributionManagement>
-  <properties>
-    <parfait.version>${project.version}</parfait.version>
-  </properties>
 </project>
