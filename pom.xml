@@ -3,7 +3,7 @@
   <groupId>com.custardsource</groupId>
   <artifactId>parfait</artifactId>
   <packaging>pom</packaging>
-  <version>0.0.1</version>
+  <version>0.0.1-SNAPSHOT</version>
   <name>parfait</name>
   <description>Java performance monitoring framework, including PCP bridge</description>
   <modules>
@@ -118,4 +118,7 @@
       <url>ftp://repo.custardsource.com/repo.custardsource.com/releases</url>
     </repository>
   </distributionManagement>
+  <properties>
+    <parfait.version>${project.version}</parfait.version>
+  </properties>
 </project>
