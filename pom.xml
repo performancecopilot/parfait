@@ -5,9 +5,12 @@
   <version>0.0.1</version>
   <name>parfait</name>
   <description>Java performance monitoring framework, including PCP bridge</description>
+  <url>http://code.google.com/p/parfait/</url>
   <inceptionYear>2009</inceptionYear>
   <scm>
-    <connection>scm:svn:https://parfait.googlecode.com/svn</connection>
+    <connection>scm:svn:http://parfait.googlecode.com/svn</connection>
+    <developerConnection>scm:svn:https://parfait.googlecode.com/svn</developerConnection>
+    <url>http://code.google.com/p/parfait/source/browse/</url>
   </scm>
   <licenses>
     <license>
