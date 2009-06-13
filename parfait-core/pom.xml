@@ -6,112 +6,12 @@
   <version>0.0.1</version>
   <name>parfait-core</name>
   <description>Java performance monitoring framework, including PCP bridge</description>
-  <url>http://code.google.com/p/parfait/</url>
-  <inceptionYear>2009</inceptionYear>
   <parent>
     <groupId>com.custardsource</groupId>
     <artifactId>parfait</artifactId>
     <version>0.0.1</version>
   </parent>
-  <scm>
-    <connection>scm:svn:http://parfait.googlecode.com/svn</connection>
-    <developerConnection>scm:svn:https://parfait.googlecode.com/svn</developerConnection>
-    <url>http://code.google.com/p/parfait/source/browse/</url>
-  </scm>
-  <licenses>
-    <license>
-      <name>Apache 2</name>
-      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-      <distribution>repo</distribution>
-      <comments>A business-friendly OSS license</comments>
-    </license>
-  </licenses>
-  <organization>
-    <name>custardsource</name>
-    <url>http://custardsource.com/</url>
-  </organization>
-  <developers>
-    <developer>
-      <id>funkwit</id>
-      <name>Paul Cowan</name>
-      <email>paul@custardsource.com</email>
-      <url>http://custardsource.com/</url>
-      <organization>custardsource</organization>
-      <organizationUrl>http://custardsource.com/</organizationUrl>
-      <roles>
-        <role>developer</role>
-      </roles>
-      <timezone>+10</timezone>
-    </developer>
-  </developers>
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
-          <encoding>UTF-8</encoding>
-        </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-release-plugin</artifactId>
-        <configuration>
-          <encoding>UTF-8</encoding>
-        </configuration>
-      </plugin>
-    </plugins>
-    <extensions>
-      <extension>
-        <groupId>org.apache.maven.wagon</groupId>
-         <artifactId>wagon-ftp</artifactId>
-         <version>1.0-alpha-6</version>
-      </extension>
-    </extensions>
-  </build>
-  <reporting>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-pmd-plugin</artifactId>
-        <configuration>
-          <targetJdk>1.5</targetJdk>
-        </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-site-plugin</artifactId>
-        <configuration>
-          <inputEncoding>UTF-8</inputEncoding>
-          <outputEncoding>UTF-8</outputEncoding>
-        </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <configuration>
-          <encoding>UTF-8</encoding>
-          <docencoding>UTF-8</docencoding>
-          <charset>UTF-8</charset>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jxr-plugin</artifactId>
-      </plugin>
-    </plugins>
-  </reporting>
   <dependencies>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>3.8.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.14</version>
-    </dependency>
     <dependency>
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
@@ -128,18 +28,11 @@
       <version>1.4</version>
     </dependency>
     <dependency>
-    	<groupId>com.google.collections</groupId>
-    	<artifactId>google-collections</artifactId>
-    	<version>1.0-rc2</version>
-    	<type>jar</type>
-    	<scope>compile</scope>
+      <groupId>com.google.collections</groupId>
+      <artifactId>google-collections</artifactId>
+      <version>1.0-rc2</version>
+      <type>jar</type>
+      <scope>compile</scope>
     </dependency>
   </dependencies>
-  <distributionManagement>
-    <repository>
-      <id>custardsource</id>
-      <name>custardsource releases</name>
-      <url>ftp://repo.custardsource.com/repo.custardsource.com/releases</url>
-    </repository>
-  </distributionManagement>
 </project>

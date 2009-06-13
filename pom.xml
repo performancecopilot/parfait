@@ -6,6 +6,9 @@
   <version>0.0.1</version>
   <name>parfait</name>
   <description>Java performance monitoring framework, including PCP bridge</description>
+  <modules>
+    <module>parfait-core</module>
+  </modules>
   <url>http://code.google.com/p/parfait/</url>
   <inceptionYear>2009</inceptionYear>
   <scm>
@@ -107,28 +110,6 @@
       <artifactId>log4j</artifactId>
       <version>1.2.14</version>
     </dependency>
-    <dependency>
-      <groupId>commons-lang</groupId>
-      <artifactId>commons-lang</artifactId>
-      <version>2.4</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring</artifactId>
-      <version>2.5.5</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-      <version>1.4</version>
-    </dependency>
-    <dependency>
-    	<groupId>com.google.collections</groupId>
-    	<artifactId>google-collections</artifactId>
-    	<version>1.0-rc2</version>
-    	<type>jar</type>
-    	<scope>compile</scope>
-    </dependency>
   </dependencies>
   <distributionManagement>
     <repository>
@@ -137,7 +118,4 @@
       <url>ftp://repo.custardsource.com/repo.custardsource.com/releases</url>
     </repository>
   </distributionManagement>
-  <modules>
-    <module>parfait-core</module>
-  </modules>
 </project>
