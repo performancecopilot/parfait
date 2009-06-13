@@ -2,8 +2,6 @@ package com.custardsource.parfait.timing;
 
 import junit.framework.TestCase;
 
-import com.aconex.utilities.AssertionFailedException;
-
 public class ControllerMetricTest extends TestCase {
     public void testCannotStartTwice() {
         ControllerMetric timing = new ControllerMetric(StandardThreadMetrics.CLOCK_TIME);
@@ -11,7 +9,7 @@ public class ControllerMetricTest extends TestCase {
         try {
             timing.startTimer();
             fail();
-        } catch (AssertionFailedException e) {
+        } catch (IllegalStateException e) {
             // Expected
         }
     }
@@ -21,7 +19,7 @@ public class ControllerMetricTest extends TestCase {
         try {
             timing.pauseOwnTime();
             fail();
-        } catch (AssertionFailedException e) {
+        } catch (IllegalStateException e) {
             // Expected
         }
     }
@@ -31,7 +29,7 @@ public class ControllerMetricTest extends TestCase {
         try {
             timing.resumeOwnTime();
             fail();
-        } catch (AssertionFailedException e) {
+        } catch (IllegalStateException e) {
             // Expected
         }
     }
@@ -41,7 +39,7 @@ public class ControllerMetricTest extends TestCase {
         try {
             timing.stopTimer();
             fail();
-        } catch (AssertionFailedException e) {
+        } catch (IllegalStateException e) {
             // Expected
         }
     }
@@ -53,7 +51,7 @@ public class ControllerMetricTest extends TestCase {
         try {
             timing.pauseOwnTime();
             fail();
-        } catch (AssertionFailedException e) {
+        } catch (IllegalStateException e) {
             // Expected
         }
     }
@@ -65,7 +63,7 @@ public class ControllerMetricTest extends TestCase {
         try {
             timing.pauseOwnTime();
             fail();
-        } catch (AssertionFailedException e) {
+        } catch (IllegalStateException e) {
             // Expected
         }
     }
@@ -76,7 +74,7 @@ public class ControllerMetricTest extends TestCase {
         try {
             timing.resumeOwnTime();
             fail();
-        } catch (AssertionFailedException e) {
+        } catch (IllegalStateException e) {
             // Expected
         }
     }
@@ -88,7 +86,7 @@ public class ControllerMetricTest extends TestCase {
         try {
             timing.resumeOwnTime();
             fail();
-        } catch (AssertionFailedException e) {
+        } catch (IllegalStateException e) {
             // Expected
         }
     }
@@ -98,7 +96,7 @@ public class ControllerMetricTest extends TestCase {
         try {
             timing.stopTimer();
             fail();
-        } catch (AssertionFailedException e) {
+        } catch (IllegalStateException e) {
             // Expected
         }
     }
@@ -109,7 +107,7 @@ public class ControllerMetricTest extends TestCase {
         try {
             timing.totalValue();
             fail();
-        } catch (AssertionFailedException e) {
+        } catch (IllegalStateException e) {
             // Expected
         }
     }
@@ -120,7 +118,7 @@ public class ControllerMetricTest extends TestCase {
         try {
             timing.ownTimeValue();
             fail();
-        } catch (AssertionFailedException e) {
+        } catch (IllegalStateException e) {
             // Expected
         }
     }

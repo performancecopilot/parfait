@@ -1,6 +1,6 @@
 package com.custardsource.parfait.timing;
 
-import com.aconex.utilities.Assert;
+import com.google.common.base.Preconditions;
 
 /**
  * Class to measure the time taken to run by a single controller (or some similar 'delta' metric).
@@ -22,23 +22,23 @@ class ControllerMetric {
     }
 
     public void startTimer() {
-        Assert.isNull(startValue, "Can't start running timer");
+        Preconditions.checkState(startValue == null, "Can't start running timer");
         this.startValue = metricSource.getCurrentValue();
         this.lastStartOwnTimeValue = metricSource.getCurrentValue();
         this.ownValueSoFar = 0L;
     }
 
     public void pauseOwnTime() {
-        Assert.notNull(startValue, "Can't pause own time while timer is stopped");
-        Assert.notNull(lastStartOwnTimeValue, "Can't pause own time while already paused");
+    	Preconditions.checkState(startValue != null, "Can't pause own time while timer is stopped");
+    	Preconditions.checkState(lastStartOwnTimeValue != null, "Can't pause own time while already paused");
         this.ownValueSoFar += (metricSource.getCurrentValue() - lastStartOwnTimeValue);
         this.lastStartOwnTimeValue = null;
     }
 
     public void resumeOwnTime() {
-        Assert.notNull(startValue, "Can't resume own time while timer is stopped");
-        Assert.isNull(lastStartOwnTimeValue, "Can't resume own time - already counting");
-        Assert.isNull(endValue, "Can't resume own time - stopped");
+    	Preconditions.checkState(startValue != null, "Can't resume own time while timer is stopped");
+    	Preconditions.checkState(lastStartOwnTimeValue == null, "Can't resume own time - already counting");
+    	Preconditions.checkState(endValue == null, "Can't resume own time - stopped");
         this.lastStartOwnTimeValue = metricSource.getCurrentValue();
     }
 
@@ -48,12 +48,12 @@ class ControllerMetric {
     }
 
     public long totalValue() {
-        Assert.notNull(endValue, "Can't measure time until timer is stopped");
+    	Preconditions.checkState(endValue != null, "Can't measure time until timer is stopped");
         return endValue - startValue;
     }
 
     public long ownTimeValue() {
-        Assert.notNull(endValue, "Can't measure time until timer is stopped");
+    	Preconditions.checkState(endValue != null, "Can't measure time until timer is stopped");
         return ownValueSoFar;
     }
 

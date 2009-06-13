@@ -95,11 +95,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.aconex</groupId>
-      <artifactId>aconex-assert</artifactId>
-      <version>1.1</version>
-    </dependency>
-    <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
       <version>1.2.14</version>
@@ -118,6 +113,13 @@
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <version>1.4</version>
+    </dependency>
+    <dependency>
+    	<groupId>com.google.collections</groupId>
+    	<artifactId>google-collections</artifactId>
+    	<version>1.0-rc2</version>
+    	<type>jar</type>
+    	<scope>compile</scope>
     </dependency>
   </dependencies>
 </project>

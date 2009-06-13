@@ -2,7 +2,7 @@ package com.custardsource.parfait;
 
 import org.apache.commons.lang.ObjectUtils;
 
-import com.aconex.utilities.Assert;
+import com.google.common.base.Preconditions;
 
 /**
  * MonitoredValue provides a convenient implementation of {@link Monitorable} for basic values that
@@ -32,7 +32,7 @@ public class MonitoredValue<T> extends AbstractMonitorable<T> {
 	public MonitoredValue(String name, String description,
 			MonitorableRegistry registry, T initialValue) {
 		super(name, description, (Class<T>) initialValue.getClass());
-		Assert.notNull(initialValue, "Monitored value can not be null");
+		Preconditions.checkNotNull(initialValue, "Monitored value can not be null");
 		this.value = initialValue;
 		registerSelf(registry);
 	}
@@ -45,7 +45,7 @@ public class MonitoredValue<T> extends AbstractMonitorable<T> {
         if (ObjectUtils.equals(this.value, newValue)) {
             return;
         }
-        Assert.notNull(newValue, "Monitored value can not be null");
+        Preconditions.checkNotNull(newValue, "Monitored value can not be null");
         this.value = newValue;
         notifyMonitors();
     }

@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 
-import com.aconex.utilities.Assert;
+import com.google.common.base.Preconditions;
 
 public class MonitorableRegistry {
 	public static MonitorableRegistry DEFAULT_REGISTRY = new MonitorableRegistry();
@@ -35,7 +35,7 @@ public class MonitorableRegistry {
     }
     
     public synchronized Collection<Monitorable<?>> getMonitorables() {
-        Assert.isTrue(stateFrozen, "MonitorableRegistry must be frozen before retrieving monitorable list");
+    	Preconditions.checkState(stateFrozen, "MonitorableRegistry must be frozen before retrieving monitorable list");
         stateFrozen = true;
         return Collections.unmodifiableCollection(monitorables.values());
     }

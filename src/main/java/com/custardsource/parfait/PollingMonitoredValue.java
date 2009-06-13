@@ -6,7 +6,7 @@ import java.util.TimerTask;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.log4j.Logger;
 
-import com.aconex.utilities.Assert;
+import com.google.common.base.Preconditions;
 
 /**
  * Monitors the value returned by calls at the provided interval to the the provided {@link Poller}.
@@ -33,7 +33,8 @@ public class PollingMonitoredValue<T> extends MonitoredValue<T> {
 			MonitorableRegistry registry, int updateInterval, Poller<T> poller) {
         super(name, description, registry, poller.poll());
         this.poller = poller;
-        Assert.isTrue(updateInterval >= MIN_UPDATE_INTERVAL, "updateInterval is too short.");
+		Preconditions.checkState(updateInterval >= MIN_UPDATE_INTERVAL,
+				"updateInterval is too short.");
         pollingTimer.scheduleAtFixedRate(new PollerTask(), updateInterval, updateInterval);
     }
     

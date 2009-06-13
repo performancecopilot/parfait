@@ -6,7 +6,7 @@ import java.io.InputStream;
 import org.apache.commons.io.input.ProxyInputStream;
 
 import com.custardsource.parfait.MonitoredCounter;
-import com.aconex.utilities.Assert;
+import com.google.common.base.Preconditions;
 
 public class ByteCountingInputStream extends ProxyInputStream {
 
@@ -30,8 +30,8 @@ public class ByteCountingInputStream extends ProxyInputStream {
     public ByteCountingInputStream(InputStream streamToWrap,
 			MonitoredCounter counter) {
 	    super(streamToWrap);
-		Assert.notNull(counter, "MonitoredCounter cannot be null");
-		Assert.notNull(streamToWrap, "InputStream cannot be null");
+	    Preconditions.checkNotNull(counter, "MonitoredCounter cannot be null");
+	    Preconditions.checkNotNull(streamToWrap, "InputStream cannot be null");
 		this.monitoredCounter = counter;
 	}
 	

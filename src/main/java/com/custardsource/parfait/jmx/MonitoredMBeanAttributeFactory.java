@@ -20,7 +20,7 @@ import org.springframework.jmx.support.JmxUtils;
 import com.custardsource.parfait.MonitoredValue;
 import com.custardsource.parfait.Poller;
 import com.custardsource.parfait.PollingMonitoredValue;
-import com.aconex.utilities.Assert;
+import com.google.common.base.Preconditions;
 
 /**
  * Factory bean that generates a monitor which tracks the value of the provided MBean attribute.
@@ -102,13 +102,18 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean {
         }
 
         if (compositeDataItem != null) {
-            Assert.equal(CompositeData.class.getName(), monitoredAttribute.getType(), "MBean ["
-                    + mBeanName + "] attribute [" + attributeName
-                    + "] must be of type CompositeData if compositeDataItem is provided");
+			Preconditions
+					.checkState(
+							CompositeData.class.getName().equals(
+									monitoredAttribute.getType()),
+							"MBean [%s] attribute [%s] must be of type CompositeData if compositeDataItem is provided",
+							mBeanName, attributeName);
             CompositeData data = (CompositeData) server.getAttribute(mBeanName, attributeName);
-            Assert.notNull(data.getCompositeType().getType(compositeDataItem), "MBean ["
-                    + mBeanName + "] attribute [" + attributeName
-                    + "] does not have a data item called [" + compositeDataItem + "]");
+			Preconditions
+					.checkState(
+							data.getCompositeType().getType(compositeDataItem) != null,
+							"MBean [%s] attribute [%s] does not have a data item called [%s]",
+							mBeanName, attributeName, compositeDataItem);
         }
 
         if (updateInterval == DO_NOT_UPDATE_VALUE) {
