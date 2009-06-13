@@ -56,6 +56,13 @@
         </configuration>
       </plugin>
     </plugins>
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+         <artifactId>wagon-ftp</artifactId>
+         <version>1.0-alpha-6</version>
+      </extension>
+    </extensions>
   </build>
   <reporting>
     <plugins>
@@ -122,4 +129,11 @@
     	<scope>compile</scope>
     </dependency>
   </dependencies>
+  <distributionManagement>
+    <repository>
+      <id>custardsource</id>
+      <name>custardsource releases</name>
+      <url>ftp://repo.custardsource.com/repo.custardsource.com/releases</url>
+    </repository>
+  </distributionManagement>
 </project>
