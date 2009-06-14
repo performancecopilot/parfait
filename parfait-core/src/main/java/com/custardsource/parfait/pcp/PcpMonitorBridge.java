@@ -1,23 +1,10 @@
 package com.custardsource.parfait.pcp;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.RandomAccessFile;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.channels.FileChannel.MapMode;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -43,15 +30,7 @@ public class PcpMonitorBridge extends MonitoringView {
 
     private final Logger LOG = Logger.getLogger(PcpMonitorBridge.class);
 
-    public static final byte PROTOCOL_VERSION = 1;
-
-    public static final int MAX_STRING_LENGTH = 256;
-
     public static final int UPDATE_QUEUE_SIZE = 1024;
-
-    public static final String ENCODING = "ISO-8859-1";
-
-    private final Map<Monitorable<?>, Integer> monitorableOffsets = new HashMap<Monitorable<?>, Integer>();
 
     private final ArrayBlockingQueue<Monitorable<?>> monitorablesPendingUpdate = new ArrayBlockingQueue<Monitorable<?>>(
     		UPDATE_QUEUE_SIZE);
@@ -70,9 +49,9 @@ public class PcpMonitorBridge extends MonitoringView {
      */
     private boolean outputValuesToPCPFile = true;
 
-    private volatile ByteBuffer dataFileBuffer = null;
-
     private boolean deleteFilesOnExit = false;
+
+	private volatile PcpWriter pcpWriter;
 
 
     public PcpMonitorBridge(String serverName, String dataFileDir) {
@@ -98,7 +77,7 @@ public class PcpMonitorBridge extends MonitoringView {
 
     @Override
     public void stopMonitoring(Collection<Monitorable<?>> monitorables) {
-        dataFileBuffer = null;
+        pcpWriter = null;
         for (Monitorable<?> monitorable : monitorables) {
             monitorable.removeMonitor(monitor);
         }
@@ -111,42 +90,21 @@ public class PcpMonitorBridge extends MonitoringView {
     @Override
     protected void startMonitoring(Collection<Monitorable<?>> monitorables) {
         try {
-            // Calculate the data file offsets
-            int dataFileOffset = 9; // 8 bytes for the version number and 1 for the protocol version
-            for (Monitorable<?> monitorable : monitorables) {
-                int dataSize = getTypeSize(monitorable.getType());
-                dataFileOffset = align(dataFileOffset, dataSize);
-                monitorableOffsets.put(monitorable, dataFileOffset);
-                dataFileOffset = dataFileOffset + dataSize;
-            }
-
-            // Write the new header data into header file
-            long fileGeneration = System.currentTimeMillis();
             File headerFile = getHeaderFile();
+            File dataFile = getDataFile();
+            
             if (isDeleteFilesOnExit()) {
                 headerFile.deleteOnExit();
+                dataFile.deleteOnExit();
             }
-            OutputStreamWriter headerWriter = new OutputStreamWriter(new BufferedOutputStream(
-                    new FileOutputStream(headerFile)), ENCODING);
-            writeHeaderValue(headerWriter, "version", String.valueOf(PROTOCOL_VERSION));
-            writeHeaderValue(headerWriter, "generation", String.valueOf(fileGeneration));
+            
+			pcpWriter = new PcpAconexPmdaWriter(headerFile, dataFile);
+			
             for (Monitorable<?> monitorable : monitorables) {
-                writeHeaderValue(headerWriter, monitorable.getName(), monitorableOffsets
-                        .get(monitorable)
-                        + "," + getTypeName(monitorable.getType()));
+            	monitorable.attachMonitor(monitor);
+				pcpWriter.addMetric(monitorable.getName(), monitorable.get());
             }
-            headerWriter.close();
-
-            // Create a new data file and populate with initial data
-            createDataFile(dataFileOffset);
-            for (Monitorable<?> monitorable : monitorables) {
-                updateData(monitorable);
-                monitorable.attachMonitor(monitor);
-            }
-
-            // And finally update the data file generation number to match the header file
-            dataFileBuffer.put(8, PROTOCOL_VERSION);
-            dataFileBuffer.putLong(0, fileGeneration);
+            pcpWriter.start();
 
             updateThread.start();
 
@@ -157,131 +115,12 @@ public class PcpMonitorBridge extends MonitoringView {
         }
     }
 
-    private int align(int offset, int dataSize) {
-        int alignmentBoundry = dataSize == 8 ? 8 : 4;
-        if (offset % alignmentBoundry != 0) {
-            return ((offset / alignmentBoundry) + 1) * alignmentBoundry;
-        } else {
-            return offset;
-        }
-    }
-
-    private void updateData(Monitorable<?> monitorable) {
-
-        ByteBuffer localFileBuffer = dataFileBuffer;
-        if (localFileBuffer == null) {
-            return;
-        }
-
-        Class<?> type = monitorable.getType();
-        localFileBuffer.position(monitorableOffsets.get(monitorable));
-
-        if (type == Boolean.class) {
-            int value = ((Boolean) monitorable.get()) ? 1 : 0;
-            localFileBuffer.putInt(value);
-        } else if (type == Integer.class) {
-            localFileBuffer.putInt((Integer) monitorable.get());
-        } else if (type == AtomicInteger.class) {
-            int value = ((AtomicInteger) monitorable.get()).intValue();
-            localFileBuffer.putInt(value);
-        } else if (type == Long.class) {
-            long value = (Long) monitorable.get();
-            localFileBuffer.putLong(value);
-        } else if (type == AtomicLong.class) {
-            long value = ((AtomicLong) monitorable.get()).longValue();
-            localFileBuffer.putLong(value);
-        } else if (type == Double.class) {
-            double value = (Double) monitorable.get();
-            localFileBuffer.putDouble(value);
-        } else if (type == String.class) {
-            try {
-                String value = (String) monitorable.get();
-                byte[] stringData = value.getBytes(ENCODING);
-                int length = Math.min(stringData.length, MAX_STRING_LENGTH - 1);
-                localFileBuffer.put(stringData, 0, length);
-                localFileBuffer.put((byte) 0);
-            } catch (UnsupportedEncodingException e) {
-                throw new UnsupportedOperationException(e);
-            }
-        } else {
-            throw new UnsupportedOperationException(
-                    "Don't know how to process Monitorable of type [" + type + "]");
-        }
-    }
-
-    private int getTypeSize(Class<?> type) {
-        if (type == Boolean.class) {
-            return 4;
-        } else if (type == Integer.class || type == AtomicInteger.class) {
-            return 4;
-        } else if (type == Long.class || type == AtomicLong.class) {
-            return 8;
-        } else if (type == Double.class) {
-            return 8;
-        } else if (type == String.class) {
-            return MAX_STRING_LENGTH;
-        } else {
-            throw new UnsupportedOperationException(
-                    "Don't know how to process Monitorable of type [" + type + "]");
-        }
-    }
-
-    private String getTypeName(Class<?> type) {
-        if (type == Boolean.class) {
-            return "int";
-        } else if (type == Integer.class || type == AtomicInteger.class) {
-            return "int";
-        } else if (type == Long.class || type == AtomicLong.class) {
-            return "long";
-        } else if (type == Double.class) {
-            return "double";
-        } else if (type == String.class) {
-            return "string";
-        } else {
-            throw new UnsupportedOperationException(
-                    "Don't know how to process Monitorable of type [" + type + "]");
-        }
-    }
-
     private File getHeaderFile() {
         return new File(dataFileDir, serverName + ".pcp.header");
     }
 
-    private void writeHeaderValue(Writer output, String name, String value) throws IOException {
-        output.append(name);
-        output.append('=');
-        output.append(value);
-        output.append("\n");
-    }
-
     private File getDataFile() {
         return new File(dataFileDir, serverName + ".pcp.data");
-    }
-
-    /**
-     * Creates a new blank data file of the specified length, all bytes are initially cleared to
-     * zero.
-     */
-    private void createDataFile(int totalLength) throws IOException {
-        RandomAccessFile fos = null;
-        try {
-            File dataFile = getDataFile();
-            if (isDeleteFilesOnExit()) {
-                dataFile.deleteOnExit();
-            }
-            fos = new RandomAccessFile(dataFile, "rw");
-            fos.setLength(0);
-            fos.setLength(totalLength);
-            ByteBuffer tempDataFile = fos.getChannel().map(MapMode.READ_WRITE, 0, totalLength);
-            tempDataFile.order(ByteOrder.nativeOrder());
-            fos.close();
-
-            dataFileBuffer = tempDataFile;
-        } finally {
-            if (fos != null) {
-                fos.close();
-            }
-        }
     }
 
     /**
@@ -293,12 +132,13 @@ public class PcpMonitorBridge extends MonitoringView {
         public void run() {
             try {
                 Collection<Monitorable<?>> monitorablesToUpdate = new ArrayList<Monitorable<?>>();
-                while (dataFileBuffer != null) {
+                while (pcpWriter != null) {
                     try {
+                    	// TODO should make a copy of the writer
                         monitorablesToUpdate.add(monitorablesPendingUpdate.take());
                         monitorablesPendingUpdate.drainTo(monitorablesToUpdate);
                         for (Monitorable<?> monitorable : monitorablesToUpdate) {
-                            updateData(monitorable);
+                            pcpWriter.updateMetric(monitorable.getName(), monitorable.get());
                         }
                         if (monitorablesPendingUpdate.size() >= UPDATE_QUEUE_SIZE) {
                             LOG.warn("Update queue was full - some updates may have been lost.");
@@ -363,10 +203,6 @@ public class PcpMonitorBridge extends MonitoringView {
         this.deleteFilesOnExit = deleteFilesOnExit;
     }
 
-    /**
-     * 
-     * @return
-     */
     public final boolean isDeleteFilesOnExit() {
         return deleteFilesOnExit;
     }

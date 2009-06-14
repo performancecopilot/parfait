@@ -108,13 +108,13 @@ public class PcpMonitorBridgeTest extends TestCase {
         stringValue.set("");
         checkDataValues(generationNumber);
 
-        stringValue.set(createString(PcpMonitorBridge.MAX_STRING_LENGTH / 3));
+        stringValue.set(createString(PcpAconexPmdaWriter.MAX_STRING_LENGTH / 3));
         checkDataValues(generationNumber);
 
-        stringValue.set(createString(PcpMonitorBridge.MAX_STRING_LENGTH - 1));
+        stringValue.set(createString(PcpAconexPmdaWriter.MAX_STRING_LENGTH - 1));
         checkDataValues(generationNumber);
 
-        stringValue.set(createString(PcpMonitorBridge.MAX_STRING_LENGTH));
+        stringValue.set(createString(PcpAconexPmdaWriter.MAX_STRING_LENGTH));
         checkDataValues(generationNumber);
 
         stringValue.set(createString(500));
@@ -132,9 +132,10 @@ public class PcpMonitorBridgeTest extends TestCase {
     private long checkHeaderFileFormat() throws IOException {
         LineNumberReader in = new LineNumberReader(new InputStreamReader(new FileInputStream(System
                 .getProperty("java.io.tmpdir")
-                + "/test.pcp.header"), PcpMonitorBridge.ENCODING));
+                + "/test.pcp.header"), PcpAconexPmdaWriter.ENCODING));
 
-        assertEquals("version=" + PcpMonitorBridge.PROTOCOL_VERSION, in.readLine());
+		assertEquals("version=" + PcpAconexPmdaWriter.PROTOCOL_VERSION, in
+				.readLine());
 
         String generation = in.readLine();
         assertTrue(generation.startsWith("generation="));
@@ -161,17 +162,17 @@ public class PcpMonitorBridgeTest extends TestCase {
         in.close();
 
         assertEquals(generationNumber, dataBuffer.getLong(0));
-        assertEquals(PcpMonitorBridge.PROTOCOL_VERSION, dataBuffer.get(8));
+        assertEquals(PcpAconexPmdaWriter.PROTOCOL_VERSION, dataBuffer.get(8));
 
         assertEquals(booleanValue.get() ? 1 : 0, dataBuffer.getInt(12));
         assertEquals(doubleValue.get(), dataBuffer.getDouble(16));
         assertEquals((int) intValue.get(), dataBuffer.getInt(24));
         assertEquals((long) longValue.get(), dataBuffer.getLong(32));
 
-        byte[] string = stringValue.get().getBytes(PcpMonitorBridge.ENCODING);
+        byte[] string = stringValue.get().getBytes(PcpAconexPmdaWriter.ENCODING);
         dataBuffer.position(40);
-        for (int i = 0; i < Math.min(string.length, PcpMonitorBridge.MAX_STRING_LENGTH - 1); i++) {
-            assertEquals(string[i], dataBuffer.get());
+        for (int i = 0; i < Math.min(string.length, PcpAconexPmdaWriter.MAX_STRING_LENGTH - 1); i++) {
+        	assertEquals(string[i], dataBuffer.get());
         }
         assertEquals(0, dataBuffer.get());
     }
