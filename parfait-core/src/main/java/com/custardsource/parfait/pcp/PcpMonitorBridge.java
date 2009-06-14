@@ -19,15 +19,16 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
-import org.springframework.util.Assert;
 
 import com.custardsource.parfait.Monitor;
 import com.custardsource.parfait.Monitorable;
 import com.custardsource.parfait.MonitorableRegistry;
 import com.custardsource.parfait.MonitoringView;
+import com.google.common.base.Preconditions;
 
 /**
  * PcpMonitorBridge bridges between the set of {@link Monitorable}s in the current system and a PCP
@@ -79,19 +80,20 @@ public class PcpMonitorBridge extends MonitoringView {
     }
 
     public PcpMonitorBridge(String serverName, String dataFileDir, MonitorableRegistry registry) {
-        super(registry);
-        Assert.hasText(serverName, "Sever name can not be blank");
-        this.serverName = serverName;
-        this.dataFileDir = new File(dataFileDir);
-        if (!this.dataFileDir.exists()) {
-            this.dataFileDir.mkdirs();
-        }
-        Assert.isTrue(this.dataFileDir.isDirectory(), "dataFileDir [" + dataFileDir
-                + "] is not a directory.");
-        this.updateThread = new Thread(new Updater());
-        this.updateThread.setName("PcpMonitorBridge-Updater");
-        this.updateThread.setDaemon(true);
-        Assert.notNull(registry);
+		super(registry);
+		Preconditions.checkNotNull(registry);
+		Preconditions.checkArgument(StringUtils.isNotBlank(serverName),
+				"Sever name can not be blank");
+		this.serverName = serverName;
+		this.dataFileDir = new File(dataFileDir);
+		if (!this.dataFileDir.exists()) {
+			this.dataFileDir.mkdirs();
+		}
+		Preconditions.checkArgument(this.dataFileDir.isDirectory(),
+				"dataFileDir [%s] is not a directory.", dataFileDir);
+		this.updateThread = new Thread(new Updater());
+		this.updateThread.setName("PcpMonitorBridge-Updater");
+		this.updateThread.setDaemon(true);
     }
 
     @Override
