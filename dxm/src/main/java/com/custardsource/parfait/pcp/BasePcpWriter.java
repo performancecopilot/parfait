@@ -139,14 +139,16 @@ public abstract class BasePcpWriter implements PcpWriter {
     private void initialiseOffsets() {
     	int totalMetrics = metricData.size();
     	for (PcpMetricInfo info : metricData.values()) {
-    		info.setOffsets(getNextOffsets(totalMetrics));
+    		info.setOffsets(getNextOffsets(info, totalMetrics));
     	}
 	}
 
 	protected abstract void populateDataBuffer(ByteBuffer dataFileBuffer,
 			Collection<PcpMetricInfo> metricInfos) throws IOException;
 
-    protected abstract PcpOffset getNextOffsets(int totalMetrics);
+	protected abstract PcpOffset getNextOffsets(PcpMetricInfo currentInfo,
+			int totalMetrics);
+
     protected abstract int getMetricNameLimit();
     protected abstract Charset getCharset();
     protected abstract int getFileLength(Collection<PcpMetricInfo> infos);

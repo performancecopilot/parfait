@@ -20,7 +20,7 @@ public class DefaultTypeHandlers {
      * the supplied Number can not be reasonably coerced into an integer.
      */
     public static TypeHandler<Number> NUMBER_AS_INTEGER = new AbstractTypeHandler<Number>(
-            MmvMetricType.I32) {
+            MmvMetricType.I32, 4) {
         public void putBytes(ByteBuffer buffer, Number value) {
             buffer.putInt(value == null ? 0 : value.intValue());
         }
@@ -31,7 +31,7 @@ public class DefaultTypeHandlers {
      * the supplied Number has a floating-point component.
      */
     public static TypeHandler<Number> NUMBER_AS_LONG = new AbstractTypeHandler<Number>(
-            MmvMetricType.I64) {
+            MmvMetricType.I64, 8) {
         public void putBytes(ByteBuffer buffer, Number value) {
             buffer.putLong(value == null ? 0 : value.longValue());
         }
@@ -42,7 +42,7 @@ public class DefaultTypeHandlers {
      * Number is not a double.
      */
     public static TypeHandler<Number> NUMBER_AS_DOUBLE = new AbstractTypeHandler<Number>(
-            MmvMetricType.DOUBLE) {
+            MmvMetricType.DOUBLE, 8) {
         public void putBytes(ByteBuffer buffer, Number value) {
             buffer.putDouble(value == null ? 0 : value.doubleValue());
         }
@@ -53,17 +53,17 @@ public class DefaultTypeHandlers {
      * Number is not a float.
      */
     public static TypeHandler<Number> NUMBER_AS_FLOAT = new AbstractTypeHandler<Number>(
-            MmvMetricType.DOUBLE) {
+            MmvMetricType.DOUBLE, 8) {
         public void putBytes(ByteBuffer buffer, Number value) {
             buffer.putFloat(value == null ? 0 : value.floatValue());
         }
     };
 
     /**
-     * Converts a {@link Boolean} into a PCP unsigned 32-bit integer.
+     * Converts a {@link Boolean} into a PCP signed 32-bit integer.
      */
     public static TypeHandler<Boolean> BOOLEAN_AS_INT = new AbstractTypeHandler<Boolean>(
-            MmvMetricType.U32) {
+            MmvMetricType.I32, 4) {
         public void putBytes(ByteBuffer buffer, Boolean value) {
             buffer.putInt(value == null ? 0 : (value ? 1 : 0));
         }
@@ -73,7 +73,7 @@ public class DefaultTypeHandlers {
      * Converts an {@link AtomicBoolean} into a PCP unsigned 32-bit integer.
      */
     public static TypeHandler<AtomicBoolean> ATOMIC_BOOLEAN_AS_INT = new AbstractTypeHandler<AtomicBoolean>(
-            MmvMetricType.I32) {
+            MmvMetricType.I32, 4) {
         public void putBytes(ByteBuffer buffer, AtomicBoolean value) {
             buffer.putInt(value == null ? 0 : (value.get() ? 1 : 0));
         }

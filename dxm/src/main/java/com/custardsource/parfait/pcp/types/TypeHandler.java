@@ -28,4 +28,6 @@ public interface TypeHandler<JavaType> {
      *         {@link #putBytes(ByteBuffer, Object)}
      */
     MmvMetricType getMetricType();
+
+	int getDataLength();
 }

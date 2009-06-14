@@ -240,7 +240,8 @@ public class PcpMmvWriter extends BasePcpWriter {
 
 	
 	@Override
-	protected synchronized PcpOffset getNextOffsets(int totalMetrics) {
+	protected synchronized PcpOffset getNextOffsets(PcpMetricInfo currentInfo,
+			int totalMetrics) {
 		if (!firstOffsetCalculated) {
 			calculateFirstOffset(totalMetrics);
 		}
@@ -272,14 +273,14 @@ public class PcpMmvWriter extends BasePcpWriter {
         // addMetric(String) would fail, as there's no handler registered; use a custom one which
         // puts the string's length as an int
         bridge.addMetric("sheep.insomniac.jumpitem", "Fence", new AbstractTypeHandler<String>(
-                MmvMetricType.I32) {
+                MmvMetricType.I32, 4) {
             public void putBytes(ByteBuffer buffer, String value) {
                 buffer.putInt(value.length());
             }
         });
         // addMetric(Date) would fail, as there's no handler registered; register one for all date
         // types from now on
-        bridge.registerType(Date.class, new AbstractTypeHandler<Date>(MmvMetricType.I64) {
+        bridge.registerType(Date.class, new AbstractTypeHandler<Date>(MmvMetricType.I64, 8) {
             public void putBytes(ByteBuffer buffer, Date value) {
                 buffer.putLong(value.getTime());
             }
