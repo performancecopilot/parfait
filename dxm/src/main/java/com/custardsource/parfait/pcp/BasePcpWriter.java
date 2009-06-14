@@ -16,11 +16,17 @@ import com.custardsource.parfait.pcp.types.DefaultTypeHandlers;
 import com.custardsource.parfait.pcp.types.TypeHandler;
 
 public abstract class BasePcpWriter implements PcpWriter {
+	private final File dataFile;
     private final Map<String, PcpMetricInfo> metricData = new LinkedHashMap<String, PcpMetricInfo>();
     private final Map<Class<?>, TypeHandler<?>> typeHandlers = new HashMap<Class<?>, TypeHandler<?>>(
             DefaultTypeHandlers.getDefaultMappings());
     protected volatile boolean started = false;
+    private ByteBuffer dataFileBuffer = null;
 
+    protected BasePcpWriter(File dataFile) {
+    	this.dataFile = dataFile;
+    }
+    
     /* (non-Javadoc)
 	 * @see com.custardsource.parfait.pcp.PcpWriter#addMetric(java.lang.String, java.lang.Object)
 	 */
@@ -71,7 +77,12 @@ public abstract class BasePcpWriter implements PcpWriter {
     }
 
     
-    protected abstract void updateValue(PcpMetricInfo info, Object value);
+	@SuppressWarnings("unchecked")
+	protected void updateValue(PcpMetricInfo info, Object value) {
+		dataFileBuffer.position(info.getOffsets().dataValueOffset());
+        TypeHandler rawHandler = info.getTypeHandler();
+        rawHandler.putBytes(dataFileBuffer, value);
+	}
 
 	private void addMetricInfo(String name, Object initialValue, TypeHandler<?> pcpType) {
         if (started) {
@@ -119,7 +130,8 @@ public abstract class BasePcpWriter implements PcpWriter {
             throw new IllegalStateException("Cannot create an MMV file with no metrics");
         }
         initialiseOffsets();
-        doStart(metricData.values());
+		dataFileBuffer = initialiseBuffer(dataFile, getFileLength(metricData.values()));
+        populateDataBuffer(dataFileBuffer, metricData.values());
 
         started = true;
     }
@@ -131,12 +143,13 @@ public abstract class BasePcpWriter implements PcpWriter {
     	}
 	}
 
-	protected abstract void doStart(Collection<PcpMetricInfo> metricInfos) throws IOException;
-
+	protected abstract void populateDataBuffer(ByteBuffer dataFileBuffer,
+			Collection<PcpMetricInfo> metricInfos) throws IOException;
 
     protected abstract PcpOffset getNextOffsets(int totalMetrics);
     protected abstract int getMetricNameLimit();
     protected abstract Charset getCharset();
+    protected abstract int getFileLength(Collection<PcpMetricInfo> infos);
 
 	protected static class PcpMetricInfo {
         public PcpMetricInfo(String metricName, TypeHandler<?> handler, Object initialValue) {

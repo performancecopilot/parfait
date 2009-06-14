@@ -82,8 +82,6 @@ public class PcpMmvWriter extends BasePcpWriter {
 
 	private static final int DATA_VALUE_OFFSET_WITHIN_BLOCK = 8;
 
-    private final File dataFile;
-    private ByteBuffer dataFileBuffer = null;
     // @GuardedBy(this)
 	private boolean firstOffsetCalculated = false;
     // @GuardedBy(this)
@@ -102,13 +100,12 @@ public class PcpMmvWriter extends BasePcpWriter {
      *            the file to map
      */
     public PcpMmvWriter(File file) {
-        this.dataFile = file;
+    	super(file);
     }
 
-    protected void doStart(Collection<PcpMetricInfo> metricInfos) throws IOException {
+    @Override
+    protected void populateDataBuffer(ByteBuffer dataFileBuffer, Collection<PcpMetricInfo> metricInfos) throws IOException {
     	int metricCount = metricInfos.size();
-    	
-		dataFileBuffer = initialiseBuffer(dataFile, getFileLength(metricInfos));
 
         dataFileBuffer.position(0);
         dataFileBuffer.put(TAG);
@@ -147,7 +144,8 @@ public class PcpMmvWriter extends BasePcpWriter {
         dataFileBuffer.putLong(generation);
 	}
 
-    private int getFileLength(Collection<PcpMetricInfo> metricInfos) {
+    @Override
+    protected int getFileLength(Collection<PcpMetricInfo> metricInfos) {
     	int count = metricInfos.size();
 		return HEADER_LENGTH + (TOC_LENGTH * 2) + (METRIC_LENGTH * count)
 				+ (VALUE_LENGTH * count);
@@ -259,14 +257,6 @@ public class PcpMmvWriter extends BasePcpWriter {
 		nextDataBlockOffset = nextDescriptorOffset + (METRIC_LENGTH * totalMetrics);
 		nextDataValueOffset = nextDataBlockOffset + DATA_VALUE_OFFSET_WITHIN_BLOCK;
 		firstOffsetCalculated = true;
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	protected void updateValue(PcpMetricInfo info, Object value) {
-		dataFileBuffer.position(info.getOffsets().dataValueOffset());
-        TypeHandler rawHandler = info.getTypeHandler();
-        rawHandler.putBytes(dataFileBuffer, value);
 	}
 
     public static void main(String[] args) throws IOException {
