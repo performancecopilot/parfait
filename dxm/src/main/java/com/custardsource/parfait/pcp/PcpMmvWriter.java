@@ -2,16 +2,11 @@ package com.custardsource.parfait.pcp;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.channels.FileChannel.MapMode;
 import java.nio.charset.Charset;
+import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.custardsource.parfait.pcp.types.AbstractTypeHandler;
@@ -53,7 +48,7 @@ import com.custardsource.parfait.pcp.types.TypeHandler;
  * 
  * @author Cowan
  */
-public class PcpMmvWriter {
+public class PcpMmvWriter extends BasePcpWriter {
     private static enum TocType {
         METRICS(2),
         VALUES(3);
@@ -65,22 +60,6 @@ public class PcpMmvWriter {
         }
     }
 
-    private static class PcpMetricInfo {
-        public PcpMetricInfo(int valueIndex, TypeHandler<?> handler, Object initialValue) {
-            this.valueIndex = valueIndex;
-            this.typeHandler = handler;
-            this.initialValue = initialValue;
-        }
-
-        private final int valueIndex;
-        private final Object initialValue;
-        private final TypeHandler<?> typeHandler;
-    }
-
-    /**
-     * The charset used for PCP metrics names and String values.
-     */
-    public static final Charset PCP_CHARSET = Charset.forName("US-ASCII");
     /**
      * The maximum length of a metric name able to be exported to the MMV agent. Note that this is
      * relative to {@link #PCP_CHARSET} (it's a measure of the maximum number of bytes, not the Java
@@ -93,16 +72,26 @@ public class PcpMmvWriter {
     private static final int METRIC_LENGTH = 76;
     private static final int VALUE_LENGTH = 24;
     private static final int DEFAULT_INSTANCE_DOMAIN_ID = -1;
+
+	/**
+	 * The charset used for PCP metrics names and String values.
+	 */
+	public static final Charset PCP_CHARSET = Charset.forName("US-ASCII");
     private static final byte[] TAG = "MMV\0".getBytes(PCP_CHARSET);
     private static final int MMV_FORMAT_VERSION = 0;
 
+	private static final int DATA_VALUE_OFFSET_WITHIN_BLOCK = 8;
+
     private final File dataFile;
     private ByteBuffer dataFileBuffer = null;
-    private volatile boolean started = false;
-    private final Map<String, PcpMetricInfo> metricData = new LinkedHashMap<String, PcpMetricInfo>();
-    private final Map<Class<?>, TypeHandler<?>> typeHandlers = new HashMap<Class<?>, TypeHandler<?>>(
-            DefaultTypeHandlers.getDefaultMappings());
-    private int metricCount = 0;
+    // @GuardedBy(this)
+	private boolean firstOffsetCalculated = false;
+    // @GuardedBy(this)
+	private int nextDescriptorOffset;
+    // @GuardedBy(this)
+	private int nextDataBlockOffset;
+    // @GuardedBy(this)
+	private int nextDataValueOffset;
 
     /**
      * Creates a new PcpMmvFile writing to the underlying file, which will be created + opened as a
@@ -116,109 +105,10 @@ public class PcpMmvWriter {
         this.dataFile = file;
     }
 
-    /**
-     * Adds a new metric to the writer, with an initial default value. Uses the default
-     * {@link TypeHandler} based on the runtime type of the initialValue parameter.
-     * 
-     * @param name
-     *            the name of the metric to export. Must not exceed {@link #METRIC_NAME_LIMIT} bytes
-     *            when converted using {@link #PCP_CHARSET}
-     * @param initialValue
-     *            the 'default' value to write into the file at initialisation time
-     * @throws IllegalArgumentException
-     *             if the name is too long, the metric name has already been added, or this is no
-     *             type handler registered for the runtime class of the initial value
-     * @throws IllegalStateException
-     *             if this writer has already been started, finalising the file layout
-     */
-    public void addMetric(String name, Object initialValue) {
-        TypeHandler<?> handler = typeHandlers.get(initialValue.getClass());
-        if (handler == null) {
-            throw new IllegalArgumentException("No default handler registered for type "
-                    + initialValue.getClass());
-        }
-        addMetricInfo(name, initialValue, handler);
-
-    }
-
-    /**
-     * Adds a new metric to the writer, with an initial default value. Uses the default
-     * {@link TypeHandler} based on the runtime type of the initialValue parameter.
-     * 
-     * @param name
-     *            the name of the metric to export. Must not exceed {@link #METRIC_NAME_LIMIT} bytes
-     *            when converted using {@link #PCP_CHARSET}
-     * @param initialValue
-     *            the 'default' value to write into the file at initialisation time
-     * @param pcpType
-     *            the type converter to use to render the initial value (and all subsequent values)
-     *            to the PCP stream
-     * @throws IllegalArgumentException
-     *             if the name is too long or the metric name has already been added
-     * @throws IllegalStateException
-     *             if this writer has already been started, finalising the file layout
-     */
-    public <T> void addMetric(String name, T initialValue, TypeHandler<T> pcpType) {
-        if (pcpType == null) {
-            throw new IllegalArgumentException("PCP Type handler must not be null");
-        }
-        addMetricInfo(name, initialValue, pcpType);
-    }
-
-    /**
-     * Updates the metric value of the given metric, once the writer has been started
-     * 
-     * @param name
-     *            the metric to update
-     * @param value
-     *            the new value (must be convertible by the {@link TypeHandler} used when adding the
-     *            metric)
-     */
-    public void updateMetric(String name, Object value) {
-        if (!started) {
-            throw new IllegalStateException("Cannot update metric unless writer is running");
-        }
-        PcpMetricInfo info = metricData.get(name);
-        if (info == null) {
-            throw new IllegalArgumentException("Metric " + name
-                    + " was not added before initialising the writer");
-        }
-        dataFileBuffer.position(getValueOffset(info.valueIndex, metricCount));
-        writeValueSection(dataFileBuffer, info.valueIndex, value, info.typeHandler);
-
-    }
-
-    /**
-     * Registers a new {@link TypeHandler} to be used to convert all subsequent values of type
-     * runtimeClass
-     * 
-     * @param runtimeClass
-     *            the class to be converted by the new handler
-     * @param handler
-     *            the handler to use
-     */
-    public <T> void registerType(Class<T> runtimeClass, TypeHandler<T> handler) {
-        if (started) {
-            // Can't add any more metrics anyway; harmless
-            return;
-        }
-        typeHandlers.put(runtimeClass, handler);
-    }
-
-    /**
-     * Starts the Writer, freezing the file format and writing out the metadata and initial values.
-     * 
-     * @throws IOException
-     *             if the file cannot be created or written.
-     */
-    public void start() throws IOException {
-        if (started) {
-            throw new IllegalStateException("Writer is already started");
-        }
-        if (metricCount == 0) {
-            throw new IllegalStateException("Cannot create an MMV file with no metrics");
-        }
-        dataFileBuffer = initialiseBuffer();
+    protected void doStart(Collection<PcpMetricInfo> metricInfos) throws IOException {
+    	int metricCount = metricInfos.size();
+    	
+		dataFileBuffer = initialiseBuffer(dataFile, getFileLength(metricInfos));
 
         dataFileBuffer.position(0);
         dataFileBuffer.put(TAG);
@@ -232,65 +122,38 @@ public class PcpMmvWriter {
         // 2 TOC blocks;
         dataFileBuffer.putInt(2);
 
-        dataFileBuffer.position(getTocOffset(0));
-        writeToc(dataFileBuffer, TocType.METRICS, metricCount, getMetricOffset(0));
-        dataFileBuffer.position(getTocOffset(1));
-        writeToc(dataFileBuffer, TocType.VALUES, metricCount, getValueOffset(0, metricCount));
+        PcpMetricInfo first = metricInfos.iterator().next();
+        
+		dataFileBuffer.position(getTocOffset(0));
+		writeToc(dataFileBuffer, TocType.METRICS, metricCount, first
+				.getOffsets().descriptorOffset());
+		dataFileBuffer.position(getTocOffset(1));
+		writeToc(dataFileBuffer, TocType.VALUES, metricCount, first
+				.getOffsets().dataBlockOffset());
 
-        for (Map.Entry<String, PcpMetricInfo> metricEntry : metricData.entrySet()) {
-            PcpMetricInfo info = metricEntry.getValue();
+        for (PcpMetricInfo info : metricInfos) {
+			dataFileBuffer.position(info.getOffsets().descriptorOffset());
+			writeMetricsSection(dataFileBuffer, info.getMetricName(), info
+					.getTypeHandler().getMetricType());
 
-            dataFileBuffer.position(getMetricOffset(info.valueIndex));
-            writeMetricsSection(dataFileBuffer, metricEntry.getKey(), info.typeHandler
-                    .getMetricType());
-
-            dataFileBuffer.position(getValueOffset(info.valueIndex, metricCount));
-            writeValueSection(dataFileBuffer, info.valueIndex, info.initialValue, info.typeHandler);
+			dataFileBuffer.position(info.getOffsets().dataBlockOffset());
+			writeValueSection(dataFileBuffer, info.getOffsets()
+					.descriptorOffset(), info.getInitialValue(), info
+					.getTypeHandler());
         }
 
         // Once it's set up, let the agent know
         dataFileBuffer.position(gen2Offset);
         dataFileBuffer.putLong(generation);
+	}
 
-        started = true;
-    }
+    private int getFileLength(Collection<PcpMetricInfo> metricInfos) {
+    	int count = metricInfos.size();
+		return HEADER_LENGTH + (TOC_LENGTH * 2) + (METRIC_LENGTH * count)
+				+ (VALUE_LENGTH * count);
+	}
 
-    private ByteBuffer initialiseBuffer() throws IOException {
-        RandomAccessFile fos = null;
-        try {
-            fos = new RandomAccessFile(dataFile, "rw");
-            fos.setLength(0);
-            int length = getValueOffset(metricCount - 1, metricCount) + METRIC_LENGTH;
-            fos.setLength(length);
-            ByteBuffer tempDataFile = fos.getChannel().map(MapMode.READ_WRITE, 0, length);
-            tempDataFile.order(ByteOrder.nativeOrder());
-            fos.close();
-
-            return tempDataFile;
-        } finally {
-            if (fos != null) {
-                fos.close();
-            }
-        }
-    }
-
-    private void addMetricInfo(String name, Object initialValue, TypeHandler<?> pcpType) {
-        if (started) {
-            throw new IllegalStateException("Cannot add metric " + name + " after starting");
-        }
-        if (metricData.containsKey(name)) {
-            throw new IllegalArgumentException("Metric " + name
-                    + " has already been added to writer");
-        }
-        if (name.getBytes(PCP_CHARSET).length > METRIC_NAME_LIMIT) {
-            throw new IllegalArgumentException("Cannot add metric " + name
-                    + "; name exceeds length limit");
-        }
-        PcpMetricInfo info = new PcpMetricInfo(metricCount++, pcpType, initialValue);
-        metricData.put(name, info);
-    }
-
-    /**
+	/**
      * Writes out a PCP MMV table-of-contents block.
      * 
      * @param dataFileBuffer
@@ -339,17 +202,17 @@ public class PcpMmvWriter {
      * 
      * @param dataFileBuffer
      *            ByteBuffer positioned at the correct offset in the file for the block
-     * @param metricIndex
-     *            the 0-based index of the metric this value represents
+     * @param descriptorOffset
+     *            the offset of the descriptor block of this metric
      * @param value
      *            the value to be written to the file
      * @param handler
      *            the {@link TypeHandler} to use to convert the value to bytes
      */
     @SuppressWarnings("unchecked")
-    private void writeValueSection(ByteBuffer dataFileBuffer, int metricIndex, Object value,
-            TypeHandler<?> handler) {
-        dataFileBuffer.putInt(getMetricOffset(metricIndex));
+	private void writeValueSection(ByteBuffer dataFileBuffer,
+			int descriptorOffset, Object value, TypeHandler<?> handler) {
+        dataFileBuffer.putInt(descriptorOffset);
         // Instance offset
         dataFileBuffer.putInt(0);
         TypeHandler rawHandler = handler;
@@ -367,34 +230,47 @@ public class PcpMmvWriter {
         return HEADER_LENGTH + (tocIndex * TOC_LENGTH);
     }
 
-    /**
-     * Calculates the file offset of a given PCP MMV metric descriptor block
-     * 
-     * @param metricIndex
-     *            the 0-based index of the metric block to be written
-     * @return the file offset used to store that metric block (32-bit regardless of architecture)
-     */
-    private final int getMetricOffset(int metricIndex) {
-        return HEADER_LENGTH + (TOC_LENGTH * 2) + (metricIndex * METRIC_LENGTH);
-    }
+	@Override
+	protected Charset getCharset() {
+		return PCP_CHARSET;
+	}
 
-    /**
-     * Calculates the file offset of a given PCP MMV metric value block
-     * 
-     * @param metricIndex
-     *            the 0-based index of the metric value to be written
-     * @param totalMetrics
-     *            the total number of metrics represented in the file (used to leave room for all
-     *            metric descriptor blocks)
-     * @return the file offset used to store that value block (32-bit regardless of architecture)
-     */
-    private final int getValueOffset(int metricIndex, int totalMetrics) {
-        return HEADER_LENGTH + (TOC_LENGTH * 2) + (totalMetrics * METRIC_LENGTH)
-                + (metricIndex * VALUE_LENGTH);
-    }
-    
+	@Override
+	protected int getMetricNameLimit() {
+		return METRIC_NAME_LIMIT;
+	}
+
+	
+	@Override
+	protected synchronized PcpOffset getNextOffsets(int totalMetrics) {
+		if (!firstOffsetCalculated) {
+			calculateFirstOffset(totalMetrics);
+		}
+		PcpOffset offset = new PcpOffset(nextDescriptorOffset,
+				nextDataBlockOffset, nextDataValueOffset);
+		nextDataBlockOffset += VALUE_LENGTH;
+		nextDataValueOffset += VALUE_LENGTH;
+		nextDescriptorOffset += METRIC_LENGTH;
+		return offset;
+	}
+
+	private void calculateFirstOffset(int totalMetrics) {
+		nextDescriptorOffset = HEADER_LENGTH + (TOC_LENGTH * 2);
+		nextDataBlockOffset = nextDescriptorOffset + (METRIC_LENGTH * totalMetrics);
+		nextDataValueOffset = nextDataBlockOffset + DATA_VALUE_OFFSET_WITHIN_BLOCK;
+		firstOffsetCalculated = true;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	protected void updateValue(PcpMetricInfo info, Object value) {
+		dataFileBuffer.position(info.getOffsets().dataValueOffset());
+        TypeHandler rawHandler = info.getTypeHandler();
+        rawHandler.putBytes(dataFileBuffer, value);
+	}
+
     public static void main(String[] args) throws IOException {
-        PcpMmvWriter bridge = new PcpMmvWriter(new File("/var/tmp/mmv/mmvtest"));
+        PcpMmvWriter bridge = new PcpMmvWriter(new File("/var/tmp/mmv/mmvtest2"));
         // Uses default boolean-to-int handler
         bridge.addMetric("sheep.baabaablack.bagsfull.haveany", new AtomicBoolean(true));
         // Uses default int handler
