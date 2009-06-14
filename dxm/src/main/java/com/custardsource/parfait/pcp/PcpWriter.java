@@ -5,21 +5,21 @@ import java.io.IOException;
 import com.custardsource.parfait.pcp.types.TypeHandler;
 
 public interface PcpWriter {
-	/**
-	 * Adds a new metric to the writer, with an initial default value. Uses the default
-	 * {@link TypeHandler} based on the runtime type of the initialValue parameter.
-	 * 
-	 * @param name
-	 *            the name of the metric to export. Must not exceed {@link #METRIC_NAME_LIMIT} bytes
-	 *            when converted using {@link #PCP_CHARSET}
-	 * @param initialValue
-	 *            the 'default' value to write into the file at initialisation time
-	 * @throws IllegalArgumentException
-	 *             if the name is too long, the metric name has already been added, or this is no
-	 *             type handler registered for the runtime class of the initial value
-	 * @throws IllegalStateException
-	 *             if this writer has already been started, finalising the file layout
-	 */
+    /**
+     * Adds a new metric to the writer, with an initial default value. Uses the default
+     * {@link TypeHandler} based on the runtime type of the initialValue parameter.
+     * 
+     * @param name
+     *            the name of the metric to export. Must not exceed any byte-length limits specified
+     *            by the implementation
+     * @param initialValue
+     *            the 'default' value to write into the file at initialisation time
+     * @throws IllegalArgumentException
+     *             if the name is too long, the metric name has already been added, or this is no
+     *             type handler registered for the runtime class of the initial value
+     * @throws IllegalStateException
+     *             if this writer has already been started, finalising the file layout
+     */
 	public abstract void addMetric(String name, Object initialValue);
 
 	/**
@@ -27,8 +27,8 @@ public interface PcpWriter {
 	 * {@link TypeHandler} based on the runtime type of the initialValue parameter.
 	 * 
 	 * @param name
-	 *            the name of the metric to export. Must not exceed {@link #METRIC_NAME_LIMIT} bytes
-	 *            when converted using {@link #PCP_CHARSET}
+     *            the name of the metric to export. Must not exceed any byte-length limits specified
+     *            by the implementation
 	 * @param initialValue
 	 *            the 'default' value to write into the file at initialisation time
 	 * @param pcpType
