@@ -71,7 +71,7 @@ public class PcpMonitorBridge extends MonitoringView {
 		Preconditions.checkArgument(this.dataFileDir.isDirectory(),
 				"dataFileDir [%s] is not a directory.", dataFileDir);
 		this.updateThread = new Thread(new Updater());
-		this.updateThread.setName("PcpMonitorBridge-Updater");
+		this.updateThread.setName("PcpMonitorBridge-Updater-" + serverName);
 		this.updateThread.setDaemon(true);
     }
 
