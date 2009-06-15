@@ -100,7 +100,7 @@ public class PcpAconexPmdaWriter extends BasePcpWriter {
 		writeHeaderValue(headerWriter, "generation", String
 				.valueOf(fileGeneration));
 		for (PcpMetricInfo metricInfo : metricInfos) {
-			writeHeaderValue(headerWriter, metricInfo.getMetricName(),
+			writeHeaderValue(headerWriter, metricInfo.getMetricName().getMetric(),
 					metricInfo.getOffsets().dataValueOffset()
 							+ ","
 							+ metricInfo.getTypeHandler().getMetricType()

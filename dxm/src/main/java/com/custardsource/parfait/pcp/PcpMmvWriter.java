@@ -26,9 +26,9 @@ import com.custardsource.parfait.pcp.types.TypeHandler;
  * Standard lifecycle for this class is:
  * <ul>
  * <li>create the PcpMmvFile
- * <li>{@link #addMetric(String, Object)} for every metric which will be monitored by the file
+ * <li>{@link #addMetric(MetricName, Object)} for every metric which will be monitored by the file
  * <li>{@link #start()} to write out the file ready for the MMV agent to read
- * <li>{@link #updateMetric(String, Object)} metrics as new values come to hand
+ * <li>{@link #updateMetric(MetricName, Object)} metrics as new values come to hand
  * </ul>
  * <p>
  * Adding metrics after the file is started will result in an {@link IllegalStateException}, as will
@@ -181,11 +181,11 @@ public class PcpMmvWriter extends BasePcpWriter {
      * @param metricType
      *            the type of the metric
      */
-    private void writeMetricsSection(ByteBuffer dataFileBuffer, String name,
+    private void writeMetricsSection(ByteBuffer dataFileBuffer, MetricName name,
             MmvMetricType metricType) {
         int originalPosition = dataFileBuffer.position();
 
-        dataFileBuffer.put(name.getBytes(PCP_CHARSET));
+        dataFileBuffer.put(name.getMetric().getBytes(PCP_CHARSET));
         dataFileBuffer.put((byte) 0);
         dataFileBuffer.position(originalPosition + METRIC_NAME_LIMIT + 1);
         dataFileBuffer.putInt(metricType.getIdentifier());
@@ -263,16 +263,16 @@ public class PcpMmvWriter extends BasePcpWriter {
     public static void main(String[] args) throws IOException {
         PcpMmvWriter bridge = new PcpMmvWriter(new File("/var/tmp/mmv/mmvtest2"));
         // Uses default boolean-to-int handler
-        bridge.addMetric("sheep.baabaablack.bagsfull.haveany", new AtomicBoolean(true));
+        bridge.addMetric(MetricName.withoutInstance("sheep.baabaablack.bagsfull.haveany"), new AtomicBoolean(true));
         // Uses default int handler
-        bridge.addMetric("sheep.baabaablack.bagsfull.count", 3);
+        bridge.addMetric(MetricName.withoutInstance("sheep.baabaablack.bagsfull.count"), 3);
         // Uses default long handler
-        bridge.addMetric("sheep.insomniac.count", 12345678901234L);
+        bridge.addMetric(MetricName.withoutInstance("sheep.insomniac.count"), 12345678901234L);
         // Uses default double handler
-        bridge.addMetric("sheep.limpy.legs.available", 0.75);
+        bridge.addMetric(MetricName.withoutInstance("sheep.limpy.legs.available"), 0.75);
         // addMetric(String) would fail, as there's no handler registered; use a custom one which
         // puts the string's length as an int
-        bridge.addMetric("sheep.insomniac.jumpitem", "Fence", new AbstractTypeHandler<String>(
+        bridge.addMetric(MetricName.withoutInstance("sheep.insomniac.jumpitem"), "Fence", new AbstractTypeHandler<String>(
                 MmvMetricType.I32, 4) {
             public void putBytes(ByteBuffer buffer, String value) {
                 buffer.putInt(value.length());
@@ -285,10 +285,10 @@ public class PcpMmvWriter extends BasePcpWriter {
                 buffer.putLong(value.getTime());
             }
         });
-        bridge.addMetric("cow.how.now", new Date());
-        bridge.addMetric("cow.how.then", new GregorianCalendar(1990, 1, 1, 12, 34, 56).getTime());
+        bridge.addMetric(MetricName.withoutInstance("cow.how.now"), new Date());
+        bridge.addMetric(MetricName.withoutInstance("cow.how.then"), new GregorianCalendar(1990, 1, 1, 12, 34, 56).getTime());
         bridge.start();
         // Sold a bag
-        bridge.updateMetric("sheep.baabaablack.bagsfull.count", 2);
+        bridge.updateMetric(MetricName.withoutInstance("sheep.baabaablack.bagsfull.count"), 2);
     }
 }

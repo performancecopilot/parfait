@@ -102,7 +102,8 @@ public class PcpMonitorBridge extends MonitoringView {
 			
             for (Monitorable<?> monitorable : monitorables) {
             	monitorable.attachMonitor(monitor);
-				pcpWriter.addMetric(monitorable.getName(), monitorable.get());
+                pcpWriter.addMetric(MetricName.withoutInstance(monitorable.getName()), monitorable
+                        .get());
             }
             pcpWriter.start();
 
@@ -138,7 +139,8 @@ public class PcpMonitorBridge extends MonitoringView {
                         monitorablesToUpdate.add(monitorablesPendingUpdate.take());
                         monitorablesPendingUpdate.drainTo(monitorablesToUpdate);
                         for (Monitorable<?> monitorable : monitorablesToUpdate) {
-                            pcpWriter.updateMetric(monitorable.getName(), monitorable.get());
+                            pcpWriter.updateMetric(MetricName
+                                    .withoutInstance(monitorable.getName()), monitorable.get());
                         }
                         if (monitorablesPendingUpdate.size() >= UPDATE_QUEUE_SIZE) {
                             LOG.warn("Update queue was full - some updates may have been lost.");

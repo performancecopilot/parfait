@@ -17,7 +17,7 @@ import com.custardsource.parfait.pcp.types.TypeHandler;
 
 public abstract class BasePcpWriter implements PcpWriter {
 	private final File dataFile;
-    private final Map<String, PcpMetricInfo> metricData = new LinkedHashMap<String, PcpMetricInfo>();
+    private final Map<MetricName, PcpMetricInfo> metricData = new LinkedHashMap<MetricName, PcpMetricInfo>();
     private final Map<Class<?>, TypeHandler<?>> typeHandlers = new HashMap<Class<?>, TypeHandler<?>>(
             DefaultTypeHandlers.getDefaultMappings());
     protected volatile boolean started = false;
@@ -30,7 +30,7 @@ public abstract class BasePcpWriter implements PcpWriter {
     /* (non-Javadoc)
 	 * @see com.custardsource.parfait.pcp.PcpWriter#addMetric(java.lang.String, java.lang.Object)
 	 */
-    public void addMetric(String name, Object initialValue) {
+    public void addMetric(MetricName name, Object initialValue) {
         TypeHandler<?> handler = typeHandlers.get(initialValue.getClass());
         if (handler == null) {
             throw new IllegalArgumentException("No default handler registered for type "
@@ -43,7 +43,7 @@ public abstract class BasePcpWriter implements PcpWriter {
     /* (non-Javadoc)
 	 * @see com.custardsource.parfait.pcp.PcpWriter#addMetric(java.lang.String, T, com.custardsource.parfait.pcp.types.TypeHandler)
 	 */
-    public <T> void addMetric(String name, T initialValue, TypeHandler<T> pcpType) {
+    public <T> void addMetric(MetricName name, T initialValue, TypeHandler<T> pcpType) {
         if (pcpType == null) {
             throw new IllegalArgumentException("PCP Type handler must not be null");
         }
@@ -64,7 +64,7 @@ public abstract class BasePcpWriter implements PcpWriter {
     /* (non-Javadoc)
 	 * @see com.custardsource.parfait.pcp.PcpWriter#updateMetric(java.lang.String, java.lang.Object)
 	 */
-    public void updateMetric(String name, Object value) {
+    public void updateMetric(MetricName name, Object value) {
         if (!started) {
             throw new IllegalStateException("Cannot update metric unless writer is running");
         }
@@ -84,7 +84,7 @@ public abstract class BasePcpWriter implements PcpWriter {
         rawHandler.putBytes(dataFileBuffer, value);
 	}
 
-	private void addMetricInfo(String name, Object initialValue, TypeHandler<?> pcpType) {
+	private void addMetricInfo(MetricName name, Object initialValue, TypeHandler<?> pcpType) {
         if (started) {
             throw new IllegalStateException("Cannot add metric " + name + " after starting");
         }
@@ -92,7 +92,7 @@ public abstract class BasePcpWriter implements PcpWriter {
             throw new IllegalArgumentException("Metric " + name
                     + " has already been added to writer");
         }
-        if (name.getBytes(getCharset()).length > getMetricNameLimit()) {
+        if (name.getMetric().getBytes(getCharset()).length > getMetricNameLimit()) {
             throw new IllegalArgumentException("Cannot add metric " + name
                     + "; name exceeds length limit");
         }
@@ -154,18 +154,18 @@ public abstract class BasePcpWriter implements PcpWriter {
     protected abstract int getFileLength(Collection<PcpMetricInfo> infos);
 
 	protected static class PcpMetricInfo {
-        public PcpMetricInfo(String metricName, TypeHandler<?> handler, Object initialValue) {
+        public PcpMetricInfo(MetricName metricName, TypeHandler<?> handler, Object initialValue) {
         	this.metricName = metricName;
             this.typeHandler = handler;
             this.initialValue = initialValue;
         }
 
-        private final String metricName;
+        private final MetricName metricName;
 		private final Object initialValue;
         private final TypeHandler<?> typeHandler;
         private PcpOffset offsets;
         
-        public String getMetricName() {
+        public MetricName getMetricName() {
         	return metricName;
         }
         

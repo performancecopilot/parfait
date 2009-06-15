@@ -20,7 +20,7 @@ public interface PcpWriter {
      * @throws IllegalStateException
      *             if this writer has already been started, finalising the file layout
      */
-	public abstract void addMetric(String name, Object initialValue);
+	public abstract void addMetric(MetricName name, Object initialValue);
 
 	/**
 	 * Adds a new metric to the writer, with an initial default value. Uses the default
@@ -39,7 +39,7 @@ public interface PcpWriter {
 	 * @throws IllegalStateException
 	 *             if this writer has already been started, finalising the file layout
 	 */
-	public abstract <T> void addMetric(String name, T initialValue,
+	public abstract <T> void addMetric(MetricName name, T initialValue,
 			TypeHandler<T> pcpType);
 
 	/**
@@ -51,7 +51,7 @@ public interface PcpWriter {
 	 *            the new value (must be convertible by the {@link TypeHandler} used when adding the
 	 *            metric)
 	 */
-	public abstract void updateMetric(String name, Object value);
+	public abstract void updateMetric(MetricName name, Object value);
 
 	/**
 	 * Registers a new {@link TypeHandler} to be used to convert all subsequent values of type
