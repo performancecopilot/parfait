@@ -263,16 +263,16 @@ public class PcpMmvWriter extends BasePcpWriter {
     public static void main(String[] args) throws IOException {
         PcpMmvWriter bridge = new PcpMmvWriter(new File("/var/tmp/mmv/mmvtest2"));
         // Uses default boolean-to-int handler
-        bridge.addMetric(MetricName.withoutInstance("sheep.baabaablack.bagsfull.haveany"), new AtomicBoolean(true));
+        bridge.addMetric(MetricName.parse("sheep.baabaablack.bagsfull.haveany"), new AtomicBoolean(true));
         // Uses default int handler
-        bridge.addMetric(MetricName.withoutInstance("sheep.baabaablack.bagsfull.count"), 3);
+        bridge.addMetric(MetricName.parse("sheep.baabaablack.bagsfull.count"), 3);
         // Uses default long handler
-        bridge.addMetric(MetricName.withoutInstance("sheep.insomniac.count"), 12345678901234L);
+        bridge.addMetric(MetricName.parse("sheep.insomniac.count"), 12345678901234L);
         // Uses default double handler
-        bridge.addMetric(MetricName.withoutInstance("sheep.limpy.legs.available"), 0.75);
+        bridge.addMetric(MetricName.parse("sheep.limpy.legs.available"), 0.75);
         // addMetric(String) would fail, as there's no handler registered; use a custom one which
         // puts the string's length as an int
-        bridge.addMetric(MetricName.withoutInstance("sheep.insomniac.jumpitem"), "Fence", new AbstractTypeHandler<String>(
+        bridge.addMetric(MetricName.parse("sheep.insomniac.jumpitem"), "Fence", new AbstractTypeHandler<String>(
                 MmvMetricType.I32, 4) {
             public void putBytes(ByteBuffer buffer, String value) {
                 buffer.putInt(value.length());
@@ -285,10 +285,10 @@ public class PcpMmvWriter extends BasePcpWriter {
                 buffer.putLong(value.getTime());
             }
         });
-        bridge.addMetric(MetricName.withoutInstance("cow.how.now"), new Date());
-        bridge.addMetric(MetricName.withoutInstance("cow.how.then"), new GregorianCalendar(1990, 1, 1, 12, 34, 56).getTime());
+        bridge.addMetric(MetricName.parse("cow.how.now"), new Date());
+        bridge.addMetric(MetricName.parse("cow.how.then"), new GregorianCalendar(1990, 1, 1, 12, 34, 56).getTime());
         bridge.start();
         // Sold a bag
-        bridge.updateMetric(MetricName.withoutInstance("sheep.baabaablack.bagsfull.count"), 2);
+        bridge.updateMetric(MetricName.parse("sheep.baabaablack.bagsfull.count"), 2);
     }
 }
