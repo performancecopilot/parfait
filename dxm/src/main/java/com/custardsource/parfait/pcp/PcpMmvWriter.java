@@ -66,6 +66,7 @@ public class PcpMmvWriter extends BasePcpWriter {
      * relative to {@link #PCP_CHARSET} (it's a measure of the maximum number of bytes, not the Java
      * String length)
      */
+    // TODO - enfore for instances as well
     public static final int METRIC_NAME_LIMIT = 63;
 
     private static final int HEADER_LENGTH = 32;
