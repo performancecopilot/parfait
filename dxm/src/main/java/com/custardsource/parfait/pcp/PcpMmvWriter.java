@@ -50,6 +50,7 @@ import com.custardsource.parfait.pcp.types.TypeHandler;
  */
 public class PcpMmvWriter extends BasePcpWriter {
     private static enum TocType {
+        INSTANCES(1),
         METRICS(2),
         VALUES(3);
 
@@ -72,6 +73,7 @@ public class PcpMmvWriter extends BasePcpWriter {
     private static final int METRIC_LENGTH = 76;
     private static final int VALUE_LENGTH = 24;
     private static final int DEFAULT_INSTANCE_DOMAIN_ID = -1;
+    private static final int INSTANCE_LENGTH = 68;
 
 	/**
 	 * The charset used for PCP metrics names and String values.
@@ -82,14 +84,6 @@ public class PcpMmvWriter extends BasePcpWriter {
 
 	private static final int DATA_VALUE_OFFSET_WITHIN_BLOCK = 8;
 
-    // @GuardedBy(this)
-	private boolean firstOffsetCalculated = false;
-    // @GuardedBy(this)
-	private int nextDescriptorOffset;
-    // @GuardedBy(this)
-	private int nextDataBlockOffset;
-    // @GuardedBy(this)
-	private int nextDataValueOffset;
 
     /**
      * Creates a new PcpMmvFile writing to the underlying file, which will be created + opened as a
@@ -104,8 +98,8 @@ public class PcpMmvWriter extends BasePcpWriter {
     }
 
     @Override
-    protected void populateDataBuffer(ByteBuffer dataFileBuffer, Collection<PcpMetricInfo> metricInfos) throws IOException {
-    	int metricCount = metricInfos.size();
+    protected void populateDataBuffer(ByteBuffer dataFileBuffer, Collection<PcpValueInfo> valueInfos) throws IOException {
+    	int metricCount = valueInfos.size();
 
         dataFileBuffer.position(0);
         dataFileBuffer.put(TAG);
@@ -116,27 +110,41 @@ public class PcpMmvWriter extends BasePcpWriter {
         // Generation 2 will be filled in later, once the file's ready
         dataFileBuffer.putLong(0);
 
-        // 2 TOC blocks;
-        dataFileBuffer.putInt(2);
-
-        PcpMetricInfo first = metricInfos.iterator().next();
+        Collection<Instance> instances = getInstances();
+        Collection<PcpMetricInfo> metrics = getMetricInfos();
+       
+        // 2 TOC blocks, 3 if there are instances
+        dataFileBuffer.putInt(tocCount());
+        
+        PcpMetricInfo firstMetric = metrics.iterator().next();
+        PcpValueInfo firstValue = valueInfos.iterator().next();
         
 		dataFileBuffer.position(getTocOffset(0));
-		writeToc(dataFileBuffer, TocType.METRICS, metricCount, first
-				.getOffsets().descriptorOffset());
+		writeToc(dataFileBuffer, TocType.METRICS, metricCount, firstMetric.getOffset());
 		dataFileBuffer.position(getTocOffset(1));
-		writeToc(dataFileBuffer, TocType.VALUES, metricCount, first
+		writeToc(dataFileBuffer, TocType.VALUES, metricCount, firstValue
 				.getOffsets().dataBlockOffset());
+		
+		if (!instances.isEmpty()) {
+	        dataFileBuffer.position(getTocOffset(2));
+            writeToc(dataFileBuffer, TocType.INSTANCES, instances.size(), instances.iterator()
+                    .next().getOffset());
+		}
 
-        for (PcpMetricInfo info : metricInfos) {
-			dataFileBuffer.position(info.getOffsets().descriptorOffset());
-			writeMetricsSection(dataFileBuffer, info.getMetricName(), info
-					.getTypeHandler().getMetricType());
+        for (PcpMetricInfo info : metrics) {
+            dataFileBuffer.position(info.getOffset());
+            writeMetricsSection(dataFileBuffer, info, info.getTypeHandler().getMetricType());
+        }
 
-			dataFileBuffer.position(info.getOffsets().dataBlockOffset());
-			writeValueSection(dataFileBuffer, info.getOffsets()
-					.descriptorOffset(), info.getInitialValue(), info
-					.getTypeHandler());
+        for (Instance instance : instances) {
+            dataFileBuffer.position(instance.getOffset());
+            writeInstanceSection(dataFileBuffer, instance);
+        }
+		
+        for (PcpValueInfo info : valueInfos) {
+            dataFileBuffer.position(info.getOffsets().dataBlockOffset());
+            writeValueSection(dataFileBuffer, info.getDescriptorOffset(), info.getInitialValue(),
+                    info.getTypeHandler(), info.getInstanceOffset());
         }
 
         // Once it's set up, let the agent know
@@ -145,13 +153,16 @@ public class PcpMmvWriter extends BasePcpWriter {
 	}
 
     @Override
-    protected int getFileLength(Collection<PcpMetricInfo> metricInfos) {
-    	int count = metricInfos.size();
-		return HEADER_LENGTH + (TOC_LENGTH * 2) + (METRIC_LENGTH * count)
-				+ (VALUE_LENGTH * count);
+    protected int getFileLength() {
+        int metricCount = getMetricInfos().size();
+        int instanceCount = getInstances().size();
+        int valueCount = getValueInfos().size();
+        int tocCount = tocCount();
+        return HEADER_LENGTH + (TOC_LENGTH * tocCount) + (INSTANCE_LENGTH * instanceCount)
+                + (METRIC_LENGTH * metricCount) + (VALUE_LENGTH * valueCount);
 	}
 
-	/**
+    /**
      * Writes out a PCP MMV table-of-contents block.
      * 
      * @param dataFileBuffer
@@ -175,22 +186,26 @@ public class PcpMmvWriter extends BasePcpWriter {
      * 
      * @param dataFileBuffer
      *            ByteBuffer positioned at the correct offset in the file for the block
-     * @param name
-     *            the name of the metric (must be &le; {@link #METRIC_NAME_LIMIT} characters, and
+     * @param info
+     *            the info of the metric (name must be &le; {@link #METRIC_NAME_LIMIT} characters, and
      *            must be convertible to {@link #PCP_CHARSET})
      * @param metricType
      *            the type of the metric
      */
-    private void writeMetricsSection(ByteBuffer dataFileBuffer, MetricName name,
+    private void writeMetricsSection(ByteBuffer dataFileBuffer, PcpMetricInfo info,
             MmvMetricType metricType) {
         int originalPosition = dataFileBuffer.position();
 
-        dataFileBuffer.put(name.getMetric().getBytes(PCP_CHARSET));
+        dataFileBuffer.put(info.getMetricName().getBytes(PCP_CHARSET));
         dataFileBuffer.put((byte) 0);
         dataFileBuffer.position(originalPosition + METRIC_NAME_LIMIT + 1);
         dataFileBuffer.putInt(metricType.getIdentifier());
         // Instance domains not yet supported
-        dataFileBuffer.putInt(DEFAULT_INSTANCE_DOMAIN_ID);
+        if (info.getInstanceDomain() != null) {
+            dataFileBuffer.putInt(info.getInstanceDomain().getId());
+        } else {
+            dataFileBuffer.putInt(DEFAULT_INSTANCE_DOMAIN_ID);
+        }
         // Dimensions not yet supported
         dataFileBuffer.putInt(0);
     }
@@ -206,15 +221,23 @@ public class PcpMmvWriter extends BasePcpWriter {
      *            the value to be written to the file
      * @param handler
      *            the {@link TypeHandler} to use to convert the value to bytes
+     * @param instanceOffset
+     *            the offset of the instance in the file
      */
     @SuppressWarnings("unchecked")
 	private void writeValueSection(ByteBuffer dataFileBuffer,
-			int descriptorOffset, Object value, TypeHandler<?> handler) {
+			int descriptorOffset, Object value, TypeHandler<?> handler, int instanceOffset) {
         dataFileBuffer.putInt(descriptorOffset);
         // Instance offset
-        dataFileBuffer.putInt(0);
+        dataFileBuffer.putInt(instanceOffset);
         TypeHandler rawHandler = handler;
         rawHandler.putBytes(dataFileBuffer, value);
+    }
+
+    private void writeInstanceSection(ByteBuffer dataFileBuffer, Instance instance) {
+        dataFileBuffer.putInt(instance.getId());
+        dataFileBuffer.put(instance.getName().getBytes(PCP_CHARSET));
+        dataFileBuffer.put((byte) 0);
     }
 
     /**
@@ -239,28 +262,39 @@ public class PcpMmvWriter extends BasePcpWriter {
 	}
 
 	
-	@Override
-	protected synchronized PcpOffset getNextOffsets(PcpMetricInfo currentInfo,
-			int totalMetrics) {
-		if (!firstOffsetCalculated) {
-			calculateFirstOffset(totalMetrics);
-		}
-		PcpOffset offset = new PcpOffset(nextDescriptorOffset,
-				nextDataBlockOffset, nextDataValueOffset);
-		nextDataBlockOffset += VALUE_LENGTH;
-		nextDataValueOffset += VALUE_LENGTH;
-		nextDescriptorOffset += METRIC_LENGTH;
-		return offset;
-	}
+    @Override
+    protected synchronized void initialiseOffsets() {
+        int nextOffset = HEADER_LENGTH + (TOC_LENGTH * tocCount());
+        for (Instance instance : getInstances()) {
+            instance.setOffset(nextOffset);
+            nextOffset += INSTANCE_LENGTH;
+        }
 
-	private void calculateFirstOffset(int totalMetrics) {
-		nextDescriptorOffset = HEADER_LENGTH + (TOC_LENGTH * 2);
-		nextDataBlockOffset = nextDescriptorOffset + (METRIC_LENGTH * totalMetrics);
-		nextDataValueOffset = nextDataBlockOffset + DATA_VALUE_OFFSET_WITHIN_BLOCK;
-		firstOffsetCalculated = true;
-	}
+        for (PcpMetricInfo metric : getMetricInfos()) {
+            metric.setOffset(nextOffset);
+            nextOffset += METRIC_LENGTH;
+        }
+
+        for (PcpValueInfo value : getValueInfos()) {
+            value.setOffsets(new PcpOffset(nextOffset, nextOffset
+                    + DATA_VALUE_OFFSET_WITHIN_BLOCK));
+            nextOffset += VALUE_LENGTH;
+
+        }
+    }
+
+	private int tocCount() {
+        return getInstances().isEmpty() ? 2 : 3;
+    }
 
     public static void main(String[] args) throws IOException {
+        PcpMmvWriter instanceBridge = new PcpMmvWriter(new File("/var/tmp/mmv/instances"));
+        instanceBridge.addMetric(MetricName.parse("sheep[baabaablack].bagsfull"), 3);
+        instanceBridge.addMetric(MetricName.parse("sheep[shaun].bagsfull"), 0);
+        instanceBridge.start();
+        instanceBridge.updateMetric(MetricName.parse("sheep[baabaablack].bagsfull"), 2);
+               
+        
         PcpMmvWriter bridge = new PcpMmvWriter(new File("/var/tmp/mmv/mmvtest2"));
         // Uses default boolean-to-int handler
         bridge.addMetric(MetricName.parse("sheep.baabaablack.bagsfull.haveany"), new AtomicBoolean(true));
@@ -290,5 +324,10 @@ public class PcpMmvWriter extends BasePcpWriter {
         bridge.start();
         // Sold a bag
         bridge.updateMetric(MetricName.parse("sheep.baabaablack.bagsfull.count"), 2);
+    }
+
+    @Override
+    protected boolean supportsInstances() {
+        return true;
     }
 }

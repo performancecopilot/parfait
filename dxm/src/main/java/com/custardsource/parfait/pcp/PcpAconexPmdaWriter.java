@@ -21,8 +21,6 @@ public class PcpAconexPmdaWriter extends BasePcpWriter {
     public static final int MAX_STRING_LENGTH = 256;
 	private static final int HEADER_LENGTH = 9; // 8 for version, 1 for protocol version
 	private final File headerFile;
-    // @GuardedBy(this)
-	private int nextDataValueOffset = HEADER_LENGTH;  
 
 	public PcpAconexPmdaWriter(File headerFile, File dataFile) {
 		super(dataFile);
@@ -51,9 +49,9 @@ public class PcpAconexPmdaWriter extends BasePcpWriter {
 	}
 
 	@Override
-	protected int getFileLength(Collection<PcpMetricInfo> infos) {
-		PcpMetricInfo lastInfo = null;
-		for (PcpMetricInfo info : infos) {
+	protected int getFileLength() {
+		PcpValueInfo lastInfo = null;
+		for (PcpValueInfo info : getValueInfos()) {
 			lastInfo = info;
 		}
 		return lastInfo.getOffsets().dataValueOffset()
@@ -75,21 +73,21 @@ public class PcpAconexPmdaWriter extends BasePcpWriter {
 	}
 
 	@Override
-	protected synchronized PcpOffset getNextOffsets(PcpMetricInfo currentInfo,
-			int totalMetrics) {
-		// Descriptor offsets not used by this file format; block + value
+	protected synchronized void initialiseOffsets() {
+		// Instance + Descriptor offsets not used by this file format; block + value
 		// offsets are the same as there's no metadata
-		nextDataValueOffset = align(nextDataValueOffset, currentInfo
-				.getTypeHandler().getDataLength());
-		PcpOffset offset = new PcpOffset(0, nextDataValueOffset,
-				nextDataValueOffset);
-		nextDataValueOffset += currentInfo.getTypeHandler().getDataLength();
-		return offset;
+	    int nextOffset = HEADER_LENGTH;
+
+        for (PcpValueInfo value : getValueInfos()) {
+            nextOffset = align(nextOffset, value.getTypeHandler().getDataLength());
+            value.setOffsets(new PcpOffset(nextOffset, nextOffset));
+            nextOffset += value.getTypeHandler().getDataLength();
+        }
 	}
 
 	@Override
 	protected void populateDataBuffer(ByteBuffer dataFileBuffer,
-			Collection<PcpMetricInfo> metricInfos) throws IOException {
+			Collection<PcpValueInfo> metricInfos) throws IOException {
 		long fileGeneration = System.currentTimeMillis();
 		// Need to write header here too
 		OutputStreamWriter headerWriter = new OutputStreamWriter(
@@ -99,7 +97,7 @@ public class PcpAconexPmdaWriter extends BasePcpWriter {
 				.valueOf(PROTOCOL_VERSION));
 		writeHeaderValue(headerWriter, "generation", String
 				.valueOf(fileGeneration));
-		for (PcpMetricInfo metricInfo : metricInfos) {
+		for (PcpValueInfo metricInfo : metricInfos) {
 			writeHeaderValue(headerWriter, metricInfo.getMetricName().getMetric(),
 					metricInfo.getOffsets().dataValueOffset()
 							+ ","
@@ -108,7 +106,7 @@ public class PcpAconexPmdaWriter extends BasePcpWriter {
 		}
         headerWriter.close();
         
-		for (PcpMetricInfo metricInfo : metricInfos) {
+		for (PcpValueInfo metricInfo : metricInfos) {
 			updateValue(metricInfo, metricInfo.getInitialValue());
 		}
         
@@ -118,4 +116,9 @@ public class PcpAconexPmdaWriter extends BasePcpWriter {
 
         
 	}
+
+    @Override
+    protected boolean supportsInstances() {
+        return false;
+    }
 }

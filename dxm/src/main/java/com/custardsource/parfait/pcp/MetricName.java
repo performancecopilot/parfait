@@ -30,8 +30,12 @@ public final class MetricName {
         return instance;
     }
 
+    public String getInstanceDomainTag() {
+        return prefix;
+    }
+
     boolean hasInstance() {
-        return instance == null;
+        return instance != null;
     }
 
     public static MetricName parse(String metric) {
