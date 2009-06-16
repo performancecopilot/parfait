@@ -41,7 +41,7 @@ import com.custardsource.parfait.pcp.types.TypeHandler;
  * <li>String types are not supported (version 0 of the MMV protocol does not support string types)</li>
  * <li>Instance domains are not supported (to be added later)</li>
  * <li>Dimensions are not specified (to be added later)</li>
- * <li>Receiving agent must be using MMV agent version 2.8.9 or later (prior versions contained an
+ * <li>Receiving agent must be using MMV agent version 2.8.10 or later (prior versions contained an
  * ambiguity in the file format which may lead to indeterminate behaviour depending on
  * sizeof(time_t))</li>
  * </ul>
@@ -66,13 +66,13 @@ public class PcpMmvWriter extends BasePcpWriter {
      * relative to {@link #PCP_CHARSET} (it's a measure of the maximum number of bytes, not the Java
      * String length)
      */
-    // TODO - enfore for instances as well
+    // TODO - enforce for instances as well
     public static final int METRIC_NAME_LIMIT = 63;
 
     private static final int HEADER_LENGTH = 32;
     private static final int TOC_LENGTH = 16;
-    private static final int METRIC_LENGTH = 76;
-    private static final int VALUE_LENGTH = 24;
+    private static final int METRIC_LENGTH = 80;
+    private static final int VALUE_LENGTH = 32;
     private static final int DEFAULT_INSTANCE_DOMAIN_ID = -1;
     private static final int INSTANCE_LENGTH = 68;
 
@@ -81,9 +81,9 @@ public class PcpMmvWriter extends BasePcpWriter {
 	 */
 	public static final Charset PCP_CHARSET = Charset.forName("US-ASCII");
     private static final byte[] TAG = "MMV\0".getBytes(PCP_CHARSET);
-    private static final int MMV_FORMAT_VERSION = 0;
+    private static final int MMV_FORMAT_VERSION = 1;
 
-	private static final int DATA_VALUE_OFFSET_WITHIN_BLOCK = 8;
+	private static final int DATA_VALUE_OFFSET_WITHIN_BLOCK = 16;
 
 
     /**
@@ -179,7 +179,7 @@ public class PcpMmvWriter extends BasePcpWriter {
             int firstEntryOffset) {
         dataFileBuffer.putInt(tocType.identifier);
         dataFileBuffer.putInt(entryCount);
-        dataFileBuffer.putInt(firstEntryOffset);
+        dataFileBuffer.putLong(firstEntryOffset);
     }
 
     /**
@@ -201,13 +201,14 @@ public class PcpMmvWriter extends BasePcpWriter {
         dataFileBuffer.put((byte) 0);
         dataFileBuffer.position(originalPosition + METRIC_NAME_LIMIT + 1);
         dataFileBuffer.putInt(metricType.getIdentifier());
-        // Instance domains not yet supported
         if (info.getInstanceDomain() != null) {
             dataFileBuffer.putInt(info.getInstanceDomain().getId());
         } else {
             dataFileBuffer.putInt(DEFAULT_INSTANCE_DOMAIN_ID);
         }
         // Dimensions not yet supported
+        dataFileBuffer.putInt(0);
+        // Semantics not yet supported
         dataFileBuffer.putInt(0);
     }
 
@@ -228,9 +229,8 @@ public class PcpMmvWriter extends BasePcpWriter {
     @SuppressWarnings("unchecked")
 	private void writeValueSection(ByteBuffer dataFileBuffer,
 			int descriptorOffset, Object value, TypeHandler<?> handler, int instanceOffset) {
-        dataFileBuffer.putInt(descriptorOffset);
-        // Instance offset
-        dataFileBuffer.putInt(instanceOffset);
+        dataFileBuffer.putLong(descriptorOffset);
+        dataFileBuffer.putLong(instanceOffset);
         TypeHandler rawHandler = handler;
         rawHandler.putBytes(dataFileBuffer, value);
     }
