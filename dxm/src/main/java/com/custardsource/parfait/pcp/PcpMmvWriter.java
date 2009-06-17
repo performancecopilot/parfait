@@ -66,8 +66,13 @@ public class PcpMmvWriter extends BasePcpWriter {
      * relative to {@link #PCP_CHARSET} (it's a measure of the maximum number of bytes, not the Java
      * String length)
      */
-    // TODO - enforce for instances as well
     public static final int METRIC_NAME_LIMIT = 63;
+    /**
+     * The maximum length of an instance name able to be exported to the MMV agent. Note that this is
+     * relative to {@link #PCP_CHARSET} (it's a measure of the maximum number of bytes, not the Java
+     * String length)
+     */
+    public static final int INSTANCE_NAME_LIMIT = 63;
 
     private static final int HEADER_LENGTH = 32;
     private static final int TOC_LENGTH = 16;
@@ -257,10 +262,15 @@ public class PcpMmvWriter extends BasePcpWriter {
 		return PCP_CHARSET;
 	}
 
-	@Override
-	protected int getMetricNameLimit() {
-		return METRIC_NAME_LIMIT;
-	}
+    @Override
+    protected int getMetricNameLimit() {
+        return METRIC_NAME_LIMIT;
+    }
+
+    @Override
+    protected int getInstanceNameLimit() {
+        return INSTANCE_NAME_LIMIT;
+    }
 
 	
     @Override
@@ -289,7 +299,13 @@ public class PcpMmvWriter extends BasePcpWriter {
     }
 
     public static void main(String[] args) throws IOException {
-        PcpMmvWriter instanceBridge = new PcpMmvWriter(new File("/var/tmp/mmv/instances"));
+        PcpMmvWriter instanceBridge = new PcpMmvWriter(new File("/var/tmp/mmv/nodots"));
+        instanceBridge.addMetric(MetricName.parse("sheep[baabaablack]"), 3);
+        instanceBridge.addMetric(MetricName.parse("sheep[shaun]"), 0);
+        instanceBridge.start();
+        instanceBridge.updateMetric(MetricName.parse("sheep[baabaablack]"), 2);
+ 
+        instanceBridge = new PcpMmvWriter(new File("/var/tmp/mmv/instances"));
         instanceBridge.addMetric(MetricName.parse("sheep[baabaablack].bagsfull"), 3);
         instanceBridge.addMetric(MetricName.parse("sheep[shaun].bagsfull"), 0);
         instanceBridge.start();
@@ -325,10 +341,5 @@ public class PcpMmvWriter extends BasePcpWriter {
         bridge.start();
         // Sold a bag
         bridge.updateMetric(MetricName.parse("sheep.baabaablack.bagsfull.count"), 2);
-    }
-
-    @Override
-    protected boolean supportsInstances() {
-        return true;
     }
 }

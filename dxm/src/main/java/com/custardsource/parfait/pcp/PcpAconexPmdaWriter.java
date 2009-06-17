@@ -67,10 +67,15 @@ public class PcpAconexPmdaWriter extends BasePcpWriter {
         }
     }
 
-	@Override
-	protected int getMetricNameLimit() {
-		return METRIC_NAME_LIMIT;
-	}
+    @Override
+    protected int getMetricNameLimit() {
+        return METRIC_NAME_LIMIT;
+    }
+
+    @Override
+    protected int getInstanceNameLimit() {
+        return 0;
+    }
 
 	@Override
 	protected synchronized void initialiseOffsets() {
@@ -116,9 +121,4 @@ public class PcpAconexPmdaWriter extends BasePcpWriter {
 
         
 	}
-
-    @Override
-    protected boolean supportsInstances() {
-        return false;
-    }
 }

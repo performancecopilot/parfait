@@ -106,9 +106,9 @@ public abstract class BasePcpWriter implements PcpWriter {
                     + "; name exceeds length limit");
         }
         if (name.hasInstance()) {
-            if (!supportsInstances()) {
-                throw new IllegalArgumentException("Metric name " + name
-                        + " contains an instance but this writer does not support them");
+            if (name.getInstance().getBytes(getCharset()).length > getInstanceNameLimit()) {
+                throw new IllegalArgumentException("Cannot add metric " + name
+                        + "; instance name is too long");
             }
         }
         PcpMetricInfo metricInfo = metricNames.get(name.getMetric());
@@ -136,8 +136,6 @@ public abstract class BasePcpWriter implements PcpWriter {
         PcpValueInfo info = new PcpValueInfo(name, metricInfo, instance, initialValue);
         metricData.put(name, info);
     }
-
-    protected abstract boolean supportsInstances();
 
     protected ByteBuffer initialiseBuffer(File file, int length) throws IOException {
         RandomAccessFile fos = null;
@@ -181,6 +179,12 @@ public abstract class BasePcpWriter implements PcpWriter {
             Collection<PcpValueInfo> metricInfos) throws IOException;
 
     protected abstract int getMetricNameLimit();
+
+    /**
+     * @return the maximum length of an instance name supported by this agent. May be 0 to indicate
+     *         that instances are not supported.
+     */
+    protected abstract int getInstanceNameLimit();
 
     protected abstract Charset getCharset();
 
