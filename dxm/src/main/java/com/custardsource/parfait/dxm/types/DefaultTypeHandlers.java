@@ -1,4 +1,4 @@
-package com.custardsource.parfait.pcp.types;
+package com.custardsource.parfait.dxm.types;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;

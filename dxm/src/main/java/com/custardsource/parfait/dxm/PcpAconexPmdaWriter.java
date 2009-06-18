@@ -1,4 +1,4 @@
-package com.custardsource.parfait.pcp;
+package com.custardsource.parfait.dxm;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -10,8 +10,8 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Collection;
 
-import com.custardsource.parfait.pcp.types.AbstractTypeHandler;
-import com.custardsource.parfait.pcp.types.MmvMetricType;
+import com.custardsource.parfait.dxm.types.AbstractTypeHandler;
+import com.custardsource.parfait.dxm.types.MmvMetricType;
 
 public class PcpAconexPmdaWriter extends BasePcpWriter {
     public static final String ENCODING = "ISO-8859-1";

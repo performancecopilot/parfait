@@ -1,4 +1,4 @@
-package com.custardsource.parfait.pcp;
+package com.custardsource.parfait.dxm;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,8 +14,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.custardsource.parfait.pcp.types.DefaultTypeHandlers;
-import com.custardsource.parfait.pcp.types.TypeHandler;
+import com.custardsource.parfait.dxm.types.DefaultTypeHandlers;
+import com.custardsource.parfait.dxm.types.TypeHandler;
 
 public abstract class BasePcpWriter implements PcpWriter {
     private final File dataFile;

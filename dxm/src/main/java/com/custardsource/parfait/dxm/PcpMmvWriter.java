@@ -1,4 +1,4 @@
-package com.custardsource.parfait.pcp;
+package com.custardsource.parfait.dxm;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,10 +9,10 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.custardsource.parfait.pcp.types.AbstractTypeHandler;
-import com.custardsource.parfait.pcp.types.DefaultTypeHandlers;
-import com.custardsource.parfait.pcp.types.MmvMetricType;
-import com.custardsource.parfait.pcp.types.TypeHandler;
+import com.custardsource.parfait.dxm.types.AbstractTypeHandler;
+import com.custardsource.parfait.dxm.types.DefaultTypeHandlers;
+import com.custardsource.parfait.dxm.types.MmvMetricType;
+import com.custardsource.parfait.dxm.types.TypeHandler;
 
 /**
  * <p>

@@ -1,4 +1,4 @@
-package com.custardsource.parfait.pcp.types;
+package com.custardsource.parfait.dxm.types;
 
 
 /**

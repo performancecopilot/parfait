@@ -1,8 +1,8 @@
-package com.custardsource.parfait.pcp;
+package com.custardsource.parfait.dxm;
 
 import java.io.IOException;
 
-import com.custardsource.parfait.pcp.types.TypeHandler;
+import com.custardsource.parfait.dxm.types.TypeHandler;
 
 public interface PcpWriter {
     /**
