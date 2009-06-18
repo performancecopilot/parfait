@@ -15,6 +15,9 @@ import com.custardsource.parfait.Monitor;
 import com.custardsource.parfait.Monitorable;
 import com.custardsource.parfait.MonitorableRegistry;
 import com.custardsource.parfait.MonitoringView;
+import com.custardsource.parfait.dxm.MetricName;
+import com.custardsource.parfait.dxm.PcpAconexPmdaWriter;
+import com.custardsource.parfait.dxm.PcpWriter;
 import com.google.common.base.Preconditions;
 
 /**

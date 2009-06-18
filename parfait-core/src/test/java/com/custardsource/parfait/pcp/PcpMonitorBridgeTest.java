@@ -15,6 +15,7 @@ import org.apache.commons.lang.StringUtils;
 
 import com.custardsource.parfait.MonitorableRegistry;
 import com.custardsource.parfait.MonitoredValue;
+import com.custardsource.parfait.dxm.PcpAconexPmdaWriter;
 
 public class PcpMonitorBridgeTest extends TestCase {
     private MonitoredValue<Boolean> booleanValue = null;
