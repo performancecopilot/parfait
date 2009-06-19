@@ -8,7 +8,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.log4j.Logger;
 
 import com.custardsource.parfait.MonitoredCounter;
-import com.custardsource.parfait.timing.ControllerMetricCollector.MonitoredCounterSet;
 
 /**
  * A class to provide a {@link ControllerMetricCollector} to each controller on demand, guaranteed
@@ -22,7 +21,7 @@ public class ControllerMetricCollectorFactory {
      */
     private static final Logger LOG = Logger.getLogger(ControllerMetricCollectorFactory.class);
 
-    private final Map<MetricCollectorController, ControllerMetricCollector.MonitoredCounterSet> perControllerCounters = new ConcurrentHashMap<MetricCollectorController, ControllerMetricCollector.MonitoredCounterSet>();
+    private final Map<MetricCollectorController, MonitoredCounterSet> perControllerCounters = new ConcurrentHashMap<MetricCollectorController, MonitoredCounterSet>();
 
     private final ThreadLocal<ControllerMetricCollector> metricCollectors = new ThreadLocal<ControllerMetricCollector>() {
         @Override
@@ -59,12 +58,12 @@ public class ControllerMetricCollectorFactory {
         perControllerCounters.put(controller, getCounterSet(beanName));
     }
 
-    private ControllerMetricCollector.MonitoredCounterSet getCounterSet(String beanName) {
+    private MonitoredCounterSet getCounterSet(String beanName) {
         ControllerCounterSet invocationCounter = createControllerMonitoredCounter(beanName,
                 "count",
                 "Total number of times the controller %s was invoked directly by a user request",
                 "Total number of times all controllers have been invoked directly by a user request");
-        ControllerMetricCollector.MonitoredCounterSet counters = new ControllerMetricCollector.MonitoredCounterSet(
+        MonitoredCounterSet counters = new MonitoredCounterSet(
                 invocationCounter);
 
         ControllerCounterSet timingCounter = createControllerMonitoredCounter(

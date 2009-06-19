@@ -3,7 +3,7 @@ package com.custardsource.parfait.timing;
 import junit.framework.TestCase;
 
 import com.custardsource.parfait.MonitorableRegistry;
-import com.custardsource.parfait.timing.ControllerMetricCollector.MonitoredCounterSet;
+import com.custardsource.parfait.timing.MonitoredCounterSet;
 
 public class ControllerMetricCollectorFactoryTest extends TestCase {
 

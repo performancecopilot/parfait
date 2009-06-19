@@ -1,8 +1,5 @@
 package com.custardsource.parfait.timing;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
@@ -30,7 +27,7 @@ public class ControllerMetricCollector {
     private static final Logger LOG = Logger.getLogger(ControllerMetricCollector.class);
 
     public ControllerMetricCollector(
-            Map<MetricCollectorController, ControllerMetricCollector.MonitoredCounterSet> perControllerCounters) {
+            Map<MetricCollectorController, MonitoredCounterSet> perControllerCounters) {
         this.perControllerCounters = perControllerCounters;
     }
 
@@ -79,42 +76,5 @@ public class ControllerMetricCollector {
 
     public void resumeAfterForward() {
         current.resumeAll();
-    }
-
-    static class MonitoredCounterSet {
-        private final Map<ThreadMetric, ControllerCounterSet> metrics = new LinkedHashMap<ThreadMetric, ControllerCounterSet>();
-        private final ControllerCounterSet invocationCounter;
-
-        public MonitoredCounterSet(ControllerCounterSet invocationCounter) {
-            this.invocationCounter = invocationCounter;
-        }
-
-        public ControllerCounterSet getInvocationCounter() {
-            return invocationCounter;
-        }
-
-        public void addMetric(ThreadMetric metric) {
-            addMetric(metric, null);
-        }
-
-        public void addMetric(ThreadMetric metric, ControllerCounterSet counter) {
-            metrics.put(metric, counter);
-        }
-
-        private Collection<ThreadMetric> getMetricSources() {
-            return metrics.keySet();
-        }
-
-        private ControllerCounterSet getCounterForMetric(ThreadMetric metric) {
-            return metrics.get(metric);
-        }
-
-        Integer numberOfControllerCounters() {
-            return metrics.values().size();
-        }
-
-        Map<ThreadMetric, ControllerCounterSet> getMetrics() {
-            return Collections.unmodifiableMap(metrics);
-        }
     }
 }
