@@ -125,4 +125,7 @@
       <url>ftp://repo.custardsource.com/repo.custardsource.com/releases</url>
     </repository>
   </distributionManagement>
+  <properties>
+  	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
 </project>
