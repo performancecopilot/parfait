@@ -8,6 +8,7 @@ import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.custardsource.parfait.dxm.types.AbstractTypeHandler;
@@ -189,10 +190,11 @@ public class PcpMmvWriter extends BasePcpWriter {
         int instanceCount = getInstances().size();
         int valueCount = getValueInfos().size();
         int tocCount = tocCount();
+        int stringCount = getStrings().size();
         return HEADER_LENGTH + (TOC_LENGTH * tocCount)
                 + (INSTANCE_DOMAIN_LENGTH * instanceDomainCount)
                 + (INSTANCE_LENGTH * instanceCount) + (METRIC_LENGTH * metricCount)
-                + (VALUE_LENGTH * valueCount);
+                + (VALUE_LENGTH * valueCount) + (STRING_BLOCK_LENGTH * stringCount);
     }
 
     /**
@@ -342,7 +344,6 @@ public class PcpMmvWriter extends BasePcpWriter {
         for (PcpValueInfo value : getValueInfos()) {
             value.setOffset(nextOffset);
             nextOffset += VALUE_LENGTH;
-
         }
     }
 

@@ -272,6 +272,7 @@ public abstract class BasePcpWriter implements PcpWriter {
 
     private Map<String, InstanceDomain> instanceDomainsByName = new HashMap<String, InstanceDomain>();
     private Map<Integer, InstanceDomain> instanceDomainsById = new LinkedHashMap<Integer, InstanceDomain>();
+    private Collection<PcpString> stringInfo = new ArrayList<PcpString>();
 
     // TODO don't synchronize - concurrentmap
     protected synchronized InstanceDomain getInstanceDomain(String name) {
@@ -304,6 +305,8 @@ public abstract class BasePcpWriter implements PcpWriter {
         private int offset;
         private Map<String, Instance> instancesByName = new HashMap<String, Instance>();
         private Map<Integer, Instance> instancesById = new LinkedHashMap<Integer, Instance>();
+        private PcpString shortHelpText;
+        private PcpString longHelpText;
 
         private InstanceDomain(String name, int id) {
             this.name = name;
@@ -350,6 +353,21 @@ public abstract class BasePcpWriter implements PcpWriter {
         public Collection<Instance> getInstances() {
             return instancesById.values();
         }
+
+        public void setHelpText(PcpString shortHelpText, PcpString longHelpText) {
+            this.shortHelpText = shortHelpText;
+            this.longHelpText = longHelpText;
+            
+        }
+
+        public PcpString getShortHelpText() {
+            return shortHelpText;
+        }
+
+        public PcpString getLongHelpText() {
+            return longHelpText;
+        }
+        
     }
 
     protected static class Instance {
@@ -410,6 +428,40 @@ public abstract class BasePcpWriter implements PcpWriter {
         return metricNames.values();
     }
     
+
+    protected static class PcpString {
+        final String value;
+        int offset;
+        
+        public PcpString(String value) {
+            this.value = value;
+        }
+
+        public int getOffset() {
+            return offset;
+        }
+
+        public void setOffset(int offset) {
+            this.offset = offset;
+        }
+        
+    }
+
+    @Override
+    public void setHelpText(String instanceDomain, String shortHelpText, String longHelpText) {
+        InstanceDomain domain = getInstanceDomain(instanceDomain);
+        domain.setHelpText(createPcpString(shortHelpText), createPcpString(longHelpText));
+    }
+    
+    private PcpString createPcpString(String text) {
+        PcpString string = new PcpString(text);
+        stringInfo .add(string);
+        return string;
+    }
+
+    protected Collection<PcpString> getStrings() {
+        return stringInfo;
+    }
 
     public static void main(String[] args) throws Exception {
         BasePcpWriter writer = new PcpMmvWriter(new File("/tmp/xmmv"));

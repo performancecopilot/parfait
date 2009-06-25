@@ -72,5 +72,20 @@ public interface PcpWriter {
 	 *             if the file cannot be created or written.
 	 */
 	public abstract void start() throws IOException;
+	
+    /**
+     * Sets the help text associated with an instance domain.
+     * 
+     * @param instanceDomain
+     *            Java pseudo-instance domain identifier (i.e. metric prefix; for
+     *            animals.dog[xxx].size this is the 'animals.dog' part)
+     * @param shortHelpText
+     *            the short help text; must not exceed any length limits specified by the
+     *            implementation
+     * @param longHelpText
+     *            the long explanatory text; must not exceed any length limits specified by the
+     *            implementation
+     */
+	public void setHelpText(String instanceDomain, String shortHelpText, String longHelpText); 
 
 }
