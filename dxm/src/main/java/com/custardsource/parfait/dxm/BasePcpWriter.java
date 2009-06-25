@@ -87,7 +87,7 @@ public abstract class BasePcpWriter implements PcpWriter {
 
     @SuppressWarnings("unchecked")
     protected void updateValue(PcpValueInfo info, Object value) {
-        dataFileBuffer.position(info.getOffsets().dataValueOffset());
+        dataFileBuffer.position(info.getOffset());
         TypeHandler rawHandler = info.getTypeHandler();
         rawHandler.putBytes(dataFileBuffer, value);
     }
@@ -237,19 +237,19 @@ public abstract class BasePcpWriter implements PcpWriter {
         private final MetricName metricName;
         private final Object initialValue;
         private final PcpMetricInfo metricInfo;
-        private Instance instance;
-        private PcpOffset offsets;
+        private final Instance instance;
+        private int offset;
 
         public MetricName getMetricName() {
             return metricName;
         }
 
-        public PcpOffset getOffsets() {
-            return offsets;
+        public int getOffset() {
+            return offset;
         }
 
-        public void setOffsets(PcpOffset offsets) {
-            this.offsets = offsets;
+        public void setOffset(int offset) {
+            this.offset = offset;
         }
 
         public TypeHandler<?> getTypeHandler() {
@@ -270,27 +270,8 @@ public abstract class BasePcpWriter implements PcpWriter {
 
     }
 
-    protected static class PcpOffset {
-        private final int dataBlockOffset;
-        private final int dataValueOffset;
-
-        public PcpOffset(int dataBlockOffset, int dataOffset) {
-            this.dataBlockOffset = dataBlockOffset;
-            this.dataValueOffset = dataOffset;
-        }
-
-        public int dataValueOffset() {
-            return dataValueOffset;
-        }
-
-        public int dataBlockOffset() {
-            return dataBlockOffset;
-        }
-
-    }
-
     private Map<String, InstanceDomain> instanceDomainsByName = new HashMap<String, InstanceDomain>();
-    private Map<Integer, InstanceDomain> instanceDomainsById = new HashMap<Integer, InstanceDomain>();
+    private Map<Integer, InstanceDomain> instanceDomainsById = new LinkedHashMap<Integer, InstanceDomain>();
 
     // TODO don't synchronize - concurrentmap
     protected synchronized InstanceDomain getInstanceDomain(String name) {
@@ -320,8 +301,9 @@ public abstract class BasePcpWriter implements PcpWriter {
     protected static class InstanceDomain {
         private final String name;
         private final int id;
+        private int offset;
         private Map<String, Instance> instancesByName = new HashMap<String, Instance>();
-        private Map<Integer, Instance> instancesById = new HashMap<Integer, Instance>();
+        private Map<Integer, Instance> instancesById = new LinkedHashMap<Integer, Instance>();
 
         private InstanceDomain(String name, int id) {
             this.name = name;
@@ -333,7 +315,7 @@ public abstract class BasePcpWriter implements PcpWriter {
             Instance instance = instancesByName.get(name);
             if (instance == null) {
                 int id = calculateId(name, instancesById.keySet());
-                instance = new Instance(name, id);
+                instance = new Instance(this, name, id);
                 instancesByName.put(name, instance);
                 instancesById.put(id, instance);
             }
@@ -342,20 +324,42 @@ public abstract class BasePcpWriter implements PcpWriter {
 
         @Override
         public String toString() {
-            return name + " (" + id + ") " + instancesByName.values().toString();
+            return name + " (" + id + ") " + instancesById.values().toString();
         }
 
         public int getId() {
             return id;
+        }
+
+        public int getOffset() {
+            return offset;
+        }
+
+        public void setOffset(int offset) {
+            this.offset = offset;
+        }
+        
+        public int getInstanceCount() {
+            return instancesById.size();
+        }
+
+        public int getFirstInstanceOffset() {
+            return instancesById.values().iterator().next().getOffset();
+        }
+
+        public Collection<Instance> getInstances() {
+            return instancesById.values();
         }
     }
 
     protected static class Instance {
         private final String name;
         private final int id;
+        private final InstanceDomain instanceDomain;
         private int offset;
 
-        private Instance(String name, int id) {
+        private Instance(InstanceDomain domain, String name, int id) {
+            this.instanceDomain = domain;
             this.name = name;
             this.id = id;
         }
@@ -380,12 +384,20 @@ public abstract class BasePcpWriter implements PcpWriter {
         public String getName() {
             return name;
         }
+
+        public InstanceDomain getInstanceDomain() {
+            return instanceDomain;
+        }
     }
     
+    protected Collection<InstanceDomain> getInstanceDomains() {
+        return instanceDomainsById.values();
+    }
+
     protected Collection<Instance> getInstances() {
         Collection<Instance> instances = new ArrayList<Instance>();
-        for (InstanceDomain domain : instanceDomainsByName.values()) {
-            instances.addAll(domain.instancesByName.values());
+        for (InstanceDomain domain : instanceDomainsById.values()) {
+            instances.addAll(domain.instancesById.values());
         }
         return instances;
     }
@@ -410,6 +422,6 @@ public abstract class BasePcpWriter implements PcpWriter {
         id.getInstance("TaskControl");
         id.getInstance("SearchControlledDocControl");
         writer.getInstanceDomain("aconex.tasks").getInstance("");
-        System.out.println(writer.instanceDomainsByName.values());
+        System.out.println(writer.instanceDomainsById.values());
     }
 }

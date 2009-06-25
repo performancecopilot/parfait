@@ -51,9 +51,11 @@ import com.custardsource.parfait.dxm.types.TypeHandler;
  */
 public class PcpMmvWriter extends BasePcpWriter {
     private static enum TocType {
-        INSTANCES(1),
+        INSTANCE_DOMAINS(1),
+        INSTANCES(5),
         METRICS(2),
-        VALUES(3);
+        VALUES(3),
+        STRINGS(4);
 
         private final int identifier;
 
@@ -69,9 +71,9 @@ public class PcpMmvWriter extends BasePcpWriter {
      */
     public static final int METRIC_NAME_LIMIT = 63;
     /**
-     * The maximum length of an instance name able to be exported to the MMV agent. Note that this is
-     * relative to {@link #PCP_CHARSET} (it's a measure of the maximum number of bytes, not the Java
-     * String length)
+     * The maximum length of an instance name able to be exported to the MMV agent. Note that this
+     * is relative to {@link #PCP_CHARSET} (it's a measure of the maximum number of bytes, not the
+     * Java String length)
      */
     public static final int INSTANCE_NAME_LIMIT = 63;
 
@@ -80,22 +82,23 @@ public class PcpMmvWriter extends BasePcpWriter {
     private static final int METRIC_LENGTH = 104;
     private static final int VALUE_LENGTH = 32;
     private static final int DEFAULT_INSTANCE_DOMAIN_ID = -1;
-    private static final int INSTANCE_LENGTH = 68;
+    private static final int INSTANCE_LENGTH = 80;
+    private static final int INSTANCE_DOMAIN_LENGTH = 32;
+    private static final int STRING_BLOCK_LENGTH = 256;
 
-	/**
-	 * The charset used for PCP metrics names and String values.
-	 */
-	public static final Charset PCP_CHARSET = Charset.forName("US-ASCII");
+    /**
+     * The charset used for PCP metrics names and String values.
+     */
+    public static final Charset PCP_CHARSET = Charset.forName("US-ASCII");
     private static final byte[] TAG = "MMV\0".getBytes(PCP_CHARSET);
     private static final int MMV_FORMAT_VERSION = 1;
     // Set process ID check but not name prefix
     private static final int FLAGS = 0x2;
 
-	private static final int DATA_VALUE_OFFSET_WITHIN_BLOCK = 16;
-	
-	// TODO Actually expose this through the APU
-	private int itemId = 0;
+    private static final int DATA_VALUE_LENGTH = 16;
 
+    // TODO Actually expose this through the API
+    private int itemId = 0;
 
     /**
      * Creates a new PcpMmvFile writing to the underlying file, which will be created + opened as a
@@ -106,11 +109,12 @@ public class PcpMmvWriter extends BasePcpWriter {
      *            the file to map
      */
     public PcpMmvWriter(File file) {
-    	super(file);
+        super(file);
     }
 
     @Override
-    protected void populateDataBuffer(ByteBuffer dataFileBuffer, Collection<PcpValueInfo> valueInfos) throws IOException {
+    protected void populateDataBuffer(ByteBuffer dataFileBuffer, Collection<PcpValueInfo> valueInfos)
+            throws IOException {
         dataFileBuffer.position(0);
         dataFileBuffer.put(TAG);
         dataFileBuffer.putInt(MMV_FORMAT_VERSION);
@@ -119,8 +123,6 @@ public class PcpMmvWriter extends BasePcpWriter {
         int gen2Offset = dataFileBuffer.position();
         // Generation 2 will be filled in later, once the file's ready
         dataFileBuffer.putLong(0);
-        Collection<Instance> instances = getInstances();
-        Collection<PcpMetricInfo> metrics = getMetricInfos();
         // 2 TOC blocks, 3 if there are instances
         dataFileBuffer.putInt(tocCount());
         // TODO diked out for testing
@@ -129,34 +131,48 @@ public class PcpMmvWriter extends BasePcpWriter {
         dataFileBuffer.putInt(getPid());
         // TODO - cluster identifier - not yet used
         dataFileBuffer.putInt(0);
-        
-        PcpMetricInfo firstMetric = metrics.iterator().next();
-        PcpValueInfo firstValue = valueInfos.iterator().next();
-        
-		dataFileBuffer.position(getTocOffset(0));
-		writeToc(dataFileBuffer, TocType.METRICS, metrics.size(), firstMetric.getOffset());
-		dataFileBuffer.position(getTocOffset(1));
-		writeToc(dataFileBuffer, TocType.VALUES, valueInfos.size(), firstValue
-				.getOffsets().dataBlockOffset());
-		
-		if (!instances.isEmpty()) {
-	        dataFileBuffer.position(getTocOffset(2));
+
+        Collection<InstanceDomain> instanceDomains = getInstanceDomains();
+        Collection<Instance> instances = getInstances();
+        Collection<PcpMetricInfo> metrics = getMetricInfos();
+
+        int tocBlockIndex = 0;
+
+        if (!instanceDomains.isEmpty()) {
+            dataFileBuffer.position(getTocOffset(tocBlockIndex++));
+            writeToc(dataFileBuffer, TocType.INSTANCE_DOMAINS, instanceDomains.size(),
+                    instanceDomains.iterator().next().getOffset());
+        }
+
+        if (!instances.isEmpty()) {
+            dataFileBuffer.position(getTocOffset(tocBlockIndex++));
             writeToc(dataFileBuffer, TocType.INSTANCES, instances.size(), instances.iterator()
                     .next().getOffset());
-		}
+        }
+
+        dataFileBuffer.position(getTocOffset(tocBlockIndex++));
+        writeToc(dataFileBuffer, TocType.METRICS, metrics.size(), metrics.iterator().next()
+                .getOffset());
+        dataFileBuffer.position(getTocOffset(tocBlockIndex++));
+        writeToc(dataFileBuffer, TocType.VALUES, valueInfos.size(), valueInfos.iterator().next()
+                .getOffset());
+
+        for (InstanceDomain instanceDomain : instanceDomains) {
+            dataFileBuffer.position(instanceDomain.getOffset());
+            writeInstanceDomainSection(dataFileBuffer, instanceDomain);
+            for (Instance instance : instanceDomain.getInstances()) {
+                dataFileBuffer.position(instance.getOffset());
+                writeInstanceSection(dataFileBuffer, instance);
+            }
+        }
 
         for (PcpMetricInfo info : metrics) {
             dataFileBuffer.position(info.getOffset());
             writeMetricsSection(dataFileBuffer, info, info.getTypeHandler().getMetricType());
         }
 
-        for (Instance instance : instances) {
-            dataFileBuffer.position(instance.getOffset());
-            writeInstanceSection(dataFileBuffer, instance);
-        }
-		
         for (PcpValueInfo info : valueInfos) {
-            dataFileBuffer.position(info.getOffsets().dataBlockOffset());
+            dataFileBuffer.position(info.getOffset());
             writeValueSection(dataFileBuffer, info.getDescriptorOffset(), info.getInitialValue(),
                     info.getTypeHandler(), info.getInstanceOffset());
         }
@@ -164,17 +180,20 @@ public class PcpMmvWriter extends BasePcpWriter {
         // Once it's set up, let the agent know
         dataFileBuffer.position(gen2Offset);
         dataFileBuffer.putLong(generation);
-	}
+    }
 
     @Override
     protected int getFileLength() {
+        int instanceDomainCount = getInstanceDomains().size();
         int metricCount = getMetricInfos().size();
         int instanceCount = getInstances().size();
         int valueCount = getValueInfos().size();
         int tocCount = tocCount();
-        return HEADER_LENGTH + (TOC_LENGTH * tocCount) + (INSTANCE_LENGTH * instanceCount)
-                + (METRIC_LENGTH * metricCount) + (VALUE_LENGTH * valueCount);
-	}
+        return HEADER_LENGTH + (TOC_LENGTH * tocCount)
+                + (INSTANCE_DOMAIN_LENGTH * instanceDomainCount)
+                + (INSTANCE_LENGTH * instanceCount) + (METRIC_LENGTH * metricCount)
+                + (VALUE_LENGTH * valueCount);
+    }
 
     /**
      * Writes out a PCP MMV table-of-contents block.
@@ -201,8 +220,8 @@ public class PcpMmvWriter extends BasePcpWriter {
      * @param dataFileBuffer
      *            ByteBuffer positioned at the correct offset in the file for the block
      * @param info
-     *            the info of the metric (name must be &le; {@link #METRIC_NAME_LIMIT} characters, and
-     *            must be convertible to {@link #PCP_CHARSET})
+     *            the info of the metric (name must be &le; {@link #METRIC_NAME_LIMIT} characters,
+     *            and must be convertible to {@link #PCP_CHARSET})
      * @param metricType
      *            the type of the metric
      */
@@ -215,7 +234,7 @@ public class PcpMmvWriter extends BasePcpWriter {
         dataFileBuffer.position(originalPosition + METRIC_NAME_LIMIT + 1);
         // TODO expose metric item through the API
         dataFileBuffer.putInt(++itemId);
-        
+
         dataFileBuffer.putInt(metricType.getIdentifier());
         // TODO Semantics not yet supported
         dataFileBuffer.putInt(0);
@@ -249,18 +268,30 @@ public class PcpMmvWriter extends BasePcpWriter {
      *            the offset of the instance in the file
      */
     @SuppressWarnings("unchecked")
-	private void writeValueSection(ByteBuffer dataFileBuffer,
-			int descriptorOffset, Object value, TypeHandler<?> handler, int instanceOffset) {
-        dataFileBuffer.putLong(descriptorOffset);
-        dataFileBuffer.putLong(instanceOffset);
+    private void writeValueSection(ByteBuffer dataFileBuffer, int descriptorOffset, Object value,
+            TypeHandler<?> handler, int instanceOffset) {
+        int originalPosition = dataFileBuffer.position();
         TypeHandler rawHandler = handler;
         rawHandler.putBytes(dataFileBuffer, value);
+        dataFileBuffer.position(originalPosition + DATA_VALUE_LENGTH);
+        dataFileBuffer.putLong(descriptorOffset);
+        dataFileBuffer.putLong(instanceOffset);
     }
 
     private void writeInstanceSection(ByteBuffer dataFileBuffer, Instance instance) {
+        dataFileBuffer.putLong(instance.getInstanceDomain().getOffset());
+        dataFileBuffer.putInt(0);
         dataFileBuffer.putInt(instance.getId());
         dataFileBuffer.put(instance.getName().getBytes(PCP_CHARSET));
-        dataFileBuffer.put((byte) 0);
+    }
+
+    private void writeInstanceDomainSection(ByteBuffer dataFileBuffer, InstanceDomain instanceDomain) {
+        dataFileBuffer.putInt(instanceDomain.getId());
+        dataFileBuffer.putInt(instanceDomain.getInstanceCount());
+        dataFileBuffer.putLong(instanceDomain.getFirstInstanceOffset());
+        // TODO help text
+        dataFileBuffer.putLong(0);
+        dataFileBuffer.putLong(0);
     }
 
     /**
@@ -274,10 +305,10 @@ public class PcpMmvWriter extends BasePcpWriter {
         return HEADER_LENGTH + (tocIndex * TOC_LENGTH);
     }
 
-	@Override
-	protected Charset getCharset() {
-		return PCP_CHARSET;
-	}
+    @Override
+    protected Charset getCharset() {
+        return PCP_CHARSET;
+    }
 
     @Override
     protected int getMetricNameLimit() {
@@ -289,10 +320,15 @@ public class PcpMmvWriter extends BasePcpWriter {
         return INSTANCE_NAME_LIMIT;
     }
 
-	
     @Override
     protected synchronized void initialiseOffsets() {
         int nextOffset = HEADER_LENGTH + (TOC_LENGTH * tocCount());
+
+        for (InstanceDomain instanceDomain : getInstanceDomains()) {
+            instanceDomain.setOffset(nextOffset);
+            nextOffset += INSTANCE_DOMAIN_LENGTH;
+        }
+
         for (Instance instance : getInstances()) {
             instance.setOffset(nextOffset);
             nextOffset += INSTANCE_LENGTH;
@@ -304,43 +340,35 @@ public class PcpMmvWriter extends BasePcpWriter {
         }
 
         for (PcpValueInfo value : getValueInfos()) {
-            value.setOffsets(new PcpOffset(nextOffset, nextOffset
-                    + DATA_VALUE_OFFSET_WITHIN_BLOCK));
+            value.setOffset(nextOffset);
             nextOffset += VALUE_LENGTH;
 
         }
     }
 
-	private int tocCount() {
-        return getInstances().isEmpty() ? 2 : 3;
+    private int tocCount() {
+        int tocCount = 2; // metrics + values
+        if (!getInstances().isEmpty()) {
+            tocCount += 2;
+        }
+        // TODO - strings
+        return tocCount;
     }
 
-	/**
-	 * @return the PID of the current running Java Process
-	 */
-	// TODO this is Sun JVM specific!
+    /**
+     * @return the PID of the current running Java Process
+     */
+    // TODO this is Sun JVM specific!
     private int getPid() {
         String processIdentifier = ManagementFactory.getRuntimeMXBean().getName();
         return Integer.valueOf(processIdentifier.split("@")[0]);
     }
 
     public static void main(String[] args) throws IOException {
-        PcpMmvWriter instanceBridge = new PcpMmvWriter(new File("/var/tmp/mmv/nodots"));
-        instanceBridge.addMetric(MetricName.parse("sheep[baabaablack]"), 3);
-        instanceBridge.addMetric(MetricName.parse("sheep[shaun]"), 0);
-        instanceBridge.start();
-        instanceBridge.updateMetric(MetricName.parse("sheep[baabaablack]"), 2);
- 
-        instanceBridge = new PcpMmvWriter(new File("/var/tmp/mmv/instances"));
-        instanceBridge.addMetric(MetricName.parse("sheep[baabaablack].bagsfull"), 3);
-        instanceBridge.addMetric(MetricName.parse("sheep[shaun].bagsfull"), 0);
-        instanceBridge.start();
-        instanceBridge.updateMetric(MetricName.parse("sheep[baabaablack].bagsfull"), 2);
-               
-        
         PcpMmvWriter bridge = new PcpMmvWriter(new File("/var/tmp/mmv/mmvtest2"));
         // Uses default boolean-to-int handler
-        bridge.addMetric(MetricName.parse("sheep[baabaablack].bagsfull.haveany"), new AtomicBoolean(true));
+        bridge.addMetric(MetricName.parse("sheep[baabaablack].bagsfull.haveany"),
+                new AtomicBoolean(true));
         // Uses default int handler
         bridge.addMetric(MetricName.parse("sheep[baabaablack].bagsfull.count"), 3);
         // Uses default long handler
@@ -349,12 +377,12 @@ public class PcpMmvWriter extends BasePcpWriter {
         bridge.addMetric(MetricName.parse("sheep[limpy].legs.available"), 0.75);
         // addMetric(String) would fail, as there's no handler registered; use a custom one which
         // puts the string's length as an int
-        bridge.addMetric(MetricName.parse("sheep[insomniac].jumpitem"), "Fence", new AbstractTypeHandler<String>(
-                MmvMetricType.I32, 4) {
-            public void putBytes(ByteBuffer buffer, String value) {
-                buffer.putInt(value.length());
-            }
-        });
+        bridge.addMetric(MetricName.parse("sheep[insomniac].jumpitem"), "Fence",
+                new AbstractTypeHandler<String>(MmvMetricType.I32, 4) {
+                    public void putBytes(ByteBuffer buffer, String value) {
+                        buffer.putInt(value.length());
+                    }
+                });
         // addMetric(Date) would fail, as there's no handler registered; register one for all date
         // types from now on
         bridge.registerType(Date.class, new AbstractTypeHandler<Date>(MmvMetricType.I64, 8) {
@@ -363,7 +391,8 @@ public class PcpMmvWriter extends BasePcpWriter {
             }
         });
         bridge.addMetric(MetricName.parse("cow.how.now"), new Date());
-        bridge.addMetric(MetricName.parse("cow.how.then"), new GregorianCalendar(1990, 1, 1, 12, 34, 56).getTime());
+        bridge.addMetric(MetricName.parse("cow.how.then"), new GregorianCalendar(1990, 1, 1, 12,
+                34, 56).getTime());
         bridge.start();
         // Sold a bag
         bridge.updateMetric(MetricName.parse("sheep[baabaablack].bagsfull.count"), 2);

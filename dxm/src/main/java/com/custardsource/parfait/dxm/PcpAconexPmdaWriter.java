@@ -54,8 +54,7 @@ public class PcpAconexPmdaWriter extends BasePcpWriter {
 		for (PcpValueInfo info : getValueInfos()) {
 			lastInfo = info;
 		}
-		return lastInfo.getOffsets().dataValueOffset()
-				+ lastInfo.getTypeHandler().getDataLength();
+        return lastInfo.getOffset() + lastInfo.getTypeHandler().getDataLength();
 	}
 
     private int align(int offset, int dataSize) {
@@ -85,7 +84,7 @@ public class PcpAconexPmdaWriter extends BasePcpWriter {
 
         for (PcpValueInfo value : getValueInfos()) {
             nextOffset = align(nextOffset, value.getTypeHandler().getDataLength());
-            value.setOffsets(new PcpOffset(nextOffset, nextOffset));
+            value.setOffset(nextOffset);
             nextOffset += value.getTypeHandler().getDataLength();
         }
 	}
@@ -103,11 +102,9 @@ public class PcpAconexPmdaWriter extends BasePcpWriter {
 		writeHeaderValue(headerWriter, "generation", String
 				.valueOf(fileGeneration));
 		for (PcpValueInfo metricInfo : metricInfos) {
-			writeHeaderValue(headerWriter, metricInfo.getMetricName().getMetric(),
-					metricInfo.getOffsets().dataValueOffset()
-							+ ","
-							+ metricInfo.getTypeHandler().getMetricType()
-									.getDescription());
+            writeHeaderValue(headerWriter, metricInfo.getMetricName().getMetric(), metricInfo
+                    .getOffset()
+                    + "," + metricInfo.getTypeHandler().getMetricType().getDescription());
 		}
         headerWriter.close();
         
