@@ -10,7 +10,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.custardsource.parfait.dxm.BasePcpWriter.PcpString;
 import com.custardsource.parfait.dxm.types.AbstractTypeHandler;
 import com.custardsource.parfait.dxm.types.DefaultTypeHandlers;
 import com.custardsource.parfait.dxm.types.MmvMetricType;
@@ -53,10 +52,10 @@ import com.custardsource.parfait.dxm.types.TypeHandler;
 public class PcpMmvWriter extends BasePcpWriter {
     private static enum TocType {
         INSTANCE_DOMAINS(1),
-        INSTANCES(5),
-        METRICS(2),
-        VALUES(3),
-        STRINGS(4);
+        INSTANCES(2),
+        METRICS(3),
+        VALUES(4),
+        STRINGS(5);
 
         private final int identifier;
 
@@ -267,10 +266,8 @@ public class PcpMmvWriter extends BasePcpWriter {
         }
         // Just padding
         dataFileBuffer.putInt(0);
-        // Short help offset
-        dataFileBuffer.putInt(0);
-        // Long help offset
-        dataFileBuffer.putInt(0);
+        dataFileBuffer.putLong(getStringOffset(info.getShortHelpText()));
+        dataFileBuffer.putLong(getStringOffset(info.getLongHelpText()));
     }
 
     /**
@@ -404,7 +401,7 @@ public class PcpMmvWriter extends BasePcpWriter {
         // Uses default int handler
         bridge.addMetric(MetricName.parse("sheep[baabaablack].bagsfull.count"), 3);
         // Uses default long handler
-        bridge.addMetric(MetricName.parse("sheep[insomniac].count"), 12345678901234L);
+        bridge.addMetric(MetricName.parse("sheep[insomniac].jumps"), 12345678901234L);
         // Uses default double handler
         bridge.addMetric(MetricName.parse("sheep[limpy].legs.available"), 0.75);
         // addMetric(String) would fail, as there's no handler registered; use a custom one which
@@ -426,12 +423,13 @@ public class PcpMmvWriter extends BasePcpWriter {
         bridge.addMetric(MetricName.parse("cow.how.then"), new GregorianCalendar(1990, 1, 1, 12,
                 34, 56).getTime());
         bridge
-                .setInstanceDomainHelpText(
-                        "sheep",
-                        "sheep in the paddock",
-                        "List of all the sheep in the paddock. Includes 'baabaablack', 'insomniac' (who likes to jump fences), and 'limpy' the three-legged wonder sheep.");
-                        //null);
-        bridge.start();
+        .setInstanceDomainHelpText(
+                "sheep",
+                "sheep in the paddock",
+                "List of all the sheep in the paddock. Includes 'baabaablack', 'insomniac' (who likes to jump fences), and 'limpy' the three-legged wonder sheep.");
+        bridge.setMetricHelpText("sheep.jumps", "# of jumps done",
+                "Number of times the sheep has jumped over its jumpitem");
+       bridge.start();
         // Sold a bag
         bridge.updateMetric(MetricName.parse("sheep[baabaablack].bagsfull.count"), 2);
     }

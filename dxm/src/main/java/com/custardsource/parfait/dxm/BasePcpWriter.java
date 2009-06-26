@@ -111,28 +111,17 @@ public abstract class BasePcpWriter implements PcpWriter {
                         + "; instance name is too long");
             }
         }
-        PcpMetricInfo metricInfo = metricNames.get(name.getMetric());
+        PcpMetricInfo metricInfo = getMetricInfo(name.getMetric());
         InstanceDomain domain = null;
         Instance instance = null;
         
         if (name.hasInstance()) {
             domain = getInstanceDomain(name.getInstanceDomainTag());
             instance = domain.getInstance(name.getInstance());
+            metricInfo.setInstanceDomain(domain);
         }
+        metricInfo.setTypeHandler(pcpType);
         
-        if (metricInfo == null) {
-            metricInfo = new PcpMetricInfo(name.getMetric(), domain, pcpType);
-            metricNames.put(name.getMetric(), metricInfo);
-        } else {
-            if (domain != metricInfo.domain) {
-                throw new IllegalArgumentException("Metric name " + name
-                        + " does not match previously specified instance layout");
-            }
-            if (!pcpType.equals(metricInfo.typeHandler)) {
-                throw new IllegalArgumentException("Metric name " + name
-                        + " cannot use different type handlers for different instances");
-            }
-        }
         PcpValueInfo info = new PcpValueInfo(name, metricInfo, instance, initialValue);
         metricData.put(name, info);
     }
@@ -192,14 +181,16 @@ public abstract class BasePcpWriter implements PcpWriter {
 
     protected static class PcpMetricInfo {
         private final String metricName;
-        private final InstanceDomain domain;
-        private final TypeHandler<?> typeHandler;
-        private int offset;
         
-        public PcpMetricInfo(String metricName, InstanceDomain domain, TypeHandler<?> typeHandler) {
+        private InstanceDomain domain;
+        private TypeHandler<?> typeHandler;
+        private int offset;
+        private PcpString shortHelpText;
+        private PcpString longHelpText;
+        
+
+        public PcpMetricInfo(String metricName) {
             this.metricName = metricName;
-            this.domain = domain;
-            this.typeHandler = typeHandler;
         }
 
         public int getOffset() {
@@ -217,13 +208,43 @@ public abstract class BasePcpWriter implements PcpWriter {
         public TypeHandler<?> getTypeHandler() {
             return typeHandler;
         }
+        
+        private void setTypeHandler(TypeHandler<?> typeHandler) {
+            if (this.typeHandler == null || this.typeHandler.equals(typeHandler)) {
+                this.typeHandler = typeHandler;
+            } else {
+                throw new IllegalArgumentException(
+                        "Two different type handlers cannot be registered for metric " + metricName);
+            }
+            
+        }
 
         public InstanceDomain getInstanceDomain() {
             return domain;
         }
 
+        private void setInstanceDomain(InstanceDomain domain) {
+            if (this.domain == null || this.domain.equals(domain)) {
+                this.domain = domain;
+            } else {
+                throw new IllegalArgumentException(
+                        "Two different instance domains cannot be set for metric " + metricName);
+            }
+        }
+
+        public PcpString getShortHelpText() {
+            return shortHelpText;
+        }
         
-    }
+        public PcpString getLongHelpText() {
+            return longHelpText;
+        }
+
+        public void setHelpText(PcpString shortHelpText, PcpString longHelpText) {
+            this.shortHelpText = shortHelpText;
+            this.longHelpText = longHelpText;
+        }
+}
     
     protected static class PcpValueInfo {
 
@@ -273,6 +294,16 @@ public abstract class BasePcpWriter implements PcpWriter {
     private Map<String, InstanceDomain> instanceDomainsByName = new HashMap<String, InstanceDomain>();
     private Map<Integer, InstanceDomain> instanceDomainsById = new LinkedHashMap<Integer, InstanceDomain>();
     private Collection<PcpString> stringInfo = new ArrayList<PcpString>();
+
+    // TODO don't synchronize - concurrentmap
+    protected synchronized PcpMetricInfo getMetricInfo(String name) {
+        PcpMetricInfo info = metricNames.get(name);
+        if (info == null) {
+            info = new PcpMetricInfo(name);
+            metricNames.put(name, info);
+        }
+        return info;
+    }
 
     // TODO don't synchronize - concurrentmap
     protected synchronized InstanceDomain getInstanceDomain(String name) {
@@ -455,6 +486,12 @@ public abstract class BasePcpWriter implements PcpWriter {
     public void setInstanceDomainHelpText(String instanceDomain, String shortHelpText, String longHelpText) {
         InstanceDomain domain = getInstanceDomain(instanceDomain);
         domain.setHelpText(createPcpString(shortHelpText), createPcpString(longHelpText));
+    }
+
+    @Override
+    public void setMetricHelpText(String metricName, String shortHelpText, String longHelpText) {
+        PcpMetricInfo info = getMetricInfo(metricName);
+        info.setHelpText(createPcpString(shortHelpText), createPcpString(longHelpText));
     }
     
     private PcpString createPcpString(String text) {

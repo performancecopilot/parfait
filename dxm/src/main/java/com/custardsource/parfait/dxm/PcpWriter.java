@@ -88,4 +88,19 @@ public interface PcpWriter {
      */
 	public void setInstanceDomainHelpText(String instanceDomain, String shortHelpText, String longHelpText); 
 
+    /**
+     * Sets the help text associated with a particular metric
+     * 
+     * @param metricName
+     *            String version of the metric name, ignoring any possible instance domains. (e.g. for
+     *            animals.dog[xxx].size this is 'animals.dog.size')
+     * @param shortHelpText
+     *            the short help text; must not exceed any length limits specified by the
+     *            implementation
+     * @param longHelpText
+     *            the long explanatory text; must not exceed any length limits specified by the
+     *            implementation
+     */
+    public void setMetricHelpText(String metricName, String shortHelpText, String longHelpText);
+
 }
