@@ -30,4 +30,6 @@ public interface TypeHandler<JavaType> {
     MmvMetricType getMetricType();
 
 	int getDataLength();
+	
+	boolean requiresLargeStorage();
 }

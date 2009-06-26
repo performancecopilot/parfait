@@ -14,10 +14,7 @@ public enum MmvMetricType {
     U64(3, "ulong"),
     FLOAT(4, "float"),
     DOUBLE(5, "double"),
-    INTEGRAL(10, "integral"),
-    DISCRETE(11, "discrete"),
-    // TODO - not actually handled by the MMV agent
-    STRING(12, "string");
+    STRING(6, "string");
 
     private final int identifier;
 	private final String description;

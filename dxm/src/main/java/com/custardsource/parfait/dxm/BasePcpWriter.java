@@ -87,8 +87,9 @@ public abstract class BasePcpWriter implements PcpWriter {
 
     @SuppressWarnings("unchecked")
     protected void updateValue(PcpValueInfo info, Object value) {
-        dataFileBuffer.position(info.getOffset());
         TypeHandler rawHandler = info.getTypeHandler();
+        dataFileBuffer.position(rawHandler.requiresLargeStorage() ? info.getLargeValue()
+                .getOffset() : info.getOffset());
         rawHandler.putBytes(dataFileBuffer, value);
     }
 
@@ -246,19 +247,26 @@ public abstract class BasePcpWriter implements PcpWriter {
         }
 }
     
-    protected static class PcpValueInfo {
+    // TODO restore this to static - inject PCP String?
+    protected class PcpValueInfo {
 
         public PcpValueInfo(MetricName metricName, PcpMetricInfo metricInfo, Instance instance, Object initialValue) {
             this.metricName = metricName;
             this.metricInfo = metricInfo;
             this.instance = instance;
             this.initialValue = initialValue;
+            if (metricInfo.getTypeHandler().requiresLargeStorage()) {
+                this.largeValue = createPcpString(initialValue.toString()); 
+            } else {
+                this.largeValue = null;
+            }
         }
 
         private final MetricName metricName;
         private final Object initialValue;
         private final PcpMetricInfo metricInfo;
         private final Instance instance;
+        private final PcpString largeValue;
         private int offset;
 
         public MetricName getMetricName() {
@@ -287,6 +295,10 @@ public abstract class BasePcpWriter implements PcpWriter {
 
         public int getDescriptorOffset() {
             return metricInfo.getOffset();
+        }
+        
+        public PcpString getLargeValue() {
+            return largeValue;
         }
 
     }

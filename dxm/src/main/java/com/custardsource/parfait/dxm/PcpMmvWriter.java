@@ -99,6 +99,22 @@ public class PcpMmvWriter extends BasePcpWriter {
 
     // TODO Actually expose this through the API
     private int itemId = 0;
+    
+    private static final TypeHandler<String> MMV_STRING_HANDLER = new AbstractTypeHandler<String>(
+            MmvMetricType.STRING, STRING_BLOCK_LENGTH) {
+        @Override
+        public boolean requiresLargeStorage() {
+            return true;
+        }
+
+        @Override
+        public void putBytes(ByteBuffer buffer, String value) {
+            byte[] bytes = value.getBytes(PCP_CHARSET);
+            int length = Math.min(bytes.length, STRING_BLOCK_LENGTH - 1);
+            buffer.put(bytes, 0, length);
+            buffer.put((byte) 0);
+        }
+    };
 
     /**
      * Creates a new PcpMmvFile writing to the underlying file, which will be created + opened as a
@@ -110,6 +126,7 @@ public class PcpMmvWriter extends BasePcpWriter {
      */
     public PcpMmvWriter(File file) {
         super(file);
+        registerType(String.class, MMV_STRING_HANDLER);
     }
 
     @Override
@@ -180,8 +197,7 @@ public class PcpMmvWriter extends BasePcpWriter {
 
         for (PcpValueInfo info : valueInfos) {
             dataFileBuffer.position(info.getOffset());
-            writeValueSection(dataFileBuffer, info.getDescriptorOffset(), info.getInitialValue(),
-                    info.getTypeHandler(), info.getInstanceOffset());
+            writeValueSection(dataFileBuffer, info);
         }
 
         for (PcpString string : strings) {
@@ -275,24 +291,24 @@ public class PcpMmvWriter extends BasePcpWriter {
      * 
      * @param dataFileBuffer
      *            ByteBuffer positioned at the correct offset in the file for the block
-     * @param descriptorOffset
-     *            the offset of the descriptor block of this metric
      * @param value
-     *            the value to be written to the file
-     * @param handler
-     *            the {@link TypeHandler} to use to convert the value to bytes
-     * @param instanceOffset
-     *            the offset of the instance in the file
+     *            the PcpValueInfo to be written to the file
      */
     @SuppressWarnings("unchecked")
-    private void writeValueSection(ByteBuffer dataFileBuffer, int descriptorOffset, Object value,
-            TypeHandler<?> handler, int instanceOffset) {
+    private void writeValueSection(ByteBuffer dataFileBuffer, PcpValueInfo info) {
         int originalPosition = dataFileBuffer.position();
-        TypeHandler rawHandler = handler;
-        rawHandler.putBytes(dataFileBuffer, value);
+        TypeHandler rawHandler = info.getTypeHandler();
+        if (rawHandler.requiresLargeStorage()) {
+            // API requires the length here but it's current unused -- write out the maximum possible length
+            dataFileBuffer.putLong(STRING_BLOCK_LENGTH - 1);
+            System.out.println("Large storage: writing " + info.getLargeValue().getOffset() + " to pos " + dataFileBuffer.position());
+            dataFileBuffer.putLong(info.getLargeValue().getOffset());
+            dataFileBuffer.position(info.getLargeValue().getOffset());
+        }
+        rawHandler.putBytes(dataFileBuffer, info.getInitialValue());
         dataFileBuffer.position(originalPosition + DATA_VALUE_LENGTH);
-        dataFileBuffer.putLong(descriptorOffset);
-        dataFileBuffer.putLong(instanceOffset);
+        dataFileBuffer.putLong(info.getDescriptorOffset());
+        dataFileBuffer.putLong(info.getInstanceOffset());
     }
 
     private void writeInstanceSection(ByteBuffer dataFileBuffer, Instance instance) {
@@ -404,7 +420,8 @@ public class PcpMmvWriter extends BasePcpWriter {
         bridge.addMetric(MetricName.parse("sheep[insomniac].jumps"), 12345678901234L);
         // Uses default double handler
         bridge.addMetric(MetricName.parse("sheep[limpy].legs.available"), 0.75);
-        // addMetric(String) would fail, as there's no handler registered; use a custom one which
+        bridge.addMetric(MetricName.parse("sheep[limpy].brother.name"), "boris");
+               // addMetric(String) would fail, as there's no handler registered; use a custom one which
         // puts the string's length as an int
         bridge.addMetric(MetricName.parse("sheep[insomniac].jumpitem"), "Fence",
                 new AbstractTypeHandler<String>(MmvMetricType.I32, 4) {

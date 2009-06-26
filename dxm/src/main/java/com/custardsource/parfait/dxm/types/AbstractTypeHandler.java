@@ -24,4 +24,9 @@ public abstract class AbstractTypeHandler<JavaType> implements TypeHandler<JavaT
 	public int getDataLength() {
 		return dataLength;
 	}
+
+    @Override
+    public boolean requiresLargeStorage() {
+        return false;
+    }
 }
