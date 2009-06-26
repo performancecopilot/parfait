@@ -426,7 +426,7 @@ public class PcpMmvWriter extends BasePcpWriter {
         bridge.addMetric(MetricName.parse("cow.how.then"), new GregorianCalendar(1990, 1, 1, 12,
                 34, 56).getTime());
         bridge
-                .setHelpText(
+                .setInstanceDomainHelpText(
                         "sheep",
                         "sheep in the paddock",
                         "List of all the sheep in the paddock. Includes 'baabaablack', 'insomniac' (who likes to jump fences), and 'limpy' the three-legged wonder sheep.");

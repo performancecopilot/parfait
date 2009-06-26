@@ -452,7 +452,7 @@ public abstract class BasePcpWriter implements PcpWriter {
     }
 
     @Override
-    public void setHelpText(String instanceDomain, String shortHelpText, String longHelpText) {
+    public void setInstanceDomainHelpText(String instanceDomain, String shortHelpText, String longHelpText) {
         InstanceDomain domain = getInstanceDomain(instanceDomain);
         domain.setHelpText(createPcpString(shortHelpText), createPcpString(longHelpText));
     }

@@ -86,6 +86,6 @@ public interface PcpWriter {
      *            the long explanatory text; must not exceed any length limits specified by the
      *            implementation
      */
-	public void setHelpText(String instanceDomain, String shortHelpText, String longHelpText); 
+	public void setInstanceDomainHelpText(String instanceDomain, String shortHelpText, String longHelpText); 
 
 }
