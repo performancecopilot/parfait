@@ -444,6 +444,10 @@ public abstract class BasePcpWriter implements PcpWriter {
         public void setOffset(int offset) {
             this.offset = offset;
         }
+
+        public String getValue() {
+            return value;
+        }
         
     }
 
@@ -454,6 +458,9 @@ public abstract class BasePcpWriter implements PcpWriter {
     }
     
     private PcpString createPcpString(String text) {
+        if (text == null) {
+            return null;
+        }
         PcpString string = new PcpString(text);
         stringInfo .add(string);
         return string;

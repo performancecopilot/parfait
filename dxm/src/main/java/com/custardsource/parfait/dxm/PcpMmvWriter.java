@@ -8,9 +8,9 @@ import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.custardsource.parfait.dxm.BasePcpWriter.PcpString;
 import com.custardsource.parfait.dxm.types.AbstractTypeHandler;
 import com.custardsource.parfait.dxm.types.DefaultTypeHandlers;
 import com.custardsource.parfait.dxm.types.MmvMetricType;
@@ -136,6 +136,7 @@ public class PcpMmvWriter extends BasePcpWriter {
         Collection<InstanceDomain> instanceDomains = getInstanceDomains();
         Collection<Instance> instances = getInstances();
         Collection<PcpMetricInfo> metrics = getMetricInfos();
+        Collection<PcpString> strings = getStrings();
 
         int tocBlockIndex = 0;
 
@@ -158,6 +159,12 @@ public class PcpMmvWriter extends BasePcpWriter {
         writeToc(dataFileBuffer, TocType.VALUES, valueInfos.size(), valueInfos.iterator().next()
                 .getOffset());
 
+        if (!getStrings().isEmpty()) {
+            dataFileBuffer.position(getTocOffset(tocBlockIndex++));
+            writeToc(dataFileBuffer, TocType.STRINGS, strings.size(),
+                    strings.iterator().next().getOffset());
+        }
+
         for (InstanceDomain instanceDomain : instanceDomains) {
             dataFileBuffer.position(instanceDomain.getOffset());
             writeInstanceDomainSection(dataFileBuffer, instanceDomain);
@@ -178,9 +185,20 @@ public class PcpMmvWriter extends BasePcpWriter {
                     info.getTypeHandler(), info.getInstanceOffset());
         }
 
+        for (PcpString string : strings) {
+            dataFileBuffer.position(string.getOffset());
+            writeStringSection(dataFileBuffer, string.getValue());
+        }
+
         // Once it's set up, let the agent know
         dataFileBuffer.position(gen2Offset);
         dataFileBuffer.putLong(generation);
+    }
+
+    private void writeStringSection(ByteBuffer dataFileBuffer, String value) {
+        // TODO check string length is OK
+        dataFileBuffer.put(value.getBytes(PCP_CHARSET));
+        dataFileBuffer.put((byte) 0);
     }
 
     @Override
@@ -291,9 +309,15 @@ public class PcpMmvWriter extends BasePcpWriter {
         dataFileBuffer.putInt(instanceDomain.getId());
         dataFileBuffer.putInt(instanceDomain.getInstanceCount());
         dataFileBuffer.putLong(instanceDomain.getFirstInstanceOffset());
-        // TODO help text
-        dataFileBuffer.putLong(0);
-        dataFileBuffer.putLong(0);
+        dataFileBuffer.putLong(getStringOffset(instanceDomain.getShortHelpText()));
+        dataFileBuffer.putLong(getStringOffset(instanceDomain.getLongHelpText()));
+    }
+
+    private long getStringOffset(PcpString text) {
+        if (text == null) {
+            return 0;
+        }
+        return text.getOffset();
     }
 
     /**
@@ -345,6 +369,11 @@ public class PcpMmvWriter extends BasePcpWriter {
             value.setOffset(nextOffset);
             nextOffset += VALUE_LENGTH;
         }
+
+        for (PcpString string : getStrings()) {
+            string.setOffset(nextOffset);
+            nextOffset += STRING_BLOCK_LENGTH;
+        }
     }
 
     private int tocCount() {
@@ -352,7 +381,9 @@ public class PcpMmvWriter extends BasePcpWriter {
         if (!getInstances().isEmpty()) {
             tocCount += 2;
         }
-        // TODO - strings
+        if (!getStrings().isEmpty()) {
+            tocCount++;
+        }
         return tocCount;
     }
 
@@ -394,6 +425,12 @@ public class PcpMmvWriter extends BasePcpWriter {
         bridge.addMetric(MetricName.parse("cow.how.now"), new Date());
         bridge.addMetric(MetricName.parse("cow.how.then"), new GregorianCalendar(1990, 1, 1, 12,
                 34, 56).getTime());
+        bridge
+                .setHelpText(
+                        "sheep",
+                        "sheep in the paddock",
+                        "List of all the sheep in the paddock. Includes 'baabaablack', 'insomniac' (who likes to jump fences), and 'limpy' the three-legged wonder sheep.");
+                        //null);
         bridge.start();
         // Sold a bag
         bridge.updateMetric(MetricName.parse("sheep[baabaablack].bagsfull.count"), 2);
