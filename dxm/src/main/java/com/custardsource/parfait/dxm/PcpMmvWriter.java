@@ -186,7 +186,7 @@ public class PcpMmvWriter extends BasePcpWriter {
 
         for (PcpString string : strings) {
             dataFileBuffer.position(string.getOffset());
-            writeStringSection(dataFileBuffer, string.getValue());
+            writeStringSection(dataFileBuffer, string.getInitialValue());
         }
 
         // Once it's set up, let the agent know

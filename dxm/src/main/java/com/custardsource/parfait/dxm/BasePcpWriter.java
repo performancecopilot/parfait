@@ -461,11 +461,11 @@ public abstract class BasePcpWriter implements PcpWriter {
     
 
     protected static class PcpString {
-        final String value;
+        final String initialValue;
         int offset;
         
         public PcpString(String value) {
-            this.value = value;
+            this.initialValue = value;
         }
 
         public int getOffset() {
@@ -476,8 +476,8 @@ public abstract class BasePcpWriter implements PcpWriter {
             this.offset = offset;
         }
 
-        public String getValue() {
-            return value;
+        public String getInitialValue() {
+            return initialValue;
         }
         
     }
