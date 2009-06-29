@@ -20,7 +20,7 @@ import com.custardsource.parfait.dxm.types.TypeHandler;
 public abstract class BasePcpWriter implements PcpWriter {
     private final File dataFile;
     private final Map<MetricName, PcpValueInfo> metricData = new LinkedHashMap<MetricName, PcpValueInfo>();
-    private final Map<String, PcpMetricInfo> metricNames = new LinkedHashMap<String, PcpMetricInfo>();
+    private final Map<String, PcpMetricInfo> metricInfoByName = new LinkedHashMap<String, PcpMetricInfo>();
     private final Map<Class<?>, TypeHandler<?>> typeHandlers = new HashMap<Class<?>, TypeHandler<?>>(
             DefaultTypeHandlers.getDefaultMappings());
     protected volatile boolean started = false;
@@ -309,10 +309,10 @@ public abstract class BasePcpWriter implements PcpWriter {
 
     // TODO don't synchronize - concurrentmap
     protected synchronized PcpMetricInfo getMetricInfo(String name) {
-        PcpMetricInfo info = metricNames.get(name);
+        PcpMetricInfo info = metricInfoByName.get(name);
         if (info == null) {
             info = new PcpMetricInfo(name);
-            metricNames.put(name, info);
+            metricInfoByName.put(name, info);
         }
         return info;
     }
@@ -471,7 +471,7 @@ public abstract class BasePcpWriter implements PcpWriter {
     }
     
     protected Collection<PcpMetricInfo> getMetricInfos() {
-        return metricNames.values();
+        return metricInfoByName.values();
     }
     
 
