@@ -299,9 +299,9 @@ public class PcpMmvWriter extends BasePcpWriter {
         int originalPosition = dataFileBuffer.position();
         TypeHandler rawHandler = info.getTypeHandler();
         if (rawHandler.requiresLargeStorage()) {
-            // API requires the length here but it's current unused -- write out the maximum possible length
+            // API requires the length here but it's currently unused -- write out the maximum
+            // possible length
             dataFileBuffer.putLong(STRING_BLOCK_LENGTH - 1);
-            System.out.println("Large storage: writing " + info.getLargeValue().getOffset() + " to pos " + dataFileBuffer.position());
             dataFileBuffer.putLong(info.getLargeValue().getOffset());
             dataFileBuffer.position(info.getLargeValue().getOffset());
         }
@@ -410,25 +410,36 @@ public class PcpMmvWriter extends BasePcpWriter {
     }
 
     public static void main(String[] args) throws IOException {
-        PcpMmvWriter bridge = new PcpMmvWriter(new File("/var/tmp/mmv/mmvtest2"));
-        // Uses default boolean-to-int handler
+        PcpMmvWriter bridge = new PcpMmvWriter(new File("/var/tmp/mmv/mmvtest"));
+        
+        // Automatically uses default int handler
+        bridge.addMetric(MetricName.parse("sheep[baabaablack].bagsfull.count"), 3);
+        
+        // Automatically uses default boolean-to-int handler
         bridge.addMetric(MetricName.parse("sheep[baabaablack].bagsfull.haveany"),
                 new AtomicBoolean(true));
-        // Uses default int handler
-        bridge.addMetric(MetricName.parse("sheep[baabaablack].bagsfull.count"), 3);
-        // Uses default long handler
+        bridge.addMetric(MetricName.parse("sheep[limpy].bagsfull.haveany"),
+                new AtomicBoolean(false));
+        
+        // Automatically uses default long handler
         bridge.addMetric(MetricName.parse("sheep[insomniac].jumps"), 12345678901234L);
-        // Uses default double handler
+        
+        // Automatically uses default double handler
         bridge.addMetric(MetricName.parse("sheep[limpy].legs.available"), 0.75);
-        bridge.addMetric(MetricName.parse("sheep[limpy].brother.name"), "boris");
-               // addMetric(String) would fail, as there's no handler registered; use a custom one which
-        // puts the string's length as an int
-        bridge.addMetric(MetricName.parse("sheep[insomniac].jumpitem"), "Fence",
-                new AbstractTypeHandler<String>(MmvMetricType.I32, 4) {
-                    public void putBytes(ByteBuffer buffer, String value) {
-                        buffer.putInt(value.length());
+
+        // Uses this class' custom String handler
+        bridge.addMetric(MetricName.parse("sheep[limpy].jumpitem"), "fence");
+        
+        // addMetric(GregorianCalendar) would fail, as there's no handler registered by default for
+        // GregorianCalendars; use a custom one which puts the year as an int
+        bridge.addMetric(MetricName.parse("sheep[insomniac].lastjumped"), new GregorianCalendar(),
+                new AbstractTypeHandler<GregorianCalendar>(MmvMetricType.I32, 4) {
+                    public void putBytes(ByteBuffer buffer, GregorianCalendar value) {
+                        buffer.putInt(value.get(GregorianCalendar.YEAR));
                     }
                 });
+        
+        
         // addMetric(Date) would fail, as there's no handler registered; register one for all date
         // types from now on
         bridge.registerType(Date.class, new AbstractTypeHandler<Date>(MmvMetricType.I64, 8) {
@@ -436,18 +447,28 @@ public class PcpMmvWriter extends BasePcpWriter {
                 buffer.putLong(value.getTime());
             }
         });
+        // These will both use the handler we just registered
         bridge.addMetric(MetricName.parse("cow.how.now"), new Date());
         bridge.addMetric(MetricName.parse("cow.how.then"), new GregorianCalendar(1990, 1, 1, 12,
                 34, 56).getTime());
+        
+        // Set up some help text        
         bridge
-        .setInstanceDomainHelpText(
-                "sheep",
-                "sheep in the paddock",
-                "List of all the sheep in the paddock. Includes 'baabaablack', 'insomniac' (who likes to jump fences), and 'limpy' the three-legged wonder sheep.");
+                .setInstanceDomainHelpText(
+                        "sheep",
+                        "sheep in the paddock",
+                        "List of all the sheep in the paddock. Includes 'baabaablack', 'insomniac' (who likes to jump fences), and 'limpy' the three-legged wonder sheep.");
         bridge.setMetricHelpText("sheep.jumps", "# of jumps done",
                 "Number of times the sheep has jumped over its jumpitem");
-       bridge.start();
-        // Sold a bag
+        
+        // All the metrics are added; write the file
+        bridge.start();
+        // Metrics are visible to the agent from this point on
+        
+        // Sold a bag! Better update the count
         bridge.updateMetric(MetricName.parse("sheep[baabaablack].bagsfull.count"), 2);
+        // The fence broke! Need something new to jump over
+        bridge.updateMetric(MetricName.parse("sheep[limpy].jumpitem"), "Honda Civic");
+        // Values will be reflected in the agent immediately
     }
 }
