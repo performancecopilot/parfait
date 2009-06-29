@@ -21,6 +21,7 @@ public abstract class BasePcpWriter implements PcpWriter {
     private final File dataFile;
     private final Map<MetricName, PcpValueInfo> metricData = new LinkedHashMap<MetricName, PcpValueInfo>();
     private final Map<String, PcpMetricInfo> metricInfoByName = new LinkedHashMap<String, PcpMetricInfo>();
+    private final Map<Integer, PcpMetricInfo> metricInfoById = new LinkedHashMap<Integer, PcpMetricInfo>();
     private final Map<Class<?>, TypeHandler<?>> typeHandlers = new HashMap<Class<?>, TypeHandler<?>>(
             DefaultTypeHandlers.getDefaultMappings());
     protected volatile boolean started = false;
@@ -182,6 +183,8 @@ public abstract class BasePcpWriter implements PcpWriter {
 
     protected static class PcpMetricInfo {
         private final String metricName;
+        private final int id;
+        
         
         private InstanceDomain domain;
         private TypeHandler<?> typeHandler;
@@ -190,10 +193,15 @@ public abstract class BasePcpWriter implements PcpWriter {
         private PcpString longHelpText;
         
 
-        public PcpMetricInfo(String metricName) {
+        public PcpMetricInfo(String metricName, int id) {
             this.metricName = metricName;
+            this.id = id;
         }
 
+        public int getId() {
+            return id;
+        }
+        
         public int getOffset() {
             return offset;
         }
@@ -311,8 +319,9 @@ public abstract class BasePcpWriter implements PcpWriter {
     protected synchronized PcpMetricInfo getMetricInfo(String name) {
         PcpMetricInfo info = metricInfoByName.get(name);
         if (info == null) {
-            info = new PcpMetricInfo(name);
+            info = new PcpMetricInfo(name, calculateId(name, metricInfoById.keySet()));
             metricInfoByName.put(name, info);
+            metricInfoById.put(info.getId(), info);
         }
         return info;
     }

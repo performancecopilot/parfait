@@ -96,9 +96,6 @@ public class PcpMmvWriter extends BasePcpWriter {
     private static final int FLAGS = 0x2;
 
     private static final int DATA_VALUE_LENGTH = 16;
-
-    // TODO Actually expose this through the API
-    private int itemId = 0;
     
     private static final TypeHandler<String> MMV_STRING_HANDLER = new AbstractTypeHandler<String>(
             MmvMetricType.STRING, STRING_BLOCK_LENGTH) {
@@ -267,9 +264,7 @@ public class PcpMmvWriter extends BasePcpWriter {
         dataFileBuffer.put(info.getMetricName().getBytes(PCP_CHARSET));
         dataFileBuffer.put((byte) 0);
         dataFileBuffer.position(originalPosition + METRIC_NAME_LIMIT + 1);
-        // TODO expose metric item through the API
-        dataFileBuffer.putInt(++itemId);
-
+        dataFileBuffer.putInt(info.getId());
         dataFileBuffer.putInt(metricType.getIdentifier());
         // TODO Semantics not yet supported
         dataFileBuffer.putInt(0);
