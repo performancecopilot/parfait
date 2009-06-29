@@ -337,6 +337,9 @@ public abstract class BasePcpWriter implements PcpWriter {
         }
         value = Math.abs(value);
         while (usedIds.contains(value)) {
+            if (value == Integer.MAX_VALUE) {
+                value = 0;
+            }
             value = Math.abs(value + 1);
         }
         return value;
