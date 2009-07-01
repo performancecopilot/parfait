@@ -18,14 +18,62 @@ import com.custardsource.parfait.dxm.types.DefaultTypeHandlers;
 import com.custardsource.parfait.dxm.types.TypeHandler;
 
 public abstract class BasePcpWriter implements PcpWriter {
-    private final File dataFile;
+	public static interface PcpId {
+		int getId();
+	}
+	
+	public static abstract class Store<T extends PcpId> {
+        private final Map<String, T> byName = new LinkedHashMap<String, T>();
+        private final Map<Integer, T> byId = new LinkedHashMap<Integer, T>();
+
+        public synchronized T byName(String name) {
+	        T value = byName.get(name);
+	        if (value == null) {
+	            value = newInstance(name, byId.keySet());
+	            byName.put(name, value);
+	            byId.put(value.getId(), value);
+	        }
+	        return value;
+		}
+        
+        public synchronized Collection<T> all() {
+        	return byName.values();
+        }
+
+		protected abstract T newInstance(String name, Set<Integer> usedIds);
+
+		public int size() {
+			return byName.size();
+		}
+	}
+	
+    public static class MetricInfoStore extends Store<PcpMetricInfo> {
+		@Override
+		protected PcpMetricInfo newInstance(String name, Set<Integer> usedIds) {
+			return new PcpMetricInfo(name, calculateId(name, usedIds));
+		}
+	}
+    
+    public static class InstanceDomainStore extends Store<InstanceDomain> {
+		@Override
+		protected InstanceDomain newInstance(String name, Set<Integer> usedIds) {
+            return new InstanceDomain(name, calculateId(name, usedIds));
+		}
+    	
+    }
+
+    
+	private final File dataFile;
+	private final Store<PcpMetricInfo> metricInfo = new MetricInfoStore();
+    private final Store<InstanceDomain> instanceDomainStore = new InstanceDomainStore();
+	
+	
     private final Map<MetricName, PcpValueInfo> metricData = new LinkedHashMap<MetricName, PcpValueInfo>();
-    private final Map<String, PcpMetricInfo> metricInfoByName = new LinkedHashMap<String, PcpMetricInfo>();
-    private final Map<Integer, PcpMetricInfo> metricInfoById = new LinkedHashMap<Integer, PcpMetricInfo>();
     private final Map<Class<?>, TypeHandler<?>> typeHandlers = new HashMap<Class<?>, TypeHandler<?>>(
             DefaultTypeHandlers.getDefaultMappings());
     protected volatile boolean started = false;
     private ByteBuffer dataFileBuffer = null;
+    private Collection<PcpString> stringInfo = new ArrayList<PcpString>();
 
     protected BasePcpWriter(File dataFile) {
         this.dataFile = dataFile;
@@ -181,7 +229,7 @@ public abstract class BasePcpWriter implements PcpWriter {
 
     protected abstract int getFileLength();
 
-    protected static class PcpMetricInfo {
+    protected static class PcpMetricInfo implements PcpId {
         private final String metricName;
         private final int id;
         
@@ -311,31 +359,12 @@ public abstract class BasePcpWriter implements PcpWriter {
 
     }
 
-    private Map<String, InstanceDomain> instanceDomainsByName = new HashMap<String, InstanceDomain>();
-    private Map<Integer, InstanceDomain> instanceDomainsById = new LinkedHashMap<Integer, InstanceDomain>();
-    private Collection<PcpString> stringInfo = new ArrayList<PcpString>();
-
-    // TODO don't synchronize - concurrentmap
-    protected synchronized PcpMetricInfo getMetricInfo(String name) {
-        PcpMetricInfo info = metricInfoByName.get(name);
-        if (info == null) {
-            info = new PcpMetricInfo(name, calculateId(name, metricInfoById.keySet()));
-            metricInfoByName.put(name, info);
-            metricInfoById.put(info.getId(), info);
-        }
-        return info;
+    protected PcpMetricInfo getMetricInfo(String name) {
+    	return metricInfo.byName(name);
     }
 
-    // TODO don't synchronize - concurrentmap
-    protected synchronized InstanceDomain getInstanceDomain(String name) {
-        InstanceDomain domain = instanceDomainsByName.get(name);
-        if (domain == null) {
-            int id = calculateId(name, instanceDomainsById.keySet());
-            domain = new InstanceDomain(name, id);
-            instanceDomainsByName.put(name, domain);
-            instanceDomainsById.put(id, domain);
-        }
-        return domain;
+    protected InstanceDomain getInstanceDomain(String name) {
+    	return instanceDomainStore.byName(name);
     }
 
     private static int calculateId(String name, Set<Integer> usedIds) {
@@ -354,12 +383,11 @@ public abstract class BasePcpWriter implements PcpWriter {
         return value;
     }
 
-    protected static class InstanceDomain {
+    protected static class InstanceDomain implements PcpId {
         private final String name;
         private final int id;
         private int offset;
-        private Map<String, Instance> instancesByName = new HashMap<String, Instance>();
-        private Map<Integer, Instance> instancesById = new LinkedHashMap<Integer, Instance>();
+        private final Store<Instance> instanceStore = new InstanceStore();
         private PcpString shortHelpText;
         private PcpString longHelpText;
 
@@ -368,21 +396,13 @@ public abstract class BasePcpWriter implements PcpWriter {
             this.id = id;
         }
 
-        // TODO don't synchronize - concurrentmap
-        public synchronized Instance getInstance(String name) {
-            Instance instance = instancesByName.get(name);
-            if (instance == null) {
-                int id = calculateId(name, instancesById.keySet());
-                instance = new Instance(this, name, id);
-                instancesByName.put(name, instance);
-                instancesById.put(id, instance);
-            }
-            return instance;
+        public Instance getInstance(String name) {
+        	return instanceStore.byName(name);
         }
 
         @Override
         public String toString() {
-            return name + " (" + id + ") " + instancesById.values().toString();
+            return name + " (" + id + ") " + instanceStore.all().toString();
         }
 
         public int getId() {
@@ -398,15 +418,15 @@ public abstract class BasePcpWriter implements PcpWriter {
         }
         
         public int getInstanceCount() {
-            return instancesById.size();
+            return instanceStore.size();
         }
 
         public int getFirstInstanceOffset() {
-            return instancesById.values().iterator().next().getOffset();
+            return instanceStore.all().iterator().next().getOffset();
         }
 
         public Collection<Instance> getInstances() {
-            return instancesById.values();
+            return instanceStore.all();
         }
 
         public void setHelpText(PcpString shortHelpText, PcpString longHelpText) {
@@ -423,9 +443,16 @@ public abstract class BasePcpWriter implements PcpWriter {
             return longHelpText;
         }
         
+    	public class InstanceStore extends Store<Instance> {
+    		@Override
+    		protected Instance newInstance(String name, Set<Integer> usedIds) {
+    			return new Instance(InstanceDomain.this, name, calculateId(name, usedIds));
+    		}
+
+    	}
     }
 
-    protected static class Instance {
+    protected static class Instance implements PcpId {
         private final String name;
         private final int id;
         private final InstanceDomain instanceDomain;
@@ -464,13 +491,13 @@ public abstract class BasePcpWriter implements PcpWriter {
     }
     
     protected Collection<InstanceDomain> getInstanceDomains() {
-        return instanceDomainsById.values();
+        return instanceDomainStore.all();
     }
 
     protected Collection<Instance> getInstances() {
         Collection<Instance> instances = new ArrayList<Instance>();
-        for (InstanceDomain domain : instanceDomainsById.values()) {
-            instances.addAll(domain.instancesById.values());
+        for (InstanceDomain domain : instanceDomainStore.all()) {
+            instances.addAll(domain.getInstances());
         }
         return instances;
     }
@@ -480,7 +507,7 @@ public abstract class BasePcpWriter implements PcpWriter {
     }
     
     protected Collection<PcpMetricInfo> getMetricInfos() {
-        return metricInfoByName.values();
+        return metricInfo.all();
     }
     
 
@@ -542,6 +569,6 @@ public abstract class BasePcpWriter implements PcpWriter {
         id.getInstance("TaskControl");
         id.getInstance("SearchControlledDocControl");
         writer.getInstanceDomain("aconex.tasks").getInstance("");
-        System.out.println(writer.instanceDomainsById.values());
+        System.out.println(writer.getInstanceDomains());
     }
 }
