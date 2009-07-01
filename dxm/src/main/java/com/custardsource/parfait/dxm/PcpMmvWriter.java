@@ -39,12 +39,13 @@ import com.custardsource.parfait.dxm.types.TypeHandler;
  * This class currently has a few important limitations:
  * </p>
  * <ul>
- * <li>String types are not supported (version 0 of the MMV protocol does not support string types)</li>
- * <li>Instance domains are not supported (to be added later)</li>
- * <li>Dimensions are not specified (to be added later)</li>
- * <li>Receiving agent must be using MMV agent version 2.8.10 or later (prior versions contained an
- * ambiguity in the file format which may lead to indeterminate behaviour depending on
- * sizeof(time_t))</li>
+ * <li>Dimensions are not supported</li>
+ * <li>Cluster IDs are not supported</li>
+ * <li>Semantics are not supported</li>
+ * <li>Process ID is obtained in a Sun HotSpot-JVM specific way (likely to work on other JVMs but
+ * not guaranteed)</li>
+ * <li>Receiving agent must be using MMV agent version 2.8.10 or later (version 1 of the MMV on-disk
+ * format)</li>
  * </ul>
  * 
  * @author Cowan
