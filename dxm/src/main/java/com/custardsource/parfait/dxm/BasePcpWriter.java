@@ -224,7 +224,7 @@ public abstract class BasePcpWriter implements PcpWriter {
         }
         metricInfo.setTypeHandler(pcpType);
         
-        PcpValueInfo info = new PcpValueInfo(name, metricInfo, instance, initialValue);
+        PcpValueInfo info = new PcpValueInfo(name, metricInfo, instance, initialValue, this);
         metricData.put(name, info);
     }
 
@@ -302,8 +302,7 @@ public abstract class BasePcpWriter implements PcpWriter {
     	
     }
 
-    // TODO restore this to static - inject PCP String?
-    protected final class PcpValueInfo implements PcpOffset {
+    protected static final class PcpValueInfo implements PcpOffset {
     	private final MetricName metricName;
     	private final Object initialValue;
     	private final PcpMetricInfo metricInfo;
@@ -311,13 +310,14 @@ public abstract class BasePcpWriter implements PcpWriter {
     	private final PcpString largeValue;
     	private int offset;
 
-        private PcpValueInfo(MetricName metricName, PcpMetricInfo metricInfo, Instance instance, Object initialValue) {
+        private PcpValueInfo(MetricName metricName, PcpMetricInfo metricInfo, Instance instance, 
+        		Object initialValue, BasePcpWriter basePcpWriter) {
             this.metricName = metricName;
             this.metricInfo = metricInfo;
             this.instance = instance;
             this.initialValue = initialValue;
             if (metricInfo.getTypeHandler().requiresLargeStorage()) {
-                this.largeValue = createPcpString(initialValue.toString()); 
+                this.largeValue = basePcpWriter.createPcpString(initialValue.toString()); 
             } else {
                 this.largeValue = null;
             }
