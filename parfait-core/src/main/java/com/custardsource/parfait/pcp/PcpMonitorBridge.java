@@ -177,11 +177,10 @@ public class PcpMonitorBridge extends MonitoringView {
                 return;
             }
 
-            monitorablesPendingUpdate.offer(monitorable));
+            monitorablesPendingUpdate.offer(monitorable);
             // Don't need to check the return value here. If this failed, the queue must be full;
             // This will get detected by the Updater and logged. We should do nothing here as we 
             // don't want to block.
-            }
         }
     }
 
