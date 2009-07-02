@@ -4,19 +4,22 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import com.google.common.base.Preconditions;
 
 public class MonitorableRegistry {
+	private static final ConcurrentMap<String, MonitorableRegistry> NAMED_INSTANCES = new ConcurrentHashMap<String, MonitorableRegistry>();
 	public static MonitorableRegistry DEFAULT_REGISTRY = new MonitorableRegistry();
-	
+
     /**
      * This is a TreeMap so that the Monitorables are maintained in alphabetical order.
      */
     private final Map<String, Monitorable<?>> monitorables = new TreeMap<String, Monitorable<?>>();
 
     private boolean stateFrozen = false;
-
+    
     public synchronized <T> void register(Monitorable<T> monitorable) {
         if (stateFrozen) {
             throw new IllegalStateException("Cannot register monitorable " + monitorable.getName()
@@ -39,11 +42,23 @@ public class MonitorableRegistry {
         stateFrozen = true;
         return Collections.unmodifiableCollection(monitorables.values());
     }
-    
+ 
     /*
      * Testing only -- should be eliminated once the default registry is gone
      */
     public static void clearDefaultRegistry() {
         DEFAULT_REGISTRY = new MonitorableRegistry();
+    }
+
+    public static MonitorableRegistry getNamedInstance(String name) {
+    	MonitorableRegistry instance = NAMED_INSTANCES.get(name);
+    	if (instance == null) {
+    		instance = new MonitorableRegistry();
+    		MonitorableRegistry existing = NAMED_INSTANCES.putIfAbsent(name, instance);
+    		if (existing != null) {
+    			return existing;
+    		}
+    	}
+    	return instance;
     }
 }
