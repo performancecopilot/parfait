@@ -228,7 +228,7 @@ public abstract class BasePcpWriter implements PcpWriter {
         metricData.put(name, info);
     }
 
-    private static int calculateId(String name, Set<Integer> usedIds) {
+    static int calculateId(String name, Set<Integer> usedIds) {
         int value = name.hashCode();
         // Math.abs(MIN_VALUE) == MIN_VALUE, better deal with that just in case...
         if (value == Integer.MIN_VALUE) {
@@ -253,7 +253,7 @@ public abstract class BasePcpWriter implements PcpWriter {
         return string;
     }
 
-	private static interface PcpId {
+	static interface PcpId {
 		int getId();
 	}
 
@@ -262,11 +262,11 @@ public abstract class BasePcpWriter implements PcpWriter {
 		void setOffset(int offset);
 	}
 	
-	private static abstract class Store<T extends PcpId> {
+	static abstract class Store<T extends PcpId> {
         private final Map<String, T> byName = new LinkedHashMap<String, T>();
         private final Map<Integer, T> byId = new LinkedHashMap<Integer, T>();
 
-        private synchronized T byName(String name) {
+        synchronized T byName(String name) {
 	        T value = byName.get(name);
 	        if (value == null) {
 	            value = newInstance(name, byId.keySet());
@@ -276,13 +276,13 @@ public abstract class BasePcpWriter implements PcpWriter {
 	        return value;
 		}
         
-        private synchronized Collection<T> all() {
+        synchronized Collection<T> all() {
         	return byName.values();
         }
 
 		protected abstract T newInstance(String name, Set<Integer> usedIds);
 
-		private int size() {
+		int size() {
 			return byName.size();
 		}
 	}
@@ -302,81 +302,6 @@ public abstract class BasePcpWriter implements PcpWriter {
     	
     }
 
-    protected static final class PcpMetricInfo implements PcpId, PcpOffset {
-        private final String metricName;
-        private final int id;
-        
-        private InstanceDomain domain;
-        private TypeHandler<?> typeHandler;
-        private int offset;
-        private PcpString shortHelpText;
-        private PcpString longHelpText;
-        
-
-        private PcpMetricInfo(String metricName, int id) {
-            this.metricName = metricName;
-            this.id = id;
-        }
-
-        public int getId() {
-            return id;
-        }
-        
-        @Override
-        public int getOffset() {
-            return offset;
-        }
-
-        @Override
-        public void setOffset(int offset) {
-            this.offset = offset;
-        }
-        
-        String getMetricName() {
-            return metricName;
-        }
-
-        TypeHandler<?> getTypeHandler() {
-            return typeHandler;
-        }
-        
-        private void setTypeHandler(TypeHandler<?> typeHandler) {
-            if (this.typeHandler == null || this.typeHandler.equals(typeHandler)) {
-                this.typeHandler = typeHandler;
-            } else {
-                throw new IllegalArgumentException(
-                        "Two different type handlers cannot be registered for metric " + metricName);
-            }
-            
-        }
-
-        InstanceDomain getInstanceDomain() {
-            return domain;
-        }
-
-        private void setInstanceDomain(InstanceDomain domain) {
-            if (this.domain == null || this.domain.equals(domain)) {
-                this.domain = domain;
-            } else {
-                throw new IllegalArgumentException(
-                        "Two different instance domains cannot be set for metric " + metricName);
-            }
-        }
-
-        PcpString getShortHelpText() {
-            return shortHelpText;
-        }
-        
-        PcpString getLongHelpText() {
-            return longHelpText;
-        }
-
-        private void setHelpText(PcpString shortHelpText, PcpString longHelpText) {
-            this.shortHelpText = shortHelpText;
-            this.longHelpText = longHelpText;
-        }
-}
-    
     // TODO restore this to static - inject PCP String?
     protected final class PcpValueInfo implements PcpOffset {
     	private final MetricName metricName;
@@ -413,7 +338,7 @@ public abstract class BasePcpWriter implements PcpWriter {
         }
 
         TypeHandler<?> getTypeHandler() {
-            return metricInfo.typeHandler;
+            return metricInfo.getTypeHandler();
         }
 
         Object getInitialValue() {
@@ -421,7 +346,7 @@ public abstract class BasePcpWriter implements PcpWriter {
         }
 
         int getInstanceOffset() {
-            return instance == null ? 0 : instance.offset;
+            return instance == null ? 0 : instance.getOffset();
         }
 
         int getDescriptorOffset() {
@@ -432,138 +357,5 @@ public abstract class BasePcpWriter implements PcpWriter {
             return largeValue;
         }
 
-    }
-
-    protected static class InstanceDomain implements PcpId, PcpOffset {
-        private final String name;
-        private final int id;
-        private int offset;
-        private final Store<Instance> instanceStore = new InstanceStore();
-        private PcpString shortHelpText;
-        private PcpString longHelpText;
-
-        private InstanceDomain(String name, int id) {
-            this.name = name;
-            this.id = id;
-        }
-
-        private Instance getInstance(String name) {
-        	return instanceStore.byName(name);
-        }
-
-        @Override
-        public String toString() {
-            return name + " (" + id + ") " + instanceStore.all().toString();
-        }
-
-        public int getId() {
-            return id;
-        }
-
-        public int getOffset() {
-            return offset;
-        }
-
-        public void setOffset(int offset) {
-            this.offset = offset;
-        }
-        
-        int getInstanceCount() {
-            return instanceStore.size();
-        }
-
-        int getFirstInstanceOffset() {
-            return instanceStore.all().iterator().next().getOffset();
-        }
-
-        Collection<Instance> getInstances() {
-            return instanceStore.all();
-        }
-
-        private void setHelpText(PcpString shortHelpText, PcpString longHelpText) {
-            this.shortHelpText = shortHelpText;
-            this.longHelpText = longHelpText;
-            
-        }
-
-        PcpString getShortHelpText() {
-            return shortHelpText;
-        }
-
-        PcpString getLongHelpText() {
-            return longHelpText;
-        }
-        
-    	private class InstanceStore extends Store<Instance> {
-    		@Override
-    		protected Instance newInstance(String name, Set<Integer> usedIds) {
-    			return new Instance(InstanceDomain.this, name, calculateId(name, usedIds));
-    		}
-
-    	}
-    }
-
-    protected static final class Instance implements PcpId, PcpOffset {
-        private final String name;
-        private final int id;
-        private final InstanceDomain instanceDomain;
-        private int offset;
-
-        private Instance(InstanceDomain domain, String name, int id) {
-            this.instanceDomain = domain;
-            this.name = name;
-            this.id = id;
-        }
-
-        @Override
-        public String toString() {
-            return name + " (" + id + ")";
-        }
-
-        @Override
-        public int getOffset() {
-            return offset;
-        }
-
-        @Override
-        public void setOffset(int offset) {
-            this.offset = offset;
-        }
-
-        @Override
-        public int getId() {
-            return id;
-        }
-
-        String getName() {
-            return name;
-        }
-
-        InstanceDomain getInstanceDomain() {
-            return instanceDomain;
-        }
-    }
-
-    protected final static class PcpString implements PcpOffset {
-        private final String initialValue;
-        private int offset;
-        
-        public PcpString(String value) {
-            this.initialValue = value;
-        }
-
-        @Override
-        public int getOffset() {
-            return offset;
-        }
-
-        @Override
-        public void setOffset(int offset) {
-            this.offset = offset;
-        }
-
-        String getInitialValue() {
-            return initialValue;
-        }
     }
 }
