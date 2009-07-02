@@ -12,6 +12,7 @@ import java.util.Collection;
 
 import com.custardsource.parfait.dxm.types.AbstractTypeHandler;
 import com.custardsource.parfait.dxm.types.MmvMetricType;
+import com.google.common.base.Preconditions;
 
 public class PcpAconexPmdaWriter extends BasePcpWriter {
     public static final String ENCODING = "ISO-8859-1";
@@ -20,11 +21,29 @@ public class PcpAconexPmdaWriter extends BasePcpWriter {
     public static final int METRIC_NAME_LIMIT = 200;
     public static final int MAX_STRING_LENGTH = 256;
 	private static final int HEADER_LENGTH = 9; // 8 for version, 1 for protocol version
+	private final File dataFileDirectory;
 	private final File headerFile;
+	private final String serverName;
+	
 
-	public PcpAconexPmdaWriter(File headerFile, File dataFile) {
-		super(dataFile);
-		this.headerFile = headerFile;
+	public PcpAconexPmdaWriter(File directory, String serverName, boolean deleteFilesOnExit) {
+		super(getDataFile(directory, serverName));
+		Preconditions.checkArgument(serverName != null
+				&& !serverName.equals(""), "Sever name can not be blank");
+		this.serverName = serverName;
+		if (!directory.exists()) {
+			directory.mkdirs();
+		}
+		Preconditions.checkArgument(directory.isDirectory(),
+				"dataFileDir [%s] is not a directory.", directory);
+
+		this.headerFile = getHeaderFile(directory, serverName);
+		this.dataFileDirectory = directory; 
+		
+		if (deleteFilesOnExit) {
+			getDataFile().deleteOnExit();
+			headerFile.deleteOnExit();
+		}
 		registerType(String.class, new AbstractTypeHandler<String>(
 				MmvMetricType.STRING, MAX_STRING_LENGTH) {
 			public void putBytes(ByteBuffer buffer, String value) {
@@ -36,7 +55,15 @@ public class PcpAconexPmdaWriter extends BasePcpWriter {
 		});
 	}
 
-    private void writeHeaderValue(Writer output, String name, String value) throws IOException {
+    private File getHeaderFile(File directory, String serverName) {
+    	return new File(directory, serverName + ".pcp.header");
+	}
+
+	private static File getDataFile(File directory, String serverName) {
+    	return new File(directory, serverName + ".pcp.data");
+	}
+
+	private void writeHeaderValue(Writer output, String name, String value) throws IOException {
         output.append(name);
         output.append('=');
         output.append(value);
@@ -118,4 +145,10 @@ public class PcpAconexPmdaWriter extends BasePcpWriter {
 
         
 	}
+
+	@Override
+	public String toString() {
+		return "PcpAconexPmdaWriter '" + serverName + "', writing to " + dataFileDirectory;
+	}
+	
 }

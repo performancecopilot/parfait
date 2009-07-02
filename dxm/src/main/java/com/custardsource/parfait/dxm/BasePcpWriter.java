@@ -18,6 +18,9 @@ import com.custardsource.parfait.dxm.types.DefaultTypeHandlers;
 import com.custardsource.parfait.dxm.types.TypeHandler;
 
 public abstract class BasePcpWriter implements PcpWriter {
+	// TODO concurrency safety audit
+	// TODO only include in-use indoms/instances/metrics (/strings?) in the header
+	// TODO config to presupply IDs and helptexts
 	private final File dataFile;
 	private final Store<PcpMetricInfo> metricInfo = new MetricInfoStore();
     private final Store<InstanceDomain> instanceDomainStore = new InstanceDomainStore();
@@ -191,6 +194,10 @@ public abstract class BasePcpWriter implements PcpWriter {
     
     protected final Collection<PcpString> getStrings() {
         return stringInfo;
+    }
+    
+    protected final File getDataFile() {
+    	return dataFile;
     }
 
 
