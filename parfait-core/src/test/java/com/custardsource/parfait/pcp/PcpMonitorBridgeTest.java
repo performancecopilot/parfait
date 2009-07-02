@@ -40,8 +40,8 @@ public class PcpMonitorBridgeTest extends TestCase {
         doubleValue = new MonitoredValue<Double>("double.value", "double.value.desc", registry, 1d);
         stringValue = new MonitoredValue<String>("string.value", "string.value.desc", registry, "!");
 
-        pcp = new PcpMonitorBridge("test", System.getProperty("java.io.tmpdir"), registry);
-
+		pcp = new PcpMonitorBridge(new PcpAconexPmdaWriter(new File(System
+				.getProperty("java.io.tmpdir")), "test", true), registry);
     }
 
     public void tearDown() {

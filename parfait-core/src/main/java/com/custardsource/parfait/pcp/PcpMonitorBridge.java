@@ -1,12 +1,10 @@
 package com.custardsource.parfait.pcp;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
@@ -16,7 +14,6 @@ import com.custardsource.parfait.Monitorable;
 import com.custardsource.parfait.MonitorableRegistry;
 import com.custardsource.parfait.MonitoringView;
 import com.custardsource.parfait.dxm.MetricName;
-import com.custardsource.parfait.dxm.PcpAconexPmdaWriter;
 import com.custardsource.parfait.dxm.PcpWriter;
 import com.google.common.base.Preconditions;
 
@@ -39,39 +36,26 @@ public class PcpMonitorBridge extends MonitoringView {
 
     private final Thread updateThread;
 
-    private final String serverName;
-
-    private final File dataFileDir;
-
     /*
      * Determines whether value changes detected are written out to an external file for external
      * monitoring by the PCP agent.
      */
     private boolean outputValuesToPCPFile = true;
 
-    private boolean deleteFilesOnExit = false;
-
 	private volatile PcpWriter pcpWriter;
 
 
-    public PcpMonitorBridge(String serverName, String dataFileDir) {
-    	this(serverName, dataFileDir, MonitorableRegistry.DEFAULT_REGISTRY);
+    public PcpMonitorBridge(PcpWriter writer) {
+    	this(writer, MonitorableRegistry.DEFAULT_REGISTRY);
     }
 
-    public PcpMonitorBridge(String serverName, String dataFileDir, MonitorableRegistry registry) {
+    public PcpMonitorBridge(PcpWriter writer, MonitorableRegistry registry) {
 		super(registry);
+		Preconditions.checkNotNull(writer);
 		Preconditions.checkNotNull(registry);
-		Preconditions.checkArgument(StringUtils.isNotBlank(serverName),
-				"Sever name can not be blank");
-		this.serverName = serverName;
-		this.dataFileDir = new File(dataFileDir);
-		if (!this.dataFileDir.exists()) {
-			this.dataFileDir.mkdirs();
-		}
-		Preconditions.checkArgument(this.dataFileDir.isDirectory(),
-				"dataFileDir [%s] is not a directory.", dataFileDir);
+		this.pcpWriter = writer;
 		this.updateThread = new Thread(new Updater());
-		this.updateThread.setName("PcpMonitorBridge-Updater-" + serverName);
+		this.updateThread.setName("PcpMonitorBridge-Updater");
 		this.updateThread.setDaemon(true);
     }
 
@@ -90,16 +74,6 @@ public class PcpMonitorBridge extends MonitoringView {
     @Override
     protected void startMonitoring(Collection<Monitorable<?>> monitorables) {
         try {
-            File headerFile = getHeaderFile();
-            File dataFile = getDataFile();
-            
-            if (isDeleteFilesOnExit()) {
-                headerFile.deleteOnExit();
-                dataFile.deleteOnExit();
-            }
-            
-			pcpWriter = new PcpAconexPmdaWriter(headerFile, dataFile);
-			
             for (Monitorable<?> monitorable : monitorables) {
             	monitorable.attachMonitor(monitor);
                 pcpWriter.addMetric(MetricName.parse(monitorable.getName()), monitorable
@@ -109,19 +83,10 @@ public class PcpMonitorBridge extends MonitoringView {
 
             updateThread.start();
 
-            LOG.info("PCP monitoring bridge started for server [" + serverName
-                    + "] - logging to directory [" + dataFileDir + "]");
+            LOG.info("PCP monitoring bridge started for writer [" + pcpWriter + "]");
         } catch (IOException e) {
             throw new RuntimeException("Unable to initialise PCP monitoring bridge", e);
         }
-    }
-
-    private File getHeaderFile() {
-        return new File(dataFileDir, serverName + ".pcp.header");
-    }
-
-    private File getDataFile() {
-        return new File(dataFileDir, serverName + ".pcp.data");
     }
 
     /**
@@ -192,20 +157,5 @@ public class PcpMonitorBridge extends MonitoringView {
     @ManagedAttribute
     public void setOutputValuesToPCPFile(boolean outputValuesToPCPFile) {
         this.outputValuesToPCPFile = outputValuesToPCPFile;
-    }
-
-    /**
-     * When set to true, both the header and data files created by this bridge are marked for deletion 
-     * via JVM standard deletion policy on normal termination.  The default value is false, and highly encouraged
-     * to leave this value off.  Only when circumstances require that the data file name pattern changes on each 
-     * JVM launch (say, when using the Process ID in the filename) should this properties use be considered.
-     * @param deleteFilesOnExit
-     */
-    public void setDeleteFilesOnExit(boolean deleteFilesOnExit) {
-        this.deleteFilesOnExit = deleteFilesOnExit;
-    }
-
-    public final boolean isDeleteFilesOnExit() {
-        return deleteFilesOnExit;
     }
 }
