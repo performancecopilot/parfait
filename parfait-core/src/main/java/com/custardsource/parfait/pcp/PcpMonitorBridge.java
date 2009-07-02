@@ -13,7 +13,6 @@ import com.custardsource.parfait.Monitor;
 import com.custardsource.parfait.Monitorable;
 import com.custardsource.parfait.MonitorableRegistry;
 import com.custardsource.parfait.MonitoringView;
-import com.custardsource.parfait.dxm.MetricName;
 import com.custardsource.parfait.dxm.PcpWriter;
 import com.google.common.base.Preconditions;
 
@@ -33,8 +32,8 @@ public class PcpMonitorBridge extends MonitoringView {
     		UPDATE_QUEUE_SIZE);
 
     private final Monitor monitor = new PcpMonitorBridgeMonitor();
-
     private final Thread updateThread;
+    private final MetricNameMapper mapper;
 
     /*
      * Determines whether value changes detected are written out to an external file for external
@@ -50,10 +49,16 @@ public class PcpMonitorBridge extends MonitoringView {
     }
 
     public PcpMonitorBridge(PcpWriter writer, MonitorableRegistry registry) {
+    	this(writer, registry, MetricNameMapper.PASSTHROUGH_MAPPER);
+    }
+    
+    public PcpMonitorBridge(PcpWriter writer, MonitorableRegistry registry, MetricNameMapper mapper) {
 		super(registry);
 		Preconditions.checkNotNull(writer);
 		Preconditions.checkNotNull(registry);
+		Preconditions.checkNotNull(mapper);
 		this.pcpWriter = writer;
+		this.mapper = mapper;
 		this.updateThread = new Thread(new Updater());
 		this.updateThread.setName("PcpMonitorBridge-Updater");
 		this.updateThread.setDaemon(true);
@@ -76,7 +81,7 @@ public class PcpMonitorBridge extends MonitoringView {
         try {
             for (Monitorable<?> monitorable : monitorables) {
             	monitorable.attachMonitor(monitor);
-                pcpWriter.addMetric(MetricName.parse(monitorable.getName()), monitorable
+                pcpWriter.addMetric(mapper.map(monitorable.getName()), monitorable
                         .get());
             }
             pcpWriter.start();
@@ -104,8 +109,8 @@ public class PcpMonitorBridge extends MonitoringView {
                         monitorablesToUpdate.add(monitorablesPendingUpdate.take());
                         monitorablesPendingUpdate.drainTo(monitorablesToUpdate);
                         for (Monitorable<?> monitorable : monitorablesToUpdate) {
-                            pcpWriter.updateMetric(MetricName
-                                    .parse(monitorable.getName()), monitorable.get());
+							pcpWriter.updateMetric(mapper.map(monitorable
+									.getName()), monitorable.get());
                         }
                         if (monitorablesPendingUpdate.size() >= UPDATE_QUEUE_SIZE) {
                             LOG.warn("Update queue was full - some updates may have been lost.");
