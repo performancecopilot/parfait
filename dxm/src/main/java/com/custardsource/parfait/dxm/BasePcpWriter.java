@@ -18,60 +18,14 @@ import com.custardsource.parfait.dxm.types.DefaultTypeHandlers;
 import com.custardsource.parfait.dxm.types.TypeHandler;
 
 public abstract class BasePcpWriter implements PcpWriter {
-	public static interface PcpId {
-		int getId();
-	}
-	
-	public static abstract class Store<T extends PcpId> {
-        private final Map<String, T> byName = new LinkedHashMap<String, T>();
-        private final Map<Integer, T> byId = new LinkedHashMap<Integer, T>();
-
-        public synchronized T byName(String name) {
-	        T value = byName.get(name);
-	        if (value == null) {
-	            value = newInstance(name, byId.keySet());
-	            byName.put(name, value);
-	            byId.put(value.getId(), value);
-	        }
-	        return value;
-		}
-        
-        public synchronized Collection<T> all() {
-        	return byName.values();
-        }
-
-		protected abstract T newInstance(String name, Set<Integer> usedIds);
-
-		public int size() {
-			return byName.size();
-		}
-	}
-	
-    public static class MetricInfoStore extends Store<PcpMetricInfo> {
-		@Override
-		protected PcpMetricInfo newInstance(String name, Set<Integer> usedIds) {
-			return new PcpMetricInfo(name, calculateId(name, usedIds));
-		}
-	}
-    
-    public static class InstanceDomainStore extends Store<InstanceDomain> {
-		@Override
-		protected InstanceDomain newInstance(String name, Set<Integer> usedIds) {
-            return new InstanceDomain(name, calculateId(name, usedIds));
-		}
-    	
-    }
-
-    
 	private final File dataFile;
 	private final Store<PcpMetricInfo> metricInfo = new MetricInfoStore();
     private final Store<InstanceDomain> instanceDomainStore = new InstanceDomainStore();
 	
-	
     private final Map<MetricName, PcpValueInfo> metricData = new LinkedHashMap<MetricName, PcpValueInfo>();
     private final Map<Class<?>, TypeHandler<?>> typeHandlers = new HashMap<Class<?>, TypeHandler<?>>(
             DefaultTypeHandlers.getDefaultMappings());
-    protected volatile boolean started = false;
+    private volatile boolean started = false;
     private ByteBuffer dataFileBuffer = null;
     private Collection<PcpString> stringInfo = new ArrayList<PcpString>();
 
@@ -134,6 +88,36 @@ public abstract class BasePcpWriter implements PcpWriter {
         updateValue(info, value);
     }
 
+    /*
+     * (non-Javadoc)
+     * @see com.custardsource.parfait.pcp.PcpWriter#start()
+     */
+    public void start() throws IOException {
+        if (started) {
+            throw new IllegalStateException("Writer is already started");
+        }
+        if (metricData.isEmpty()) {
+            throw new IllegalStateException("Cannot create an MMV file with no metrics");
+        }
+        initialiseOffsets();
+        dataFileBuffer = initialiseBuffer(dataFile, getFileLength());
+        populateDataBuffer(dataFileBuffer, metricData.values());
+
+        started = true;
+    }
+
+    @Override
+    public void setInstanceDomainHelpText(String instanceDomain, String shortHelpText, String longHelpText) {
+        InstanceDomain domain = getInstanceDomain(instanceDomain);
+        domain.setHelpText(createPcpString(shortHelpText), createPcpString(longHelpText));
+    }
+
+    @Override
+    public void setMetricHelpText(String metricName, String shortHelpText, String longHelpText) {
+        PcpMetricInfo info = getMetricInfo(metricName);
+        info.setHelpText(createPcpString(shortHelpText), createPcpString(longHelpText));
+    }
+
     @SuppressWarnings("unchecked")
     protected void updateValue(PcpValueInfo info, Object value) {
         TypeHandler rawHandler = info.getTypeHandler();
@@ -141,6 +125,74 @@ public abstract class BasePcpWriter implements PcpWriter {
                 .getOffset() : info.getOffset());
         rawHandler.putBytes(dataFileBuffer, value);
     }
+
+    protected ByteBuffer initialiseBuffer(File file, int length) throws IOException {
+        RandomAccessFile fos = null;
+        try {
+            fos = new RandomAccessFile(file, "rw");
+            fos.setLength(0);
+            fos.setLength(length);
+            ByteBuffer tempDataFile = fos.getChannel().map(MapMode.READ_WRITE, 0, length);
+            tempDataFile.order(ByteOrder.nativeOrder());
+            fos.close();
+
+            return tempDataFile;
+        } finally {
+            if (fos != null) {
+                fos.close();
+            }
+        }
+    }
+
+    protected abstract void initialiseOffsets();
+
+    protected abstract void populateDataBuffer(ByteBuffer dataFileBuffer,
+            Collection<PcpValueInfo> metricInfos) throws IOException;
+
+    protected abstract int getMetricNameLimit();
+
+    /**
+     * @return the maximum length of an instance name supported by this agent. May be 0 to indicate
+     *         that instances are not supported.
+     */
+    protected abstract int getInstanceNameLimit();
+
+    protected abstract Charset getCharset();
+
+    protected abstract int getFileLength();
+
+    protected PcpMetricInfo getMetricInfo(String name) {
+    	return metricInfo.byName(name);
+    }
+
+    protected InstanceDomain getInstanceDomain(String name) {
+    	return instanceDomainStore.byName(name);
+    }
+
+    protected Collection<InstanceDomain> getInstanceDomains() {
+        return instanceDomainStore.all();
+    }
+
+    protected Collection<Instance> getInstances() {
+        Collection<Instance> instances = new ArrayList<Instance>();
+        for (InstanceDomain domain : instanceDomainStore.all()) {
+            instances.addAll(domain.getInstances());
+        }
+        return instances;
+    }
+
+    protected Collection<PcpValueInfo> getValueInfos() {
+        return metricData.values();
+    }
+    
+    protected Collection<PcpMetricInfo> getMetricInfos() {
+        return metricInfo.all();
+    }
+
+    protected Collection<PcpString> getStrings() {
+        return stringInfo;
+    }
+
 
     private synchronized void addMetricInfo(MetricName name, Object initialValue,
             TypeHandler<?> pcpType) {
@@ -176,58 +228,74 @@ public abstract class BasePcpWriter implements PcpWriter {
         metricData.put(name, info);
     }
 
-    protected ByteBuffer initialiseBuffer(File file, int length) throws IOException {
-        RandomAccessFile fos = null;
-        try {
-            fos = new RandomAccessFile(file, "rw");
-            fos.setLength(0);
-            fos.setLength(length);
-            ByteBuffer tempDataFile = fos.getChannel().map(MapMode.READ_WRITE, 0, length);
-            tempDataFile.order(ByteOrder.nativeOrder());
-            fos.close();
-
-            return tempDataFile;
-        } finally {
-            if (fos != null) {
-                fos.close();
+    private static int calculateId(String name, Set<Integer> usedIds) {
+        int value = name.hashCode();
+        // Math.abs(MIN_VALUE) == MIN_VALUE, better deal with that just in case...
+        if (value == Integer.MIN_VALUE) {
+            value++;
+        }
+        value = Math.abs(value);
+        while (usedIds.contains(value)) {
+            if (value == Integer.MAX_VALUE) {
+                value = 0;
             }
+            value = Math.abs(value + 1);
         }
+        return value;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.custardsource.parfait.pcp.PcpWriter#start()
-     */
-    public void start() throws IOException {
-        if (started) {
-            throw new IllegalStateException("Writer is already started");
+    private PcpString createPcpString(String text) {
+        if (text == null) {
+            return null;
         }
-        if (metricData.isEmpty()) {
-            throw new IllegalStateException("Cannot create an MMV file with no metrics");
-        }
-        initialiseOffsets();
-        dataFileBuffer = initialiseBuffer(dataFile, getFileLength());
-        populateDataBuffer(dataFileBuffer, metricData.values());
-
-        started = true;
+        PcpString string = new PcpString(text);
+        stringInfo .add(string);
+        return string;
     }
 
-    protected abstract void initialiseOffsets();
+	private static interface PcpId {
+		int getId();
+	}
+	
+	private static abstract class Store<T extends PcpId> {
+        private final Map<String, T> byName = new LinkedHashMap<String, T>();
+        private final Map<Integer, T> byId = new LinkedHashMap<Integer, T>();
 
-    protected abstract void populateDataBuffer(ByteBuffer dataFileBuffer,
-            Collection<PcpValueInfo> metricInfos) throws IOException;
+        public synchronized T byName(String name) {
+	        T value = byName.get(name);
+	        if (value == null) {
+	            value = newInstance(name, byId.keySet());
+	            byName.put(name, value);
+	            byId.put(value.getId(), value);
+	        }
+	        return value;
+		}
+        
+        public synchronized Collection<T> all() {
+        	return byName.values();
+        }
 
-    protected abstract int getMetricNameLimit();
+		protected abstract T newInstance(String name, Set<Integer> usedIds);
 
-    /**
-     * @return the maximum length of an instance name supported by this agent. May be 0 to indicate
-     *         that instances are not supported.
-     */
-    protected abstract int getInstanceNameLimit();
-
-    protected abstract Charset getCharset();
-
-    protected abstract int getFileLength();
+		public int size() {
+			return byName.size();
+		}
+	}
+	
+    private static class MetricInfoStore extends Store<PcpMetricInfo> {
+		@Override
+		protected PcpMetricInfo newInstance(String name, Set<Integer> usedIds) {
+			return new PcpMetricInfo(name, calculateId(name, usedIds));
+		}
+	}
+    
+    private static class InstanceDomainStore extends Store<InstanceDomain> {
+		@Override
+		protected InstanceDomain newInstance(String name, Set<Integer> usedIds) {
+            return new InstanceDomain(name, calculateId(name, usedIds));
+		}
+    	
+    }
 
     protected static class PcpMetricInfo implements PcpId {
         private final String metricName;
@@ -359,30 +427,6 @@ public abstract class BasePcpWriter implements PcpWriter {
 
     }
 
-    protected PcpMetricInfo getMetricInfo(String name) {
-    	return metricInfo.byName(name);
-    }
-
-    protected InstanceDomain getInstanceDomain(String name) {
-    	return instanceDomainStore.byName(name);
-    }
-
-    private static int calculateId(String name, Set<Integer> usedIds) {
-        int value = name.hashCode();
-        // Math.abs(MIN_VALUE) == MIN_VALUE, better deal with that just in case...
-        if (value == Integer.MIN_VALUE) {
-            value++;
-        }
-        value = Math.abs(value);
-        while (usedIds.contains(value)) {
-            if (value == Integer.MAX_VALUE) {
-                value = 0;
-            }
-            value = Math.abs(value + 1);
-        }
-        return value;
-    }
-
     protected static class InstanceDomain implements PcpId {
         private final String name;
         private final int id;
@@ -489,27 +533,6 @@ public abstract class BasePcpWriter implements PcpWriter {
             return instanceDomain;
         }
     }
-    
-    protected Collection<InstanceDomain> getInstanceDomains() {
-        return instanceDomainStore.all();
-    }
-
-    protected Collection<Instance> getInstances() {
-        Collection<Instance> instances = new ArrayList<Instance>();
-        for (InstanceDomain domain : instanceDomainStore.all()) {
-            instances.addAll(domain.getInstances());
-        }
-        return instances;
-    }
-
-    protected Collection<PcpValueInfo> getValueInfos() {
-        return metricData.values();
-    }
-    
-    protected Collection<PcpMetricInfo> getMetricInfos() {
-        return metricInfo.all();
-    }
-    
 
     protected static class PcpString {
         final String initialValue;
@@ -531,30 +554,5 @@ public abstract class BasePcpWriter implements PcpWriter {
             return initialValue;
         }
         
-    }
-
-    @Override
-    public void setInstanceDomainHelpText(String instanceDomain, String shortHelpText, String longHelpText) {
-        InstanceDomain domain = getInstanceDomain(instanceDomain);
-        domain.setHelpText(createPcpString(shortHelpText), createPcpString(longHelpText));
-    }
-
-    @Override
-    public void setMetricHelpText(String metricName, String shortHelpText, String longHelpText) {
-        PcpMetricInfo info = getMetricInfo(metricName);
-        info.setHelpText(createPcpString(shortHelpText), createPcpString(longHelpText));
-    }
-    
-    private PcpString createPcpString(String text) {
-        if (text == null) {
-            return null;
-        }
-        PcpString string = new PcpString(text);
-        stringInfo .add(string);
-        return string;
-    }
-
-    protected Collection<PcpString> getStrings() {
-        return stringInfo;
     }
 }
