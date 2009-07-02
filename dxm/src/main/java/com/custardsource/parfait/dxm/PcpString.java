@@ -3,7 +3,6 @@
  */
 package com.custardsource.parfait.dxm;
 
-import com.custardsource.parfait.dxm.BasePcpWriter.PcpOffset;
 
 final class PcpString implements PcpOffset {
     private final String initialValue;

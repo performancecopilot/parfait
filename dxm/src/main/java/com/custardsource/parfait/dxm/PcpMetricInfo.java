@@ -3,8 +3,6 @@
  */
 package com.custardsource.parfait.dxm;
 
-import com.custardsource.parfait.dxm.BasePcpWriter.PcpId;
-import com.custardsource.parfait.dxm.BasePcpWriter.PcpOffset;
 import com.custardsource.parfait.dxm.types.TypeHandler;
 
 final class PcpMetricInfo implements PcpId, PcpOffset {

@@ -3,8 +3,6 @@
  */
 package com.custardsource.parfait.dxm;
 
-import com.custardsource.parfait.dxm.BasePcpWriter.PcpId;
-import com.custardsource.parfait.dxm.BasePcpWriter.PcpOffset;
 
 final class Instance implements PcpId, PcpOffset {
     private final String name;

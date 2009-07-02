@@ -6,8 +6,6 @@ package com.custardsource.parfait.dxm;
 import java.util.Collection;
 import java.util.Set;
 
-import com.custardsource.parfait.dxm.BasePcpWriter.PcpId;
-import com.custardsource.parfait.dxm.BasePcpWriter.PcpOffset;
 import com.custardsource.parfait.dxm.BasePcpWriter.Store;
 
 class InstanceDomain implements PcpId, PcpOffset {
