@@ -557,18 +557,4 @@ public abstract class BasePcpWriter implements PcpWriter {
     protected Collection<PcpString> getStrings() {
         return stringInfo;
     }
-
-    public static void main(String[] args) throws Exception {
-        BasePcpWriter writer = new PcpMmvWriter(new File("/tmp/xmmv"));
-        InstanceDomain id;
-        id = writer.getInstanceDomain("aconex.smurfs");
-        id = writer.getInstanceDomain("aconex.tasks");
-        id = writer.getInstanceDomain("aconex.controllers");
-        id = writer.getInstanceDomain("aconex.controllers");
-        id.getInstance("TaskControl");
-        id.getInstance("TaskControl");
-        id.getInstance("SearchControlledDocControl");
-        writer.getInstanceDomain("aconex.tasks").getInstance("");
-        System.out.println(writer.getInstanceDomains());
-    }
 }
