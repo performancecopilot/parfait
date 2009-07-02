@@ -37,7 +37,7 @@ public abstract class BasePcpWriter implements PcpWriter {
      * (non-Javadoc)
      * @see com.custardsource.parfait.pcp.PcpWriter#addMetric(java.lang.String, java.lang.Object)
      */
-    public void addMetric(MetricName name, Object initialValue) {
+    public final void addMetric(MetricName name, Object initialValue) {
         TypeHandler<?> handler = typeHandlers.get(initialValue.getClass());
         if (handler == null) {
             throw new IllegalArgumentException("No default handler registered for type "
@@ -52,7 +52,7 @@ public abstract class BasePcpWriter implements PcpWriter {
      * @see com.custardsource.parfait.pcp.PcpWriter#addMetric(java.lang.String, T,
      * com.custardsource.parfait.pcp.types.TypeHandler)
      */
-    public <T> void addMetric(MetricName name, T initialValue, TypeHandler<T> pcpType) {
+    public final <T> void addMetric(MetricName name, T initialValue, TypeHandler<T> pcpType) {
         if (pcpType == null) {
             throw new IllegalArgumentException("PCP Type handler must not be null");
         }
@@ -64,7 +64,7 @@ public abstract class BasePcpWriter implements PcpWriter {
      * @see com.custardsource.parfait.pcp.PcpWriter#registerType(java.lang.Class,
      * com.custardsource.parfait.pcp.types.TypeHandler)
      */
-    public <T> void registerType(Class<T> runtimeClass, TypeHandler<T> handler) {
+    public final <T> void registerType(Class<T> runtimeClass, TypeHandler<T> handler) {
         if (started) {
             // Can't add any more metrics anyway; harmless
             return;
@@ -76,7 +76,7 @@ public abstract class BasePcpWriter implements PcpWriter {
      * (non-Javadoc)
      * @see com.custardsource.parfait.pcp.PcpWriter#updateMetric(java.lang.String, java.lang.Object)
      */
-    public void updateMetric(MetricName name, Object value) {
+    public final void updateMetric(MetricName name, Object value) {
         if (!started) {
             throw new IllegalStateException("Cannot update metric unless writer is running");
         }
@@ -92,7 +92,7 @@ public abstract class BasePcpWriter implements PcpWriter {
      * (non-Javadoc)
      * @see com.custardsource.parfait.pcp.PcpWriter#start()
      */
-    public void start() throws IOException {
+    public final void start() throws IOException {
         if (started) {
             throw new IllegalStateException("Writer is already started");
         }
@@ -107,26 +107,26 @@ public abstract class BasePcpWriter implements PcpWriter {
     }
 
     @Override
-    public void setInstanceDomainHelpText(String instanceDomain, String shortHelpText, String longHelpText) {
+    public final void setInstanceDomainHelpText(String instanceDomain, String shortHelpText, String longHelpText) {
         InstanceDomain domain = getInstanceDomain(instanceDomain);
         domain.setHelpText(createPcpString(shortHelpText), createPcpString(longHelpText));
     }
 
     @Override
-    public void setMetricHelpText(String metricName, String shortHelpText, String longHelpText) {
+    public final void setMetricHelpText(String metricName, String shortHelpText, String longHelpText) {
         PcpMetricInfo info = getMetricInfo(metricName);
         info.setHelpText(createPcpString(shortHelpText), createPcpString(longHelpText));
     }
 
     @SuppressWarnings("unchecked")
-    protected void updateValue(PcpValueInfo info, Object value) {
+    protected final void updateValue(PcpValueInfo info, Object value) {
         TypeHandler rawHandler = info.getTypeHandler();
         dataFileBuffer.position(rawHandler.requiresLargeStorage() ? info.getLargeValue()
                 .getOffset() : info.getOffset());
         rawHandler.putBytes(dataFileBuffer, value);
     }
 
-    protected ByteBuffer initialiseBuffer(File file, int length) throws IOException {
+    private ByteBuffer initialiseBuffer(File file, int length) throws IOException {
         RandomAccessFile fos = null;
         try {
             fos = new RandomAccessFile(file, "rw");
@@ -161,19 +161,23 @@ public abstract class BasePcpWriter implements PcpWriter {
 
     protected abstract int getFileLength();
 
-    protected PcpMetricInfo getMetricInfo(String name) {
+    protected final PcpMetricInfo getMetricInfo(String name) {
     	return metricInfo.byName(name);
     }
 
-    protected InstanceDomain getInstanceDomain(String name) {
+    protected final Collection<PcpMetricInfo> getMetricInfos() {
+        return metricInfo.all();
+    }
+
+    protected final InstanceDomain getInstanceDomain(String name) {
     	return instanceDomainStore.byName(name);
     }
 
-    protected Collection<InstanceDomain> getInstanceDomains() {
+    protected final Collection<InstanceDomain> getInstanceDomains() {
         return instanceDomainStore.all();
     }
 
-    protected Collection<Instance> getInstances() {
+    protected final Collection<Instance> getInstances() {
         Collection<Instance> instances = new ArrayList<Instance>();
         for (InstanceDomain domain : instanceDomainStore.all()) {
             instances.addAll(domain.getInstances());
@@ -181,15 +185,11 @@ public abstract class BasePcpWriter implements PcpWriter {
         return instances;
     }
 
-    protected Collection<PcpValueInfo> getValueInfos() {
+    protected final Collection<PcpValueInfo> getValueInfos() {
         return metricData.values();
     }
     
-    protected Collection<PcpMetricInfo> getMetricInfos() {
-        return metricInfo.all();
-    }
-
-    protected Collection<PcpString> getStrings() {
+    protected final Collection<PcpString> getStrings() {
         return stringInfo;
     }
 
@@ -261,7 +261,7 @@ public abstract class BasePcpWriter implements PcpWriter {
         private final Map<String, T> byName = new LinkedHashMap<String, T>();
         private final Map<Integer, T> byId = new LinkedHashMap<Integer, T>();
 
-        public synchronized T byName(String name) {
+        private synchronized T byName(String name) {
 	        T value = byName.get(name);
 	        if (value == null) {
 	            value = newInstance(name, byId.keySet());
@@ -271,25 +271,25 @@ public abstract class BasePcpWriter implements PcpWriter {
 	        return value;
 		}
         
-        public synchronized Collection<T> all() {
+        private synchronized Collection<T> all() {
         	return byName.values();
         }
 
 		protected abstract T newInstance(String name, Set<Integer> usedIds);
 
-		public int size() {
+		private int size() {
 			return byName.size();
 		}
 	}
 	
-    private static class MetricInfoStore extends Store<PcpMetricInfo> {
+    private static final class MetricInfoStore extends Store<PcpMetricInfo> {
 		@Override
 		protected PcpMetricInfo newInstance(String name, Set<Integer> usedIds) {
 			return new PcpMetricInfo(name, calculateId(name, usedIds));
 		}
 	}
     
-    private static class InstanceDomainStore extends Store<InstanceDomain> {
+    private static final class InstanceDomainStore extends Store<InstanceDomain> {
 		@Override
 		protected InstanceDomain newInstance(String name, Set<Integer> usedIds) {
             return new InstanceDomain(name, calculateId(name, usedIds));
@@ -297,10 +297,9 @@ public abstract class BasePcpWriter implements PcpWriter {
     	
     }
 
-    protected static class PcpMetricInfo implements PcpId {
+    protected static final class PcpMetricInfo implements PcpId {
         private final String metricName;
         private final int id;
-        
         
         private InstanceDomain domain;
         private TypeHandler<?> typeHandler;
@@ -309,7 +308,7 @@ public abstract class BasePcpWriter implements PcpWriter {
         private PcpString longHelpText;
         
 
-        public PcpMetricInfo(String metricName, int id) {
+        private PcpMetricInfo(String metricName, int id) {
             this.metricName = metricName;
             this.id = id;
         }
@@ -318,19 +317,19 @@ public abstract class BasePcpWriter implements PcpWriter {
             return id;
         }
         
-        public int getOffset() {
+        int getOffset() {
             return offset;
         }
 
-        public void setOffset(int offset) {
+        void setOffset(int offset) {
             this.offset = offset;
         }
         
-        public String getMetricName() {
+        String getMetricName() {
             return metricName;
         }
 
-        public TypeHandler<?> getTypeHandler() {
+        TypeHandler<?> getTypeHandler() {
             return typeHandler;
         }
         
@@ -344,7 +343,7 @@ public abstract class BasePcpWriter implements PcpWriter {
             
         }
 
-        public InstanceDomain getInstanceDomain() {
+        InstanceDomain getInstanceDomain() {
             return domain;
         }
 
@@ -357,24 +356,30 @@ public abstract class BasePcpWriter implements PcpWriter {
             }
         }
 
-        public PcpString getShortHelpText() {
+        PcpString getShortHelpText() {
             return shortHelpText;
         }
         
-        public PcpString getLongHelpText() {
+        PcpString getLongHelpText() {
             return longHelpText;
         }
 
-        public void setHelpText(PcpString shortHelpText, PcpString longHelpText) {
+        private void setHelpText(PcpString shortHelpText, PcpString longHelpText) {
             this.shortHelpText = shortHelpText;
             this.longHelpText = longHelpText;
         }
 }
     
     // TODO restore this to static - inject PCP String?
-    protected class PcpValueInfo {
+    protected final class PcpValueInfo {
+    	private final MetricName metricName;
+    	private final Object initialValue;
+    	private final PcpMetricInfo metricInfo;
+    	private final Instance instance;
+    	private final PcpString largeValue;
+    	private int offset;
 
-        public PcpValueInfo(MetricName metricName, PcpMetricInfo metricInfo, Instance instance, Object initialValue) {
+        private PcpValueInfo(MetricName metricName, PcpMetricInfo metricInfo, Instance instance, Object initialValue) {
             this.metricName = metricName;
             this.metricInfo = metricInfo;
             this.instance = instance;
@@ -386,42 +391,35 @@ public abstract class BasePcpWriter implements PcpWriter {
             }
         }
 
-        private final MetricName metricName;
-        private final Object initialValue;
-        private final PcpMetricInfo metricInfo;
-        private final Instance instance;
-        private final PcpString largeValue;
-        private int offset;
-
-        public MetricName getMetricName() {
+        MetricName getMetricName() {
             return metricName;
         }
 
-        public int getOffset() {
+        int getOffset() {
             return offset;
         }
 
-        public void setOffset(int offset) {
+        void setOffset(int offset) {
             this.offset = offset;
         }
 
-        public TypeHandler<?> getTypeHandler() {
+        TypeHandler<?> getTypeHandler() {
             return metricInfo.typeHandler;
         }
 
-        public Object getInitialValue() {
+        Object getInitialValue() {
             return initialValue;
         }
 
-        public int getInstanceOffset() {
+        int getInstanceOffset() {
             return instance == null ? 0 : instance.offset;
         }
 
-        public int getDescriptorOffset() {
+        int getDescriptorOffset() {
             return metricInfo.getOffset();
         }
         
-        public PcpString getLargeValue() {
+        PcpString getLargeValue() {
             return largeValue;
         }
 
@@ -440,7 +438,7 @@ public abstract class BasePcpWriter implements PcpWriter {
             this.id = id;
         }
 
-        public Instance getInstance(String name) {
+        private Instance getInstance(String name) {
         	return instanceStore.byName(name);
         }
 
@@ -453,7 +451,7 @@ public abstract class BasePcpWriter implements PcpWriter {
             return id;
         }
 
-        public int getOffset() {
+        int getOffset() {
             return offset;
         }
 
@@ -461,33 +459,33 @@ public abstract class BasePcpWriter implements PcpWriter {
             this.offset = offset;
         }
         
-        public int getInstanceCount() {
+        int getInstanceCount() {
             return instanceStore.size();
         }
 
-        public int getFirstInstanceOffset() {
+        int getFirstInstanceOffset() {
             return instanceStore.all().iterator().next().getOffset();
         }
 
-        public Collection<Instance> getInstances() {
+        Collection<Instance> getInstances() {
             return instanceStore.all();
         }
 
-        public void setHelpText(PcpString shortHelpText, PcpString longHelpText) {
+        private void setHelpText(PcpString shortHelpText, PcpString longHelpText) {
             this.shortHelpText = shortHelpText;
             this.longHelpText = longHelpText;
             
         }
 
-        public PcpString getShortHelpText() {
+        PcpString getShortHelpText() {
             return shortHelpText;
         }
 
-        public PcpString getLongHelpText() {
+        PcpString getLongHelpText() {
             return longHelpText;
         }
         
-    	public class InstanceStore extends Store<Instance> {
+    	private class InstanceStore extends Store<Instance> {
     		@Override
     		protected Instance newInstance(String name, Set<Integer> usedIds) {
     			return new Instance(InstanceDomain.this, name, calculateId(name, usedIds));
@@ -496,7 +494,7 @@ public abstract class BasePcpWriter implements PcpWriter {
     	}
     }
 
-    protected static class Instance implements PcpId {
+    protected static final class Instance implements PcpId {
         private final String name;
         private final int id;
         private final InstanceDomain instanceDomain;
@@ -513,46 +511,46 @@ public abstract class BasePcpWriter implements PcpWriter {
             return name + " (" + id + ")";
         }
 
-        public int getOffset() {
+        int getOffset() {
             return offset;
         }
 
-        public void setOffset(int offset) {
+        void setOffset(int offset) {
             this.offset = offset;
         }
 
+        @Override
         public int getId() {
             return id;
         }
 
-        public String getName() {
+        String getName() {
             return name;
         }
 
-        public InstanceDomain getInstanceDomain() {
+        InstanceDomain getInstanceDomain() {
             return instanceDomain;
         }
     }
 
-    protected static class PcpString {
-        final String initialValue;
-        int offset;
+    protected final static class PcpString {
+        private final String initialValue;
+        private int offset;
         
         public PcpString(String value) {
             this.initialValue = value;
         }
 
-        public int getOffset() {
+        int getOffset() {
             return offset;
         }
 
-        public void setOffset(int offset) {
+        void setOffset(int offset) {
             this.offset = offset;
         }
 
-        public String getInitialValue() {
+        String getInitialValue() {
             return initialValue;
         }
-        
     }
 }
