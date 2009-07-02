@@ -25,7 +25,7 @@ import com.google.common.base.Preconditions;
 @ManagedResource
 public class PcpMonitorBridge extends MonitoringView {
 
-    private final Logger LOG = Logger.getLogger(PcpMonitorBridge.class);
+    private static final Logger LOG = Logger.getLogger(PcpMonitorBridge.class);
 
     public static final int UPDATE_QUEUE_SIZE = 1024;
 
