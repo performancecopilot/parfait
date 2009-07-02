@@ -358,34 +358,24 @@ public class PcpMmvWriter extends BasePcpWriter {
     @Override
     protected synchronized void initialiseOffsets() {
         int nextOffset = HEADER_LENGTH + (TOC_LENGTH * tocCount());
-
-        for (InstanceDomain instanceDomain : getInstanceDomains()) {
-            instanceDomain.setOffset(nextOffset);
-            nextOffset += INSTANCE_DOMAIN_LENGTH;
-        }
-
-        for (Instance instance : getInstances()) {
-            instance.setOffset(nextOffset);
-            nextOffset += INSTANCE_LENGTH;
-        }
-
-        for (PcpMetricInfo metric : getMetricInfos()) {
-            metric.setOffset(nextOffset);
-            nextOffset += METRIC_LENGTH;
-        }
-
-        for (PcpValueInfo value : getValueInfos()) {
-            value.setOffset(nextOffset);
-            nextOffset += VALUE_LENGTH;
-        }
-
-        for (PcpString string : getStrings()) {
-            string.setOffset(nextOffset);
-            nextOffset += STRING_BLOCK_LENGTH;
-        }
+        
+        nextOffset = initializeOffsets(getInstanceDomains(), nextOffset, INSTANCE_DOMAIN_LENGTH);
+        nextOffset = initializeOffsets(getInstances(), nextOffset, INSTANCE_LENGTH);
+        nextOffset = initializeOffsets(getMetricInfos(), nextOffset, METRIC_LENGTH);
+        nextOffset = initializeOffsets(getValueInfos(), nextOffset, VALUE_LENGTH);
+        nextOffset = initializeOffsets(getStrings(), nextOffset, STRING_BLOCK_LENGTH);
     }
 
-    private int tocCount() {
+	private int initializeOffsets(Collection<? extends PcpOffset> offsettables,
+			int nextOffset, int blockLength) {
+		for (PcpOffset offsettable : offsettables) {
+			offsettable.setOffset(nextOffset);
+			nextOffset += blockLength;
+		}
+		return nextOffset;
+	}
+
+	private int tocCount() {
         int tocCount = 2; // metrics + values
         if (!getInstances().isEmpty()) {
             tocCount += 2;

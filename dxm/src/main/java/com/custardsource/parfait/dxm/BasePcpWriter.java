@@ -256,6 +256,11 @@ public abstract class BasePcpWriter implements PcpWriter {
 	private static interface PcpId {
 		int getId();
 	}
+
+	static interface PcpOffset {
+		int getOffset();
+		void setOffset(int offset);
+	}
 	
 	private static abstract class Store<T extends PcpId> {
         private final Map<String, T> byName = new LinkedHashMap<String, T>();
@@ -297,7 +302,7 @@ public abstract class BasePcpWriter implements PcpWriter {
     	
     }
 
-    protected static final class PcpMetricInfo implements PcpId {
+    protected static final class PcpMetricInfo implements PcpId, PcpOffset {
         private final String metricName;
         private final int id;
         
@@ -317,11 +322,13 @@ public abstract class BasePcpWriter implements PcpWriter {
             return id;
         }
         
-        int getOffset() {
+        @Override
+        public int getOffset() {
             return offset;
         }
 
-        void setOffset(int offset) {
+        @Override
+        public void setOffset(int offset) {
             this.offset = offset;
         }
         
@@ -371,7 +378,7 @@ public abstract class BasePcpWriter implements PcpWriter {
 }
     
     // TODO restore this to static - inject PCP String?
-    protected final class PcpValueInfo {
+    protected final class PcpValueInfo implements PcpOffset {
     	private final MetricName metricName;
     	private final Object initialValue;
     	private final PcpMetricInfo metricInfo;
@@ -395,11 +402,13 @@ public abstract class BasePcpWriter implements PcpWriter {
             return metricName;
         }
 
-        int getOffset() {
+        @Override
+        public int getOffset() {
             return offset;
         }
 
-        void setOffset(int offset) {
+        @Override
+        public void setOffset(int offset) {
             this.offset = offset;
         }
 
@@ -425,7 +434,7 @@ public abstract class BasePcpWriter implements PcpWriter {
 
     }
 
-    protected static class InstanceDomain implements PcpId {
+    protected static class InstanceDomain implements PcpId, PcpOffset {
         private final String name;
         private final int id;
         private int offset;
@@ -451,7 +460,7 @@ public abstract class BasePcpWriter implements PcpWriter {
             return id;
         }
 
-        int getOffset() {
+        public int getOffset() {
             return offset;
         }
 
@@ -494,7 +503,7 @@ public abstract class BasePcpWriter implements PcpWriter {
     	}
     }
 
-    protected static final class Instance implements PcpId {
+    protected static final class Instance implements PcpId, PcpOffset {
         private final String name;
         private final int id;
         private final InstanceDomain instanceDomain;
@@ -511,11 +520,13 @@ public abstract class BasePcpWriter implements PcpWriter {
             return name + " (" + id + ")";
         }
 
-        int getOffset() {
+        @Override
+        public int getOffset() {
             return offset;
         }
 
-        void setOffset(int offset) {
+        @Override
+        public void setOffset(int offset) {
             this.offset = offset;
         }
 
@@ -533,7 +544,7 @@ public abstract class BasePcpWriter implements PcpWriter {
         }
     }
 
-    protected final static class PcpString {
+    protected final static class PcpString implements PcpOffset {
         private final String initialValue;
         private int offset;
         
@@ -541,11 +552,13 @@ public abstract class BasePcpWriter implements PcpWriter {
             this.initialValue = value;
         }
 
-        int getOffset() {
+        @Override
+        public int getOffset() {
             return offset;
         }
 
-        void setOffset(int offset) {
+        @Override
+        public void setOffset(int offset) {
             this.offset = offset;
         }
 
