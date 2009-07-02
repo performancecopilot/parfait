@@ -45,7 +45,7 @@ public class PcpMonitorBridge extends MonitoringView {
 
     /*
      * Determines whether value changes detected are written out to an external file for external
-     * monitoring by the Aconex PCP agent.
+     * monitoring by the PCP agent.
      */
     private boolean outputValuesToPCPFile = true;
 
@@ -184,7 +184,7 @@ public class PcpMonitorBridge extends MonitoringView {
         }
     }
 
-    @ManagedAttribute(description = "If set, value changes are written to an external file monitored by the Aconex PCP Agent.")
+    @ManagedAttribute(description = "If set, value changes are written to an external file monitored PCP Agent.")
     public boolean isOutputValuesToPCPFile() {
         return outputValuesToPCPFile;
     }
