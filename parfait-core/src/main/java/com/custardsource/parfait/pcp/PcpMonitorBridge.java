@@ -24,9 +24,6 @@ import com.google.common.base.Preconditions;
  * PcpMonitorBridge bridges between the set of {@link Monitorable}s in the current system and a PCP
  * monitor agent. The bridge works by persisting any changes to a Monitorable into a section of
  * memory that is also mapped into the PCP monitor agents address space.
- * <p>
- * The format of the shared address space is specified in an associated header file. A full
- * description of the communication protocol can be found under the issue ACX-5426.
  */
 @ManagedResource
 public class PcpMonitorBridge extends MonitoringView {
@@ -180,9 +177,10 @@ public class PcpMonitorBridge extends MonitoringView {
                 return;
             }
 
-            if (!monitorablesPendingUpdate.offer(monitorable)) {
-                // The queue must be full... This will get detected by the Updater and logged we
-                // should do nothing here as we don't want to block.
+            monitorablesPendingUpdate.offer(monitorable));
+            // Don't need to check the return value here. If this failed, the queue must be full;
+            // This will get detected by the Updater and logged. We should do nothing here as we 
+            // don't want to block.
             }
         }
     }
