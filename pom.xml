@@ -11,6 +11,8 @@
     <module>dxm</module>
     <module>parfait-pcp</module>
     <module>parfait-io</module>
+    <module>parfait-jmx</module>
+    <module>parfait-jdbc</module>
   </modules>
   <url>http://code.google.com/p/parfait/</url>
   <inceptionYear>2009</inceptionYear>
