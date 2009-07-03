@@ -9,7 +9,6 @@
   <modules>
     <module>parfait-core</module>
     <module>dxm</module>
-    <module>parfait-jdbc</module>
     <module>parfait-pcp</module>
   </modules>
   <url>http://code.google.com/p/parfait/</url>
