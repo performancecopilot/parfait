@@ -10,6 +10,7 @@
     <module>parfait-core</module>
     <module>dxm</module>
     <module>parfait-pcp</module>
+    <module>parfait-io</module>
   </modules>
   <url>http://code.google.com/p/parfait/</url>
   <inceptionYear>2009</inceptionYear>
