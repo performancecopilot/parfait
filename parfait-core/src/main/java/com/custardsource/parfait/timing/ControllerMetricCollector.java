@@ -6,7 +6,7 @@ import org.apache.log4j.Logger;
 
 /**
  * <p>
- * Coordinates multiple {@link MetricMeasurement ControllerMetrics} for all the controllers invoked
+ * Coordinates multiple {@link MetricMeasurement MetricMeasurements} for all the controllers invoked
  * in the process of handling the user request.
  * </p>
  * <p>
