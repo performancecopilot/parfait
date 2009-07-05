@@ -9,7 +9,7 @@ import org.apache.commons.lang.StringUtils;
 public class ControllerMetricSet {
     private final ControllerMetricSet parent;
     private final List<ControllerMetricSet> children = new ArrayList<ControllerMetricSet>();
-    private final List<ControllerMetric> metricInstances = new ArrayList<ControllerMetric>();
+    private final List<MetricMeasurement> metricInstances = new ArrayList<MetricMeasurement>();
 
     private final Class<?> controllerClass;
     private final String action;
@@ -28,28 +28,28 @@ public class ControllerMetricSet {
         return parent;
     }
     
-    public void addMetricInstance(ControllerMetric metric) {
+    public void addMetricInstance(MetricMeasurement metric) {
         metricInstances.add(metric);
     }
     
     public void startAll() {
-        for (ControllerMetric metric : metricInstances) {
+        for (MetricMeasurement metric : metricInstances) {
             metric.startTimer();
         }
     }
 
     public void stopAll() {
-        for (ControllerMetric metric : metricInstances) {
+        for (MetricMeasurement metric : metricInstances) {
             metric.stopTimer();
         }
     }
     public void pauseAll() {
-        for (ControllerMetric metric : metricInstances) {
+        for (MetricMeasurement metric : metricInstances) {
             metric.pauseOwnTime();
         }
     }
     public void resumeAll() {
-        for (ControllerMetric metric : metricInstances) {
+        for (MetricMeasurement metric : metricInstances) {
             metric.resumeOwnTime();
         }
     }
@@ -97,7 +97,7 @@ public class ControllerMetricSet {
         return controllerClass;
     }
 
-    public Collection<ControllerMetric> getMetricInstances() {
+    public Collection<MetricMeasurement> getMetricInstances() {
         return metricInstances;
     }
 

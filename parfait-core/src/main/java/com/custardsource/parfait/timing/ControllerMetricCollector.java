@@ -6,7 +6,7 @@ import org.apache.log4j.Logger;
 
 /**
  * <p>
- * Coordinates multiple {@link ControllerMetric ControllerMetrics} for all the controllers invoked
+ * Coordinates multiple {@link MetricMeasurement ControllerMetrics} for all the controllers invoked
  * in the process of handling the user request.
  * </p>
  * <p>
@@ -35,7 +35,7 @@ public class ControllerMetricCollector {
         ControllerMetricSet newTiming = new ControllerMetricSet(current, controller.getClass(),
                 action);
         for (ThreadMetric metric : perControllerCounters.get(controller).getMetricSources()) {
-            newTiming.addMetricInstance(new ControllerMetric(metric));
+            newTiming.addMetricInstance(new MetricMeasurement(metric));
         }
         current = newTiming;
         topLevelController = controller;
@@ -49,7 +49,7 @@ public class ControllerMetricCollector {
         String depthText = (depth > 0) ? "Nested (" + depth + ")" : "Top";
 
         String metricData = "";
-        for (ControllerMetric metric : current.getMetricInstances()) {
+        for (MetricMeasurement metric : current.getMetricInstances()) {
             metricData += "\t" + metric.getMetricName() + ": own " +
                     metric.ownTimeValueFormatted() + ", total " + metric.totalValueFormatted();
         }
@@ -58,7 +58,7 @@ public class ControllerMetricCollector {
         if (depth == 0 && perControllerCounters.containsKey(topLevelController)) {
             // We're at the top level, do our PCP perControllerCounters too
             MonitoredCounterSet counters = perControllerCounters.get(topLevelController);
-            for (ControllerMetric metric : current.getMetricInstances()) {
+            for (MetricMeasurement metric : current.getMetricInstances()) {
                 ControllerCounterSet counter = counters.getCounterForMetric(metric
                         .getMetricSource());
                 if (counter != null) {

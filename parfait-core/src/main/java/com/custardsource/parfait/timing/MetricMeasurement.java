@@ -10,14 +10,14 @@ import com.google.common.base.Preconditions;
  * long the execution of the controller took from start to finish, and how long was actually spent
  * in this controller's code as opposed to forwarding elsewhere).
  */
-class ControllerMetric {
+class MetricMeasurement {
     private Long startValue;
     private Long endValue;
     private Long lastStartOwnTimeValue;
     private long ownValueSoFar = 0L;
     private ThreadMetric metricSource;
 
-    public ControllerMetric(ThreadMetric metricSource) {
+    public MetricMeasurement(ThreadMetric metricSource) {
         this.metricSource = metricSource;
     }
 
