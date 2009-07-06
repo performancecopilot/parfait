@@ -2,11 +2,11 @@ package com.custardsource.parfait.timing;
 
 
 /**
- * A dummy ControllerMetricCollectorFactory which implements all functionality as no-ops.
+ * A dummy EventTimer which implements all functionality as no-ops.
  */
-public final class DummyControllerMetricCollectorFactory extends EventTimer {
+public final class DummyEventTimer extends EventTimer {
 
-    private static final EventMetricCollector DUMMY_CONTROLLER_METRIC_COLLECTOR = new EventMetricCollector(
+    private static final EventMetricCollector DUMMY_EVENT_METRIC_COLLECTOR = new EventMetricCollector(
             null) {
         public void startTiming(Object source, String action) {
             // no-op
@@ -26,7 +26,7 @@ public final class DummyControllerMetricCollectorFactory extends EventTimer {
     };
 
     public EventMetricCollector getCollector() {
-        return DUMMY_CONTROLLER_METRIC_COLLECTOR;
+        return DUMMY_EVENT_METRIC_COLLECTOR;
     }
 
     public void addController(Timeable controller, String beanName) {
