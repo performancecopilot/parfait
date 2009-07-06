@@ -28,7 +28,7 @@ public class EventTimerTest extends TestCase {
 
     public void testTotalMonitoredCounterSize() {
 
-        metricFactory.addController(workflowWizardControl, "/WorkFlowWizard");
+        metricFactory.registerTimeable(workflowWizardControl, "/WorkFlowWizard");
 
         /**
          * This total value includes the invocation count counter, which is stored separately to the
@@ -42,7 +42,7 @@ public class EventTimerTest extends TestCase {
         assertEquals("Should be the same number of per controller and total counters",
                 --totalControllerCounterSize, numberOfMetricCounters);
 
-        metricFactory.addController(logonControl, "/Logon");
+        metricFactory.registerTimeable(logonControl, "/Logon");
 
         assertEquals(
                 "Number of total controller counters should not change after adding controller",
@@ -52,7 +52,7 @@ public class EventTimerTest extends TestCase {
         assertEquals("Should be the same number of per controller and total counters",
                 --totalControllerCounterSize, logonCounterSet.numberOfControllerCounters());
 
-        metricFactory.addController(attachmentControl, "/Attachments");
+        metricFactory.registerTimeable(attachmentControl, "/Attachments");
         assertEquals(
                 "Number of total controller counters should not change after adding controller",
                 ++totalControllerCounterSize, metricFactory.getNumberOfTotalControllerCounters());
@@ -65,9 +65,9 @@ public class EventTimerTest extends TestCase {
 
     public void testTotalMonitoredCounterSingletons() {
 
-        metricFactory.addController(logonControl, "/Logon");
-        metricFactory.addController(workflowWizardControl, "/WorkflowWizard");
-        metricFactory.addController(attachmentControl, "/Attachments");
+        metricFactory.registerTimeable(logonControl, "/Logon");
+        metricFactory.registerTimeable(workflowWizardControl, "/WorkflowWizard");
+        metricFactory.registerTimeable(attachmentControl, "/Attachments");
 
         EventCounters wizardCounterSet = metricFactory
                 .getCounterSetForController(workflowWizardControl);

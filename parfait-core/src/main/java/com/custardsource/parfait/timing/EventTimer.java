@@ -67,7 +67,7 @@ public class EventTimer {
         return metricCollectors.get();
     }
 
-    public void addController(Timeable timeable, String beanName) {
+    public void registerTimeable(Timeable timeable, String beanName) {
         timeable.setMetricCollectorFactory(this);
         perControllerCounters.put(timeable, getCounterSet(beanName));
     }

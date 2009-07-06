@@ -23,7 +23,7 @@ public final class EventTimerInjector implements BeanPostProcessor {
     public Object postProcessBeforeInitialization(Object bean, String beanName)
             throws BeansException {
         if (bean instanceof Timeable) {
-            metricCollectorFactory.addController((Timeable) bean, beanName);
+            metricCollectorFactory.registerTimeable((Timeable) bean, beanName);
         }
         return bean;
     }
