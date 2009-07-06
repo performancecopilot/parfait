@@ -3,7 +3,7 @@ package com.custardsource.parfait.timing;
 import junit.framework.TestCase;
 
 import com.custardsource.parfait.MonitorableRegistry;
-import com.custardsource.parfait.timing.MonitoredCounterSet;
+import com.custardsource.parfait.timing.EventCounters;
 
 public class ControllerMetricCollectorFactoryTest extends TestCase {
 
@@ -36,7 +36,7 @@ public class ControllerMetricCollectorFactoryTest extends TestCase {
          * each controller, this should not be taken into consideration.
          */
         Integer totalControllerCounterSize = metricFactory.getNumberOfTotalControllerCounters();
-        MonitoredCounterSet wizardCounterSet = metricFactory
+        EventCounters wizardCounterSet = metricFactory
                 .getCounterSetForController(workflowWizardControl);
         Integer numberOfMetricCounters = wizardCounterSet.numberOfControllerCounters();
         assertEquals("Should be the same number of per controller and total counters",
@@ -47,7 +47,7 @@ public class ControllerMetricCollectorFactoryTest extends TestCase {
         assertEquals(
                 "Number of total controller counters should not change after adding controller",
                 ++totalControllerCounterSize, metricFactory.getNumberOfTotalControllerCounters());
-        MonitoredCounterSet logonCounterSet = metricFactory
+        EventCounters logonCounterSet = metricFactory
                 .getCounterSetForController(logonControl);
         assertEquals("Should be the same number of per controller and total counters",
                 --totalControllerCounterSize, logonCounterSet.numberOfControllerCounters());
@@ -56,7 +56,7 @@ public class ControllerMetricCollectorFactoryTest extends TestCase {
         assertEquals(
                 "Number of total controller counters should not change after adding controller",
                 ++totalControllerCounterSize, metricFactory.getNumberOfTotalControllerCounters());
-        MonitoredCounterSet attachmentCounterSet = metricFactory
+        EventCounters attachmentCounterSet = metricFactory
                 .getCounterSetForController(attachmentControl);
         assertEquals("Should be the same number of per controller and total counters",
                 --totalControllerCounterSize, attachmentCounterSet.numberOfControllerCounters());
@@ -69,11 +69,11 @@ public class ControllerMetricCollectorFactoryTest extends TestCase {
         metricFactory.addController(workflowWizardControl, "/WorkflowWizard");
         metricFactory.addController(attachmentControl, "/Attachments");
 
-        MonitoredCounterSet wizardCounterSet = metricFactory
+        EventCounters wizardCounterSet = metricFactory
                 .getCounterSetForController(workflowWizardControl);
-        MonitoredCounterSet logonCounterSet = metricFactory
+        EventCounters logonCounterSet = metricFactory
                 .getCounterSetForController(logonControl);
-        MonitoredCounterSet attachmentsCounterSet = metricFactory
+        EventCounters attachmentsCounterSet = metricFactory
                 .getCounterSetForController(attachmentControl);
 
         assertNotNull("Couldnt obtain counter set for workflow wizard controller", wizardCounterSet);

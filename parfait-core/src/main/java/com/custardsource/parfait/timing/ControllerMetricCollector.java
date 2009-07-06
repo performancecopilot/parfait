@@ -22,12 +22,12 @@ public class ControllerMetricCollector {
     private int depth = 0;
     private Object topLevelController;
 
-    private final Map<MetricCollectorController, MonitoredCounterSet> perControllerCounters;
+    private final Map<MetricCollectorController, EventCounters> perControllerCounters;
 
     private static final Logger LOG = Logger.getLogger(ControllerMetricCollector.class);
 
     public ControllerMetricCollector(
-            Map<MetricCollectorController, MonitoredCounterSet> perControllerCounters) {
+            Map<MetricCollectorController, EventCounters> perControllerCounters) {
         this.perControllerCounters = perControllerCounters;
     }
 
@@ -57,7 +57,7 @@ public class ControllerMetricCollector {
                 .getBackTrace(), metricData));
         if (depth == 0 && perControllerCounters.containsKey(topLevelController)) {
             // We're at the top level, do our PCP perControllerCounters too
-            MonitoredCounterSet counters = perControllerCounters.get(topLevelController);
+            EventCounters counters = perControllerCounters.get(topLevelController);
             for (MetricMeasurement metric : current.getMetricInstances()) {
                 EventMetricCounters counter = counters.getCounterForMetric(metric
                         .getMetricSource());

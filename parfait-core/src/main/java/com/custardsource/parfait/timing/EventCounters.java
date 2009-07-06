@@ -8,11 +8,11 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-class MonitoredCounterSet {
+class EventCounters {
     private final Map<ThreadMetric, EventMetricCounters> metrics = new LinkedHashMap<ThreadMetric, EventMetricCounters>();
     private final EventMetricCounters invocationCounter;
 
-    public MonitoredCounterSet(EventMetricCounters invocationCounter) {
+    public EventCounters(EventMetricCounters invocationCounter) {
         this.invocationCounter = invocationCounter;
     }
 
