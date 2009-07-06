@@ -19,7 +19,7 @@ public class EventTimerTest extends TestCase {
 
     private void initEvents() {
         MonitorableRegistry.clearDefaultRegistry();
-        metricFactory = new EventTimer();
+        metricFactory = new EventTimer("test");
         workflowWizardControl = new DummyTimeable();
         logonControl = new DummyTimeable();
         attachmentControl = new DummyTimeable();

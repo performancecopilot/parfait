@@ -37,24 +37,27 @@ public class EventTimer {
     private final Map<String, MonitoredCounter> totalCountersAcrossEvents = new HashMap<String, MonitoredCounter>();
 
     private final ThreadMetricSuite metricSuite;
+    private final String prefix;
 
-    protected EventTimer() {
-        this(new ThreadMetricSuite());
+    protected EventTimer(String prefix) {
+        this(prefix, new ThreadMetricSuite());
     }
     
-    protected EventTimer(ThreadMetricSuite metrics) {
-        this.metricSuite = metrics;
+    protected EventTimer(String prefix, ThreadMetricSuite metrics) {
         // used by subclasses
+        this.metricSuite = metrics;
+        this.prefix = prefix;
     }
     
-    public EventTimer(boolean enableCpuCollection,
+    public EventTimer(String prefix, boolean enableCpuCollection,
             boolean enableContentionCollection) {
-        this(new ThreadMetricSuite(), enableCpuCollection, enableContentionCollection);
+        this(prefix, new ThreadMetricSuite(), enableCpuCollection, enableContentionCollection);
     }
 
-    public EventTimer(ThreadMetricSuite metrics, boolean enableCpuCollection,
+    public EventTimer(String prefix, ThreadMetricSuite metrics, boolean enableCpuCollection,
             boolean enableContentionCollection) {
         this.metricSuite = metrics;
+        this.prefix = prefix;
         if (enableCpuCollection) {
             ManagementFactory.getThreadMXBean().setThreadCpuTimeEnabled(true);
         }
@@ -110,11 +113,12 @@ public class EventTimer {
     }
 
     private String getMetricName(String beanName, String metric) {
-        return "aconex.controllers." + beanName.replace("/", "") + "." + metric;
+        // TODO do name cleanup elsewhere
+        return prefix + "." + beanName.replace("/", "") + "." + metric;
     }
 
     private String getTotalMetricName(String metric) {
-        return "aconex.controllers.total." + metric;
+        return prefix + ".total." + metric;
     }
 
     Integer getNumberOfTotalEventCounters() {

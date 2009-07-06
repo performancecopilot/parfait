@@ -5,6 +5,9 @@ package com.custardsource.parfait.timing;
  * A dummy EventTimer which implements all functionality as no-ops.
  */
 public final class DummyEventTimer extends EventTimer {
+    public DummyEventTimer() {
+        super("dummy");
+    }
 
     private static final EventMetricCollector DUMMY_EVENT_METRIC_COLLECTOR = new EventMetricCollector(
             null) {
