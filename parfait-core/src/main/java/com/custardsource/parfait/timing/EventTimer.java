@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.log4j.Logger;
 
+import com.custardsource.parfait.MonitorableRegistry;
 import com.custardsource.parfait.MonitoredCounter;
 
 /**
@@ -38,26 +39,27 @@ public class EventTimer {
 
     private final ThreadMetricSuite metricSuite;
     private final String prefix;
+    private final MonitorableRegistry registry;
 
-    protected EventTimer(String prefix) {
-        this(prefix, new ThreadMetricSuite());
+    protected EventTimer(String prefix, MonitorableRegistry registry) {
+        this(prefix, registry, new ThreadMetricSuite());
     }
     
-    protected EventTimer(String prefix, ThreadMetricSuite metrics) {
+    protected EventTimer(String prefix, MonitorableRegistry registry, ThreadMetricSuite metrics) {
         // used by subclasses
-        this.metricSuite = metrics;
-        this.prefix = prefix;
+        this(prefix, registry, metrics, false, false);
     }
     
-    public EventTimer(String prefix, boolean enableCpuCollection,
+    public EventTimer(String prefix, MonitorableRegistry registry, boolean enableCpuCollection,
             boolean enableContentionCollection) {
-        this(prefix, new ThreadMetricSuite(), enableCpuCollection, enableContentionCollection);
+        this(prefix, registry, new ThreadMetricSuite(), enableCpuCollection, enableContentionCollection);
     }
 
-    public EventTimer(String prefix, ThreadMetricSuite metrics, boolean enableCpuCollection,
-            boolean enableContentionCollection) {
+    public EventTimer(String prefix, MonitorableRegistry registry, ThreadMetricSuite metrics,
+            boolean enableCpuCollection, boolean enableContentionCollection) {
         this.metricSuite = metrics;
         this.prefix = prefix;
+        this.registry = registry;
         if (enableCpuCollection) {
             ManagementFactory.getThreadMXBean().setThreadCpuTimeEnabled(true);
         }
@@ -93,7 +95,7 @@ public class EventTimer {
         String metricName = getMetricName(beanName, metric);
         String metricDescription = String.format(description, beanName);
         LOG.debug("Created metric: " + metricName + "\t" + metricDescription);
-        return new MonitoredCounter(metricName, metricDescription);
+        return new MonitoredCounter(metricName, metricDescription, registry);
     }
 
     private EventMetricCounters createEventMetricCounters(String beanName, String metric,
@@ -105,7 +107,7 @@ public class EventTimer {
         totalCounter = totalCountersAcrossEvents.get(metric);
         if (totalCounter == null) {
             totalCounter = new MonitoredCounter(getTotalMetricName(metric), metricDescription
-                    + " [TOTAL]");
+                    + " [TOTAL]", registry);
             totalCountersAcrossEvents.put(metric, totalCounter);
         }
 

@@ -1,12 +1,14 @@
 package com.custardsource.parfait.timing;
 
+import com.custardsource.parfait.MonitorableRegistry;
+
 
 /**
  * A dummy EventTimer which implements all functionality as no-ops.
  */
 public final class DummyEventTimer extends EventTimer {
-    public DummyEventTimer() {
-        super("dummy");
+    public DummyEventTimer(MonitorableRegistry registry) {
+        super("dummy", registry);
     }
 
     private static final EventMetricCollector DUMMY_EVENT_METRIC_COLLECTOR = new EventMetricCollector(
