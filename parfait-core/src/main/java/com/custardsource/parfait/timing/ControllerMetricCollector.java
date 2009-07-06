@@ -59,7 +59,7 @@ public class ControllerMetricCollector {
             // We're at the top level, do our PCP perControllerCounters too
             MonitoredCounterSet counters = perControllerCounters.get(topLevelController);
             for (MetricMeasurement metric : current.getMetricInstances()) {
-                ControllerCounterSet counter = counters.getCounterForMetric(metric
+                EventMetricCounters counter = counters.getCounterForMetric(metric
                         .getMetricSource());
                 if (counter != null) {
                     counter.incrementCounters(metric.totalValue());

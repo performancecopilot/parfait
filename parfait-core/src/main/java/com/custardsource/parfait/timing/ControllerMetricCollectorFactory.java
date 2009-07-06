@@ -59,49 +59,49 @@ public class ControllerMetricCollectorFactory {
     }
 
     private MonitoredCounterSet getCounterSet(String beanName) {
-        ControllerCounterSet invocationCounter = createControllerMonitoredCounter(beanName,
+        EventMetricCounters invocationCounter = createControllerMonitoredCounter(beanName,
                 "count",
                 "Total number of times the controller %s was invoked directly by a user request",
                 "Total number of times all controllers have been invoked directly by a user request");
         MonitoredCounterSet counters = new MonitoredCounterSet(
                 invocationCounter);
 
-        ControllerCounterSet timingCounter = createControllerMonitoredCounter(
+        EventMetricCounters timingCounter = createControllerMonitoredCounter(
                 beanName,
                 "time",
                 "Total time (in ms) spent in controller %s after direct invocation by a user request",
                 "Total time (in ms) spent in all controllers after direct invocation by a user request");
         counters.addMetric(StandardThreadMetrics.CLOCK_TIME, timingCounter);
 
-        ControllerCounterSet userTimeCounter = createControllerMonitoredCounter(beanName, "utime",
+        EventMetricCounters userTimeCounter = createControllerMonitoredCounter(beanName, "utime",
                 "User CPU time spent in controller %s after direct invocation",
                 "User CPU time spent in all controllers after direct invocation");
         counters.addMetric(StandardThreadMetrics.USER_CPU_TIME, userTimeCounter);
 
-        ControllerCounterSet systemTimeCounter = createControllerMonitoredCounter(beanName,
+        EventMetricCounters systemTimeCounter = createControllerMonitoredCounter(beanName,
                 "stime", "System CPU time spent in controller %s after direct invocation",
                 "System CPU time spent in all controllers after direct invocation");
         counters.addMetric(StandardThreadMetrics.SYSTEM_CPU_TIME, systemTimeCounter);
 
-        ControllerCounterSet blockedCountCounter = createControllerMonitoredCounter(beanName,
+        EventMetricCounters blockedCountCounter = createControllerMonitoredCounter(beanName,
                 "blocked.count",
                 "Number of times thread entered BLOCKED state during controller %s",
                 "Number of times BLOCKED state entered in all controllers");
         counters.addMetric(StandardThreadMetrics.BLOCKED_COUNT, blockedCountCounter);
 
-        ControllerCounterSet blockedTimeCounter = createControllerMonitoredCounter(beanName,
+        EventMetricCounters blockedTimeCounter = createControllerMonitoredCounter(beanName,
                 "blocked.time", "ms spent in BLOCKED state during controller %s",
                 "ms spent in BLOCKED state in all controllers");
         counters.addMetric(StandardThreadMetrics.BLOCKED_TIME, blockedTimeCounter);
 
-        ControllerCounterSet waitedCountCounter = createControllerMonitoredCounter(
+        EventMetricCounters waitedCountCounter = createControllerMonitoredCounter(
                 beanName,
                 "waited.count",
                 "Number of times thread entered WAITING or TIMED_WAITING state during controller %s",
                 "Number of times WAITING or TIMED_WAITING state entered in all controllers");
         counters.addMetric(StandardThreadMetrics.WAITED_COUNT, waitedCountCounter);
 
-        ControllerCounterSet waitedTimeCounter = createControllerMonitoredCounter(beanName,
+        EventMetricCounters waitedTimeCounter = createControllerMonitoredCounter(beanName,
                 "waited.time", "ms spent in WAITED or TIMED_WAITING state during controller %s",
                 "ms spent in WAITED or TIMED_WAITING state in all controllers");
         counters.addMetric(StandardThreadMetrics.WAITED_TIME, waitedTimeCounter);
@@ -117,7 +117,7 @@ public class ControllerMetricCollectorFactory {
         return new MonitoredCounter(metricName, metricDescription);
     }
 
-    private ControllerCounterSet createControllerMonitoredCounter(String beanName, String metric,
+    private EventMetricCounters createControllerMonitoredCounter(String beanName, String metric,
             String metricDescription, String totalMetricDescription) {
         MonitoredCounter metricCounter = createMetric(beanName, metric, metricDescription);
         MonitoredCounter totalCounter;
@@ -128,7 +128,7 @@ public class ControllerMetricCollectorFactory {
             totalCountersForControllers.put(metric, totalCounter);
         }
 
-        return new ControllerCounterSet(metricCounter, totalCounter);
+        return new EventMetricCounters(metricCounter, totalCounter);
     }
 
     private String getMetricName(String beanName, String metric) {

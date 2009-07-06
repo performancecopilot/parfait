@@ -82,13 +82,13 @@ public class ControllerMetricCollectorFactoryTest extends TestCase {
                 attachmentsCounterSet);
 
         for (ThreadMetric metric : wizardCounterSet.getMetrics().keySet()) {
-            ControllerCounterSet wizardCounter = wizardCounterSet.getMetrics().get(metric);
+            EventMetricCounters wizardCounter = wizardCounterSet.getMetrics().get(metric);
             assertNotNull("Couldnt obtain wizard counter for metric " + metric.getMetricName(),
                     wizardCounter);
-            ControllerCounterSet logonCounter = logonCounterSet.getMetrics().get(metric);
+            EventMetricCounters logonCounter = logonCounterSet.getMetrics().get(metric);
             assertNotNull("Couldnt obtain logon counter for metric " + metric.getMetricName(),
                     logonCounter);
-            ControllerCounterSet attachmentsCounter = attachmentsCounterSet.getMetrics()
+            EventMetricCounters attachmentsCounter = attachmentsCounterSet.getMetrics()
                     .get(metric);
             assertNotNull(
                     "Couldnt obtain attachments counter for metric " + metric.getMetricName(),

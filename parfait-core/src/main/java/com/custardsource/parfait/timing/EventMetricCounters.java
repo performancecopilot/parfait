@@ -10,11 +10,11 @@ import com.custardsource.parfait.MonitoredCounter;
  * important to ensure that the total counter is the same instance of the class across all
  * ControllerCounterSet objects which are measuring the same metric.
  */
-public class ControllerCounterSet {
+public class EventMetricCounters {
     private final MonitoredCounter controllerCounter;
     private final MonitoredCounter totalCounter;
 
-    public ControllerCounterSet(MonitoredCounter metricCounter, MonitoredCounter totalMetricCounter) {
+    public EventMetricCounters(MonitoredCounter metricCounter, MonitoredCounter totalMetricCounter) {
         Assert.notNull(metricCounter, "Cannot provide null controller metric counter");
         Assert.notNull(totalMetricCounter, "Cannot provide null controller total metric counter");
         this.controllerCounter = metricCounter;

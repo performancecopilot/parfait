@@ -9,14 +9,14 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 class MonitoredCounterSet {
-    private final Map<ThreadMetric, ControllerCounterSet> metrics = new LinkedHashMap<ThreadMetric, ControllerCounterSet>();
-    private final ControllerCounterSet invocationCounter;
+    private final Map<ThreadMetric, EventMetricCounters> metrics = new LinkedHashMap<ThreadMetric, EventMetricCounters>();
+    private final EventMetricCounters invocationCounter;
 
-    public MonitoredCounterSet(ControllerCounterSet invocationCounter) {
+    public MonitoredCounterSet(EventMetricCounters invocationCounter) {
         this.invocationCounter = invocationCounter;
     }
 
-    public ControllerCounterSet getInvocationCounter() {
+    public EventMetricCounters getInvocationCounter() {
         return invocationCounter;
     }
 
@@ -24,7 +24,7 @@ class MonitoredCounterSet {
         addMetric(metric, null);
     }
 
-    public void addMetric(ThreadMetric metric, ControllerCounterSet counter) {
+    public void addMetric(ThreadMetric metric, EventMetricCounters counter) {
         metrics.put(metric, counter);
     }
 
@@ -32,7 +32,7 @@ class MonitoredCounterSet {
         return metrics.keySet();
     }
 
-    ControllerCounterSet getCounterForMetric(ThreadMetric metric) {
+    EventMetricCounters getCounterForMetric(ThreadMetric metric) {
         return metrics.get(metric);
     }
 
@@ -40,7 +40,7 @@ class MonitoredCounterSet {
         return metrics.values().size();
     }
 
-    Map<ThreadMetric, ControllerCounterSet> getMetrics() {
+    Map<ThreadMetric, EventMetricCounters> getMetrics() {
         return Collections.unmodifiableMap(metrics);
     }
 }
