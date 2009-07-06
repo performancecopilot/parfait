@@ -23,8 +23,8 @@ public final class ControllerMetricCollectorPostProcessor implements BeanPostPro
 
     public Object postProcessBeforeInitialization(Object bean, String beanName)
             throws BeansException {
-        if (bean instanceof MetricCollectorController) {
-            metricCollectorFactory.addController((MetricCollectorController) bean, beanName);
+        if (bean instanceof Timeable) {
+            metricCollectorFactory.addController((Timeable) bean, beanName);
         }
         return bean;
     }

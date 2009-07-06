@@ -8,9 +8,9 @@ import com.custardsource.parfait.timing.EventCounters;
 public class EventTimerTest extends TestCase {
 
     private EventTimer metricFactory;
-    private MetricCollectorController workflowWizardControl;
-    private MetricCollectorController logonControl;
-    private MetricCollectorController attachmentControl;
+    private Timeable workflowWizardControl;
+    private Timeable logonControl;
+    private Timeable attachmentControl;
 
     @Override
     protected void setUp() throws Exception {
@@ -20,9 +20,9 @@ public class EventTimerTest extends TestCase {
     private void initControllers() {
         MonitorableRegistry.clearDefaultRegistry();
         metricFactory = new EventTimer();
-        workflowWizardControl = new DummyMetricCollectionController();
-        logonControl = new DummyMetricCollectionController();
-        attachmentControl = new DummyMetricCollectionController();
+        workflowWizardControl = new DummyTimeable();
+        logonControl = new DummyTimeable();
+        attachmentControl = new DummyTimeable();
 
     }
 
@@ -103,9 +103,8 @@ public class EventTimerTest extends TestCase {
 
     }
     
-    public static class DummyMetricCollectionController implements MetricCollectorController {
-        public void setMetricCollectorFactory(
-                EventTimer metricCollectorFactory) {
+    public static class DummyTimeable implements Timeable {
+        public void setMetricCollectorFactory(EventTimer metricCollectorFactory) {
         }
     }
 }

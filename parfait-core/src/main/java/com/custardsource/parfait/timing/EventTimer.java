@@ -21,7 +21,7 @@ public class EventTimer {
      */
     private static final Logger LOG = Logger.getLogger(EventTimer.class);
 
-    private final Map<MetricCollectorController, EventCounters> perControllerCounters = new ConcurrentHashMap<MetricCollectorController, EventCounters>();
+    private final Map<Timeable, EventCounters> perControllerCounters = new ConcurrentHashMap<Timeable, EventCounters>();
 
     private final ThreadLocal<EventMetricCollector> metricCollectors = new ThreadLocal<EventMetricCollector>() {
         @Override
@@ -67,9 +67,9 @@ public class EventTimer {
         return metricCollectors.get();
     }
 
-    public void addController(MetricCollectorController controller, String beanName) {
-        controller.setMetricCollectorFactory(this);
-        perControllerCounters.put(controller, getCounterSet(beanName));
+    public void addController(Timeable timeable, String beanName) {
+        timeable.setMetricCollectorFactory(this);
+        perControllerCounters.put(timeable, getCounterSet(beanName));
     }
 
     private EventCounters getCounterSet(String beanName) {

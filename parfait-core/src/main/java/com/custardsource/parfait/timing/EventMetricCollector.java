@@ -22,12 +22,11 @@ public class EventMetricCollector {
     private int depth = 0;
     private Object topLevelController;
 
-    private final Map<MetricCollectorController, EventCounters> perControllerCounters;
+    private final Map<Timeable, EventCounters> perControllerCounters;
 
     private static final Logger LOG = Logger.getLogger(EventMetricCollector.class);
 
-    public EventMetricCollector(
-            Map<MetricCollectorController, EventCounters> perControllerCounters) {
+    public EventMetricCollector(Map<Timeable, EventCounters> perControllerCounters) {
         this.perControllerCounters = perControllerCounters;
     }
 

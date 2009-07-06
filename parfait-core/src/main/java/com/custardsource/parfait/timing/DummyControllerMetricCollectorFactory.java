@@ -29,7 +29,7 @@ public final class DummyControllerMetricCollectorFactory extends EventTimer {
         return DUMMY_CONTROLLER_METRIC_COLLECTOR;
     }
 
-    public void addController(MetricCollectorController controller, String beanName) {
+    public void addController(Timeable controller, String beanName) {
         controller.setMetricCollectorFactory(this);
     }
 
