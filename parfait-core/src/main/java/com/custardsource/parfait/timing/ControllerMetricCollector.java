@@ -14,7 +14,7 @@ import org.apache.log4j.Logger;
  * </p>
  */
 public class ControllerMetricCollector {
-    private ControllerMetricSet current = null;
+    private StepMeasurements current = null;
     /**
      * The number of nested controllers invoked so far. When we hit depth of 0 we know we've reached
      * the top-level controller requested by the user.
@@ -32,7 +32,7 @@ public class ControllerMetricCollector {
     }
 
     public void startTiming(Object controller, String action) {
-        ControllerMetricSet newTiming = new ControllerMetricSet(current, controller.getClass(),
+        StepMeasurements newTiming = new StepMeasurements(current, controller.getClass(),
                 action);
         for (ThreadMetric metric : perControllerCounters.get(controller).getMetricSources()) {
             newTiming.addMetricInstance(new MetricMeasurement(metric));

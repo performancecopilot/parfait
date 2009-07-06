@@ -6,15 +6,15 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 
-public class ControllerMetricSet {
-    private final ControllerMetricSet parent;
-    private final List<ControllerMetricSet> children = new ArrayList<ControllerMetricSet>();
+public class StepMeasurements {
+    private final StepMeasurements parent;
+    private final List<StepMeasurements> children = new ArrayList<StepMeasurements>();
     private final List<MetricMeasurement> metricInstances = new ArrayList<MetricMeasurement>();
 
     private final Class<?> controllerClass;
     private final String action;
 
-    public ControllerMetricSet(ControllerMetricSet parent,
+    public StepMeasurements(StepMeasurements parent,
             Class<?> controllerClass, String action) {
         this.parent = parent;
         if (parent != null) {
@@ -24,7 +24,7 @@ public class ControllerMetricSet {
         this.action = action;
     }
 
-    public ControllerMetricSet getParent() {
+    public StepMeasurements getParent() {
         return parent;
     }
     
@@ -78,14 +78,14 @@ public class ControllerMetricSet {
             // Handles the 'freak case' where one controller may forward directly to MORE than one
             // 'child'. I have no idea if this ever happens, but we might as well handle it.
             List<String> childTraces = new ArrayList<String>(children.size());
-            for (ControllerMetricSet child : children) {
+            for (StepMeasurements child : children) {
                 childTraces.add(child.getForwardTrace());
             }
             return stackTraceElement() + "/{" + StringUtils.join(childTraces, '|') + "}";
         }
     }
 
-    private void addChildExecution(ControllerMetricSet newTiming) {
+    private void addChildExecution(StepMeasurements newTiming) {
         children.add(newTiming);
     }
 
