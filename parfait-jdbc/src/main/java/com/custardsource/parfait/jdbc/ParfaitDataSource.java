@@ -8,9 +8,14 @@ import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.sql.DataSource;
+
+import com.custardsource.parfait.timing.AbstractThreadMetric;
+import com.custardsource.parfait.timing.ThreadMetric;
+import com.google.common.collect.ImmutableList;
 
 public class ParfaitDataSource implements DataSource {
 	private DataSource wrapped;
@@ -144,4 +149,29 @@ public class ParfaitDataSource implements DataSource {
 			return new AtomicLong(0);
 		}
 	};
+
+	public final ThreadMetric getCounterMetric() {
+		return new AbstractThreadMetric("Database call count", "", "db.count",
+				"Number of database calls made during event") {
+
+			@Override
+			public long getCurrentValue() {
+				return getExecutionCountForCurrentThread();
+			}
+		};
+	}
+
+	public final ThreadMetric getTimeMetric() {
+		return new AbstractThreadMetric("Database execution time", "", "db.time",
+				"Time spent in database calls during event") {
+			@Override
+			public long getCurrentValue() {
+				return getExecutionTimeForCurrentThread();
+			}
+		};
+	}
+
+	public final Collection<ThreadMetric> getThreadMetrics() {
+		return ImmutableList.<ThreadMetric> of(getCounterMetric(), getTimeMetric());
+	}
 }
