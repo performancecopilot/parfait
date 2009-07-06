@@ -63,8 +63,6 @@ public class StandardThreadMetrics {
         }
     };
 
-    // TODO -- LoggingDriver, ErrorMessageMonitor
-
     private static ThreadInfo getCurrentThreadInfo() {
         return ManagementFactory.getThreadMXBean().getThreadInfo(Thread.currentThread().getId());
     }
