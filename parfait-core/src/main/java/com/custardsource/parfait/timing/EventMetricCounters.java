@@ -1,28 +1,27 @@
 package com.custardsource.parfait.timing;
 
-import org.springframework.util.Assert;
-
 import com.custardsource.parfait.MonitoredCounter;
+import com.google.common.base.Preconditions;
 
 /**
- * This class is a wrapper class which holds both a counter for a controller metric and another
- * counter for the same metric but its value is a total value across all controllers. It is
+ * This class is a wrapper class which holds both a counter for an event metric and another
+ * counter for the same metric but its value is a total value across all events. It is
  * important to ensure that the total counter is the same instance of the class across all
- * ControllerCounterSet objects which are measuring the same metric.
+ * EventMetricCounters objects which are measuring the same metric.
  */
 public class EventMetricCounters {
-    private final MonitoredCounter controllerCounter;
+    private final MonitoredCounter eventSpecificCounter;
     private final MonitoredCounter totalCounter;
 
-    public EventMetricCounters(MonitoredCounter metricCounter, MonitoredCounter totalMetricCounter) {
-        Assert.notNull(metricCounter, "Cannot provide null controller metric counter");
-        Assert.notNull(totalMetricCounter, "Cannot provide null controller total metric counter");
-        this.controllerCounter = metricCounter;
-        this.totalCounter = totalMetricCounter;
+    public EventMetricCounters(MonitoredCounter eventSpecificCounter, MonitoredCounter totalCounter) {
+        this.eventSpecificCounter = Preconditions.checkNotNull(eventSpecificCounter,
+                "Cannot provide null event-specific metric counter");
+        this.totalCounter = Preconditions.checkNotNull(totalCounter,
+                "Cannot provide null total metric counter");
     }
 
     public void incrementCounters(long value) {
-        controllerCounter.inc(value);
+        eventSpecificCounter.inc(value);
         totalCounter.inc(value);
 
     }

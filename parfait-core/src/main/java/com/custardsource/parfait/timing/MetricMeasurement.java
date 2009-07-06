@@ -3,12 +3,12 @@ package com.custardsource.parfait.timing;
 import com.google.common.base.Preconditions;
 
 /**
- * Class to measure the time taken to run by a single controller (or some similar 'delta' metric).
- * Can provide both 'forward' and 'backward' traces (that is, a list of controllers invoked by the
- * measured controller, as well as the path taken to reach the controller under timing) and provide
+ * Class to measure the time taken to run by a single event (or some similar 'delta' metric).
+ * Can provide both 'forward' and 'backward' traces (that is, a list of events invoked by the
+ * measured event, as well as the path taken to reach the event under timing) and provide
  * measures of the chosen metric for the 'total' and 'own' time spent in each (that is, e.g. how
- * long the execution of the controller took from start to finish, and how long was actually spent
- * in this controller's code as opposed to forwarding elsewhere).
+ * long the execution of the event took from start to finish, and how long was actually spent
+ * in this event's code as opposed to forwarding elsewhere).
  */
 class MetricMeasurement {
     private Long startValue;

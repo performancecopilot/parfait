@@ -29,8 +29,8 @@ public final class DummyEventTimer extends EventTimer {
         return DUMMY_EVENT_METRIC_COLLECTOR;
     }
 
-    public void registerTimeable(Timeable controller, String beanName) {
-        controller.setEventTimer(this);
+    public void registerTimeable(Timeable timeable, String beanName) {
+        timeable.setEventTimer(this);
     }
 
 }

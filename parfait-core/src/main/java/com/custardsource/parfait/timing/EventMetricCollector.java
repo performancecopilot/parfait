@@ -6,7 +6,7 @@ import org.apache.log4j.Logger;
 
 /**
  * <p>
- * Coordinates multiple {@link MetricMeasurement MetricMeasurements} for all the controllers invoked
+ * Coordinates multiple {@link MetricMeasurement MetricMeasurements} for all the events invoked
  * in the process of handling the user request.
  * </p>
  * <p>
@@ -16,28 +16,28 @@ import org.apache.log4j.Logger;
 public class EventMetricCollector {
     private StepMeasurements current = null;
     /**
-     * The number of nested controllers invoked so far. When we hit depth of 0 we know we've reached
-     * the top-level controller requested by the user.
+     * The number of nested events invoked so far. When we hit depth of 0 we know we've reached
+     * the top-level event requested by the user.
      */
     private int depth = 0;
-    private Object topLevelController;
+    private Object topLevelEvent;
 
-    private final Map<Timeable, EventCounters> perControllerCounters;
+    private final Map<Timeable, EventCounters> perEventCounters;
 
     private static final Logger LOG = Logger.getLogger(EventMetricCollector.class);
 
-    public EventMetricCollector(Map<Timeable, EventCounters> perControllerCounters) {
-        this.perControllerCounters = perControllerCounters;
+    public EventMetricCollector(Map<Timeable, EventCounters> perEventCounters) {
+        this.perEventCounters = perEventCounters;
     }
 
-    public void startTiming(Object controller, String action) {
-        StepMeasurements newTiming = new StepMeasurements(current, controller.getClass(),
+    public void startTiming(Object event, String action) {
+        StepMeasurements newTiming = new StepMeasurements(current, event.getClass(),
                 action);
-        for (ThreadMetric metric : perControllerCounters.get(controller).getMetricSources()) {
+        for (ThreadMetric metric : perEventCounters.get(event).getMetricSources()) {
             newTiming.addMetricInstance(new MetricMeasurement(metric));
         }
         current = newTiming;
-        topLevelController = controller;
+        topLevelEvent = event;
         depth++;
         current.startAll();
     }
@@ -54,9 +54,9 @@ public class EventMetricCollector {
         }
         LOG.info(String.format("%s\t%s\t%s\t%s", depthText, current.getForwardTrace(), current
                 .getBackTrace(), metricData));
-        if (depth == 0 && perControllerCounters.containsKey(topLevelController)) {
-            // We're at the top level, do our PCP perControllerCounters too
-            EventCounters counters = perControllerCounters.get(topLevelController);
+        if (depth == 0 && perEventCounters.containsKey(topLevelEvent)) {
+            // We're at the top level, increment our event counters too
+            EventCounters counters = perEventCounters.get(topLevelEvent);
             for (MetricMeasurement metric : current.getMetricInstances()) {
                 EventMetricCounters counter = counters.getCounterForMetric(metric
                         .getMetricSource());

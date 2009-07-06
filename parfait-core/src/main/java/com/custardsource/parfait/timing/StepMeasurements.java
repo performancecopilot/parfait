@@ -11,16 +11,16 @@ public class StepMeasurements {
     private final List<StepMeasurements> children = new ArrayList<StepMeasurements>();
     private final List<MetricMeasurement> metricInstances = new ArrayList<MetricMeasurement>();
 
-    private final Class<?> controllerClass;
+    private final Class<?> eventClass;
     private final String action;
 
     public StepMeasurements(StepMeasurements parent,
-            Class<?> controllerClass, String action) {
+            Class<?> eventClass, String action) {
         this.parent = parent;
         if (parent != null) {
             parent.addChildExecution(this);
         }
-        this.controllerClass = controllerClass;
+        this.eventClass = eventClass;
         this.action = action;
     }
 
@@ -55,7 +55,7 @@ public class StepMeasurements {
     }
 
     /**
-     * @return a nicely-formatted list of all the controllers taken to reach the one under
+     * @return a nicely-formatted list of all the events taken to reach the one under
      *         measurement (including that one as the last element)
      */
     String getBackTrace() {
@@ -66,7 +66,7 @@ public class StepMeasurements {
     }
 
     /**
-     * @return a nicely-formatted list of all the controllers invoked after the one under
+     * @return a nicely-formatted list of all the events invoked after the one under
      *         measurement (including that one as the first element)
      */
     String getForwardTrace() {
@@ -75,7 +75,7 @@ public class StepMeasurements {
         } else if (children.size() == 1) {
             return stackTraceElement() + "/" + children.get(0).getForwardTrace();
         } else {
-            // Handles the 'freak case' where one controller may forward directly to MORE than one
+            // Handles the 'freak case' where one event may forward directly to MORE than one
             // 'child'. I have no idea if this ever happens, but we might as well handle it.
             List<String> childTraces = new ArrayList<String>(children.size());
             for (StepMeasurements child : children) {
@@ -90,11 +90,11 @@ public class StepMeasurements {
     }
 
     private String stackTraceElement() {
-        return controllerClass.getSimpleName() + (StringUtils.isEmpty(action) ? "" : ":" + action);
+        return eventClass.getSimpleName() + (StringUtils.isEmpty(action) ? "" : ":" + action);
     }
 
-    Class<?> getControllerClass() {
-        return controllerClass;
+    Class<?> getEventClass() {
+        return eventClass;
     }
 
     public Collection<MetricMeasurement> getMetricInstances() {

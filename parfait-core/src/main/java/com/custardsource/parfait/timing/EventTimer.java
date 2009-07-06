@@ -10,31 +10,31 @@ import org.apache.log4j.Logger;
 import com.custardsource.parfait.MonitoredCounter;
 
 /**
- * A class to provide a {@link EventMetricCollector} to each controller on demand, guaranteed
+ * A class to provide a {@link EventMetricCollector} to each {@link Timeable} on demand, guaranteed
  * to be thread-safe as long is it's only ever used by the requesting thread.
  */
 public class EventTimer {
 
     /**
-     * Setting this {@link Logger} to DEBUG level will list all the created PCP metrics in a
-     * tab-delimited format, useful for adding to the agent.
+     * Setting this {@link Logger} to DEBUG level will list all the created metrics in a
+     * tab-delimited format, useful for importing elsewhere
      */
     private static final Logger LOG = Logger.getLogger(EventTimer.class);
 
-    private final Map<Timeable, EventCounters> perControllerCounters = new ConcurrentHashMap<Timeable, EventCounters>();
+    private final Map<Timeable, EventCounters> perTimeableCounters = new ConcurrentHashMap<Timeable, EventCounters>();
 
     private final ThreadLocal<EventMetricCollector> metricCollectors = new ThreadLocal<EventMetricCollector>() {
         @Override
         protected EventMetricCollector initialValue() {
-            return new EventMetricCollector(perControllerCounters);
+            return new EventMetricCollector(perTimeableCounters);
         }
     };
     
     /**
-     * Holds the singleton total counters which are used across all controllers. The key is the
+     * Holds the singleton total counters which are used across all events. The key is the
      * metric name
      */
-    private final Map<String, MonitoredCounter> totalCountersForControllers = new HashMap<String, MonitoredCounter>();
+    private final Map<String, MonitoredCounter> totalCountersAcrossEvents = new HashMap<String, MonitoredCounter>();
 
     private final ThreadMetricSuite metricSuite;
 
@@ -69,16 +69,16 @@ public class EventTimer {
 
     public void registerTimeable(Timeable timeable, String beanName) {
         timeable.setEventTimer(this);
-        perControllerCounters.put(timeable, getCounterSet(beanName));
+        perTimeableCounters.put(timeable, getCounterSet(beanName));
     }
 
     private EventCounters getCounterSet(String beanName) {
-        EventMetricCounters invocationCounter = createControllerMonitoredCounter(beanName, "count",
+        EventMetricCounters invocationCounter = createEventMetricCounters(beanName, "count",
                 "Total number of times the event was directly triggered");
         EventCounters counters = new EventCounters(invocationCounter);
 
         for (ThreadMetric metric : metricSuite.metrics()) {
-            EventMetricCounters timingCounter = createControllerMonitoredCounter(beanName, metric
+            EventMetricCounters timingCounter = createEventMetricCounters(beanName, metric
                     .getCounterSuffix(), metric.getDescription());
             counters.addMetric(metric, timingCounter);
         }
@@ -93,17 +93,17 @@ public class EventTimer {
         return new MonitoredCounter(metricName, metricDescription);
     }
 
-    private EventMetricCounters createControllerMonitoredCounter(String beanName, String metric,
+    private EventMetricCounters createEventMetricCounters(String beanName, String metric,
             String metricDescription) {
         MonitoredCounter metricCounter = createMetric(beanName, metric, metricDescription + " ["
                 + beanName + "]");
         MonitoredCounter totalCounter;
 
-        totalCounter = totalCountersForControllers.get(metric);
+        totalCounter = totalCountersAcrossEvents.get(metric);
         if (totalCounter == null) {
             totalCounter = new MonitoredCounter(getTotalMetricName(metric), metricDescription
                     + " [TOTAL]");
-            totalCountersForControllers.put(metric, totalCounter);
+            totalCountersAcrossEvents.put(metric, totalCounter);
         }
 
         return new EventMetricCounters(metricCounter, totalCounter);
@@ -117,12 +117,12 @@ public class EventTimer {
         return "aconex.controllers.total." + metric;
     }
 
-    Integer getNumberOfTotalControllerCounters() {
-        return totalCountersForControllers.size();
+    Integer getNumberOfTotalEventCounters() {
+        return totalCountersAcrossEvents.size();
     }
 
-    EventCounters getCounterSetForController(Object controller) {
-        return perControllerCounters.get(controller);
+    EventCounters getCounterSetForEvent(Object event) {
+        return perTimeableCounters.get(event);
     }
 
 }

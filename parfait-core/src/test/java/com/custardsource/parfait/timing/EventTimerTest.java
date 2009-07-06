@@ -14,10 +14,10 @@ public class EventTimerTest extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
-        initControllers();
+        initEvents();
     }
 
-    private void initControllers() {
+    private void initEvents() {
         MonitorableRegistry.clearDefaultRegistry();
         metricFactory = new EventTimer();
         workflowWizardControl = new DummyTimeable();
@@ -33,33 +33,33 @@ public class EventTimerTest extends TestCase {
         /**
          * This total value includes the invocation count counter, which is stored separately to the
          * other counters in the counter set object. So when comparing the number of counters for
-         * each controller, this should not be taken into consideration.
+         * each event, this should not be taken into consideration.
          */
-        Integer totalControllerCounterSize = metricFactory.getNumberOfTotalControllerCounters();
+        Integer totalEventCounterSize = metricFactory.getNumberOfTotalEventCounters();
         EventCounters wizardCounterSet = metricFactory
-                .getCounterSetForController(workflowWizardControl);
-        Integer numberOfMetricCounters = wizardCounterSet.numberOfControllerCounters();
-        assertEquals("Should be the same number of per controller and total counters",
-                --totalControllerCounterSize, numberOfMetricCounters);
+                .getCounterSetForEvent(workflowWizardControl);
+        Integer numberOfMetricCounters = wizardCounterSet.numberOfTimerCounters();
+        assertEquals("Should be the same number of per event and total counters",
+                --totalEventCounterSize, numberOfMetricCounters);
 
         metricFactory.registerTimeable(logonControl, "/Logon");
 
         assertEquals(
-                "Number of total controller counters should not change after adding controller",
-                ++totalControllerCounterSize, metricFactory.getNumberOfTotalControllerCounters());
+                "Number of total event counters should not change after adding event",
+                ++totalEventCounterSize, metricFactory.getNumberOfTotalEventCounters());
         EventCounters logonCounterSet = metricFactory
-                .getCounterSetForController(logonControl);
-        assertEquals("Should be the same number of per controller and total counters",
-                --totalControllerCounterSize, logonCounterSet.numberOfControllerCounters());
+                .getCounterSetForEvent(logonControl);
+        assertEquals("Should be the same number of per event and total counters",
+                --totalEventCounterSize, logonCounterSet.numberOfTimerCounters());
 
         metricFactory.registerTimeable(attachmentControl, "/Attachments");
         assertEquals(
-                "Number of total controller counters should not change after adding controller",
-                ++totalControllerCounterSize, metricFactory.getNumberOfTotalControllerCounters());
+                "Number of total event counters should not change after adding event",
+                ++totalEventCounterSize, metricFactory.getNumberOfTotalEventCounters());
         EventCounters attachmentCounterSet = metricFactory
-                .getCounterSetForController(attachmentControl);
-        assertEquals("Should be the same number of per controller and total counters",
-                --totalControllerCounterSize, attachmentCounterSet.numberOfControllerCounters());
+                .getCounterSetForEvent(attachmentControl);
+        assertEquals("Should be the same number of per event and total counters",
+                --totalEventCounterSize, attachmentCounterSet.numberOfTimerCounters());
 
     }
 
@@ -69,17 +69,14 @@ public class EventTimerTest extends TestCase {
         metricFactory.registerTimeable(workflowWizardControl, "/WorkflowWizard");
         metricFactory.registerTimeable(attachmentControl, "/Attachments");
 
-        EventCounters wizardCounterSet = metricFactory
-                .getCounterSetForController(workflowWizardControl);
-        EventCounters logonCounterSet = metricFactory
-                .getCounterSetForController(logonControl);
+        EventCounters wizardCounterSet = metricFactory.getCounterSetForEvent(workflowWizardControl);
+        EventCounters logonCounterSet = metricFactory.getCounterSetForEvent(logonControl);
         EventCounters attachmentsCounterSet = metricFactory
-                .getCounterSetForController(attachmentControl);
+                .getCounterSetForEvent(attachmentControl);
 
-        assertNotNull("Couldnt obtain counter set for workflow wizard controller", wizardCounterSet);
-        assertNotNull("Couldnt obtain counter set for logon controller", logonCounterSet);
-        assertNotNull("Couldnt obtain counter set for attachments controller",
-                attachmentsCounterSet);
+        assertNotNull("Couldnt obtain counter set for workflow wizard event", wizardCounterSet);
+        assertNotNull("Couldnt obtain counter set for logon event", logonCounterSet);
+        assertNotNull("Couldnt obtain counter set for attachments event", attachmentsCounterSet);
 
         for (ThreadMetric metric : wizardCounterSet.getMetrics().keySet()) {
             EventMetricCounters wizardCounter = wizardCounterSet.getMetrics().get(metric);

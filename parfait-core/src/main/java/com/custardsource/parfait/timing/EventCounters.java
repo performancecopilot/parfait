@@ -36,7 +36,7 @@ class EventCounters {
         return metrics.get(metric);
     }
 
-    Integer numberOfControllerCounters() {
+    Integer numberOfTimerCounters() {
         return metrics.values().size();
     }
 
