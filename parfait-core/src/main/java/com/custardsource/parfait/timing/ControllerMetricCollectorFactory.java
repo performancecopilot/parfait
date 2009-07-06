@@ -10,7 +10,7 @@ import org.apache.log4j.Logger;
 import com.custardsource.parfait.MonitoredCounter;
 
 /**
- * A class to provide a {@link ControllerMetricCollector} to each controller on demand, guaranteed
+ * A class to provide a {@link EventMetricCollector} to each controller on demand, guaranteed
  * to be thread-safe as long is it's only ever used by the requesting thread.
  */
 public class ControllerMetricCollectorFactory {
@@ -23,10 +23,10 @@ public class ControllerMetricCollectorFactory {
 
     private final Map<MetricCollectorController, EventCounters> perControllerCounters = new ConcurrentHashMap<MetricCollectorController, EventCounters>();
 
-    private final ThreadLocal<ControllerMetricCollector> metricCollectors = new ThreadLocal<ControllerMetricCollector>() {
+    private final ThreadLocal<EventMetricCollector> metricCollectors = new ThreadLocal<EventMetricCollector>() {
         @Override
-        protected ControllerMetricCollector initialValue() {
-            return new ControllerMetricCollector(perControllerCounters);
+        protected EventMetricCollector initialValue() {
+            return new EventMetricCollector(perControllerCounters);
         }
     };
     /**
@@ -49,7 +49,7 @@ public class ControllerMetricCollectorFactory {
         }
     }
 
-    public ControllerMetricCollector getCollector() {
+    public EventMetricCollector getCollector() {
         return metricCollectors.get();
     }
 

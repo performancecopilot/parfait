@@ -13,7 +13,7 @@ import org.apache.log4j.Logger;
  * Not thread-safe, should be used only by one thread at a time.
  * </p>
  */
-public class ControllerMetricCollector {
+public class EventMetricCollector {
     private StepMeasurements current = null;
     /**
      * The number of nested controllers invoked so far. When we hit depth of 0 we know we've reached
@@ -24,9 +24,9 @@ public class ControllerMetricCollector {
 
     private final Map<MetricCollectorController, EventCounters> perControllerCounters;
 
-    private static final Logger LOG = Logger.getLogger(ControllerMetricCollector.class);
+    private static final Logger LOG = Logger.getLogger(EventMetricCollector.class);
 
-    public ControllerMetricCollector(
+    public EventMetricCollector(
             Map<MetricCollectorController, EventCounters> perControllerCounters) {
         this.perControllerCounters = perControllerCounters;
     }

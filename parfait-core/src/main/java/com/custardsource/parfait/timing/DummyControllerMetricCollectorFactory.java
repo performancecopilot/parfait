@@ -6,7 +6,7 @@ package com.custardsource.parfait.timing;
  */
 public final class DummyControllerMetricCollectorFactory extends ControllerMetricCollectorFactory {
 
-    private static final ControllerMetricCollector DUMMY_CONTROLLER_METRIC_COLLECTOR = new ControllerMetricCollector(
+    private static final EventMetricCollector DUMMY_CONTROLLER_METRIC_COLLECTOR = new EventMetricCollector(
             null) {
         public void startTiming(Object source, String action) {
             // no-op
@@ -25,7 +25,7 @@ public final class DummyControllerMetricCollectorFactory extends ControllerMetri
         }
     };
 
-    public ControllerMetricCollector getCollector() {
+    public EventMetricCollector getCollector() {
         return DUMMY_CONTROLLER_METRIC_COLLECTOR;
     }
 
