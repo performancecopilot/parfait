@@ -4,7 +4,7 @@ package com.custardsource.parfait.timing;
 /**
  * A dummy ControllerMetricCollectorFactory which implements all functionality as no-ops.
  */
-public final class DummyControllerMetricCollectorFactory extends ControllerMetricCollectorFactory {
+public final class DummyControllerMetricCollectorFactory extends EventTimer {
 
     private static final EventMetricCollector DUMMY_CONTROLLER_METRIC_COLLECTOR = new EventMetricCollector(
             null) {

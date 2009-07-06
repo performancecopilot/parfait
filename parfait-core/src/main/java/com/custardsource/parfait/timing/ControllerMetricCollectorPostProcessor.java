@@ -5,14 +5,14 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 
 /**
  * A {@link BeanPostProcessor} responsible for adding all {@link MetricCollectorController}s to the
- * specified {@link ControllerMetricCollectorFactory}
+ * specified {@link EventTimer}
  */
 public final class ControllerMetricCollectorPostProcessor implements BeanPostProcessor {
 
-    private final ControllerMetricCollectorFactory metricCollectorFactory;
+    private final EventTimer metricCollectorFactory;
 
     public ControllerMetricCollectorPostProcessor(
-            ControllerMetricCollectorFactory metricCollectorFactory) {
+            EventTimer metricCollectorFactory) {
         this.metricCollectorFactory = metricCollectorFactory;
     }
 

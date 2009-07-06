@@ -5,9 +5,9 @@ import junit.framework.TestCase;
 import com.custardsource.parfait.MonitorableRegistry;
 import com.custardsource.parfait.timing.EventCounters;
 
-public class ControllerMetricCollectorFactoryTest extends TestCase {
+public class EventTimerTest extends TestCase {
 
-    private ControllerMetricCollectorFactory metricFactory;
+    private EventTimer metricFactory;
     private MetricCollectorController workflowWizardControl;
     private MetricCollectorController logonControl;
     private MetricCollectorController attachmentControl;
@@ -19,7 +19,7 @@ public class ControllerMetricCollectorFactoryTest extends TestCase {
 
     private void initControllers() {
         MonitorableRegistry.clearDefaultRegistry();
-        metricFactory = new ControllerMetricCollectorFactory();
+        metricFactory = new EventTimer();
         workflowWizardControl = new DummyMetricCollectionController();
         logonControl = new DummyMetricCollectionController();
         attachmentControl = new DummyMetricCollectionController();
@@ -105,7 +105,7 @@ public class ControllerMetricCollectorFactoryTest extends TestCase {
     
     public static class DummyMetricCollectionController implements MetricCollectorController {
         public void setMetricCollectorFactory(
-                ControllerMetricCollectorFactory metricCollectorFactory) {
+                EventTimer metricCollectorFactory) {
         }
     }
 }

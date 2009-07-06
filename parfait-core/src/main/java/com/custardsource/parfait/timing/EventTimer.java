@@ -13,13 +13,13 @@ import com.custardsource.parfait.MonitoredCounter;
  * A class to provide a {@link EventMetricCollector} to each controller on demand, guaranteed
  * to be thread-safe as long is it's only ever used by the requesting thread.
  */
-public class ControllerMetricCollectorFactory {
+public class EventTimer {
 
     /**
      * Setting this {@link Logger} to DEBUG level will list all the created PCP metrics in a
      * tab-delimited format, useful for adding to the agent.
      */
-    private static final Logger LOG = Logger.getLogger(ControllerMetricCollectorFactory.class);
+    private static final Logger LOG = Logger.getLogger(EventTimer.class);
 
     private final Map<MetricCollectorController, EventCounters> perControllerCounters = new ConcurrentHashMap<MetricCollectorController, EventCounters>();
 
@@ -38,21 +38,21 @@ public class ControllerMetricCollectorFactory {
 
     private final ThreadMetricSuite metricSuite;
 
-    protected ControllerMetricCollectorFactory() {
+    protected EventTimer() {
         this(new ThreadMetricSuite());
     }
     
-    protected ControllerMetricCollectorFactory(ThreadMetricSuite metrics) {
+    protected EventTimer(ThreadMetricSuite metrics) {
         this.metricSuite = metrics;
         // used by subclasses
     }
     
-    public ControllerMetricCollectorFactory(boolean enableCpuCollection,
+    public EventTimer(boolean enableCpuCollection,
             boolean enableContentionCollection) {
         this(new ThreadMetricSuite(), enableCpuCollection, enableContentionCollection);
     }
 
-    public ControllerMetricCollectorFactory(ThreadMetricSuite metrics, boolean enableCpuCollection,
+    public EventTimer(ThreadMetricSuite metrics, boolean enableCpuCollection,
             boolean enableContentionCollection) {
         this.metricSuite = metrics;
         if (enableCpuCollection) {
