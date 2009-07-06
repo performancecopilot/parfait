@@ -29,18 +29,32 @@ public class ControllerMetricCollectorFactory {
             return new EventMetricCollector(perControllerCounters);
         }
     };
+    
     /**
      * Holds the singleton total counters which are used across all controllers. The key is the
      * metric name
      */
-    private Map<String, MonitoredCounter> totalCountersForControllers = new HashMap<String, MonitoredCounter>();
+    private final Map<String, MonitoredCounter> totalCountersForControllers = new HashMap<String, MonitoredCounter>();
+
+    private final ThreadMetricSuite metricSuite;
 
     protected ControllerMetricCollectorFactory() {
+        this(new ThreadMetricSuite());
+    }
+    
+    protected ControllerMetricCollectorFactory(ThreadMetricSuite metrics) {
+        this.metricSuite = metrics;
         // used by subclasses
     }
-
+    
     public ControllerMetricCollectorFactory(boolean enableCpuCollection,
             boolean enableContentionCollection) {
+        this(new ThreadMetricSuite(), enableCpuCollection, enableContentionCollection);
+    }
+
+    public ControllerMetricCollectorFactory(ThreadMetricSuite metrics, boolean enableCpuCollection,
+            boolean enableContentionCollection) {
+        this.metricSuite = metrics;
         if (enableCpuCollection) {
             ManagementFactory.getThreadMXBean().setThreadCpuTimeEnabled(true);
         }
@@ -59,54 +73,16 @@ public class ControllerMetricCollectorFactory {
     }
 
     private EventCounters getCounterSet(String beanName) {
-        EventMetricCounters invocationCounter = createControllerMonitoredCounter(beanName,
-                "count",
-                "Total number of times the controller %s was invoked directly by a user request",
-                "Total number of times all controllers have been invoked directly by a user request");
-        EventCounters counters = new EventCounters(
-                invocationCounter);
+        EventMetricCounters invocationCounter = createControllerMonitoredCounter(beanName, "count",
+                "Total number of times the event was directly triggered");
+        EventCounters counters = new EventCounters(invocationCounter);
 
-        EventMetricCounters timingCounter = createControllerMonitoredCounter(
-                beanName,
-                "time",
-                "Total time (in ms) spent in controller %s after direct invocation by a user request",
-                "Total time (in ms) spent in all controllers after direct invocation by a user request");
-        counters.addMetric(StandardThreadMetrics.CLOCK_TIME, timingCounter);
+        for (ThreadMetric metric : metricSuite.metrics()) {
+            EventMetricCounters timingCounter = createControllerMonitoredCounter(beanName, metric
+                    .getCounterSuffix(), metric.getDescription());
+            counters.addMetric(metric, timingCounter);
+        }
 
-        EventMetricCounters userTimeCounter = createControllerMonitoredCounter(beanName, "utime",
-                "User CPU time spent in controller %s after direct invocation",
-                "User CPU time spent in all controllers after direct invocation");
-        counters.addMetric(StandardThreadMetrics.USER_CPU_TIME, userTimeCounter);
-
-        EventMetricCounters systemTimeCounter = createControllerMonitoredCounter(beanName,
-                "stime", "System CPU time spent in controller %s after direct invocation",
-                "System CPU time spent in all controllers after direct invocation");
-        counters.addMetric(StandardThreadMetrics.SYSTEM_CPU_TIME, systemTimeCounter);
-
-        EventMetricCounters blockedCountCounter = createControllerMonitoredCounter(beanName,
-                "blocked.count",
-                "Number of times thread entered BLOCKED state during controller %s",
-                "Number of times BLOCKED state entered in all controllers");
-        counters.addMetric(StandardThreadMetrics.BLOCKED_COUNT, blockedCountCounter);
-
-        EventMetricCounters blockedTimeCounter = createControllerMonitoredCounter(beanName,
-                "blocked.time", "ms spent in BLOCKED state during controller %s",
-                "ms spent in BLOCKED state in all controllers");
-        counters.addMetric(StandardThreadMetrics.BLOCKED_TIME, blockedTimeCounter);
-
-        EventMetricCounters waitedCountCounter = createControllerMonitoredCounter(
-                beanName,
-                "waited.count",
-                "Number of times thread entered WAITING or TIMED_WAITING state during controller %s",
-                "Number of times WAITING or TIMED_WAITING state entered in all controllers");
-        counters.addMetric(StandardThreadMetrics.WAITED_COUNT, waitedCountCounter);
-
-        EventMetricCounters waitedTimeCounter = createControllerMonitoredCounter(beanName,
-                "waited.time", "ms spent in WAITED or TIMED_WAITING state during controller %s",
-                "ms spent in WAITED or TIMED_WAITING state in all controllers");
-        counters.addMetric(StandardThreadMetrics.WAITED_TIME, waitedTimeCounter);
-
-        // TODO - db and error metrics
         return counters;
     }
 
@@ -118,13 +94,15 @@ public class ControllerMetricCollectorFactory {
     }
 
     private EventMetricCounters createControllerMonitoredCounter(String beanName, String metric,
-            String metricDescription, String totalMetricDescription) {
-        MonitoredCounter metricCounter = createMetric(beanName, metric, metricDescription);
+            String metricDescription) {
+        MonitoredCounter metricCounter = createMetric(beanName, metric, metricDescription + " ["
+                + beanName + "]");
         MonitoredCounter totalCounter;
 
         totalCounter = totalCountersForControllers.get(metric);
         if (totalCounter == null) {
-            totalCounter = new MonitoredCounter(getTotalMetricName(metric), totalMetricDescription);
+            totalCounter = new MonitoredCounter(getTotalMetricName(metric), metricDescription
+                    + " [TOTAL]");
             totalCountersForControllers.put(metric, totalCounter);
         }
 

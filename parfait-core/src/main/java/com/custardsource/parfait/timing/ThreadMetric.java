@@ -7,4 +7,8 @@ public interface ThreadMetric {
     String getMetricName();
 
     String getUnit();
+
+    String getCounterSuffix();
+
+    String getDescription();
 }
