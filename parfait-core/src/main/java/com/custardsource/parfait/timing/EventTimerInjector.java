@@ -4,15 +4,14 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
 /**
- * A {@link BeanPostProcessor} responsible for adding all {@link MetricCollectorController}s to the
+ * A {@link BeanPostProcessor} responsible for adding all {@link Timeable}s to the
  * specified {@link EventTimer}
  */
-public final class ControllerMetricCollectorPostProcessor implements BeanPostProcessor {
+public final class EventTimerInjector implements BeanPostProcessor {
 
     private final EventTimer metricCollectorFactory;
 
-    public ControllerMetricCollectorPostProcessor(
-            EventTimer metricCollectorFactory) {
+    public EventTimerInjector(EventTimer metricCollectorFactory) {
         this.metricCollectorFactory = metricCollectorFactory;
     }
 
