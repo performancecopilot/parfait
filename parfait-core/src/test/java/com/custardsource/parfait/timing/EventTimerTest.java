@@ -104,7 +104,7 @@ public class EventTimerTest extends TestCase {
     }
     
     public static class DummyTimeable implements Timeable {
-        public void setMetricCollectorFactory(EventTimer metricCollectorFactory) {
+        public void setEventTimer(EventTimer timer) {
         }
     }
 }

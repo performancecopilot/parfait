@@ -30,7 +30,7 @@ public final class DummyEventTimer extends EventTimer {
     }
 
     public void registerTimeable(Timeable controller, String beanName) {
-        controller.setMetricCollectorFactory(this);
+        controller.setEventTimer(this);
     }
 
 }

@@ -6,6 +6,6 @@ package com.custardsource.parfait.timing;
  */
 public interface Timeable {
 
-    public void setMetricCollectorFactory(EventTimer metricCollectorFactory);
+    public void setEventTimer(EventTimer timer);
 
 }
