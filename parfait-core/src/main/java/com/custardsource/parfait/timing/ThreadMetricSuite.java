@@ -6,8 +6,11 @@ import java.util.Collections;
 import java.util.List;
 
 public class ThreadMetricSuite {
-    private final List<ThreadMetric> metrics = new ArrayList<ThreadMetric>(StandardThreadMetrics
-            .defaults());
+    private final List<ThreadMetric> metrics;
+    
+    private ThreadMetricSuite(Collection<? extends ThreadMetric> metrics) {
+        this.metrics = new ArrayList<ThreadMetric>(metrics);
+    }
     
     public final void addMetric(ThreadMetric metric) {
         metrics.add(metric);
@@ -21,4 +24,11 @@ public class ThreadMetricSuite {
         return Collections.unmodifiableList(metrics);
     }
 
+    public static ThreadMetricSuite blank() {
+        return new ThreadMetricSuite(Collections.<ThreadMetric>emptyList());
+    }
+
+    public static ThreadMetricSuite withDefaultMetrics() {
+        return new ThreadMetricSuite(StandardThreadMetrics.defaults());
+    }
 }
