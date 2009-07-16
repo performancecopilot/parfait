@@ -30,7 +30,7 @@ public class EventMetricCollector {
         this.perEventCounters = perEventCounters;
     }
 
-    public void startTiming(Object event, String action) {
+    public void startTiming(Timeable event, String action) {
         StepMeasurements newTiming = new StepMeasurements(current, event.getClass(),
                 action);
         for (ThreadMetric metric : perEventCounters.get(event).getMetricSources()) {

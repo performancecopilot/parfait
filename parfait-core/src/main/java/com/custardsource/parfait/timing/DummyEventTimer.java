@@ -8,12 +8,12 @@ import com.custardsource.parfait.MonitorableRegistry;
  */
 public final class DummyEventTimer extends EventTimer {
     public DummyEventTimer(MonitorableRegistry registry) {
-        super("dummy", registry);
+        super("dummy", registry, ThreadMetricSuite.blank(), false, false);
     }
 
     private static final EventMetricCollector DUMMY_EVENT_METRIC_COLLECTOR = new EventMetricCollector(
             null) {
-        public void startTiming(Object source, String action) {
+        public void startTiming(Timeable source, String action) {
             // no-op
         }
 

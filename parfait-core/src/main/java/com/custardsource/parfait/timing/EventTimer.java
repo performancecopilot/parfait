@@ -41,21 +41,6 @@ public class EventTimer {
     private final String prefix;
     private final MonitorableRegistry registry;
 
-    protected EventTimer(String prefix, MonitorableRegistry registry) {
-        this(prefix, registry, ThreadMetricSuite.withDefaultMetrics());
-    }
-
-    protected EventTimer(String prefix, MonitorableRegistry registry, ThreadMetricSuite metrics) {
-        // used by subclasses
-        this(prefix, registry, metrics, false, false);
-    }
-
-    public EventTimer(String prefix, MonitorableRegistry registry, boolean enableCpuCollection,
-            boolean enableContentionCollection) {
-        this(prefix, registry, ThreadMetricSuite.withDefaultMetrics(), enableCpuCollection,
-                enableContentionCollection);
-    }
-
     public EventTimer(String prefix, MonitorableRegistry registry, ThreadMetricSuite metrics,
             boolean enableCpuCollection, boolean enableContentionCollection) {
         this.metricSuite = metrics;
