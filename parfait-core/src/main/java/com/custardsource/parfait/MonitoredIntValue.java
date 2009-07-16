@@ -2,7 +2,7 @@ package com.custardsource.parfait;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class MonitoredIntValue extends MonitoredValue<AtomicInteger> {
+public class MonitoredIntValue extends MonitoredNumeric<AtomicInteger> {
 	public MonitoredIntValue(String name, String description,
 			MonitorableRegistry registry, Integer initialValue) {
 		super(name, description, registry, new AtomicInteger(initialValue));
@@ -10,7 +10,8 @@ public class MonitoredIntValue extends MonitoredValue<AtomicInteger> {
 
 	public MonitoredIntValue(String name, String description,
 			Integer initialValue) {
-		super(name, description, new AtomicInteger(initialValue));
+        super(name, description, MonitorableRegistry.DEFAULT_REGISTRY, new AtomicInteger(
+                initialValue));
 	}
 
     /**

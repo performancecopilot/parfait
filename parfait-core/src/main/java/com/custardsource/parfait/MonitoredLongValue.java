@@ -2,7 +2,7 @@ package com.custardsource.parfait;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public class MonitoredLongValue extends MonitoredValue<AtomicLong> {
+public class MonitoredLongValue extends MonitoredNumeric<AtomicLong> {
 	public MonitoredLongValue(String name, String description,
 			MonitorableRegistry registry, Long initialValue) {
 		super(name, description, registry, new AtomicLong(initialValue));
@@ -10,7 +10,7 @@ public class MonitoredLongValue extends MonitoredValue<AtomicLong> {
 
 	public MonitoredLongValue(String name, String description,
 			Long initialValue) {
-		super(name, description, new AtomicLong(initialValue));
+		super(name, description, MonitorableRegistry.DEFAULT_REGISTRY, new AtomicLong(initialValue));
 	}
 
     /**
