@@ -13,4 +13,10 @@ public class ThreadValueMetric extends AbstractThreadMetric {
     public long getCurrentValue() {
         return source.get().longValue();
     }
+
+    @Override
+    public long getValueForThread(Thread t) {
+        Number n = source.getForThread(t);
+        return n == null ? 0 : n.longValue();
+    }
 }
