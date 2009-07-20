@@ -20,7 +20,7 @@ public class EventMetricCollector {
      * the top-level event requested by the user.
      */
     private int depth = 0;
-    private Object topLevelEvent;
+    private Timeable topLevelEvent;
 
     private final Map<Timeable, EventCounters> perEventCounters;
 
