@@ -1,5 +1,7 @@
 package com.custardsource.parfait.timing;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.google.common.base.Function;
@@ -11,6 +13,8 @@ public interface ThreadValue<T> {
     boolean canRetrieveAcrossThreads();
 
     T getForThread(Thread thread);
+    
+    Map<Thread, T> asMap();
 
     public static class ThreadLocalMap<T> implements ThreadValue<T> {
         private final ThreadLocal<T> threadLocal = new ThreadLocal<T>() {
@@ -41,6 +45,11 @@ public interface ThreadValue<T> {
             }
             return null;
         }
+
+        @Override
+        public Map<Thread, T> asMap() {
+            return Collections.<Thread, T>emptyMap();
+        }
     }
 
     public static class WeakReferenceThreadMap<T> implements ThreadValue<T> {
@@ -69,6 +78,11 @@ public interface ThreadValue<T> {
         @Override
         public final T getForThread(Thread thread) {
             return map.get(thread);
+        }
+
+        @Override
+        public Map<Thread, T> asMap() {
+            return new HashMap<Thread, T>(map);
         }
     }
 }

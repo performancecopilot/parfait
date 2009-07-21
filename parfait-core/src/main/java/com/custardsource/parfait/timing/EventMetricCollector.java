@@ -6,14 +6,17 @@ import org.apache.log4j.Logger;
 
 /**
  * <p>
- * Coordinates multiple {@link MetricMeasurement MetricMeasurements} for all the events invoked
- * in the process of handling the user request.
+ * Coordinates multiple {@link MetricMeasurement MetricMeasurements} for all the events invoked in
+ * the process of handling the user request.
  * </p>
  * <p>
- * Not thread-safe, should be used only by one thread at a time.
+ * Not thread-safe, should be used only by one thread at a time (obtaining the top-level measurement
+ * via {@link #getInProgressMeasurements()} is thread-safe and permitted).
  * </p>
  */
 public class EventMetricCollector {
+    private volatile StepMeasurements top = null;
+    
     private StepMeasurements current = null;
     /**
      * The number of nested events invoked so far. When we hit depth of 0 we know we've reached
@@ -34,11 +37,14 @@ public class EventMetricCollector {
         StepMeasurements newTiming = new StepMeasurements(current, event.getClass(),
                 action);
         for (ThreadMetric metric : perEventCounters.get(event).getMetricSources()) {
-            newTiming.addMetricInstance(new MetricMeasurement(metric));
+            newTiming.addMetricInstance(new MetricMeasurement(metric, Thread.currentThread()));
         }
         current = newTiming;
         topLevelEvent = event;
         depth++;
+        if (top == null) {
+            top = newTiming;
+        }
         current.startAll();
     }
 
@@ -67,6 +73,9 @@ public class EventMetricCollector {
             counters.getInvocationCounter().incrementCounters(1);
         }
         current = current.getParent();
+        if (depth == 0) {
+            top = null;
+        }
     }
 
     public void pauseForForward() {
@@ -75,5 +84,9 @@ public class EventMetricCollector {
 
     public void resumeAfterForward() {
         current.resumeAll();
+    }
+    
+    final StepMeasurements getInProgressMeasurements() {
+        return top;
     }
 }

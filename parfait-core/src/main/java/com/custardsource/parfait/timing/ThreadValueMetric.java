@@ -8,11 +8,6 @@ public class ThreadValueMetric extends AbstractThreadMetric {
         super(name, unit, counterSuffix, description);
         this.source = source;
     }
-    
-    @Override
-    public long getCurrentValue() {
-        return source.get().longValue();
-    }
 
     @Override
     public long getValueForThread(Thread t) {

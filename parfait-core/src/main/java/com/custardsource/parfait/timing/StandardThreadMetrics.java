@@ -10,11 +10,6 @@ public class StandardThreadMetrics {
     public static final ThreadMetric CLOCK_TIME = new AbstractThreadMetric("Elapsed time", "ms",
             "time", "Total wall time (in ms) spent executing event") {
         @Override
-        public long getCurrentValue() {
-            return System.currentTimeMillis();
-        }
-
-        @Override
         public long getValueForThread(Thread t) {
             return System.currentTimeMillis();
         }
@@ -22,11 +17,6 @@ public class StandardThreadMetrics {
     
     public static final ThreadMetric TOTAL_CPU_TIME = new AbstractThreadMetric("Total CPU", "ms",
             "cputime", "Total CPU time (in ms) spent executing event") {
-        @Override
-        public long getCurrentValue() {
-            return nanosToMillis(ManagementFactory.getThreadMXBean().getCurrentThreadCpuTime());
-        }
-
         @Override
         public long getValueForThread(Thread t) {
             return nanosToMillis(ManagementFactory.getThreadMXBean().getThreadCpuTime(t.getId()));
@@ -36,11 +26,6 @@ public class StandardThreadMetrics {
     public static final ThreadMetric USER_CPU_TIME = new AbstractThreadMetric("User CPU", "ms",
             "utime", "User CPU time (in ms) spent executing event") {
         @Override
-        public long getCurrentValue() {
-            return nanosToMillis(ManagementFactory.getThreadMXBean().getCurrentThreadUserTime());
-        }
-
-        @Override
         public long getValueForThread(Thread t) {
             return nanosToMillis(ManagementFactory.getThreadMXBean().getThreadUserTime(t.getId()));
         }
@@ -48,12 +33,6 @@ public class StandardThreadMetrics {
 
     public static final ThreadMetric SYSTEM_CPU_TIME = new AbstractThreadMetric("System CPU", "ms",
             "stime", "System CPU time (in ms) spent executing event") {
-        @Override
-        public long getCurrentValue() {
-            return nanosToMillis(ManagementFactory.getThreadMXBean().getCurrentThreadCpuTime()
-                    - ManagementFactory.getThreadMXBean().getCurrentThreadUserTime());
-        }
-
         @Override
         public long getValueForThread(Thread t) {
             return nanosToMillis(ManagementFactory.getThreadMXBean().getThreadCpuTime(t.getId())
@@ -111,22 +90,12 @@ public class StandardThreadMetrics {
         }
 
         @Override
-        public final long getCurrentValue() {
-            return getValue(getCurrentThreadInfo());
-        }
-
-        @Override
         public final long getValueForThread(Thread t) {
             ThreadInfo info = getThreadInfo(t);
             return info == null ? 0 : getValue(info);
         }
 
         protected abstract long getValue(ThreadInfo threadInfo);
-
-        private static ThreadInfo getCurrentThreadInfo() {
-            return ManagementFactory.getThreadMXBean()
-                    .getThreadInfo(Thread.currentThread().getId());
-        }
 
         private static ThreadInfo getThreadInfo(Thread t) {
             return ManagementFactory.getThreadMXBean().getThreadInfo(t.getId());

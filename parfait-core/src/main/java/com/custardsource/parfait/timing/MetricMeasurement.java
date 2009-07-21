@@ -11,27 +11,29 @@ import com.google.common.base.Preconditions;
  * in this event's code as opposed to forwarding elsewhere).
  */
 class MetricMeasurement {
-    private Long startValue;
+    private volatile Long startValue;
     private Long endValue;
     private Long lastStartOwnTimeValue;
     private long ownValueSoFar = 0L;
-    private ThreadMetric metricSource;
+    private final ThreadMetric metricSource;
+    private final Thread thread;
 
-    public MetricMeasurement(ThreadMetric metricSource) {
+    public MetricMeasurement(ThreadMetric metricSource, Thread thread) {
         this.metricSource = metricSource;
+        this.thread = thread;
     }
 
     public void startTimer() {
         Preconditions.checkState(startValue == null, "Can't start running timer");
-        this.startValue = metricSource.getCurrentValue();
-        this.lastStartOwnTimeValue = metricSource.getCurrentValue();
+        this.startValue = metricSource.getValueForThread(thread);
+        this.lastStartOwnTimeValue = this.startValue;
         this.ownValueSoFar = 0L;
     }
 
     public void pauseOwnTime() {
     	Preconditions.checkState(startValue != null, "Can't pause own time while timer is stopped");
     	Preconditions.checkState(lastStartOwnTimeValue != null, "Can't pause own time while already paused");
-        this.ownValueSoFar += (metricSource.getCurrentValue() - lastStartOwnTimeValue);
+        this.ownValueSoFar += (metricSource.getValueForThread(thread) - lastStartOwnTimeValue);
         this.lastStartOwnTimeValue = null;
     }
 
@@ -39,12 +41,12 @@ class MetricMeasurement {
     	Preconditions.checkState(startValue != null, "Can't resume own time while timer is stopped");
     	Preconditions.checkState(lastStartOwnTimeValue == null, "Can't resume own time - already counting");
     	Preconditions.checkState(endValue == null, "Can't resume own time - stopped");
-        this.lastStartOwnTimeValue = metricSource.getCurrentValue();
+        this.lastStartOwnTimeValue = metricSource.getValueForThread(thread);
     }
 
     public void stopTimer() {
         pauseOwnTime();
-        endValue = metricSource.getCurrentValue();
+        endValue = metricSource.getValueForThread(thread);
     }
 
     public long totalValue() {
@@ -55,6 +57,16 @@ class MetricMeasurement {
     public long ownTimeValue() {
     	Preconditions.checkState(endValue != null, "Can't measure time until timer is stopped");
         return ownValueSoFar;
+    }
+
+    public long inProgressValue() {
+        Long start = startValue;
+        Long snapshot = metricSource.getValueForThread(thread);
+        
+        if (start == null || snapshot == null) {
+            return 0;
+        }
+        return snapshot - start;
     }
 
     public String getMetricName() {

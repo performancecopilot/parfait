@@ -1,9 +1,21 @@
 package com.custardsource.parfait.timing;
 
 import java.lang.management.ManagementFactory;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.management.openmbean.CompositeData;
+import javax.management.openmbean.CompositeDataSupport;
+import javax.management.openmbean.CompositeType;
+import javax.management.openmbean.OpenDataException;
+import javax.management.openmbean.OpenType;
+import javax.management.openmbean.SimpleType;
+import javax.management.openmbean.TabularData;
+import javax.management.openmbean.TabularDataSupport;
+import javax.management.openmbean.TabularType;
 
 import org.apache.log4j.Logger;
 
@@ -24,19 +36,20 @@ public class EventTimer {
 
     private final Map<Timeable, EventCounters> perTimeableCounters = new ConcurrentHashMap<Timeable, EventCounters>();
 
-    private final ThreadLocal<EventMetricCollector> metricCollectors = new ThreadLocal<EventMetricCollector>() {
+    private final ThreadValue<EventMetricCollector> metricCollectors = new ThreadValue.WeakReferenceThreadMap<EventMetricCollector>() {
         @Override
         protected EventMetricCollector initialValue() {
             return new EventMetricCollector(perTimeableCounters);
         }
     };
     
+    
     /**
      * Holds the singleton total counters which are used across all events. The key is the
      * metric name
      */
     private final Map<String, MonitoredCounter> totalCountersAcrossEvents = new HashMap<String, MonitoredCounter>();
-
+    
     private final ThreadMetricSuite metricSuite;
     private final String prefix;
     private final MonitorableRegistry registry;
@@ -117,4 +130,48 @@ public class EventTimer {
         return perTimeableCounters.get(event);
     }
 
+    public TabularData captureInProgressMeasurements() throws OpenDataException {
+        List<String> names = new ArrayList<String>();
+        List<String> descriptions = new ArrayList<String>();
+        List<OpenType<?>> types = new ArrayList<OpenType<?>>();
+        
+        names.add("Thread name");
+        descriptions.add("Thread name");
+        types.add(SimpleType.STRING);
+
+        names.add("Event");
+        descriptions.add("Event");
+        types.add(SimpleType.STRING);
+
+        for (ThreadMetric metric : metricSuite.metrics()) {
+            names.add(metric.getMetricName());
+            descriptions.add(metric.getDescription());
+            types.add(SimpleType.LONG);
+        }
+        
+        CompositeType rowType = new CompositeType("Snapshot row", "Snapshot row", names
+                .toArray(new String[] {}), descriptions.toArray(new String[] {}), types
+                .toArray(new OpenType<?>[] {}));
+
+        TabularType type = new TabularType("Snapshot", "Snapshot", rowType,
+                new String[] { "Thread name" });
+        TabularData data = new TabularDataSupport(type);
+        
+        Map<Thread, EventMetricCollector> collectors = metricCollectors.asMap();
+        for (Map.Entry<Thread, EventMetricCollector> entry : collectors.entrySet()) {
+            StepMeasurements m = entry.getValue().getInProgressMeasurements();
+            String event = m.getBackTrace();
+            Map<ThreadMetric, Long> snapshotValues = m.snapshotValues();
+            Map<String, Object> keyedValues = new HashMap<String, Object>();
+            keyedValues.put("Thread name", entry.getKey().getName());
+            keyedValues.put("Event", event);
+            for (ThreadMetric metric : metricSuite.metrics()) {
+                keyedValues.put(metric.getMetricName(), snapshotValues.get(metric));
+                System.out.println(String.format("Thread %s in event %s, metric %s has value %s", entry.getKey(), event, metric, snapshotValues.get(metric)));
+            }
+            CompositeData row = new CompositeDataSupport(rowType, keyedValues);
+            data.put(row);
+        }
+        return data;
+    }
 }

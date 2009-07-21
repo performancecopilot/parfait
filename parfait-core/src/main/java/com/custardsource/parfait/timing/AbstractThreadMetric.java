@@ -29,4 +29,10 @@ public abstract class AbstractThreadMetric implements ThreadMetric {
         return description;
     }
 
+    @Override
+    public String toString() {
+        return "Metric[" + name + "]";
+    }
+
+    
 }

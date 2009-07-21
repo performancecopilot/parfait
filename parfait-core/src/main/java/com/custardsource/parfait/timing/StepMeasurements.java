@@ -2,7 +2,10 @@ package com.custardsource.parfait.timing;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -13,7 +16,8 @@ public class StepMeasurements {
 
     private final Class<?> eventClass;
     private final String action;
-
+    private volatile boolean started = false;
+    
     public StepMeasurements(StepMeasurements parent,
             Class<?> eventClass, String action) {
         this.parent = parent;
@@ -36,9 +40,11 @@ public class StepMeasurements {
         for (MetricMeasurement metric : metricInstances) {
             metric.startTimer();
         }
+        started = true;
     }
 
     public void stopAll() {
+        started = false;
         for (MetricMeasurement metric : metricInstances) {
             metric.stopTimer();
         }
@@ -99,6 +105,18 @@ public class StepMeasurements {
 
     public Collection<MetricMeasurement> getMetricInstances() {
         return metricInstances;
+    }
+    
+    public Map<ThreadMetric, Long> snapshotValues() {
+        if (!started) {
+            return Collections.<ThreadMetric, Long>emptyMap();
+        }
+        Collection<MetricMeasurement> snapshot = new ArrayList<MetricMeasurement>(metricInstances);
+        Map<ThreadMetric, Long> results = new HashMap<ThreadMetric, Long>();
+        for (MetricMeasurement measurement : snapshot) {
+            results.put(measurement.getMetricSource(), measurement.inProgressValue());
+        }
+        return results;
     }
 
 }
