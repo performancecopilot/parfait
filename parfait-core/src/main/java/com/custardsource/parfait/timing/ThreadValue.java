@@ -17,15 +17,10 @@ public interface ThreadValue<T> {
     Map<Thread, T> asMap();
 
     public static class ThreadLocalMap<T> implements ThreadValue<T> {
-        private final ThreadLocal<T> threadLocal = new ThreadLocal<T>() {
-            @Override
-            protected T initialValue() {
-                return ThreadLocalMap.this.initialValue();
-            }
-        };
-
-        protected final T initialValue() {
-            return null;
+        private final ThreadLocal<? extends T> threadLocal;
+        
+        public ThreadLocalMap(ThreadLocal<? extends T> threadLocal) {
+            this.threadLocal = threadLocal;
         }
 
         @Override
@@ -47,7 +42,7 @@ public interface ThreadValue<T> {
         }
 
         @Override
-        public Map<Thread, T> asMap() {
+        public final Map<Thread, T> asMap() {
             return Collections.<Thread, T>emptyMap();
         }
     }
@@ -81,7 +76,7 @@ public interface ThreadValue<T> {
         }
 
         @Override
-        public Map<Thread, T> asMap() {
+        public final Map<Thread, T> asMap() {
             return new HashMap<Thread, T>(map);
         }
     }

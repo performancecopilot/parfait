@@ -13,15 +13,24 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.sql.DataSource;
 
-import com.custardsource.parfait.timing.AbstractThreadMetric;
 import com.custardsource.parfait.timing.ThreadMetric;
+import com.custardsource.parfait.timing.ThreadValue;
+import com.custardsource.parfait.timing.ThreadValueMetric;
 import com.google.common.collect.ImmutableList;
 
 public class ParfaitDataSource implements DataSource {
-	private DataSource wrapped;
+	private final DataSource wrapped;
+    private final ThreadLocal<AtomicLong> executionCounts = longThreadLocal();
+    private final ThreadLocal<AtomicLong> executionTimes = longThreadLocal();
+    private final ThreadMetric counterMetric;  
+    private final ThreadMetric timeMetric;  
 
 	public ParfaitDataSource(DataSource wrapped) {
 		this.wrapped = wrapped;
+		this.counterMetric = newThreadMetric("Database call count", "", "db.count",
+                "Number of database calls made during event", executionCounts);
+		this.timeMetric = newThreadMetric("Database execution time", "", "db.time",
+               "Time spent in database calls during event", executionTimes);
 	}
 
 	@Override
@@ -110,7 +119,7 @@ public class ParfaitDataSource implements DataSource {
 				String methodName = method.getName();
 				if ("execute".equals(methodName) || "executeQuery".equals(methodName)
 						|| "executeUpdate".equals(methodName) || "executeBatch".equals(methodName)) {
-					return invokeAndLogExecute(method, args);
+					return logStatementExecution(method, target, args);
 				}
 				return method.invoke(target, args);
 			} catch (InvocationTargetException ex) {
@@ -118,60 +127,42 @@ public class ParfaitDataSource implements DataSource {
 			}
 		}
 
-		private Object invokeAndLogExecute(Method method, Object[] args) throws Exception {
-			long start = System.currentTimeMillis();
-			try {
-				return method.invoke(target, args);
-			} finally {
-				executionCounts.get().incrementAndGet();
-				executionTimes.get().addAndGet(System.currentTimeMillis() - start);
-			}
-		}
 	}
-
-	public final long getExecutionCountForCurrentThread() {
-		return executionCounts.get().longValue();
+	
+	protected Object logStatementExecution(Method method, Statement target, Object[] args) throws Exception {
+	    long start = System.currentTimeMillis();
+	    try {
+	        return method.invoke(target, args);
+	    } finally {
+	        executionCounts.get().incrementAndGet();
+	        executionTimes.get().addAndGet(System.currentTimeMillis() - start);
+	    }
 	}
+	
+    public final ThreadMetric getCounterMetric() {
+        return counterMetric;
+    }
 
-	public final long getExecutionTimeForCurrentThread() {
-		return executionTimes.get().longValue();
-	}
+    public final ThreadMetric getTimeMetric() {
+        return timeMetric;
+    }
 
-	private final ThreadLocal<AtomicLong> executionCounts = new ThreadLocal<AtomicLong>() {
-		@Override
-		protected AtomicLong initialValue() {
-			return new AtomicLong(0);
-		}
-	};
-	private final ThreadLocal<AtomicLong> executionTimes = new ThreadLocal<AtomicLong>() {
-		@Override
-		protected AtomicLong initialValue() {
-			return new AtomicLong(0);
-		}
-	};
+    protected final ThreadMetric newThreadMetric(String name, String unit, String counterSuffix,
+            String description, final ThreadLocal<AtomicLong> threadLocal) {
+        return new ThreadValueMetric(name, unit, counterSuffix, description,
+                new ThreadValue.ThreadLocalMap<Number>(threadLocal));
+    }
 
-	public final ThreadMetric getCounterMetric() {
-		return new AbstractThreadMetric("Database call count", "", "db.count",
-				"Number of database calls made during event") {
+    public Collection<ThreadMetric> getThreadMetrics() {
+        return ImmutableList.<ThreadMetric> of(getCounterMetric(), getTimeMetric());
+    }
 
-			@Override
-			public long getCurrentValue() {
-				return getExecutionCountForCurrentThread();
-			}
-		};
-	}
-
-	public final ThreadMetric getTimeMetric() {
-		return new AbstractThreadMetric("Database execution time", "", "db.time",
-				"Time spent in database calls during event") {
-			@Override
-			public long getCurrentValue() {
-				return getExecutionTimeForCurrentThread();
-			}
-		};
-	}
-
-	public final Collection<ThreadMetric> getThreadMetrics() {
-		return ImmutableList.<ThreadMetric> of(getCounterMetric(), getTimeMetric());
-	}
+    protected static final ThreadLocal<AtomicLong> longThreadLocal() {
+        return new ThreadLocal<AtomicLong>() {
+            @Override
+            protected AtomicLong initialValue() {
+                return new AtomicLong(0);
+            }
+        };
+    }
 }

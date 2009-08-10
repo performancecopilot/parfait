@@ -12,6 +12,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
+import com.custardsource.parfait.timing.ThreadMetric;
+
 public class ParfaitDataSourceTest {
 	private DataSource wrapped;
 
@@ -26,8 +28,9 @@ public class ParfaitDataSourceTest {
 	public void testExecutionCountForCurrentThread() throws SQLException {
 		ParfaitDataSource source = new ParfaitDataSource(wrapped);
 		Statement s = source.getConnection().createStatement();
-		Assert.assertEquals(0, source.getExecutionCountForCurrentThread());
+		ThreadMetric counter = source.getCounterMetric();
+		Assert.assertEquals(0, counter.getValueForThread(Thread.currentThread()));
 		s.execute("ROLLBACK");
-		Assert.assertEquals(1, source.getExecutionCountForCurrentThread());
+        Assert.assertEquals(1, counter.getValueForThread(Thread.currentThread()));
 	}
 }
