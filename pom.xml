@@ -13,6 +13,7 @@
     <module>parfait-io</module>
     <module>parfait-jmx</module>
     <module>parfait-jdbc</module>
+    <module>parfait-cxf</module>
   </modules>
   <url>http://code.google.com/p/parfait/</url>
   <inceptionYear>2009</inceptionYear>
