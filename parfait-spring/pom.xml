@@ -1,0 +1,38 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <artifactId>parfait</artifactId>
+    <groupId>com.custardsource</groupId>
+    <version>0.0.2-SNAPSHOT</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.custardsource.parfait</groupId>
+  <artifactId>parfait-spring</artifactId>
+  <name>parfait-spring</name>
+  <version>0.0.2-SNAPSHOT</version>
+  <description>Library enabling parfait timing collection around Spring beans using Spring AOP</description>
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-aop</artifactId>
+      <version>2.5.6.SEC01</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-aspects</artifactId>
+      <version>2.5.6.SEC01</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>cglib</groupId>
+      <artifactId>cglib</artifactId>
+      <version>2.2</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.custardsource.parfait</groupId>
+      <artifactId>parfait-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+</project>
