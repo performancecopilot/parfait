@@ -10,4 +10,44 @@
   <name>parfait-cxf</name>
   <version>0.0.2-SNAPSHOT</version>
   <description>Library for performance monitoring of Apache CXF web services</description>
+  <dependencies>
+    <dependency>
+      <groupId>com.custardsource.parfait</groupId>
+      <artifactId>parfait-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.apache.cxf</groupId>
+    	<artifactId>cxf-api</artifactId>
+    	<version>2.2.3</version>
+    	<type>jar</type>
+    	<scope>compile</scope>
+    </dependency>
+    <dependency>
+    	<groupId>org.apache.cxf</groupId>
+    	<artifactId>cxf-rt-transports-http</artifactId>
+    	<version>2.2.3</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.apache.cxf</groupId>
+    	<artifactId>cxf-testutils</artifactId>
+    	<version>2.2.3</version>
+    	<scope>test</scope>
+    </dependency>
+    <dependency>
+    	<groupId>org.mortbay.jetty</groupId>
+    	<artifactId>jetty</artifactId>
+    	<version>6.1.20</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.apache.cxf</groupId>
+    	<artifactId>cxf-rt-frontend-jaxrs</artifactId>
+    	<version>2.2.3</version>
+    </dependency>
+    <dependency>
+    	<groupId>com.thoughtworks.xstream</groupId>
+    	<artifactId>xstream</artifactId>
+    	<version>1.3.1</version>
+    </dependency>
+  </dependencies>  
 </project>
