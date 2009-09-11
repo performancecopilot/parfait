@@ -50,6 +50,11 @@ public class MetricNameTest {
 		MetricName.parse("a[x.b");
 	}
 
+	@Test
+	public void testCanParseWithUnderscores() {
+		assertMetricNameMatches(MetricName.parse("a._b_"), "a._b_", null, "a._b_");
+	}
+
 	private void assertMetricNameMatches(MetricName parsedName, String expectedMetric,
 			String expectedInstance, String expectedInstanceDomain) {
 		assertEquals(expectedMetric, parsedName.getMetric());
