@@ -4,6 +4,9 @@
     <groupId>com.custardsource</groupId>
     <version>0.0.3-SNAPSHOT</version>
   </parent>
+  <properties>
+    <cxf.version>2.2.3</cxf.version>
+  </properties>
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.custardsource.parfait</groupId>
   <artifactId>parfait-cxf</artifactId>
@@ -19,19 +22,24 @@
     <dependency>
     	<groupId>org.apache.cxf</groupId>
     	<artifactId>cxf-api</artifactId>
-    	<version>2.2.3</version>
+        <version>${cxf.version}</version>
     	<type>jar</type>
     	<scope>compile</scope>
     </dependency>
     <dependency>
     	<groupId>org.apache.cxf</groupId>
     	<artifactId>cxf-rt-transports-http</artifactId>
-    	<version>2.2.3</version>
+        <version>${cxf.version}</version>
+    </dependency>
+    <dependency>
+    	<groupId>org.apache.cxf</groupId>
+    	<artifactId>cxf-rt-frontend-jaxrs</artifactId>
+        <version>${cxf.version}</version>
     </dependency>
     <dependency>
     	<groupId>org.apache.cxf</groupId>
     	<artifactId>cxf-testutils</artifactId>
-    	<version>2.2.3</version>
+        <version>${cxf.version}</version>
     	<scope>test</scope>
     </dependency>
     <dependency>
@@ -39,11 +47,6 @@
     	<artifactId>jetty</artifactId>
     	<version>6.1.20</version>
     	<scope>test</scope>
-    </dependency>
-    <dependency>
-    	<groupId>org.apache.cxf</groupId>
-    	<artifactId>cxf-rt-frontend-jaxrs</artifactId>
-    	<version>2.2.3</version>
     </dependency>
     <dependency>
     	<groupId>com.thoughtworks.xstream</groupId>
