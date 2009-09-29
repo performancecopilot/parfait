@@ -17,7 +17,7 @@ public class ThreadMetricSuite {
     }
 
     public final void addAllMetrics(Collection<ThreadMetric> metrics) {
-        metrics.addAll(metrics);
+        this.metrics.addAll(metrics);
     }
     
     public final List<ThreadMetric> metrics() {
