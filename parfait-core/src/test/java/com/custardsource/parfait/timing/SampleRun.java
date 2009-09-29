@@ -88,8 +88,8 @@ public class SampleRun {
             EventMetricCollector collector = timer.getCollector();
             for (int i = 1; i < 30; i++) {
                 try {
-                    context.setThreadValue("Name", randomName());
-                    context.setThreadValue("Company", randomCompany());
+                    context.put("Name", randomName());
+                    context.put("Company", randomCompany());
                     collector.startTiming(this, action);
                     doJob(i);
                     collector.pauseForForward();
@@ -97,8 +97,8 @@ public class SampleRun {
                     collector.stopTiming();
                     collector.resumeAfterForward();
                     collector.stopTiming();
-                    context.clearThreadValue("Name");
-                    context.clearThreadValue("Company");
+                    context.remove("Name");
+                    context.remove("Company");
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 } finally {

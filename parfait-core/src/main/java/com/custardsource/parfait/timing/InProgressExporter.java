@@ -77,7 +77,7 @@ public class InProgressExporter {
                 System.out.println(String.format("Thread %s in event %s, metric %s has value %s", entry.getKey(), event, metric, snapshotValues.get(metric)));
             }
             for (String contextEntry : contextKeys) {
-                keyedValues.put(contextEntry, context.getThreadValue(entry.getKey(), contextEntry));
+                keyedValues.put(contextEntry, context.getForThread(entry.getKey(), contextEntry));
             }
             CompositeData row = new CompositeDataSupport(rowType, keyedValues);
             data.put(row);
