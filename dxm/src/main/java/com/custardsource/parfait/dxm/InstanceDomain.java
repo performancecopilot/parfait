@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.custardsource.parfait.dxm;
 
 import java.util.Collection;
@@ -69,10 +66,11 @@ class InstanceDomain implements PcpId, PcpOffset {
     }
     
 	private class InstanceStore extends Store<Instance> {
-		@Override
-		protected Instance newInstance(String name, Set<Integer> usedIds) {
-			return new Instance(InstanceDomain.this, name, BasePcpWriter.calculateId(name, usedIds));
-		}
+        @Override
+        protected Instance newInstance(String name, Set<Integer> usedIds) {
+            return new Instance(InstanceDomain.this, name, identifierSource.calculateId(name,
+                    usedIds));
+        }
 
 	}
 }

@@ -235,22 +235,6 @@ public abstract class BasePcpWriter implements PcpWriter {
         metricData.put(name, info);
     }
 
-    static int calculateId(String name, Set<Integer> usedIds) {
-        int value = name.hashCode();
-        // Math.abs(MIN_VALUE) == MIN_VALUE, better deal with that just in case...
-        if (value == Integer.MIN_VALUE) {
-            value++;
-        }
-        value = Math.abs(value);
-        while (usedIds.contains(value)) {
-            if (value == Integer.MAX_VALUE) {
-                value = 0;
-            }
-            value = Math.abs(value + 1);
-        }
-        return value;
-    }
-
     PcpString createPcpString(String text) {
         if (text == null) {
             return null;
@@ -263,6 +247,7 @@ public abstract class BasePcpWriter implements PcpWriter {
 	static abstract class Store<T extends PcpId> {
         private final Map<String, T> byName = new LinkedHashMap<String, T>();
         private final Map<Integer, T> byId = new LinkedHashMap<Integer, T>();
+        protected final IdentifierSource identifierSource = new HashingIdentifierSource();
 
         synchronized T byName(String name) {
 	        T value = byName.get(name);
@@ -288,14 +273,14 @@ public abstract class BasePcpWriter implements PcpWriter {
     private static final class MetricInfoStore extends Store<PcpMetricInfo> {
 		@Override
 		protected PcpMetricInfo newInstance(String name, Set<Integer> usedIds) {
-			return new PcpMetricInfo(name, calculateId(name, usedIds));
+			return new PcpMetricInfo(name, identifierSource.calculateId(name, usedIds));
 		}
 	}
     
     private static final class InstanceDomainStore extends Store<InstanceDomain> {
 		@Override
 		protected InstanceDomain newInstance(String name, Set<Integer> usedIds) {
-            return new InstanceDomain(name, calculateId(name, usedIds));
+            return new InstanceDomain(name, identifierSource.calculateId(name, usedIds));
 		}
     	
     }
