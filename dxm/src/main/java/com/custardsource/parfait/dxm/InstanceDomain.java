@@ -9,13 +9,14 @@ class InstanceDomain implements PcpId, PcpOffset {
     private final String name;
     private final int id;
     private int offset;
-    private final Store<Instance> instanceStore = new InstanceStore();
+    private final Store<Instance> instanceStore;
     private PcpString shortHelpText;
     private PcpString longHelpText;
 
-    InstanceDomain(String name, int id) {
+    InstanceDomain(String name, int id, IdentifierSourceSet instanceStores) {
         this.name = name;
         this.id = id;
+        this.instanceStore = new InstanceStore(instanceStores);
     }
 
     Instance getInstance(String name) {
@@ -66,6 +67,10 @@ class InstanceDomain implements PcpId, PcpOffset {
     }
     
 	private class InstanceStore extends Store<Instance> {
+        public InstanceStore(IdentifierSourceSet identifierSources) {
+            super(identifierSources.instanceSource(InstanceDomain.this));
+        }
+
         @Override
         protected Instance newInstance(String name, Set<Integer> usedIds) {
             return new Instance(InstanceDomain.this, name, identifierSource.calculateId(name,

@@ -22,8 +22,8 @@ public abstract class BasePcpWriter implements PcpWriter {
 	// TODO only include in-use indoms/instances/metrics (/strings?) in the header
 	// TODO config to presupply IDs and helptexts
 	private final File dataFile;
-	private final Store<PcpMetricInfo> metricInfo = new MetricInfoStore();
-    private final Store<InstanceDomain> instanceDomainStore = new InstanceDomainStore();
+	private final Store<PcpMetricInfo> metricInfoStore;
+    private final Store<InstanceDomain> instanceDomainStore;
 	
     private final Map<MetricName, PcpValueInfo> metricData = new LinkedHashMap<MetricName, PcpValueInfo>();
     private final Map<Class<?>, TypeHandler<?>> typeHandlers = new HashMap<Class<?>, TypeHandler<?>>(
@@ -33,7 +33,13 @@ public abstract class BasePcpWriter implements PcpWriter {
     private Collection<PcpString> stringInfo = new ArrayList<PcpString>();
 
     protected BasePcpWriter(File dataFile) {
+        this (dataFile, IdentifierSourceSet.DEFAULT_SET);
+    }
+
+    protected BasePcpWriter(File dataFile, IdentifierSourceSet identifierSources) {
         this.dataFile = dataFile;
+        this.metricInfoStore = new MetricInfoStore(identifierSources);
+        this.instanceDomainStore = new InstanceDomainStore(identifierSources);
     }
 
     /*
@@ -165,11 +171,11 @@ public abstract class BasePcpWriter implements PcpWriter {
     protected abstract int getFileLength();
 
     protected final PcpMetricInfo getMetricInfo(String name) {
-    	return metricInfo.byName(name);
+    	return metricInfoStore.byName(name);
     }
 
     protected final Collection<PcpMetricInfo> getMetricInfos() {
-        return metricInfo.all();
+        return metricInfoStore.all();
     }
 
     protected final InstanceDomain getInstanceDomain(String name) {
@@ -247,7 +253,11 @@ public abstract class BasePcpWriter implements PcpWriter {
 	static abstract class Store<T extends PcpId> {
         private final Map<String, T> byName = new LinkedHashMap<String, T>();
         private final Map<Integer, T> byId = new LinkedHashMap<Integer, T>();
-        protected final IdentifierSource identifierSource = new HashingIdentifierSource();
+        protected final IdentifierSource identifierSource;
+        
+        public Store(IdentifierSource source) {
+            this.identifierSource = source;
+        }
 
         synchronized T byName(String name) {
 	        T value = byName.get(name);
@@ -271,6 +281,10 @@ public abstract class BasePcpWriter implements PcpWriter {
 	}
 	
     private static final class MetricInfoStore extends Store<PcpMetricInfo> {
+        public MetricInfoStore(IdentifierSourceSet identifierSources) {
+            super(identifierSources.metricSource());
+        }
+        
 		@Override
 		protected PcpMetricInfo newInstance(String name, Set<Integer> usedIds) {
 			return new PcpMetricInfo(name, identifierSource.calculateId(name, usedIds));
@@ -278,9 +292,16 @@ public abstract class BasePcpWriter implements PcpWriter {
 	}
     
     private static final class InstanceDomainStore extends Store<InstanceDomain> {
-		@Override
+        private final IdentifierSourceSet identifierSources;
+        
+        public InstanceDomainStore(IdentifierSourceSet identifierSources) {
+            super(identifierSources.instanceDomainSource());
+            this.identifierSources = identifierSources;
+        }
+
+        @Override
 		protected InstanceDomain newInstance(String name, Set<Integer> usedIds) {
-            return new InstanceDomain(name, identifierSource.calculateId(name, usedIds));
+            return new InstanceDomain(name, identifierSource.calculateId(name, usedIds), identifierSources);
 		}
     	
     }
