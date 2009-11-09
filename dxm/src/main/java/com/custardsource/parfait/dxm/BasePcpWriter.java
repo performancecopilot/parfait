@@ -32,10 +32,6 @@ public abstract class BasePcpWriter implements PcpWriter {
     private ByteBuffer dataFileBuffer = null;
     private Collection<PcpString> stringInfo = new ArrayList<PcpString>();
 
-    protected BasePcpWriter(File dataFile) {
-        this (dataFile, IdentifierSourceSet.DEFAULT_SET);
-    }
-
     protected BasePcpWriter(File dataFile, IdentifierSourceSet identifierSources) {
         this.dataFile = dataFile;
         this.metricInfoStore = new MetricInfoStore(identifierSources);

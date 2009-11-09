@@ -115,15 +115,28 @@ public class PcpMmvWriter extends BasePcpWriter {
     };
 
     /**
-     * Creates a new PcpMmvFile writing to the underlying file, which will be created + opened as a
+     * A new PcpMmvWriter using a simple default {@link IdentifierSourceSet}.
+     * 
+     * @see #PcpMmvWriter(File, IdentifierSourceSet)
+     * @deprecated should pass in an explicit IdentifierSourceSet
+     */
+    @Deprecated
+    public PcpMmvWriter(File file) {
+        this(file, IdentifierSourceSet.DEFAULT_SET);
+    }
+
+    /**
+     * Creates a new PcpMmvWriter writing to the underlying file, which will be created + opened as a
      * memory-mapped file. Uses the provided architecture to determine whether to write 32- or
      * 64-bit longs for some key header fields.
      * 
      * @param file
      *            the file to map
+     * @param identifierSources
+     *            the sources to use for coming up with identifiers for new metrics etc.
      */
-    public PcpMmvWriter(File file) {
-        super(file);
+    public PcpMmvWriter(File file, IdentifierSourceSet identifierSources) {
+        super(file, identifierSources);
         registerType(String.class, MMV_STRING_HANDLER);
     }
 
@@ -396,7 +409,8 @@ public class PcpMmvWriter extends BasePcpWriter {
     }
 
     public static void main(String[] args) throws IOException {
-        PcpMmvWriter bridge = new PcpMmvWriter(new File("/var/tmp/mmv/mmvtest"));
+        PcpMmvWriter bridge = new PcpMmvWriter(new File("/var/tmp/mmv/mmvtest"),
+                IdentifierSourceSet.DEFAULT_SET);
         
         // Automatically uses default int handler
         bridge.addMetric(MetricName.parse("sheep[baabaablack].bagsfull.count"), 3);

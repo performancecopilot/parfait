@@ -27,7 +27,7 @@ public class PcpAconexPmdaWriter extends BasePcpWriter {
 	
 
 	public PcpAconexPmdaWriter(File directory, String serverName, boolean deleteFilesOnExit) {
-		super(getDataFile(directory, serverName));
+		super(getDataFile(directory, serverName), IdentifierSourceSet.DEFAULT_SET);
 		Preconditions.checkArgument(serverName != null
 				&& !serverName.equals(""), "Sever name can not be blank");
 		this.serverName = serverName;
