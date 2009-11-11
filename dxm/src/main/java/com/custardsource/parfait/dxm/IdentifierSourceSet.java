@@ -2,23 +2,26 @@ package com.custardsource.parfait.dxm;
 
 public interface IdentifierSourceSet {
     public IdentifierSource instanceDomainSource();
-    public IdentifierSource instanceSource(InstanceDomain domain);
+    public IdentifierSource instanceSource(String domain);
     public IdentifierSource metricSource();
     
+    
     public static IdentifierSourceSet DEFAULT_SET = new IdentifierSourceSet() {
+        private final IdentifierSource DEFAULT_SOURCE = new HashingIdentifierSource();
+        
         @Override
         public IdentifierSource metricSource() {
-            return new HashingIdentifierSource();
+            return DEFAULT_SOURCE;
         }
         
         @Override
-        public IdentifierSource instanceSource(InstanceDomain domain) {
-            return new HashingIdentifierSource();
+        public IdentifierSource instanceSource(String domain) {
+            return DEFAULT_SOURCE;
         }
         
         @Override
         public IdentifierSource instanceDomainSource() {
-            return new HashingIdentifierSource();
+            return DEFAULT_SOURCE;
         }
     };
 }

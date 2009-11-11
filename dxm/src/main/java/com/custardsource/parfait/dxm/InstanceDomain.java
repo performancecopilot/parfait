@@ -68,7 +68,7 @@ class InstanceDomain implements PcpId, PcpOffset {
     
 	private class InstanceStore extends Store<Instance> {
         public InstanceStore(IdentifierSourceSet identifierSources) {
-            super(identifierSources.instanceSource(InstanceDomain.this));
+            super(identifierSources.instanceSource(name));
         }
 
         @Override

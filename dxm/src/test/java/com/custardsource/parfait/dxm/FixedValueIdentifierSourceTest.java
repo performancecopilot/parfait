@@ -16,12 +16,8 @@ public class FixedValueIdentifierSourceTest {
     private static final int PREDEFINED_IDENTIFIER = 7;
 
     private static final int FIXED_FALLBACK = 0xFEEDaBEE;
-    private static final IdentifierSource FALLBACK_SOURCE = new IdentifierSource() {
-        @Override
-        public int calculateId(String name, Set<Integer> usedIds) {
-            return FIXED_FALLBACK;
-        }
-    };
+    private static final IdentifierSource FALLBACK_SOURCE = new ConstantIdentifierSource(
+            FIXED_FALLBACK);
 
     @Test
     public void shouldFallBackWhenNoValueProvided() {
