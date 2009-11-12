@@ -10,10 +10,10 @@ import org.junit.Test;
 import com.google.common.collect.ImmutableList;
 
 public class StringParsingIdentifierSourceSetTest {
-    private static final int FIXED_FALLBACK = 0xFEEDaBEE;
+    static final int FIXED_FALLBACK = 0xFEEDaBEE;
     private static final IdentifierSource FALLBACK_SOURCE = new ConstantIdentifierSource(
             FIXED_FALLBACK);
-    private static final IdentifierSourceSet FALLBACK_SOURCES = new IdentifierSourceSet() {
+    static final IdentifierSourceSet FALLBACK_SOURCES = new IdentifierSourceSet() {
         @Override
         public IdentifierSource metricSource() {
             return FALLBACK_SOURCE;

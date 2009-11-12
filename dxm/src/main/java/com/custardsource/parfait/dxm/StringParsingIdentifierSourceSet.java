@@ -28,7 +28,9 @@ public class StringParsingIdentifierSourceSet implements IdentifierSourceSet {
         int lineNumber = 0;
         for (String currentLine : metricData) {
             lineNumber++;
-            parseAllocation(allocations, lineNumber, currentLine);
+            if (!currentLine.trim().isEmpty()) {
+                parseAllocation(allocations, lineNumber, currentLine);
+            }
         }
         return new FixedValueIdentifierSource(allocations, fallbacks.metricSource());
     }
@@ -45,7 +47,9 @@ public class StringParsingIdentifierSourceSet implements IdentifierSourceSet {
 
         for (String currentLine : instanceData) {
             lineNumber++;
-            if (startsWithBlank.matcher(currentLine).find()) {
+            if (currentLine.trim().isEmpty()) {
+                // Skip 
+            } else if (startsWithBlank.matcher(currentLine).find()) {
                 // This is an instance, not an indom
                 if (currentDomain == null) {
                     throw new IllegalArgumentException(
