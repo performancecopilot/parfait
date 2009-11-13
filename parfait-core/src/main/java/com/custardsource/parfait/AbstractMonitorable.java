@@ -3,6 +3,8 @@ package com.custardsource.parfait;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import javax.measure.unit.Unit;
+
 import org.apache.log4j.Logger;
 
 /**
@@ -22,10 +24,13 @@ public abstract class AbstractMonitorable<T> implements Monitorable<T> {
 
     private final Class<T> type;
 
-    public AbstractMonitorable(String name, String description, Class<T> type) {
+    private Unit<?> unit;
+
+    protected AbstractMonitorable(String name, String description, Class<T> type, Unit<?> unit) {
         this.name = name;
         this.description = description;
         this.type = type;
+        this.unit = unit;
         LOG = Logger.getLogger("pcp."+name);
     }
 
@@ -40,9 +45,13 @@ public abstract class AbstractMonitorable<T> implements Monitorable<T> {
     public String getDescription() {
         return description;
     }
-
+    
     public Class<T> getType() {
         return type;
+    }
+    
+    public Unit<?> getUnit() {
+        return unit;
     }
 
     public synchronized void attachMonitor(Monitor monitor) {

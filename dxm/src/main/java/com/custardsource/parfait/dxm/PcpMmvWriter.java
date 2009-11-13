@@ -10,6 +10,8 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.measure.unit.Unit;
+
 import com.custardsource.parfait.dxm.types.AbstractTypeHandler;
 import com.custardsource.parfait.dxm.types.DefaultTypeHandlers;
 import com.custardsource.parfait.dxm.types.MmvMetricType;
@@ -413,26 +415,26 @@ public class PcpMmvWriter extends BasePcpWriter {
                 IdentifierSourceSet.DEFAULT_SET);
         
         // Automatically uses default int handler
-        bridge.addMetric(MetricName.parse("sheep[baabaablack].bagsfull.count"), 3);
+        bridge.addMetric(MetricName.parse("sheep[baabaablack].bagsfull.count"), Unit.ONE, 3);
         
         // Automatically uses default boolean-to-int handler
         bridge.addMetric(MetricName.parse("sheep[baabaablack].bagsfull.haveany"),
-                new AtomicBoolean(true));
+                null, new AtomicBoolean(true));
         bridge.addMetric(MetricName.parse("sheep[limpy].bagsfull.haveany"),
-                new AtomicBoolean(false));
+                null, new AtomicBoolean(false));
         
         // Automatically uses default long handler
-        bridge.addMetric(MetricName.parse("sheep[insomniac].jumps"), 12345678901234L);
+        bridge.addMetric(MetricName.parse("sheep[insomniac].jumps"), Unit.ONE, 12345678901234L);
         
         // Automatically uses default double handler
-        bridge.addMetric(MetricName.parse("sheep[limpy].legs.available"), 0.75);
+        bridge.addMetric(MetricName.parse("sheep[limpy].legs.available"), Unit.ONE, 0.75);
 
         // Uses this class' custom String handler
-        bridge.addMetric(MetricName.parse("sheep[limpy].jumpitem"), "fence");
+        bridge.addMetric(MetricName.parse("sheep[limpy].jumpitem"), null, "fence");
         
         // addMetric(GregorianCalendar) would fail, as there's no handler registered by default for
         // GregorianCalendars; use a custom one which puts the year as an int
-        bridge.addMetric(MetricName.parse("sheep[insomniac].lastjumped"), new GregorianCalendar(),
+        bridge.addMetric(MetricName.parse("sheep[insomniac].lastjumped"), null, new GregorianCalendar(),
                 new AbstractTypeHandler<GregorianCalendar>(MmvMetricType.I32, 4) {
                     public void putBytes(ByteBuffer buffer, GregorianCalendar value) {
                         buffer.putInt(value.get(GregorianCalendar.YEAR));
@@ -448,8 +450,8 @@ public class PcpMmvWriter extends BasePcpWriter {
             }
         });
         // These will both use the handler we just registered
-        bridge.addMetric(MetricName.parse("cow.how.now"), new Date());
-        bridge.addMetric(MetricName.parse("cow.how.then"), new GregorianCalendar(1990, 1, 1, 12,
+        bridge.addMetric(MetricName.parse("cow.how.now"), null, new Date());
+        bridge.addMetric(MetricName.parse("cow.how.then"), null, new GregorianCalendar(1990, 1, 1, 12,
                 34, 56).getTime());
         
         // Set up some help text        

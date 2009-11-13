@@ -1,5 +1,7 @@
 package com.custardsource.parfait;
 
+import javax.measure.unit.Unit;
+
 import org.apache.commons.lang.ObjectUtils;
 
 import com.google.common.base.Preconditions;
@@ -23,19 +25,28 @@ public class MonitoredValue<T> extends AbstractMonitorable<T> {
 
     protected volatile T value;
 
-	public MonitoredValue(String name, String description, T initialValue) {
-		this(name, description, MonitorableRegistry.DEFAULT_REGISTRY,
-				initialValue);
-	}
+    public MonitoredValue(String name, String description, T initialValue) {
+        this(name, description, MonitorableRegistry.DEFAULT_REGISTRY,
+                initialValue);
+    }
 
-	@SuppressWarnings("unchecked")
-	public MonitoredValue(String name, String description,
-			MonitorableRegistry registry, T initialValue) {
-		super(name, description, (Class<T>) initialValue.getClass());
-		Preconditions.checkNotNull(initialValue, "Monitored value can not be null");
-		this.value = initialValue;
-		registerSelf(registry);
-	}
+    public MonitoredValue(String name, String description, T initialValue, Unit<?> unit) {
+        this(name, description, MonitorableRegistry.DEFAULT_REGISTRY, initialValue, unit);
+    }
+
+    public MonitoredValue(String name, String description, MonitorableRegistry registry,
+            T initialValue) {
+        this(name, description, registry, initialValue, Unit.ONE);
+    }
+
+    @SuppressWarnings("unchecked")
+    public MonitoredValue(String name, String description, MonitorableRegistry registry,
+            T initialValue, Unit<?> unit) {
+        super(name, description, (Class<T>) initialValue.getClass(), unit);
+        Preconditions.checkNotNull(initialValue, "Monitored value can not be null");
+        this.value = initialValue;
+        registerSelf(registry);
+    }
 
     public T get() {
         return value;

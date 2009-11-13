@@ -1,5 +1,7 @@
 package com.custardsource.parfait;
 
+import javax.measure.unit.Unit;
+
 /**
  * The Monitorable interface must be implemented by any value that needs to be monitored using the
  * Parfait monitoring system.
@@ -15,6 +17,9 @@ public interface Monitorable<T> {
     String getName();
 
     String getDescription();
+    
+    Unit<?> getUnit();
+    
 
     /**
      * The type of the value returned by the {@link #get()} method.

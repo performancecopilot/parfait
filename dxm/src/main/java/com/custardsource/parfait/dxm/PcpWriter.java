@@ -2,6 +2,8 @@ package com.custardsource.parfait.dxm;
 
 import java.io.IOException;
 
+import javax.measure.unit.Unit;
+
 import com.custardsource.parfait.dxm.types.TypeHandler;
 
 public interface PcpWriter {
@@ -12,6 +14,8 @@ public interface PcpWriter {
      * @param name
      *            the name of the metric to export. Must not exceed any byte-length limits specified
      *            by the implementation
+     * @param unit
+     *            the unit used to measure the metric.
      * @param initialValue
      *            the 'default' value to write into the file at initialisation time
      * @throws IllegalArgumentException
@@ -20,7 +24,7 @@ public interface PcpWriter {
      * @throws IllegalStateException
      *             if this writer has already been started, finalising the file layout
      */
-	public abstract void addMetric(MetricName name, Object initialValue);
+	public abstract void addMetric(MetricName name, Unit<?> unit, Object initialValue);
 
 	/**
 	 * Adds a new metric to the writer, with an initial default value. Uses the default
@@ -29,6 +33,8 @@ public interface PcpWriter {
 	 * @param name
      *            the name of the metric to export. Must not exceed any byte-length limits specified
      *            by the implementation
+     * @param unit
+     *            the unit used to measure the metric.
 	 * @param initialValue
 	 *            the 'default' value to write into the file at initialisation time
 	 * @param pcpType
@@ -39,7 +45,7 @@ public interface PcpWriter {
 	 * @throws IllegalStateException
 	 *             if this writer has already been started, finalising the file layout
 	 */
-	public abstract <T> void addMetric(MetricName name, T initialValue,
+	public abstract <T> void addMetric(MetricName name, Unit<?> unit, T initialValue,
 			TypeHandler<T> pcpType);
 
 	/**

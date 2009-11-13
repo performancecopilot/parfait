@@ -14,6 +14,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import javax.measure.unit.Unit;
+
 import com.custardsource.parfait.dxm.types.DefaultTypeHandlers;
 import com.custardsource.parfait.dxm.types.TypeHandler;
 
@@ -38,11 +40,7 @@ public abstract class BasePcpWriter implements PcpWriter {
         this.instanceDomainStore = new InstanceDomainStore(identifierSources);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.custardsource.parfait.pcp.PcpWriter#addMetric(java.lang.String, java.lang.Object)
-     */
-    public final void addMetric(MetricName name, Object initialValue) {
+    public final void addMetric(MetricName name, Unit<?> unit, Object initialValue) {
         TypeHandler<?> handler = typeHandlers.get(initialValue.getClass());
         if (handler == null) {
             throw new IllegalArgumentException("No default handler registered for type "
@@ -52,12 +50,7 @@ public abstract class BasePcpWriter implements PcpWriter {
 
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.custardsource.parfait.pcp.PcpWriter#addMetric(java.lang.String, T,
-     * com.custardsource.parfait.pcp.types.TypeHandler)
-     */
-    public final <T> void addMetric(MetricName name, T initialValue, TypeHandler<T> pcpType) {
+    public final <T> void addMetric(MetricName name, Unit<?> unit, T initialValue, TypeHandler<T> pcpType) {
         if (pcpType == null) {
             throw new IllegalArgumentException("PCP Type handler must not be null");
         }

@@ -2,6 +2,8 @@ package com.custardsource.parfait;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import javax.measure.unit.Unit;
+
 /**
  * A MonitoredCounter is a useful implementation of {@link Monitorable} specifically for
  * implementing long counters.
@@ -23,7 +25,16 @@ public class MonitoredCounter extends AbstractMonitorable<Long> {
     }
 
     public MonitoredCounter(String name, String description, MonitorableRegistry registry) {
-        super(name, description, Long.class);
+        this(name, description, registry, Unit.ONE);
+    }
+
+    public MonitoredCounter(String name, String description, Unit<?> unit) {
+        this(name, description, MonitorableRegistry.DEFAULT_REGISTRY, unit);
+    }
+
+    public MonitoredCounter(String name, String description, MonitorableRegistry registry,
+            Unit<?> unit) {
+        super(name, description, Long.class, unit);
         value = new AtomicLong(0L);
         registerSelf(registry);
     }
