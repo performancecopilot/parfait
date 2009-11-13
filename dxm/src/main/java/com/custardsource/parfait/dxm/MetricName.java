@@ -4,7 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class MetricName {
-    private static final String IDENTIFIER_SECTION = "[\\p{Alnum}_]+";
+    private static final String IDENTIFIER_SECTION = "[\\p{Alnum}_/]+";
     private static final String VALID_METRIC_NAME = "\\A((_ID_)(\\._ID_)*)(\\[(_ID_)\\])?((\\._ID_)*)\\z"
             .replace("_ID_", IDENTIFIER_SECTION);
     private static final Pattern METRIC_PATTERN = Pattern.compile(VALID_METRIC_NAME);
