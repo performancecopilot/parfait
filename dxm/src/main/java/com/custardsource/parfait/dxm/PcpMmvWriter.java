@@ -10,8 +10,11 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.measure.unit.NonSI;
+import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
 
+import com.custardsource.parfait.dxm.semantics.UnitMapping;
 import com.custardsource.parfait.dxm.types.AbstractTypeHandler;
 import com.custardsource.parfait.dxm.types.DefaultTypeHandlers;
 import com.custardsource.parfait.dxm.types.MmvMetricType;
@@ -99,7 +102,7 @@ public class PcpMmvWriter extends BasePcpWriter {
     private static final int FLAGS = 0x2;
 
     private static final int DATA_VALUE_LENGTH = 16;
-    
+
     private static final TypeHandler<String> MMV_STRING_HANDLER = new AbstractTypeHandler<String>(
             MmvMetricType.STRING, STRING_BLOCK_LENGTH) {
         @Override
@@ -285,7 +288,7 @@ public class PcpMmvWriter extends BasePcpWriter {
         // TODO Semantics not yet supported
         dataFileBuffer.putInt(0);
         // TODO Dimensions not yet supported
-        dataFileBuffer.putInt(0);
+        dataFileBuffer.putInt(UnitMapping.getDimensions(info.getUnit(), info.getMetricName()));
         if (info.getInstanceDomain() != null) {
             dataFileBuffer.putInt(info.getInstanceDomain().getId());
         } else {
@@ -373,7 +376,7 @@ public class PcpMmvWriter extends BasePcpWriter {
     @Override
     protected synchronized void initialiseOffsets() {
         int nextOffset = HEADER_LENGTH + (TOC_LENGTH * tocCount());
-        
+
         nextOffset = initializeOffsets(getInstanceDomains(), nextOffset, INSTANCE_DOMAIN_LENGTH);
         nextOffset = initializeOffsets(getInstances(), nextOffset, INSTANCE_LENGTH);
         nextOffset = initializeOffsets(getMetricInfos(), nextOffset, METRIC_LENGTH);
@@ -383,14 +386,14 @@ public class PcpMmvWriter extends BasePcpWriter {
 
 	private int initializeOffsets(Collection<? extends PcpOffset> offsettables,
 			int nextOffset, int blockLength) {
-		for (PcpOffset offsettable : offsettables) {
-			offsettable.setOffset(nextOffset);
-			nextOffset += blockLength;
-		}
-		return nextOffset;
-	}
+        for (PcpOffset offsettable : offsettables) {
+            offsettable.setOffset(nextOffset);
+            nextOffset += blockLength;
+        }
+        return nextOffset;
+    }
 
-	private int tocCount() {
+    private int tocCount() {
         int tocCount = 2; // metrics + values
         if (!getInstances().isEmpty()) {
             tocCount += 2;
@@ -413,35 +416,36 @@ public class PcpMmvWriter extends BasePcpWriter {
     public static void main(String[] args) throws IOException {
         PcpMmvWriter bridge = new PcpMmvWriter(new File("/var/tmp/mmv/mmvtest"),
                 IdentifierSourceSet.DEFAULT_SET);
-        
+
         // Automatically uses default int handler
-        bridge.addMetric(MetricName.parse("sheep[baabaablack].bagsfull.count"), Unit.ONE, 3);
-        
+        bridge.addMetric(MetricName.parse("sheep[baabaablack].bagsfull.count"), Unit.ONE
+                .times(1000), 3);
+
         // Automatically uses default boolean-to-int handler
-        bridge.addMetric(MetricName.parse("sheep[baabaablack].bagsfull.haveany"),
-                null, new AtomicBoolean(true));
-        bridge.addMetric(MetricName.parse("sheep[limpy].bagsfull.haveany"),
-                null, new AtomicBoolean(false));
-        
+        bridge.addMetric(MetricName.parse("sheep[baabaablack].bagsfull.haveany"), null,
+                new AtomicBoolean(true));
+        bridge.addMetric(MetricName.parse("sheep[limpy].bagsfull.haveany"), null,
+                new AtomicBoolean(false));
+
         // Automatically uses default long handler
         bridge.addMetric(MetricName.parse("sheep[insomniac].jumps"), Unit.ONE, 12345678901234L);
-        
+
         // Automatically uses default double handler
         bridge.addMetric(MetricName.parse("sheep[limpy].legs.available"), Unit.ONE, 0.75);
 
         // Uses this class' custom String handler
         bridge.addMetric(MetricName.parse("sheep[limpy].jumpitem"), null, "fence");
-        
+
         // addMetric(GregorianCalendar) would fail, as there's no handler registered by default for
         // GregorianCalendars; use a custom one which puts the year as an int
-        bridge.addMetric(MetricName.parse("sheep[insomniac].lastjumped"), null, new GregorianCalendar(),
-                new AbstractTypeHandler<GregorianCalendar>(MmvMetricType.I32, 4) {
+        bridge.addMetric(MetricName.parse("sheep[insomniac].lastjumped"), null,
+                new GregorianCalendar(), new AbstractTypeHandler<GregorianCalendar>(
+                        MmvMetricType.I32, 4) {
                     public void putBytes(ByteBuffer buffer, GregorianCalendar value) {
                         buffer.putInt(value.get(GregorianCalendar.YEAR));
                     }
                 });
-        
-        
+
         // addMetric(Date) would fail, as there's no handler registered; register one for all date
         // types from now on
         bridge.registerType(Date.class, new AbstractTypeHandler<Date>(MmvMetricType.I64, 8) {
@@ -451,10 +455,19 @@ public class PcpMmvWriter extends BasePcpWriter {
         });
         // These will both use the handler we just registered
         bridge.addMetric(MetricName.parse("cow.how.now"), null, new Date());
-        bridge.addMetric(MetricName.parse("cow.how.then"), null, new GregorianCalendar(1990, 1, 1, 12,
-                34, 56).getTime());
-        
-        // Set up some help text        
+        bridge.addMetric(MetricName.parse("cow.how.then"), null, new GregorianCalendar(1990, 1, 1,
+                12, 34, 56).getTime());
+
+        // Uses units
+        bridge.addMetric(MetricName.parse("cow.launch.velocity"), NonSI.MILE.divide(SI.SECOND),
+                new Date());
+        bridge.addMetric(MetricName.parse("cow.bytes.total"), NonSI.BYTE, 10000001);
+        bridge.addMetric(MetricName.parse("cow.bytes.rate"), NonSI.BYTE.times(1024).divide(
+                SI.SECOND), new Date());
+        bridge.addMetric(MetricName.parse("cow.bytes.chewtime"), NonSI.HOUR.divide(NonSI.BYTE), 7);
+        bridge.addMetric(MetricName.parse("cow.bytes.jawmotion"), SI.KILO(SI.HERTZ), 0.5);
+
+        // Set up some help text
         bridge
                 .setInstanceDomainHelpText(
                         "sheep",
@@ -462,11 +475,11 @@ public class PcpMmvWriter extends BasePcpWriter {
                         "List of all the sheep in the paddock. Includes 'baabaablack', 'insomniac' (who likes to jump fences), and 'limpy' the three-legged wonder sheep.");
         bridge.setMetricHelpText("sheep.jumps", "# of jumps done",
                 "Number of times the sheep has jumped over its jumpitem");
-        
+
         // All the metrics are added; write the file
         bridge.start();
         // Metrics are visible to the agent from this point on
-        
+
         // Sold a bag! Better update the count
         bridge.updateMetric(MetricName.parse("sheep[baabaablack].bagsfull.count"), 2);
         // The fence broke! Need something new to jump over

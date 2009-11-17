@@ -1,5 +1,7 @@
 package com.custardsource.parfait.dxm;
 
+import javax.measure.unit.Unit;
+
 import com.custardsource.parfait.dxm.types.TypeHandler;
 
 final class PcpMetricInfo implements PcpId, PcpOffset {
@@ -11,6 +13,7 @@ final class PcpMetricInfo implements PcpId, PcpOffset {
     private int offset;
     private PcpString shortHelpText;
     private PcpString longHelpText;
+    private Unit<?> unit;
 
     PcpMetricInfo(String metricName, int id) {
         this.metricName = metricName;
@@ -54,13 +57,12 @@ final class PcpMetricInfo implements PcpId, PcpOffset {
     }
 
     void setInstanceDomain(InstanceDomain domain) {
-        if (this.domain == null || this.domain.equals(domain)) {
-            this.domain = domain;
-        } else {
+        if (this.domain != null && !this.domain.equals(domain)) {
             throw new IllegalArgumentException(
                     "Two different instance domains cannot be set for metric " + metricName
                             + " (old=" + this.domain + ", new=" + domain + ")");
         }
+        this.domain = domain;
     }
 
     PcpString getShortHelpText() {
@@ -74,5 +76,18 @@ final class PcpMetricInfo implements PcpId, PcpOffset {
     void setHelpText(PcpString shortHelpText, PcpString longHelpText) {
         this.shortHelpText = shortHelpText;
         this.longHelpText = longHelpText;
+    }
+
+    public void setUnit(Unit<?> unit) {
+        if (this.unit != null && !this.unit.equals(unit)) {
+            throw new IllegalArgumentException(
+                    "Two different units cannot be set for metric " + metricName
+                    + " (old=" + this.unit + ", new=" + unit + ")");
+        }
+        this.unit = unit;
+    }
+
+    public Unit<?> getUnit() {
+        return unit;
     }
 }

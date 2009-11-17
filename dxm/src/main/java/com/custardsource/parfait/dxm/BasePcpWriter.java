@@ -46,7 +46,7 @@ public abstract class BasePcpWriter implements PcpWriter {
             throw new IllegalArgumentException("No default handler registered for type "
                     + initialValue.getClass());
         }
-        addMetricInfo(name, initialValue, handler);
+        addMetricInfo(name, unit, initialValue, handler);
 
     }
 
@@ -54,7 +54,7 @@ public abstract class BasePcpWriter implements PcpWriter {
         if (pcpType == null) {
             throw new IllegalArgumentException("PCP Type handler must not be null");
         }
-        addMetricInfo(name, initialValue, pcpType);
+        addMetricInfo(name, unit, initialValue, pcpType);
     }
 
     /*
@@ -196,7 +196,7 @@ public abstract class BasePcpWriter implements PcpWriter {
     }
 
 
-    private synchronized void addMetricInfo(MetricName name, Object initialValue,
+    private synchronized void addMetricInfo(MetricName name, Unit<?> unit, Object initialValue,
             TypeHandler<?> pcpType) {
         if (started) {
             throw new IllegalStateException("Cannot add metric " + name + " after starting");
@@ -225,6 +225,7 @@ public abstract class BasePcpWriter implements PcpWriter {
             metricInfo.setInstanceDomain(domain);
         }
         metricInfo.setTypeHandler(pcpType);
+        metricInfo.setUnit(unit == null ? Unit.ONE : unit);
         
         PcpValueInfo info = new PcpValueInfo(name, metricInfo, instance, initialValue, this);
         metricData.put(name, info);

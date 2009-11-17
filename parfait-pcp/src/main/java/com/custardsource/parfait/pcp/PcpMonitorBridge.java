@@ -81,8 +81,8 @@ public class PcpMonitorBridge extends MonitoringView {
         try {
             for (Monitorable<?> monitorable : monitorables) {
             	monitorable.attachMonitor(monitor);
-                pcpWriter.addMetric(mapper.map(monitorable.getName()), monitorable
-                        .get());
+                pcpWriter.addMetric(mapper.map(monitorable.getName()), monitorable.getUnit(),
+                        monitorable.get());
             }
             pcpWriter.start();
 
