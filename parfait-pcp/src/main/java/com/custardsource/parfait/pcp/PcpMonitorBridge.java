@@ -3,6 +3,7 @@ package com.custardsource.parfait.pcp;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import org.apache.log4j.Logger;
@@ -13,8 +14,11 @@ import com.custardsource.parfait.Monitor;
 import com.custardsource.parfait.Monitorable;
 import com.custardsource.parfait.MonitorableRegistry;
 import com.custardsource.parfait.MonitoringView;
+import com.custardsource.parfait.ValueSemantics;
 import com.custardsource.parfait.dxm.PcpWriter;
+import com.custardsource.parfait.dxm.semantics.Semantics;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableMap;
 
 /**
  * PcpMonitorBridge bridges between the set of {@link Monitorable}s in the current system and a PCP
@@ -27,6 +31,10 @@ public class PcpMonitorBridge extends MonitoringView {
     private static final Logger LOG = Logger.getLogger(PcpMonitorBridge.class);
 
     public static final int UPDATE_QUEUE_SIZE = 1024;
+
+    private static final Map<ValueSemantics, Semantics> SEMANTICS_MAP = ImmutableMap.of(
+            ValueSemantics.CONSTANT, Semantics.DISCRETE, ValueSemantics.FREE_RUNNING,
+            Semantics.INSTANT, ValueSemantics.MONOTONICALLY_INCREASING, Semantics.COUNTER);
 
     private final ArrayBlockingQueue<Monitorable<?>> monitorablesPendingUpdate = new ArrayBlockingQueue<Monitorable<?>>(
     		UPDATE_QUEUE_SIZE);
@@ -81,7 +89,8 @@ public class PcpMonitorBridge extends MonitoringView {
         try {
             for (Monitorable<?> monitorable : monitorables) {
             	monitorable.attachMonitor(monitor);
-                pcpWriter.addMetric(mapper.map(monitorable.getName()), monitorable.getUnit(),
+                pcpWriter.addMetric(mapper.map(monitorable.getName()),
+                        convertToPcpSemantics(monitorable.getSemantics()), monitorable.getUnit(),
                         monitorable.get());
             }
             pcpWriter.start();
@@ -92,6 +101,10 @@ public class PcpMonitorBridge extends MonitoringView {
         } catch (IOException e) {
             throw new RuntimeException("Unable to initialise PCP monitoring bridge", e);
         }
+    }
+
+    private Semantics convertToPcpSemantics(ValueSemantics semantics) {
+        return SEMANTICS_MAP.get(semantics);
     }
 
     /**

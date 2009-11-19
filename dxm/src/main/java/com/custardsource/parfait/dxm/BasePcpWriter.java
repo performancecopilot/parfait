@@ -16,6 +16,7 @@ import java.util.Set;
 
 import javax.measure.unit.Unit;
 
+import com.custardsource.parfait.dxm.semantics.Semantics;
 import com.custardsource.parfait.dxm.types.DefaultTypeHandlers;
 import com.custardsource.parfait.dxm.types.TypeHandler;
 
@@ -40,21 +41,21 @@ public abstract class BasePcpWriter implements PcpWriter {
         this.instanceDomainStore = new InstanceDomainStore(identifierSources);
     }
 
-    public final void addMetric(MetricName name, Unit<?> unit, Object initialValue) {
+    public final void addMetric(MetricName name, Semantics semantics, Unit<?> unit, Object initialValue) {
         TypeHandler<?> handler = typeHandlers.get(initialValue.getClass());
         if (handler == null) {
             throw new IllegalArgumentException("No default handler registered for type "
                     + initialValue.getClass());
         }
-        addMetricInfo(name, unit, initialValue, handler);
+        addMetricInfo(name, semantics, unit, initialValue, handler);
 
     }
 
-    public final <T> void addMetric(MetricName name, Unit<?> unit, T initialValue, TypeHandler<T> pcpType) {
+    public final <T> void addMetric(MetricName name, Semantics semantics, Unit<?> unit, T initialValue, TypeHandler<T> pcpType) {
         if (pcpType == null) {
             throw new IllegalArgumentException("PCP Type handler must not be null");
         }
-        addMetricInfo(name, unit, initialValue, pcpType);
+        addMetricInfo(name, semantics, unit, initialValue, pcpType);
     }
 
     /*
@@ -196,8 +197,8 @@ public abstract class BasePcpWriter implements PcpWriter {
     }
 
 
-    private synchronized void addMetricInfo(MetricName name, Unit<?> unit, Object initialValue,
-            TypeHandler<?> pcpType) {
+    private synchronized void addMetricInfo(MetricName name, Semantics semantics, Unit<?> unit,
+            Object initialValue, TypeHandler<?> pcpType) {
         if (started) {
             throw new IllegalStateException("Cannot add metric " + name + " after starting");
         }
@@ -226,6 +227,7 @@ public abstract class BasePcpWriter implements PcpWriter {
         }
         metricInfo.setTypeHandler(pcpType);
         metricInfo.setUnit(unit == null ? Unit.ONE : unit);
+        metricInfo.setSemantics(semantics);
         
         PcpValueInfo info = new PcpValueInfo(name, metricInfo, instance, initialValue, this);
         metricData.put(name, info);

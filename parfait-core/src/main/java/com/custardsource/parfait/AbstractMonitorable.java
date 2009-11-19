@@ -17,20 +17,18 @@ public abstract class AbstractMonitorable<T> implements Monitorable<T> {
     protected final Logger LOG;
     
     private final List<Monitor> monitors = new CopyOnWriteArrayList<Monitor>();
-
     private final String name;
-
     private final String description;
-
     private final Class<T> type;
+    private final Unit<?> unit;
+    private final ValueSemantics semantics;
 
-    private Unit<?> unit;
-
-    protected AbstractMonitorable(String name, String description, Class<T> type, Unit<?> unit) {
+    protected AbstractMonitorable(String name, String description, Class<T> type, Unit<?> unit, ValueSemantics semantics) {
         this.name = name;
         this.description = description;
         this.type = type;
         this.unit = unit;
+        this.semantics = semantics;
         LOG = Logger.getLogger("pcp."+name);
     }
 
@@ -82,5 +80,10 @@ public abstract class AbstractMonitorable<T> implements Monitorable<T> {
         }
     }
         
+    @Override
+    public ValueSemantics getSemantics() {
+        return semantics;
+    }
+
     protected abstract void logValue();
 }

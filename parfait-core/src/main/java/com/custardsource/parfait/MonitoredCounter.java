@@ -34,7 +34,7 @@ public class MonitoredCounter extends AbstractMonitorable<Long> {
 
     public MonitoredCounter(String name, String description, MonitorableRegistry registry,
             Unit<?> unit) {
-        super(name, description, Long.class, unit);
+        super(name, description, Long.class, unit, ValueSemantics.MONOTONICALLY_INCREASING);
         value = new AtomicLong(0L);
         registerSelf(registry);
     }

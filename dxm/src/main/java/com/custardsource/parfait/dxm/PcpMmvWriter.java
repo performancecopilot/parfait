@@ -14,6 +14,7 @@ import javax.measure.unit.NonSI;
 import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
 
+import com.custardsource.parfait.dxm.semantics.Semantics;
 import com.custardsource.parfait.dxm.semantics.UnitMapping;
 import com.custardsource.parfait.dxm.types.AbstractTypeHandler;
 import com.custardsource.parfait.dxm.types.DefaultTypeHandlers;
@@ -44,9 +45,7 @@ import com.custardsource.parfait.dxm.types.TypeHandler;
  * This class currently has a few important limitations:
  * </p>
  * <ul>
- * <li>Dimensions are not supported</li>
  * <li>Cluster IDs are not supported</li>
- * <li>Semantics are not supported</li>
  * <li>Process ID is obtained in a Sun HotSpot-JVM specific way (likely to work on other JVMs but
  * not guaranteed)</li>
  * <li>Receiving agent must be using MMV agent version 2.8.10 or later (version 1 of the MMV on-disk
@@ -285,9 +284,7 @@ public class PcpMmvWriter extends BasePcpWriter {
         dataFileBuffer.position(originalPosition + METRIC_NAME_LIMIT + 1);
         dataFileBuffer.putInt(info.getId());
         dataFileBuffer.putInt(metricType.getIdentifier());
-        // TODO Semantics not yet supported
-        dataFileBuffer.putInt(0);
-        // TODO Dimensions not yet supported
+        dataFileBuffer.putInt(info.getSemantics().getPcpValue());
         dataFileBuffer.putInt(UnitMapping.getDimensions(info.getUnit(), info.getMetricName()));
         if (info.getInstanceDomain() != null) {
             dataFileBuffer.putInt(info.getInstanceDomain().getId());
@@ -418,27 +415,30 @@ public class PcpMmvWriter extends BasePcpWriter {
                 IdentifierSourceSet.DEFAULT_SET);
 
         // Automatically uses default int handler
-        bridge.addMetric(MetricName.parse("sheep[baabaablack].bagsfull.count"), Unit.ONE
-                .times(1000), 3);
+        bridge.addMetric(MetricName.parse("sheep[baabaablack].bagsfull.count"), Semantics.COUNTER,
+                Unit.ONE.times(1000), 3);
 
         // Automatically uses default boolean-to-int handler
-        bridge.addMetric(MetricName.parse("sheep[baabaablack].bagsfull.haveany"), null,
-                new AtomicBoolean(true));
-        bridge.addMetric(MetricName.parse("sheep[limpy].bagsfull.haveany"), null,
-                new AtomicBoolean(false));
+        bridge.addMetric(MetricName.parse("sheep[baabaablack].bagsfull.haveany"),
+                Semantics.INSTANT, null, new AtomicBoolean(true));
+        bridge.addMetric(MetricName.parse("sheep[limpy].bagsfull.haveany"), Semantics.INSTANT,
+                null, new AtomicBoolean(false));
 
         // Automatically uses default long handler
-        bridge.addMetric(MetricName.parse("sheep[insomniac].jumps"), Unit.ONE, 12345678901234L);
+        bridge.addMetric(MetricName.parse("sheep[insomniac].jumps"), Semantics.COUNTER, Unit.ONE,
+                12345678901234L);
 
         // Automatically uses default double handler
-        bridge.addMetric(MetricName.parse("sheep[limpy].legs.available"), Unit.ONE, 0.75);
+        bridge.addMetric(MetricName.parse("sheep[limpy].legs.available"), Semantics.DISCRETE,
+                Unit.ONE, 0.75);
 
         // Uses this class' custom String handler
-        bridge.addMetric(MetricName.parse("sheep[limpy].jumpitem"), null, "fence");
+        bridge.addMetric(MetricName.parse("sheep[limpy].jumpitem"), Semantics.DISCRETE, null,
+                "fence");
 
         // addMetric(GregorianCalendar) would fail, as there's no handler registered by default for
         // GregorianCalendars; use a custom one which puts the year as an int
-        bridge.addMetric(MetricName.parse("sheep[insomniac].lastjumped"), null,
+        bridge.addMetric(MetricName.parse("sheep[insomniac].lastjumped"), Semantics.INSTANT, null,
                 new GregorianCalendar(), new AbstractTypeHandler<GregorianCalendar>(
                         MmvMetricType.I32, 4) {
                     public void putBytes(ByteBuffer buffer, GregorianCalendar value) {
@@ -454,18 +454,21 @@ public class PcpMmvWriter extends BasePcpWriter {
             }
         });
         // These will both use the handler we just registered
-        bridge.addMetric(MetricName.parse("cow.how.now"), null, new Date());
-        bridge.addMetric(MetricName.parse("cow.how.then"), null, new GregorianCalendar(1990, 1, 1,
-                12, 34, 56).getTime());
+        bridge.addMetric(MetricName.parse("cow.how.now"), Semantics.INSTANT, null, new Date());
+        bridge.addMetric(MetricName.parse("cow.how.then"), Semantics.INSTANT, null,
+                new GregorianCalendar(1990, 1, 1, 12, 34, 56).getTime());
 
         // Uses units
-        bridge.addMetric(MetricName.parse("cow.launch.velocity"), NonSI.MILE.divide(SI.SECOND),
-                new Date());
-        bridge.addMetric(MetricName.parse("cow.bytes.total"), NonSI.BYTE, 10000001);
-        bridge.addMetric(MetricName.parse("cow.bytes.rate"), NonSI.BYTE.times(1024).divide(
-                SI.SECOND), new Date());
-        bridge.addMetric(MetricName.parse("cow.bytes.chewtime"), NonSI.HOUR.divide(NonSI.BYTE), 7);
-        bridge.addMetric(MetricName.parse("cow.bytes.jawmotion"), SI.KILO(SI.HERTZ), 0.5);
+        bridge.addMetric(MetricName.parse("cow.launch.velocity"), Semantics.INSTANT, NonSI.MILE
+                .divide(SI.SECOND), new Date());
+        bridge.addMetric(MetricName.parse("cow.bytes.total"), Semantics.COUNTER, NonSI.BYTE,
+                10000001);
+        bridge.addMetric(MetricName.parse("cow.bytes.rate"), Semantics.INSTANT, NonSI.BYTE.times(
+                1024).divide(SI.SECOND), new Date());
+        bridge.addMetric(MetricName.parse("cow.bytes.chewtime"), Semantics.INSTANT, NonSI.HOUR
+                .divide(NonSI.BYTE), 7);
+        bridge.addMetric(MetricName.parse("cow.bytes.jawmotion"), Semantics.INSTANT, SI
+                .KILO(SI.HERTZ), 0.5);
 
         // Set up some help text
         bridge

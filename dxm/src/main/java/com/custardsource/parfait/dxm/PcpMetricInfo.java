@@ -2,6 +2,7 @@ package com.custardsource.parfait.dxm;
 
 import javax.measure.unit.Unit;
 
+import com.custardsource.parfait.dxm.semantics.Semantics;
 import com.custardsource.parfait.dxm.types.TypeHandler;
 
 final class PcpMetricInfo implements PcpId, PcpOffset {
@@ -14,6 +15,7 @@ final class PcpMetricInfo implements PcpId, PcpOffset {
     private PcpString shortHelpText;
     private PcpString longHelpText;
     private Unit<?> unit;
+    private Semantics semantics;
 
     PcpMetricInfo(String metricName, int id) {
         this.metricName = metricName;
@@ -90,4 +92,17 @@ final class PcpMetricInfo implements PcpId, PcpOffset {
     public Unit<?> getUnit() {
         return unit;
     }
+    
+    public void setSemantics(Semantics semantics) {
+        if (this.semantics != null && semantics != this.semantics) {
+            throw new IllegalArgumentException(
+                    "Two different semantics cannot be set for metric " + metricName
+                    + " (old=" + this.semantics + ", new=" + semantics + ")");
+        }
+        this.semantics = semantics;
+    }
+
+    public Semantics getSemantics() {
+        return semantics == null ? Semantics.NO_SEMANTICS : semantics;
+    }    
 }

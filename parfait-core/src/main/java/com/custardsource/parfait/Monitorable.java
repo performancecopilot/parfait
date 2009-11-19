@@ -20,6 +20,8 @@ public interface Monitorable<T> {
     
     Unit<?> getUnit();
     
+    ValueSemantics getSemantics();
+    
 
     /**
      * The type of the value returned by the {@link #get()} method.

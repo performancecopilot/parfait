@@ -17,6 +17,8 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.jmx.support.JmxUtils;
 
+import com.custardsource.parfait.Monitorable;
+import com.custardsource.parfait.MonitoredConstant;
 import com.custardsource.parfait.MonitoredValue;
 import com.custardsource.parfait.Poller;
 import com.custardsource.parfait.PollingMonitoredValue;
@@ -51,7 +53,7 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean {
     private final String attributeName;
 
     private final String compositeDataItem;
-
+    
     public MonitoredMBeanAttributeFactory(String name, String description, String mBeanName,
             String attributeName) {
         this(name, description, DO_NOT_UPDATE_VALUE, mBeanName, attributeName, null);
@@ -83,7 +85,7 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean {
         this.compositeDataItem = compositeDataItem;
     }
     
-    public MonitoredValue<T> getObject() throws InstanceNotFoundException, IntrospectionException,
+    public Monitorable<T> getObject() throws InstanceNotFoundException, IntrospectionException,
             ReflectionException, AttributeNotFoundException, MBeanException {
 
         MBeanInfo beanInfo = server.getMBeanInfo(mBeanName);
@@ -116,8 +118,8 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean {
 							mBeanName, attributeName, compositeDataItem);
         }
 
-        if (updateInterval == DO_NOT_UPDATE_VALUE) {
-        	return new MonitoredValue<T>(name, description, getAttributeValue());
+        if (isConstant()) {
+        	return new MonitoredConstant<T>(name, description, getAttributeValue());
         } else {
         	return new PollingMonitoredValue<T>(name, description, updateInterval, new Poller<T>() {
         		
@@ -130,7 +132,11 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean {
     }
 
     public Class<?> getObjectType() {
-        return MonitoredValue.class;
+        return isConstant() ? MonitoredConstant.class : MonitoredValue.class;
+    }
+
+    private boolean isConstant() {
+        return updateInterval == DO_NOT_UPDATE_VALUE;
     }
 
     public boolean isSingleton() {
