@@ -4,13 +4,15 @@ import java.util.Collection;
 
 import org.springframework.context.Lifecycle;
 
+import com.google.common.base.Preconditions;
+
 public abstract class MonitoringView implements Lifecycle {
     private final MonitorableRegistry registry;
     private volatile boolean running = false;
 
 
     public MonitoringView(MonitorableRegistry registry) {
-        this.registry = registry;
+        this.registry = Preconditions.checkNotNull(registry);
     }
     
     public void start() {

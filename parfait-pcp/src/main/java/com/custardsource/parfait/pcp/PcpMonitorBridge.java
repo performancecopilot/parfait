@@ -15,6 +15,7 @@ import com.custardsource.parfait.Monitorable;
 import com.custardsource.parfait.MonitorableRegistry;
 import com.custardsource.parfait.MonitoringView;
 import com.custardsource.parfait.ValueSemantics;
+import com.custardsource.parfait.dxm.MetricName;
 import com.custardsource.parfait.dxm.PcpWriter;
 import com.custardsource.parfait.dxm.semantics.Semantics;
 import com.google.common.base.Preconditions;
@@ -29,6 +30,9 @@ import com.google.common.collect.ImmutableMap;
 public class PcpMonitorBridge extends MonitoringView {
 
     private static final Logger LOG = Logger.getLogger(PcpMonitorBridge.class);
+    
+    private static final TextSource DEFAULT_SHORT_TEXT_SOURCE = new MetricDescriptionTextSource();
+    private static final TextSource DEFAULT_LONG_TEXT_SOURCE = new EmptyTextSource();
 
     public static final int UPDATE_QUEUE_SIZE = 1024;
 
@@ -42,6 +46,8 @@ public class PcpMonitorBridge extends MonitoringView {
     private final Monitor monitor = new PcpMonitorBridgeMonitor();
     private final Thread updateThread;
     private final MetricNameMapper mapper;
+    private final TextSource shortTextSource;
+    private final TextSource longTextSource;
 
     /*
      * Determines whether value changes detected are written out to an external file for external
@@ -52,21 +58,23 @@ public class PcpMonitorBridge extends MonitoringView {
 	private volatile PcpWriter pcpWriter;
 
 
+
     public PcpMonitorBridge(PcpWriter writer) {
     	this(writer, MonitorableRegistry.DEFAULT_REGISTRY);
     }
 
     public PcpMonitorBridge(PcpWriter writer, MonitorableRegistry registry) {
-    	this(writer, registry, MetricNameMapper.PASSTHROUGH_MAPPER);
+        this(writer, registry, MetricNameMapper.PASSTHROUGH_MAPPER, DEFAULT_SHORT_TEXT_SOURCE,
+                DEFAULT_LONG_TEXT_SOURCE);
     }
     
-    public PcpMonitorBridge(PcpWriter writer, MonitorableRegistry registry, MetricNameMapper mapper) {
+    public PcpMonitorBridge(PcpWriter writer, MonitorableRegistry registry,
+            MetricNameMapper mapper, TextSource shortTextSource, TextSource longTextSource) {
 		super(registry);
-		Preconditions.checkNotNull(writer);
-		Preconditions.checkNotNull(registry);
-		Preconditions.checkNotNull(mapper);
-		this.pcpWriter = writer;
-		this.mapper = mapper;
+		this.pcpWriter = Preconditions.checkNotNull(writer);
+		this.mapper = Preconditions.checkNotNull(mapper);
+        this.shortTextSource = Preconditions.checkNotNull(shortTextSource);
+        this.longTextSource = Preconditions.checkNotNull(longTextSource);
 		this.updateThread = new Thread(new Updater());
 		this.updateThread.setName("PcpMonitorBridge-Updater");
 		this.updateThread.setDaemon(true);
@@ -89,9 +97,12 @@ public class PcpMonitorBridge extends MonitoringView {
         try {
             for (Monitorable<?> monitorable : monitorables) {
             	monitorable.attachMonitor(monitor);
-                pcpWriter.addMetric(mapper.map(monitorable.getName()),
+            	MetricName metricName = mapper.map(monitorable.getName());
+                pcpWriter.addMetric(metricName,
                         convertToPcpSemantics(monitorable.getSemantics()), monitorable.getUnit(),
                         monitorable.get());
+                pcpWriter.setMetricHelpText(metricName.getMetric(), shortTextSource.getText(
+                        monitorable, metricName), longTextSource.getText(monitorable, metricName));
             }
             pcpWriter.start();
 

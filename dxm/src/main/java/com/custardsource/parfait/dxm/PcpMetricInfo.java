@@ -104,5 +104,9 @@ final class PcpMetricInfo implements PcpId, PcpOffset {
 
     public Semantics getSemantics() {
         return semantics == null ? Semantics.NO_SEMANTICS : semantics;
+    }
+
+    public boolean hasHelpText() {
+        return (shortHelpText != null || longHelpText != null);
     }    
 }

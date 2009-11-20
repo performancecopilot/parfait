@@ -84,7 +84,7 @@ public final class UnitMapping {
             unitDimension = Dimension.UNITS;
             unitScale = UnitScale.UNIT;
         } else {
-            LOG.warn("Found mapping " + mapping + " for metric " + name);
+            LOG.debug("Found mapping " + mapping + " for metric " + name);
             spaceDimension = mapping.getDimension(SpaceScale.class);
             timeDimension = mapping.getDimension(TimeScale.class);
             unitDimension = mapping.getDimension(UnitScale.class);

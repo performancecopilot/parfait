@@ -114,7 +114,9 @@ public abstract class BasePcpWriter implements PcpWriter {
     @Override
     public final void setMetricHelpText(String metricName, String shortHelpText, String longHelpText) {
         PcpMetricInfo info = getMetricInfo(metricName);
-        info.setHelpText(createPcpString(shortHelpText), createPcpString(longHelpText));
+        if (!info.hasHelpText()) {
+            info.setHelpText(createPcpString(shortHelpText), createPcpString(longHelpText));
+        }
     }
 
     @SuppressWarnings("unchecked")

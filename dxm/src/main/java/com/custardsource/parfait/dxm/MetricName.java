@@ -22,7 +22,7 @@ public final class MetricName {
         this.instance = instance;
     }
 
-    String getMetric() {
+    public String getMetric() {
         return prefix + suffix;
     }
 
