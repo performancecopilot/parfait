@@ -2,14 +2,14 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.custardsource.parfait</groupId>
   <artifactId>dxm</artifactId>
-  <version>0.0.3</version>
+  <version>0.0.4-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>parfait DXM</name>
   <description>Java implementation of the PCP MMV (memory-mapped values) PMDA format, allowing extremely simple passing of Java values across to the PCP system</description>
   <parent>
     <groupId>com.custardsource</groupId>
     <artifactId>parfait</artifactId>
-    <version>0.0.3</version>
+    <version>0.0.4-SNAPSHOT</version>
   </parent>
   <dependencies>
 <!--
