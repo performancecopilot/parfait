@@ -408,7 +408,6 @@ public class PcpMmvWriter extends BasePcpWriter {
     /**
      * @return the PID of the current running Java Process
      */
-    // TODO this is Sun JVM specific!
     private int getPid() {
         String processIdentifier = ManagementFactory.getRuntimeMXBean().getName();
         return Integer.valueOf(processIdentifier.split("@")[0]);
