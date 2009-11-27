@@ -118,6 +118,8 @@ public class PcpMmvWriter extends BasePcpWriter {
         }
     };
 
+    private int clusterIdentifier = 0;
+    
     /**
      * A new PcpMmvWriter using a simple default {@link IdentifierSourceSet}.
      * 
@@ -144,6 +146,10 @@ public class PcpMmvWriter extends BasePcpWriter {
         registerType(String.class, MMV_STRING_HANDLER);
     }
 
+    public void setClusterIdentifier(int clusterIdentifier) {
+    	this.clusterIdentifier = clusterIdentifier;
+    }
+    
     @Override
     protected void populateDataBuffer(ByteBuffer dataFileBuffer, Collection<PcpValueInfo> valueInfos)
             throws IOException {
@@ -161,8 +167,7 @@ public class PcpMmvWriter extends BasePcpWriter {
         // dataFileBuffer.putInt(FLAGS);
         dataFileBuffer.putInt(0);
         dataFileBuffer.putInt(getPid());
-        // TODO - cluster identifier - not yet used
-        dataFileBuffer.putInt(0);
+        dataFileBuffer.putInt(clusterIdentifier);
 
         Collection<InstanceDomain> instanceDomains = getInstanceDomains();
         Collection<Instance> instances = getInstances();
