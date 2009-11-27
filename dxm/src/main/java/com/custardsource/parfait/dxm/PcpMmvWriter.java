@@ -20,6 +20,7 @@ import com.custardsource.parfait.dxm.types.AbstractTypeHandler;
 import com.custardsource.parfait.dxm.types.DefaultTypeHandlers;
 import com.custardsource.parfait.dxm.types.MmvMetricType;
 import com.custardsource.parfait.dxm.types.TypeHandler;
+import com.google.common.base.Preconditions;
 
 /**
  * <p>
@@ -230,8 +231,9 @@ public class PcpMmvWriter extends BasePcpWriter {
     }
 
     private void writeStringSection(ByteBuffer dataFileBuffer, String value) {
-        // TODO check string length is OK
-        dataFileBuffer.put(value.getBytes(PCP_CHARSET));
+    	byte[] bytes = value.getBytes(PCP_CHARSET);
+    	Preconditions.checkArgument(bytes.length < STRING_BLOCK_LENGTH);
+        dataFileBuffer.put(bytes);
         dataFileBuffer.put((byte) 0);
     }
 
