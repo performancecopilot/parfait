@@ -45,7 +45,6 @@ import com.custardsource.parfait.dxm.types.TypeHandler;
  * This class currently has a few important limitations:
  * </p>
  * <ul>
- * <li>Cluster IDs are not supported</li>
  * <li>Process ID is obtained in a Sun HotSpot-JVM specific way (likely to work on other JVMs but
  * not guaranteed)</li>
  * <li>Receiving agent must be using MMV agent version 2.8.10 or later (version 1 of the MMV on-disk
