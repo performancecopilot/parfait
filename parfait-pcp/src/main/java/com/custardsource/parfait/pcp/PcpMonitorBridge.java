@@ -127,13 +127,13 @@ public class PcpMonitorBridge extends MonitoringView {
         public void run() {
             try {
                 Collection<Monitorable<?>> monitorablesToUpdate = new ArrayList<Monitorable<?>>();
-                while (pcpWriter != null) {
+                PcpWriter writerCopy;
+                while ((writerCopy = pcpWriter) != null) {
                     try {
-                    	// TODO should make a copy of the writer
                         monitorablesToUpdate.add(monitorablesPendingUpdate.take());
                         monitorablesPendingUpdate.drainTo(monitorablesToUpdate);
                         for (Monitorable<?> monitorable : monitorablesToUpdate) {
-							pcpWriter.updateMetric(mapper.map(monitorable
+							writerCopy.updateMetric(mapper.map(monitorable
 									.getName()), monitorable.get());
                         }
                         if (monitorablesPendingUpdate.size() >= UPDATE_QUEUE_SIZE) {
