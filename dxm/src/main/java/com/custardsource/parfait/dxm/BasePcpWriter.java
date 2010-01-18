@@ -129,6 +129,7 @@ public abstract class BasePcpWriter implements PcpWriter {
     private ByteBuffer initialiseBuffer(File file, int length) throws IOException {
         RandomAccessFile fos = null;
         try {
+            file.getParentFile().mkdirs();
             fos = new RandomAccessFile(file, "rw");
             fos.setLength(0);
             fos.setLength(length);
