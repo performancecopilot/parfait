@@ -6,8 +6,11 @@ import java.lang.management.ManagementFactory;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.GregorianCalendar;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.measure.unit.NonSI;
@@ -68,6 +71,24 @@ public class PcpMmvWriter extends BasePcpWriter {
             this.identifier = identifier;
         }
     }
+    
+    public static enum MmvFlag {
+        MMV_FLAG_NOPREFIX(1),
+        MMV_FLAG_PROCESS(2);
+        
+        private final int bitmask;
+
+        MmvFlag(int bitmask) {
+            this.bitmask = bitmask;
+        }
+        
+        public int getBitmask() {
+            return bitmask;
+        }
+    }
+    
+    public static final Set<MmvFlag> DEFAULT_FLAGS = Collections.unmodifiableSet(EnumSet.of(
+            MmvFlag.MMV_FLAG_NOPREFIX, MmvFlag.MMV_FLAG_PROCESS));
 
     /**
      * The maximum length of a metric name able to be exported to the MMV agent. Note that this is
@@ -97,8 +118,6 @@ public class PcpMmvWriter extends BasePcpWriter {
     public static final Charset PCP_CHARSET = Charset.forName("US-ASCII");
     private static final byte[] TAG = "MMV\0".getBytes(PCP_CHARSET);
     private static final int MMV_FORMAT_VERSION = 1;
-    // Set process ID check but not name prefix
-    private static final int FLAGS = 0x2;
 
     private static final int DATA_VALUE_LENGTH = 16;
 
@@ -118,7 +137,8 @@ public class PcpMmvWriter extends BasePcpWriter {
         }
     };
 
-    private int clusterIdentifier = 0;
+    private volatile int clusterIdentifier = 0;
+    private volatile Set<MmvFlag> flags = DEFAULT_FLAGS; 
     
     /**
      * A new PcpMmvWriter using a simple default {@link IdentifierSourceSet}.
@@ -150,6 +170,10 @@ public class PcpMmvWriter extends BasePcpWriter {
     	this.clusterIdentifier = clusterIdentifier;
     }
     
+    public void setFlags(Set<MmvFlag> flags) {
+        this.flags = EnumSet.copyOf(flags);
+    }
+    
     @Override
     protected void populateDataBuffer(ByteBuffer dataFileBuffer, Collection<PcpValueInfo> valueInfos)
             throws IOException {
@@ -163,9 +187,7 @@ public class PcpMmvWriter extends BasePcpWriter {
         dataFileBuffer.putLong(0);
         // 2 TOC blocks, 3 if there are instances
         dataFileBuffer.putInt(tocCount());
-        // TODO diked out for testing
-        // dataFileBuffer.putInt(FLAGS);
-        dataFileBuffer.putInt(0);
+        dataFileBuffer.putInt(getFlagMask());
         dataFileBuffer.putInt(getPid());
         dataFileBuffer.putInt(clusterIdentifier);
 
@@ -228,6 +250,14 @@ public class PcpMmvWriter extends BasePcpWriter {
         // Once it's set up, let the agent know
         dataFileBuffer.position(gen2Offset);
         dataFileBuffer.putLong(generation);
+    }
+
+    private int getFlagMask() {
+        int flagMask = 0;
+        for (MmvFlag flag : flags) {
+            flagMask |= flag.bitmask;
+        }
+        return flagMask;
     }
 
     private void writeStringSection(ByteBuffer dataFileBuffer, String value) {
