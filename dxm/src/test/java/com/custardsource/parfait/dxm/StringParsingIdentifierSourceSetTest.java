@@ -75,6 +75,12 @@ public class StringParsingIdentifierSourceSetTest {
         assertMetricResultMatches(ImmutableList.of(METRIC_NAME + WHITESPACE + "blah"));
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void metricParsingShouldFailWhenDuplicateIds() {
+        assertMetricResultMatches(ImmutableList.of(METRIC_NAME + WHITESPACE + METRIC_ID,
+                "duplicate" + WHITESPACE + METRIC_ID));
+    }
+
     @Test
     public void domainSourceShouldReturnSpecifiedValue() {
         assertDomainResultMatches(ImmutableList.of(DOMAIN_NAME + WHITESPACE + DOMAIN_ID));
@@ -131,7 +137,7 @@ public class StringParsingIdentifierSourceSetTest {
         assertInstanceResultMatches(ImmutableList.of(INSTANCE_DOMAIN_LINE, WHITESPACE
                 + INSTANCE_NAME));
     }
-    
+
     @Test(expected = NumberFormatException.class)
     public void instanceSourceShouldFailIfValueNotAnInteger() {
         assertInstanceResultMatches(ImmutableList.of(INSTANCE_DOMAIN_LINE, WHITESPACE
