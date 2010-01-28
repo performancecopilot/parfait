@@ -3,6 +3,8 @@ package com.custardsource.parfait.dxm;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
 
 public class StringParsingIdentifierSourceSet implements IdentifierSourceSet {
@@ -23,7 +25,7 @@ public class StringParsingIdentifierSourceSet implements IdentifierSourceSet {
     }
 
     private IdentifierSource parseMetrics(Iterable<String> metricData) {
-        final Map<String, Integer> allocations = Maps.newHashMap();
+        final BiMap<String, Integer> allocations = HashBiMap.<String, Integer>create();
 
         int lineNumber = 0;
         for (String currentLine : metricData) {
@@ -37,10 +39,10 @@ public class StringParsingIdentifierSourceSet implements IdentifierSourceSet {
 
     private InstanceDomainIdentifierSource parseInstances(Iterable<String> instanceData) {
         final Pattern startsWithBlank = Pattern.compile("^\\s", 1);
-        final Map<String, Integer> allocations = Maps.newHashMap();
+        final BiMap<String, Integer> allocations = HashBiMap.create();
         final Map<String, IdentifierSource> instanceSources = Maps.newHashMap();
 
-        Map<String, Integer> currentInstanceAllocations = Maps.newHashMap();
+        BiMap<String, Integer> currentInstanceAllocations = HashBiMap.create();
 
         String currentDomain = null;
         int lineNumber = 0;
@@ -64,7 +66,7 @@ public class StringParsingIdentifierSourceSet implements IdentifierSourceSet {
                             currentInstanceAllocations, fallbacks.instanceSource(currentDomain)));
                 }
                 currentDomain = parseAllocation(allocations, lineNumber, currentLine);
-                currentInstanceAllocations = Maps.newHashMap();
+                currentInstanceAllocations = HashBiMap.create();
             }
         }
 
@@ -92,7 +94,7 @@ public class StringParsingIdentifierSourceSet implements IdentifierSourceSet {
         return instanceDomainSource.getInstanceSource(domain);
     }
 
-    private String parseAllocation(final Map<String, Integer> allocations, int lineNumber,
+    private String parseAllocation(final BiMap<String, Integer> allocations, int lineNumber,
             String currentLine) {
         String[] elements = currentLine.trim().split("\\s+");
         if (elements.length != 2) {
@@ -100,7 +102,19 @@ public class StringParsingIdentifierSourceSet implements IdentifierSourceSet {
                     + " of input; should have two columns in format <name><whitespace><id>");
         }
         String metricName = elements[0];
-        Integer id = Integer.valueOf(elements[1]);
+        Integer id = null;
+        try {
+            id = Integer.valueOf(elements[1]);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Error parsing line " + lineNumber
+                    + " of input; identifier " + metricName + " has unparseable ID string '"
+                    + elements[1] + "'");
+        }
+        if (allocations.containsValue(id)) {
+            throw new IllegalArgumentException("Error parsing line " + lineNumber
+                    + " of input; identifier " + metricName + " has ID " + id
+                    + " which is already in use for identifier " + allocations.inverse().get(id));
+        }
         allocations.put(metricName, id);
         return metricName;
     }
