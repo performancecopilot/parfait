@@ -30,7 +30,7 @@ public class StringParsingIdentifierSourceSet implements IdentifierSourceSet {
         int lineNumber = 0;
         for (String currentLine : metricData) {
             lineNumber++;
-            if (!currentLine.trim().isEmpty()) {
+            if (!(currentLine.trim().isEmpty() || currentLine.trim().startsWith("#"))) {
                 parseAllocation(allocations, lineNumber, currentLine);
             }
         }
@@ -51,6 +51,8 @@ public class StringParsingIdentifierSourceSet implements IdentifierSourceSet {
             lineNumber++;
             if (currentLine.trim().isEmpty()) {
                 // Skip 
+            } else if (currentLine.trim().startsWith("#")) {
+                    // Skip 
             } else if (startsWithBlank.matcher(currentLine).find()) {
                 // This is an instance, not an indom
                 if (currentDomain == null) {

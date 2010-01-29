@@ -18,7 +18,7 @@ public class StringParsingTextSource implements TextSource {
         int lineNumber = 0;
         for (String currentLine : input) {
             lineNumber++;
-            if (!currentLine.trim().isEmpty()) {
+            if (!(currentLine.trim().isEmpty() || currentLine.trim().startsWith("#"))) {
                 String[] elements = currentLine.trim().split("\t");
                 if (elements.length != 2) {
                     throw new IllegalArgumentException(

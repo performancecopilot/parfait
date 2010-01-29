@@ -48,6 +48,18 @@ public class StringParsingIdentifierSourceSetTest {
     }
 
     @Test
+    public void metricParsingShouldSkipCommentLines() {
+        assertMetricResultMatches(ImmutableList.of("# comment", METRIC_NAME + WHITESPACE
+                + METRIC_ID));
+    }
+
+    @Test
+    public void metricParsingShouldSkipCommentLinesWithLeadingSpaces() {
+        assertMetricResultMatches(ImmutableList.of(" # comment", METRIC_NAME + WHITESPACE
+                + METRIC_ID));
+    }
+
+    @Test
     public void metricParsingShouldIgnoreLeadingSpaces() {
         assertMetricResultMatches(ImmutableList.of(WHITESPACE + METRIC_NAME + WHITESPACE
                 + METRIC_ID));
@@ -70,7 +82,7 @@ public class StringParsingIdentifierSourceSetTest {
         assertMetricResultMatches(ImmutableList.of(METRIC_NAME));
     }
 
-    @Test(expected = NumberFormatException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void metricParsingShouldFailIfValueNotAnInteger() {
         assertMetricResultMatches(ImmutableList.of(METRIC_NAME + WHITESPACE + "blah"));
     }
@@ -103,9 +115,21 @@ public class StringParsingIdentifierSourceSetTest {
         assertDomainResultMatches(ImmutableList.of(DOMAIN_NAME + WHITESPACE));
     }
 
-    @Test(expected = NumberFormatException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void domainParsingShouldFailIfValueNotAnInteger() {
         assertDomainResultMatches(ImmutableList.of(DOMAIN_NAME + WHITESPACE + "bloop"));
+    }
+
+    @Test
+    public void domainSourceShouldSkipCommentLines() {
+        assertDomainResultMatches(ImmutableList.of("# Comment", DOMAIN_NAME + WHITESPACE
+                + DOMAIN_ID));
+    }
+
+    @Test
+    public void domainSourceShouldSkipCommentLinesWithLeadingSpaces() {
+        assertDomainResultMatches(ImmutableList.of("\t# Comment", DOMAIN_NAME + WHITESPACE
+                + DOMAIN_ID));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -132,13 +156,19 @@ public class StringParsingIdentifierSourceSetTest {
                 + INSTANCE_NAME + WHITESPACE + WHITESPACE + INSTANCE_ID));
     }
 
+    @Test
+    public void instanceSourceShouldSkipCommentLines() {
+        assertInstanceResultMatches(ImmutableList.of(INSTANCE_DOMAIN_LINE, " # Comment ",
+                WHITESPACE + INSTANCE_NAME + WHITESPACE + WHITESPACE + INSTANCE_ID));
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void instanceSourceShouldFailIfOnlyOneColumn() {
         assertInstanceResultMatches(ImmutableList.of(INSTANCE_DOMAIN_LINE, WHITESPACE
                 + INSTANCE_NAME));
     }
 
-    @Test(expected = NumberFormatException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void instanceSourceShouldFailIfValueNotAnInteger() {
         assertInstanceResultMatches(ImmutableList.of(INSTANCE_DOMAIN_LINE, WHITESPACE
                 + INSTANCE_NAME + WHITESPACE + "blah"));
