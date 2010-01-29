@@ -30,7 +30,7 @@ public class AconexNameMapperTest {
 
     @Test
     public void sessionSizeBinBecomesInstance() {
-        assertMappedName("aconex.sessions[mel/bin_64KB_256KB].total",
+        assertMappedName("aconex.sessions.bin[mel/bin_64KB_256KB].total",
                 "aconex.sessions.bin_64KB_256KB.total");
     }
 
