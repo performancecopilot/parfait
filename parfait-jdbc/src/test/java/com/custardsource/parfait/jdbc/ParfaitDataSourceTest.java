@@ -20,7 +20,7 @@ public class ParfaitDataSourceTest {
 	@Before
 	public void setUp() throws SQLException, ClassNotFoundException {
 		Class.forName("org.hsqldb.jdbcDriver");
-		Connection c = DriverManager.getConnection("jdbc:hsqldb:hsql:mem:parfait", "sa", "");
+		Connection c = DriverManager.getConnection("jdbc:hsqldb:mem:parfait", "sa", "");
 		wrapped = new SingleConnectionDataSource(c, false);
 	}
 
