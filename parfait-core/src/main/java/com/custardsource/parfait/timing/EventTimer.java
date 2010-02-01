@@ -114,7 +114,7 @@ public class EventTimer {
         return totalCountersAcrossEvents.size();
     }
 
-    EventCounters getCounterSetForEvent(Object event) {
+    EventCounters getCounterSetForEvent(Timeable event) {
         return perTimeableCounters.get(event);
     }
 
