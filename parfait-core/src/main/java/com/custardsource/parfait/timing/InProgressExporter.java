@@ -57,9 +57,10 @@ public class InProgressExporter {
             types.add(SimpleType.STRING);
         }
 
-        CompositeType rowType = new CompositeType("Snapshot row", "Snapshot row", names
-                .toArray(new String[] {}), descriptions.toArray(new String[] {}), types
-                .toArray(new OpenType<?>[] {}));
+		CompositeType rowType = new CompositeType("Snapshot row",
+				"Snapshot row", names.toArray(new String[names.size()]),
+				descriptions.toArray(new String[descriptions.size()]), types
+						.toArray(new OpenType<?>[types.size()]));
 
         TabularType type = new TabularType("Snapshot", "Snapshot", rowType,
                 new String[] { "Thread name" });
