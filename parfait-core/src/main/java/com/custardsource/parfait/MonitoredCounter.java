@@ -6,39 +6,55 @@ import javax.measure.unit.Unit;
 
 /**
  * A MonitoredCounter is a useful implementation of {@link Monitorable} specifically for
- * implementing long counters.
+ * implementing long-valued counters.
  * <p>
  * This class should be used to measure incrementing counter values only. For any other values, use
- * {@link MonitoredValue}.
+ * {@link MonitoredValue} or another subclass of {@link SettableValue}.
  * <p>
- * A PCP counter is a value that increments over time due to an event. An example of a counter is
- * the number of JMS messages sent. Note that this class explicitly provides an atomic increment
- * operation only. Decrement and set methods should not be added.
+ * In Parfait terms, a counter is a value that increments over time due to an event. An example of a counter might
+ * the number of JMS messages sent or Garbage collections completed. Note that this class explicitly provides an atomic increment
+ * operation only. Values must not decrement or be set to an arbitrary value.
  * <p>
  */
 public class MonitoredCounter extends AbstractMonitorable<Long> {
+    private final AtomicLong value = new AtomicLong(0L);
 
-    private final AtomicLong value;
-
+    /**
+     * Creates a new MonitoredCounter against
+     * {@link MonitorableRegistry#DEFAULT_REGISTRY the default registry} with no
+     * unit semantics.
+     */
     public MonitoredCounter(String name, String description) {
     	this(name, description, MonitorableRegistry.DEFAULT_REGISTRY);
     }
 
+    /**
+     * Creates a new MonitoredCounter against the given registry with no unit
+     * semantics.
+     */
     public MonitoredCounter(String name, String description, MonitorableRegistry registry) {
         this(name, description, registry, Unit.ONE);
     }
 
+    /**
+     * Creates a new MonitoredCounter against
+     * {@link MonitorableRegistry#DEFAULT_REGISTRY the default registry}
+     */
     public MonitoredCounter(String name, String description, Unit<?> unit) {
         this(name, description, MonitorableRegistry.DEFAULT_REGISTRY, unit);
     }
 
+    /**
+     * Creates a new MonitoredCounter against the provided
+     * {@link MonitorableRegistry} with the given unit semantics.
+     */
     public MonitoredCounter(String name, String description, MonitorableRegistry registry,
             Unit<?> unit) {
         super(name, description, Long.class, unit, ValueSemantics.MONOTONICALLY_INCREASING);
-        value = new AtomicLong(0L);
         registerSelf(registry);
     }
 
+    @Override
     public Long get() {
         return value.get();
     }
@@ -47,7 +63,7 @@ public class MonitoredCounter extends AbstractMonitorable<Long> {
      * Increments the counter by a given value.
      * 
      * @param value
-     *            the amount to increment
+     *            the amount to increment. Should be non-negative
      */
     public void inc(long value) {
         this.value.addAndGet(value);
@@ -60,11 +76,5 @@ public class MonitoredCounter extends AbstractMonitorable<Long> {
     public void inc() {
         value.incrementAndGet();
         notifyMonitors();
-    }
-
-    protected void logValue() {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace(getName() + "=" + get());
-        }
     }
 }

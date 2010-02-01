@@ -2,6 +2,9 @@ package com.custardsource.parfait;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * {@link Monitorable} implementation for a free-running Integer value.
+ */
 public class MonitoredIntValue extends MonitoredNumeric<AtomicInteger> {
 	public MonitoredIntValue(String name, String description,
 			MonitorableRegistry registry, Integer initialValue) {

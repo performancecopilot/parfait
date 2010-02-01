@@ -9,11 +9,10 @@ import org.apache.log4j.Logger;
 
 /**
  * Convenience base class for implementing {@link Monitorable}. Provides implementations for
- * meta-data methods and a high performance synchronization free implementation of {@link Monitor}
+ * metadata methods and a high performance synchronization-free implementation of {@link Monitor}
  * notification.
  */
 public abstract class AbstractMonitorable<T> implements Monitorable<T> {
-
     protected final Logger LOG;
     
     private final List<Monitor> monitors = new CopyOnWriteArrayList<Monitor>();
@@ -29,61 +28,71 @@ public abstract class AbstractMonitorable<T> implements Monitorable<T> {
         this.type = type;
         this.unit = unit;
         this.semantics = semantics;
-        LOG = Logger.getLogger("pcp."+name);
+        LOG = Logger.getLogger("parfait."+name);
     }
 
     protected void registerSelf(MonitorableRegistry registry) {
         registry.register(this);
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public String getDescription() {
         return description;
     }
     
+    @Override
     public Class<T> getType() {
         return type;
     }
     
+    @Override
     public Unit<?> getUnit() {
         return unit;
     }
+    
+    @Override
+    public ValueSemantics getSemantics() {
+        return semantics;
+    }
 
+    @Override
     public synchronized void attachMonitor(Monitor monitor) {
         if (!isAttached(monitor)) {
             monitors.add(monitor);
         }
     }
 
+    @Override
     public synchronized void removeMonitor(Monitor monitor) {
         if (isAttached(monitor)) {
             monitors.remove(monitor);
         }
     }
 
-    private boolean isAttached(Monitor monitorToFind) {
-        for (Monitor monitor : monitors) {
-            if (monitor.equals(monitorToFind)) {
-                return true;
-            }
-        }
-        return false;
+    /**
+     * Checks if a given Monitor is registered for notifications with this Monitorable.  
+     * @return true if the monitor is currently in the notification list for the monitorable
+     * 
+     */
+    synchronized boolean isAttached(Monitor monitorToFind) {
+        return monitors.contains(monitorToFind);
     }
 
-    protected void notifyMonitors() {
+    protected final void notifyMonitors() {
         logValue();
         for (Monitor monitor : monitors) {
             monitor.valueChanged(this);
         }
     }
-        
-    @Override
-    public ValueSemantics getSemantics() {
-        return semantics;
-    }
 
-    protected abstract void logValue();
+    protected final void logValue() {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(getName() + "=" + get());
+        }
+    }
 }

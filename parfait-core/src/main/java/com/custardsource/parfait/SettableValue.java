@@ -6,6 +6,10 @@ import org.apache.commons.lang.ObjectUtils;
 
 import com.google.common.base.Preconditions;
 
+/**
+ * A base class for Monitorables which can have their value set to an arbitrary
+ * value at runtime.
+ */
 abstract class SettableValue<T> extends AbstractMonitorable<T> {
     protected volatile T value;
 
@@ -23,19 +27,18 @@ abstract class SettableValue<T> extends AbstractMonitorable<T> {
         return value;
     }
 
+    /**
+     * Sets the current value of this Monitorable. Some level of optimization is
+     * performed to ensure that spurious updates are not sent out (i.e. when the
+     * new value is the same as the old), but this is optimized for performance
+     * and no guarantee is made that such notifications will not be sent.
+     */
     public void set(T newValue) {
+        Preconditions.checkNotNull(newValue, "Monitored value can not be null");
         if (ObjectUtils.equals(this.value, newValue)) {
             return;
         }
-        Preconditions.checkNotNull(newValue, "Monitored value can not be null");
         this.value = newValue;
         notifyMonitors();
-    }
-
-    @Override
-    protected void logValue() {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace(getName() + "=" + value);
-        }
     }
 }

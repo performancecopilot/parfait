@@ -3,17 +3,17 @@ package com.custardsource.parfait;
 import javax.measure.unit.Unit;
 
 /**
- * MonitoredValue provides a convenient implementation of {@link Monitorable} for basic values that
- * are updatable through a single set method call.
+ * MonitoredValue provides a convenient implementation of {@link Monitorable}
+ * for free-running values that are updatable through a single set method call.
  * <p>
+ * A free-running value is a value that increments and decrements at-will over
+ * time. This is essentially a "point in time" measurement. An example of an
+ * instantaneous value is the number of active HTTP sessions.
  * <p>
- * An instantaneous value is a value that increments and decrements randomly over time. This is
- * essentially a "point in time" measurement. An example of an instantaneous value is the number of
- * active HTTP sessions.
- * <p>
- * It is recommended that counters be implemented using the class {@link MonitoredCounter}.
+ * It is recommended that monotonically-increasing counters be implemented using
+ * the class {@link MonitoredCounter} in preference to this class.
  */
-public class MonitoredValue<T> extends SettableValue<T> {
+class MonitoredValue<T> extends SettableValue<T> {
     public MonitoredValue(String name, String description, T initialValue) {
         this(name, description, MonitorableRegistry.DEFAULT_REGISTRY,
                 initialValue);

@@ -2,6 +2,9 @@ package com.custardsource.parfait;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * {@link Monitorable} implementation for a free-running Long value.
+ */
 public class MonitoredLongValue extends MonitoredNumeric<AtomicLong> {
 	public MonitoredLongValue(String name, String description,
 			MonitorableRegistry registry, Long initialValue) {
