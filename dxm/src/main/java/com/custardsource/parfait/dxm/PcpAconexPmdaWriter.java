@@ -15,7 +15,7 @@ import com.custardsource.parfait.dxm.types.MmvMetricType;
 import com.google.common.base.Preconditions;
 
 public class PcpAconexPmdaWriter extends BasePcpWriter {
-    public static final String ENCODING = "ISO-8859-1";
+	public static final String ENCODING = "ISO-8859-1";
     public static final Charset CHARSET = Charset.forName(ENCODING);
     public static final byte PROTOCOL_VERSION = 1;
     public static final int METRIC_NAME_LIMIT = 200;
@@ -32,7 +32,9 @@ public class PcpAconexPmdaWriter extends BasePcpWriter {
 				&& !serverName.equals(""), "Sever name can not be blank");
 		this.serverName = serverName;
 		if (!directory.exists()) {
-			directory.mkdirs();
+			if (!directory.mkdirs()) {
+				throw new RuntimeException("Count not create output directory " + directory);
+			}
 		}
 		Preconditions.checkArgument(directory.isDirectory(),
 				"dataFileDir [%s] is not a directory.", directory);
@@ -44,15 +46,8 @@ public class PcpAconexPmdaWriter extends BasePcpWriter {
 			getDataFile().deleteOnExit();
 			headerFile.deleteOnExit();
 		}
-		registerType(String.class, new AbstractTypeHandler<String>(
-				MmvMetricType.STRING, MAX_STRING_LENGTH) {
-			public void putBytes(ByteBuffer buffer, String value) {
-				byte[] stringData = value.getBytes(CHARSET);
-				int length = Math.min(stringData.length, MAX_STRING_LENGTH - 1);
-				buffer.put(stringData, 0, length);
-				buffer.put((byte) 0);
-			}
-		});
+		registerType(String.class, new FixedLengthStringHandler(
+				MmvMetricType.STRING, MAX_STRING_LENGTH));
 	}
 
     private File getHeaderFile(File directory, String serverName) {
@@ -150,5 +145,19 @@ public class PcpAconexPmdaWriter extends BasePcpWriter {
 	public String toString() {
 		return "PcpAconexPmdaWriter '" + serverName + "', writing to " + dataFileDirectory;
 	}
-	
+
+	private static final class FixedLengthStringHandler extends
+			AbstractTypeHandler<String> {
+		private FixedLengthStringHandler(MmvMetricType type, int dataLength) {
+			super(type, dataLength);
+		}
+
+		public void putBytes(ByteBuffer buffer, String value) {
+			byte[] stringData = value.getBytes(CHARSET);
+			int length = Math.min(stringData.length, MAX_STRING_LENGTH - 1);
+			buffer.put(stringData, 0, length);
+			buffer.put((byte) 0);
+		}
+	}
+
 }

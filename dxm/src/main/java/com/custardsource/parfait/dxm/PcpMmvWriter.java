@@ -414,7 +414,7 @@ public class PcpMmvWriter extends BasePcpWriter {
         nextOffset = initializeOffsets(getInstances(), nextOffset, INSTANCE_LENGTH);
         nextOffset = initializeOffsets(getMetricInfos(), nextOffset, METRIC_LENGTH);
         nextOffset = initializeOffsets(getValueInfos(), nextOffset, VALUE_LENGTH);
-        nextOffset = initializeOffsets(getStrings(), nextOffset, STRING_BLOCK_LENGTH);
+        initializeOffsets(getStrings(), nextOffset, STRING_BLOCK_LENGTH);
     }
 
 	private int initializeOffsets(Collection<? extends PcpOffset> offsettables,
@@ -446,8 +446,10 @@ public class PcpMmvWriter extends BasePcpWriter {
     }
 
     public static void main(String[] args) throws IOException {
-        PcpMmvWriter bridge = new PcpMmvWriter(new File("/var/tmp/mmv/mmvtest"),
-                IdentifierSourceSet.DEFAULT_SET);
+		final String output = args.length == 0 ? "/var/tmp/mmv/mmvtest"
+				: args[0];
+		PcpMmvWriter bridge = new PcpMmvWriter(new File(output),
+				IdentifierSourceSet.DEFAULT_SET);
 
         // Automatically uses default int handler
         bridge.addMetric(MetricName.parse("sheep[baabaablack].bagsfull.count"), Semantics.COUNTER,

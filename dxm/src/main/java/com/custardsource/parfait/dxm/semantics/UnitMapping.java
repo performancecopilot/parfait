@@ -71,18 +71,16 @@ public final class UnitMapping {
 
         Dimension spaceDimension = Dimension.NONE;
         Dimension timeDimension = Dimension.NONE;
-        Dimension unitDimension = Dimension.NONE;
+        Dimension unitDimension = Dimension.UNITS;
         PcpScale<?> spaceScale = null;
         PcpScale<?> timeScale = null;
-        PcpScale<?> unitScale = null;
+        PcpScale<?> unitScale = UnitScale.UNIT;
 
         UnitMapping mapping = findUnitMapping(unit);
 
         if (mapping == null) {
             LOG.warn("No mapping found for unit " + unit + " of metric " + name
                     + "; treating as a unit quantity");
-            unitDimension = Dimension.UNITS;
-            unitScale = UnitScale.UNIT;
         } else {
             LOG.debug("Found mapping " + mapping + " for metric " + name);
             spaceDimension = mapping.getDimension(SpaceScale.class);
