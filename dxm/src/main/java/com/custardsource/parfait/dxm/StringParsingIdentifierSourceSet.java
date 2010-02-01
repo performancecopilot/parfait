@@ -49,11 +49,7 @@ public class StringParsingIdentifierSourceSet implements IdentifierSourceSet {
 
         for (String currentLine : instanceData) {
             lineNumber++;
-            if (currentLine.trim().isEmpty()) {
-                // Skip 
-            } else if (currentLine.trim().startsWith("#")) {
-                    // Skip 
-            } else if (startsWithBlank.matcher(currentLine).find()) {
+            if (startsWithBlank.matcher(currentLine).find()) {
                 // This is an instance, not an indom
                 if (currentDomain == null) {
                     throw new IllegalArgumentException(
@@ -62,7 +58,7 @@ public class StringParsingIdentifierSourceSet implements IdentifierSourceSet {
                                     + " of input; leading whitespace should only be used for instance values under an instance domain");
                 }
                 parseAllocation(currentInstanceAllocations, lineNumber, currentLine);
-            } else {
+            } else if (!isBlankOrComment(currentLine)) {
                 if (currentDomain != null) {
                     instanceSources.put(currentDomain, new FixedValueIdentifierSource(
                             currentInstanceAllocations, fallbacks.instanceSource(currentDomain)));
@@ -81,7 +77,11 @@ public class StringParsingIdentifierSourceSet implements IdentifierSourceSet {
                 .instanceDomainSource());
     }
 
-    @Override
+    private boolean isBlankOrComment(String currentLine) {
+        return (currentLine.trim().isEmpty()) || (currentLine.trim().startsWith("#")); 
+	}
+
+	@Override
     public IdentifierSource metricSource() {
         return metricSource;
     }

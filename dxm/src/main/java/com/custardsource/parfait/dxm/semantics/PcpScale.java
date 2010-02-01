@@ -8,8 +8,6 @@ import javax.measure.unit.NonSI;
 import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
 
-import com.custardsource.parfait.dxm.semantics.PcpScale;
-
 interface PcpScale<T extends Quantity> extends UnitValued {
     public Unit<T> getUnit();
 

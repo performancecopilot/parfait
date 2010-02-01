@@ -212,12 +212,11 @@ public abstract class BasePcpWriter implements PcpWriter {
             throw new IllegalArgumentException("Cannot add metric " + name
                     + "; name exceeds length limit");
         }
-        if (name.hasInstance()) {
-            if (name.getInstance().getBytes(getCharset()).length > getInstanceNameLimit()) {
-                throw new IllegalArgumentException("Cannot add metric " + name
-                        + "; instance name is too long");
-            }
-        }
+		if (name.hasInstance()
+				&& name.getInstance().getBytes(getCharset()).length > getInstanceNameLimit()) {
+			throw new IllegalArgumentException("Cannot add metric " + name
+					+ "; instance name is too long");
+		}
         PcpMetricInfo metricInfo = getMetricInfo(name.getMetric());
         InstanceDomain domain = null;
         Instance instance = null;
