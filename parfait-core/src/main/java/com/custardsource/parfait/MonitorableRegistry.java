@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 
 /**
  * A collection of Monitorables to be monitored by a given output source (or
@@ -74,10 +75,7 @@ public class MonitorableRegistry {
      *         MonitorableRegistry.
      */
     public synchronized Collection<Monitorable<?>> getMonitorables() {
-        Preconditions.checkState(stateFrozen,
-                "MonitorableRegistry must be frozen before retrieving monitorable list");
-        stateFrozen = true;
-        return Collections.unmodifiableCollection(monitorables.values());
+        return ImmutableList.copyOf(monitorables.values());
     }
 
     /*
