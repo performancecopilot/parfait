@@ -93,7 +93,7 @@ public class JmxView extends MonitoringView {
         }
     }
 
-    @ManagedAttribute(description = "All exposed PCP metrics")
+    @ManagedAttribute(description = "All exposed parfait metrics")
     public CompositeData getExposedMetrics() {
         try {
             return new CompositeDataSupport(monitoredType, jmxMonitoredNames, jmxMonitoredValues);

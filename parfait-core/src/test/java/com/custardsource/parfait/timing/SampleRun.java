@@ -2,11 +2,6 @@ package com.custardsource.parfait.timing;
 
 import java.util.Random;
 
-import javax.management.openmbean.CompositeData;
-import javax.management.openmbean.OpenDataException;
-import javax.management.openmbean.TabularData;
-
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.BasicConfigurator;
 
 import com.custardsource.parfait.MonitorableRegistry;
@@ -16,7 +11,7 @@ public class SampleRun {
     private static final Random RANDOM = new Random();
     public static final Object LOCK = new Object();
 
-    public static void main(String[] args) throws InterruptedException, OpenDataException {
+    public static void main(String[] args) throws InterruptedException {
         BasicConfigurator.configure();
         ThreadMetricSuite suite = ThreadMetricSuite.blank();
         suite.addMetric(StandardThreadMetrics.CLOCK_TIME);
@@ -41,30 +36,13 @@ public class SampleRun {
         for (int i = 1; i <= 5; i++) {
             Thread.sleep(5000);
             
-            TabularData data = exporter.captureInProgressMeasurements();
-            System.out.println(tabToString(data));
+            InProgressSnapshot snapshot = exporter.getSnapshot();
+            System.out.println(snapshot.asString());
         }
 
         t1.join();
         t2.join();
 
-    }
-
-    private static String tabToString(TabularData data) {
-        String result = "";
-        for (String column : data.getTabularType().getRowType().keySet()) {
-            result += StringUtils.leftPad(column, 20) + "\t";
-        }
-        result += "\n";
-        for (Object row : data.values()) {
-            CompositeData rowData = (CompositeData) row;
-            for (String column : data.getTabularType().getRowType().keySet()) {
-                result += StringUtils.leftPad(rowData.get(column).toString(), 20) + "\t";
-            }
-            result += "\n";
-            
-        }
-        return result;
     }
 
     public static abstract class FakeTask implements Timeable, Runnable {
