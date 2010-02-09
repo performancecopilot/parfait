@@ -26,12 +26,6 @@ public class MonitorableRegistryTest {
         registry.register((Monitorable<?>) new DummyMonitorable("foo"));
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void getMonitorablesFailsWhenNotFrozen() {
-        MonitorableRegistry registry = newRegistry();
-        registry.getMonitorables();
-    }
-
     @Test
     public void getMonitorablesOnNewRegistryReturnsEmptyCollection() {
         MonitorableRegistry registry = newRegistry();
