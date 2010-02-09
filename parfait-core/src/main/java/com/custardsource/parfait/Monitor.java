@@ -5,7 +5,7 @@ package com.custardsource.parfait;
  * objects it is attached to. This makes it effectively an 'output sink' for all
  * monitorable changes. When a Monitorable changes value, it will notify all
  * Monitors via {@link #valueChanged(Monitorable)}. Note that Monitors are under
- * no obligation to process this immediately — they may elect to queue the
+ * no obligation to process this immediately - they may elect to queue the
  * notification for later update, swallow intermediate updates, etc., depending
  * on implementation.
  */
