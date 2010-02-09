@@ -13,7 +13,7 @@ import javax.measure.unit.Unit;
  * It is recommended that monotonically-increasing counters be implemented using
  * the class {@link MonitoredCounter} in preference to this class.
  */
-class MonitoredValue<T> extends SettableValue<T> {
+public class MonitoredValue<T> extends SettableValue<T> {
     public MonitoredValue(String name, String description, T initialValue) {
         this(name, description, MonitorableRegistry.DEFAULT_REGISTRY,
                 initialValue);
