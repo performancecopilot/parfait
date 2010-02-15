@@ -49,6 +49,9 @@ public class InProgressSnapshot {
         for (Map.Entry<Thread, EventMetricCollector> entry : timer.getCollectorThreadMap()
                 .entrySet()) {
             StepMeasurements m = entry.getValue().getInProgressMeasurements();
+            if (m == null) {
+                break;
+            }
             String event = m.getBackTrace();
             Map<ThreadMetric, Long> snapshotValues = m.snapshotValues();
             Map<String, Object> keyedValues = new HashMap<String, Object>();
