@@ -64,6 +64,13 @@ public class ThreadContext {
     }
 
     /**
+     * Clears all values for the current thread.
+     */
+    public void clear() {
+        PER_THREAD_CONTEXTS.get(Thread.currentThread()).clear();
+    }
+
+    /**
      * Retrieves a copy of the thread context for the given thread 
      */
     public Map<String, Object> forThread(Thread t) {
@@ -77,7 +84,7 @@ public class ThreadContext {
         }
         return keys;
     }
-
+    
     public Object getForThread(Thread thread, String key) {
         return PER_THREAD_CONTEXTS.get(thread).get(key);
     }

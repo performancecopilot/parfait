@@ -52,4 +52,11 @@ public class ThreadContextTest extends TestCase {
     public void testGetsEmptyContextForUnknownThread() {
         assertEquals(0, context.forThread(new Thread()).size());
     }
+
+    public void testClearRemovesValue() {
+        final String testKey = "painter";
+        context.put(testKey, 7);
+        context.clear();
+        assertNull("get() after clear should return null", context.get(testKey));
+    }
 }
