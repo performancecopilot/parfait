@@ -37,9 +37,14 @@ public class JmxInProgressMonitor {
 
     @ManagedAttribute
     public String getSnapshotAsString() {
-        return exporter.getSnapshot().asString();
+        return exporter.getSnapshot().asTabbedString();
     }
-    
+
+    @ManagedAttribute
+    public String getFormattedSnapshot() {
+        return exporter.getSnapshot().asFormattedString();
+    }
+
     private static final Function<Class<?>, OpenType<?>> CLASS_TO_OPENTYPE = new Function<Class<?>, OpenType<?>>() {
         private final Map<Class<?>, SimpleType<?>> mappings = ImmutableMap
                 .<Class<?>, SimpleType<?>> of(String.class, SimpleType.STRING, Long.class,

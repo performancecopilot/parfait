@@ -37,7 +37,7 @@ public class SampleRun {
             Thread.sleep(5000);
             
             InProgressSnapshot snapshot = exporter.getSnapshot();
-            System.out.println(snapshot.asString());
+            System.out.println(snapshot.asFormattedString());
         }
 
         t1.join();

@@ -90,32 +90,49 @@ public class InProgressSnapshot {
         return ImmutableList.copyOf(classes);
     }
 
-    public static final Function<InProgressSnapshot, String> TO_STRING = new Function<InProgressSnapshot, String>() {
+    public static InProgressSnapshot capture(EventTimer timer, ThreadContext context) {
+        return new InProgressSnapshot(timer, context);
+    }
+
+    public String asTabbedString() {
+        return TO_TABBED_STRING.apply(this);
+    }
+
+    public String asFormattedString() {
+        return TO_FORMATTED_STRING.apply(this);
+    }
+
+    private static class InProgressFormatter implements Function<InProgressSnapshot, String> {
         @Override
         public String apply(InProgressSnapshot from) {
             StringBuilder result = new StringBuilder();
 
             for (String column : from.getColumnNames()) {
-                result.append(StringUtils.leftPad(column, 20)).append("\t");
+                result.append(formatColumnValue(column)).append("\t");
             }
             result.append("\n");
             for (Map<String, Object> rowData : from.getValues()) {
                 for (String column : from.getColumnNames()) {
-                    result.append(StringUtils.leftPad(String.valueOf(rowData.get(column)), 20))
-                            .append("\t");
+                    result.append(formatColumnValue(String.valueOf(rowData.get(column)))).append(
+                            "\t");
                 }
                 result.append("\n");
 
             }
             return result.toString();
         }
+
+        protected String formatColumnValue(String value) {
+            return value;
+        }
+    }
+
+    public static final Function<InProgressSnapshot, String> TO_TABBED_STRING = new InProgressFormatter();
+
+    public static final Function<InProgressSnapshot, String> TO_FORMATTED_STRING = new InProgressFormatter() {
+        @Override
+        protected String formatColumnValue(String value) {
+            return StringUtils.leftPad(value, 20);
+        }
     };
-
-    public static InProgressSnapshot capture(EventTimer timer, ThreadContext context) {
-        return new InProgressSnapshot(timer, context);
-    }
-
-    public String asString() {
-        return TO_STRING.apply(this);
-    }
 }
