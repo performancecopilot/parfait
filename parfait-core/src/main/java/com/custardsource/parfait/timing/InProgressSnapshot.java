@@ -49,23 +49,22 @@ public class InProgressSnapshot {
         for (Map.Entry<Thread, EventMetricCollector> entry : timer.getCollectorThreadMap()
                 .entrySet()) {
             StepMeasurements m = entry.getValue().getInProgressMeasurements();
-            if (m == null) {
-                break;
+            if (m != null) {
+                String event = m.getBackTrace();
+                Map<ThreadMetric, Long> snapshotValues = m.snapshotValues();
+                Map<String, Object> keyedValues = new HashMap<String, Object>();
+                keyedValues.put("Thread name", entry.getKey().getName());
+                keyedValues.put("Event", event);
+                for (ThreadMetric metric : timer.getMetricSuite().metrics()) {
+                    keyedValues.put(metric.getMetricName(), snapshotValues.get(metric));
+                    LOG.trace(String.format("Thread %s in event %s, metric %s has value %s", entry
+                            .getKey(), event, metric, snapshotValues.get(metric)));
+                }
+                for (String contextEntry : contextKeys) {
+                    keyedValues.put(contextEntry, context.getForThread(entry.getKey(), contextEntry));
+                }
+                values.add(keyedValues);
             }
-            String event = m.getBackTrace();
-            Map<ThreadMetric, Long> snapshotValues = m.snapshotValues();
-            Map<String, Object> keyedValues = new HashMap<String, Object>();
-            keyedValues.put("Thread name", entry.getKey().getName());
-            keyedValues.put("Event", event);
-            for (ThreadMetric metric : timer.getMetricSuite().metrics()) {
-                keyedValues.put(metric.getMetricName(), snapshotValues.get(metric));
-                LOG.trace(String.format("Thread %s in event %s, metric %s has value %s", entry
-                        .getKey(), event, metric, snapshotValues.get(metric)));
-            }
-            for (String contextEntry : contextKeys) {
-                keyedValues.put(contextEntry, context.getForThread(entry.getKey(), contextEntry));
-            }
-            values.add(keyedValues);
         }
 
     }
