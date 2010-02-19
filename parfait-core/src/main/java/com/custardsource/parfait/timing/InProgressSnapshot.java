@@ -61,7 +61,8 @@ public class InProgressSnapshot {
                             .getKey(), event, metric, snapshotValues.get(metric)));
                 }
                 for (String contextEntry : contextKeys) {
-                    keyedValues.put(contextEntry, context.getForThread(entry.getKey(), contextEntry));
+                    keyedValues.put(contextEntry, String.valueOf(context.getForThread(entry
+                            .getKey(), contextEntry)));
                 }
                 values.add(keyedValues);
             }

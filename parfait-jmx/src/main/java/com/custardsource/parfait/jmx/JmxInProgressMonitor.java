@@ -56,7 +56,7 @@ public class JmxInProgressMonitor {
         }
     };
 
-    private static final Function<InProgressSnapshot, TabularData> TO_TABULAR_DATA = new Function<InProgressSnapshot, TabularData>() {
+    static final Function<InProgressSnapshot, TabularData> TO_TABULAR_DATA = new Function<InProgressSnapshot, TabularData>() {
         @Override
         public TabularData apply(InProgressSnapshot from) {
             List<OpenType<?>> types = Lists.transform(from.getColumnClasses(), CLASS_TO_OPENTYPE);
