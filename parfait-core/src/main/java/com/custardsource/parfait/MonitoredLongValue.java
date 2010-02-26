@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * {@link Monitorable} implementation for a free-running Long value.
  */
-public class MonitoredLongValue extends MonitoredNumeric<AtomicLong> implements Incrementable {
+public class MonitoredLongValue extends MonitoredNumeric<AtomicLong> implements Counter {
 	public MonitoredLongValue(String name, String description,
 			MonitorableRegistry registry, Long initialValue) {
 		super(name, description, registry, new AtomicLong(initialValue));

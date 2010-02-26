@@ -1,6 +1,6 @@
 package com.custardsource.parfait;
 
-public interface Incrementable {
+public interface Counter {
     void inc();
     
     void inc(long increment);

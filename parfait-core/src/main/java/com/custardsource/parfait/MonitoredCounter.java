@@ -16,7 +16,7 @@ import javax.measure.unit.Unit;
  * operation only. Values must not decrement or be set to an arbitrary value.
  * <p>
  */
-public class MonitoredCounter extends AbstractMonitorable<Long> implements Incrementable {
+public class MonitoredCounter extends AbstractMonitorable<Long> implements Counter {
     private final AtomicLong value = new AtomicLong(0L);
 
     /**
