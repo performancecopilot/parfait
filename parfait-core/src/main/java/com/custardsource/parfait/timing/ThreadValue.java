@@ -17,7 +17,7 @@ public interface ThreadValue<T> {
     Map<Thread, T> asMap();
 
     public static class ThreadLocalMap<T> implements ThreadValue<T> {
-        private final ThreadLocal<? extends T> threadLocal;
+        protected final ThreadLocal<? extends T> threadLocal;
         
         public ThreadLocalMap(ThreadLocal<? extends T> threadLocal) {
             this.threadLocal = threadLocal;
@@ -48,7 +48,7 @@ public interface ThreadValue<T> {
     }
 
     public static class WeakReferenceThreadMap<T> implements ThreadValue<T> {
-        private final Map<Thread, T> map = new MapMaker().weakKeys().makeComputingMap(
+        protected final Map<Thread, T> map = new MapMaker().weakKeys().makeComputingMap(
                 new Function<Thread, T>() {
                     @Override
                     public T apply(Thread from) {
