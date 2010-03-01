@@ -1,11 +1,10 @@
 package com.custardsource.parfait.io;
 
-import java.io.IOException;
-import java.io.OutputStream;
-
+import com.custardsource.parfait.Counter;
 import org.apache.commons.io.output.ProxyOutputStream;
 
-import com.custardsource.parfait.MonitoredCounter;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Used to calculate the rate at which data is sent (downloaded) . When download outputstream
@@ -15,7 +14,7 @@ import com.custardsource.parfait.MonitoredCounter;
 
 public class ByteCountingOutputStream extends ProxyOutputStream {
 
-    private final MonitoredCounter byteCounter;
+    private final Counter byteCounter;
 
     /**
      * Constructs a ByteCountingOutputStream
@@ -26,7 +25,7 @@ public class ByteCountingOutputStream extends ProxyOutputStream {
      *            PCP metric counter to be updated
      */
 
-    public ByteCountingOutputStream(OutputStream out, MonitoredCounter counter) {
+    public ByteCountingOutputStream(OutputStream out, Counter counter) {
         super(out);
         this.byteCounter = counter;
     }

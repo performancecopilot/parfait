@@ -1,18 +1,17 @@
 package com.custardsource.parfait.io;
 
+import com.custardsource.parfait.Counter;
+import com.google.common.base.Preconditions;
+import org.apache.commons.io.input.ProxyInputStream;
+
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.commons.io.input.ProxyInputStream;
-
-import com.custardsource.parfait.MonitoredCounter;
-import com.google.common.base.Preconditions;
-
 public class ByteCountingInputStream extends ProxyInputStream {
 
-	private final MonitoredCounter monitoredCounter;
+	private final Counter byteCounter;
 
-	@Override
+    @Override
     public int read(byte[] bts, int st, int end) throws IOException {
         int read = super.read(bts, st, end);
         eosSafeCountingRead(read);
@@ -28,11 +27,11 @@ public class ByteCountingInputStream extends ProxyInputStream {
     }
 
     public ByteCountingInputStream(InputStream streamToWrap,
-			MonitoredCounter counter) {
+			Counter counter) {
 	    super(streamToWrap);
 	    Preconditions.checkNotNull(counter, "MonitoredCounter cannot be null");
 	    Preconditions.checkNotNull(streamToWrap, "InputStream cannot be null");
-		this.monitoredCounter = counter;
+		this.byteCounter = counter;
 	}
 	
 	@Override
@@ -48,7 +47,7 @@ public class ByteCountingInputStream extends ProxyInputStream {
 
     private void eosSafeCountingRead(int numRead) {
         if (numRead > 0) {
-            monitoredCounter.inc(numRead);
+            byteCounter.inc(numRead);
         }
     }
 
