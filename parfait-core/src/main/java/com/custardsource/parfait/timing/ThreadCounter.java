@@ -4,9 +4,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import com.custardsource.parfait.Counter;
 
-public class ThreadCounters {
-    public static class ThreadLocalCounter extends ThreadValue.ThreadLocalMap<AtomicLong> implements
-            Counter {
+public interface ThreadCounter extends ThreadValue<AtomicLong>, Counter {
+    public static class ThreadLocalCounter extends ThreadValue.ThreadLocalMap<AtomicLong> implements ThreadCounter {
 
         public ThreadLocalCounter() {
             super(new ThreadLocal<AtomicLong>() {
@@ -29,7 +28,7 @@ public class ThreadCounters {
     }
 
     public static class ThreadMapCounter extends ThreadValue.WeakReferenceThreadMap<AtomicLong>
-            implements Counter {
+            implements ThreadCounter {
 
         public ThreadMapCounter() {
             super();
