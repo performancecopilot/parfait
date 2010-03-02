@@ -1,7 +1,6 @@
 package com.custardsource.parfait.timing;
 
 import com.custardsource.parfait.*;
-import com.google.common.collect.Lists;
 
 import javax.measure.unit.Unit;
 
@@ -23,12 +22,6 @@ public class CounterPairFactory {
                 description, threadCounter);
         metricSuite.addMetric(threadMetric);
         return new CounterPair(metric, threadCounter);
-    }
-
-    private static class CounterPair extends CompositeCounter {
-        public <T extends Monitorable<Long> & Counter> CounterPair(T masterCounter, ThreadCounter threadCounter) {
-            super(Lists.<Counter>newArrayList(masterCounter, threadCounter));
-        }
     }
 
 }
