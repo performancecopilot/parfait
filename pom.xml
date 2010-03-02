@@ -3,7 +3,7 @@
   <groupId>com.custardsource</groupId>
   <artifactId>parfait</artifactId>
   <packaging>pom</packaging>
-  <version>0.0.14-SNAPSHOT</version>
+  <version>0.0.14</version>
   <name>parfait</name>
   <description>Java performance monitoring framework, including PCP bridge</description>
   <modules>
@@ -19,9 +19,9 @@
   <url>http://code.google.com/p/parfait/</url>
   <inceptionYear>2009</inceptionYear>
   <scm>
-    <connection>scm:svn:http://parfait.googlecode.com/svn</connection>
-    <developerConnection>scm:svn:https://parfait.googlecode.com/svn</developerConnection>
-    <url>http://code.google.com/p/parfait/source/browse/</url>
+    <connection>scm:svn:http://parfait.googlecode.com/svn/tags/parfait-0.0.14</connection>
+    <developerConnection>scm:svn:https://parfait.googlecode.com/svn/tags/parfait-0.0.14</developerConnection>
+    <url>http://code.google.com/p/parfait/source/browse/tags/parfait-0.0.14</url>
   </scm>
   <licenses>
     <license>
