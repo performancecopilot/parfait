@@ -67,7 +67,16 @@ public class EventMetricCollector {
                 EventMetricCounters counter = counters.getCounterForMetric(metric
                         .getMetricSource());
                 if (counter != null) {
-                    counter.incrementCounters(metric.totalValue());
+                    // We have potential race conditions here in that some metrics (e.g.
+                    // SYSTEM_CPU_TIME) cannot be calculated atomically, as they are derived from 2
+                    // non-atomic measurements. Depending on when the kernel counter increments, we
+                    // may see spurious negative values on such derived metrics. We clip to 0 to
+                    // avoid this. Example: at the start of a thread execution, we may get total 
+                    // cpu=1000ms, user=800ms, system is calculated as 200ms. At completion, 
+                    // total=1000ms, user=810ms (only user has 'ticked' over), system calculated as 
+                    // 190ms. We spuriously think that the individual request has taken 
+                    // (190 - 200) = -10ms.
+                    counter.incrementCounters(Math.max(metric.totalValue(), 0L));
                 }
             }
             counters.getInvocationCounter().incrementCounters(1);
