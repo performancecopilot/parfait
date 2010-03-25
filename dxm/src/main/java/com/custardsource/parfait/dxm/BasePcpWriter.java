@@ -129,15 +129,19 @@ public abstract class BasePcpWriter implements PcpWriter {
     private ByteBuffer initialiseBuffer(File file, int length) throws IOException {
         RandomAccessFile fos = null;
         try {
-			if (!file.getParentFile().exists()) {
-				if (!file.getParentFile().mkdirs()) {
-					throw new RuntimeException(
-							"Count not create output directory "
-									+ file.getParentFile());
-				}
-			}
+            if (file.getParentFile().exists()) {
+                file.delete();  /* directory update visible to MMV PMDA */
+                if (file.exists()) {
+                    throw new RuntimeException(
+                            "Could not delete existing file "
+                            + file.getPath());
+                }
+            } else if (!file.getParentFile().mkdirs()) {
+				throw new RuntimeException(
+                            "Could not create output directory "
+                            + file.getParentFile());
+            }
             fos = new RandomAccessFile(file, "rw");
-            fos.setLength(0);
             fos.setLength(length);
             ByteBuffer tempDataFile = fos.getChannel().map(MapMode.READ_WRITE, 0, length);
             tempDataFile.order(ByteOrder.nativeOrder());
