@@ -134,12 +134,12 @@ public abstract class BasePcpWriter implements PcpWriter {
                 if (file.exists()) {
                     throw new RuntimeException(
                             "Could not delete existing file "
-                            + file.getPath());
+                            + file.getCanonicalPath());
                 }
             } else if (!file.getParentFile().mkdirs()) {
 				throw new RuntimeException(
                             "Could not create output directory "
-                            + file.getParentFile());
+                            + file.getParentFile().getCanonicalPath());
             }
             fos = new RandomAccessFile(file, "rw");
             fos.setLength(length);
