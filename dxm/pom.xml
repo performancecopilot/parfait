@@ -51,6 +51,13 @@
     	<version>2.4</version>
     	<scope>compile</scope>
     </dependency>
+    <dependency>
+    	<groupId>commons-io</groupId>
+    	<artifactId>commons-io</artifactId>
+    	<version>1.4</version>
+    	<type>jar</type>
+    	<scope>compile</scope>
+    </dependency>
   </dependencies>
   <repositories>
     <repository>

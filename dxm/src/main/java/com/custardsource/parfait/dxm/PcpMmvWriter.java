@@ -166,6 +166,32 @@ public class PcpMmvWriter extends BasePcpWriter {
         registerType(String.class, MMV_STRING_HANDLER);
     }
 
+    /**
+     * Creates a new PcpMmvWriter writing to the underlying file, which will be created + opened as a
+     * memory-mapped file.  This is the constructor most people should use, unless you have a really
+     * good reason not to.  It automatically handles all (incl. cross-platform) file location issues.
+     * 
+     * @param name
+     *            logical name of instrumented subsystem (e.g. "hadoop")
+     * @param identifierSources
+     *            the sources to use for coming up with identifiers for new metrics etc.
+     */
+    public PcpMmvWriter(String name, IdentifierSourceSet identifierSources) {
+        this(mmvFileFromName(name), identifierSources);
+    }
+
+    private static File mmvFileFromName(String name) {
+        Preconditions.checkArgument(!name.contains(File.separator), "MMV logical name must not contain path separators");
+
+        PcpConfig pcp = new PcpConfig();
+        String pcpTemp = pcp.getValue("PCP_TMP_DIR");
+
+        File tmpDir = new File(pcp.getRoot(), pcpTemp);
+        File mmvDir = new File(tmpDir, "mmv");
+
+        return new File(mmvDir, name);
+    }
+
     public void setClusterIdentifier(int clusterIdentifier) {
     	this.clusterIdentifier = clusterIdentifier;
     }
@@ -446,10 +472,15 @@ public class PcpMmvWriter extends BasePcpWriter {
     }
 
     public static void main(String[] args) throws IOException {
-		final String output = args.length == 0 ? "/var/tmp/mmv/mmvtest"
-				: args[0];
-		PcpMmvWriter bridge = new PcpMmvWriter(new File(output),
-				IdentifierSourceSet.DEFAULT_SET);
+        PcpMmvWriter bridge;
+
+        if (args.length == 0) {
+            // use $PCP_PMDAS_DIR/mmv/mmvdump (no args) as diagnostic tool
+            bridge = new PcpMmvWriter("test", IdentifierSourceSet.DEFAULT_SET);
+        }
+        else {
+            bridge = new PcpMmvWriter(new File(args[0]), IdentifierSourceSet.DEFAULT_SET);        
+        }
 
         // Automatically uses default int handler
         bridge.addMetric(MetricName.parse("sheep[baabaablack].bagsfull.count"), Semantics.COUNTER,
@@ -508,8 +539,7 @@ public class PcpMmvWriter extends BasePcpWriter {
                 .KILO(SI.HERTZ), 0.5);
 
         // Set up some help text
-        bridge
-                .setInstanceDomainHelpText(
+        bridge.setInstanceDomainHelpText(
                         "sheep",
                         "sheep in the paddock",
                         "List of all the sheep in the paddock. Includes 'baabaablack', 'insomniac' (who likes to jump fences), and 'limpy' the three-legged wonder sheep.");
