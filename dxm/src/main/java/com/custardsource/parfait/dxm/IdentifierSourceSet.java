@@ -6,21 +6,23 @@ public interface IdentifierSourceSet {
     public IdentifierSource metricSource();
     
     public static IdentifierSourceSet DEFAULT_SET = new IdentifierSourceSet() {
-        private final IdentifierSource DEFAULT_SOURCE = new HashingIdentifierSource();
+        private final IdentifierSource instanceDomainSource = new HashingIdentifierSource(1 << 22);
+        private final IdentifierSource instanceSource = new HashingIdentifierSource(Integer.MAX_VALUE);
+        private final IdentifierSource metricSource = new HashingIdentifierSource(1 << 10);
         
         @Override
         public IdentifierSource metricSource() {
-            return DEFAULT_SOURCE;
+            return metricSource;
         }
         
         @Override
         public IdentifierSource instanceSource(String domain) {
-            return DEFAULT_SOURCE;
+            return instanceSource;
         }
         
         @Override
         public IdentifierSource instanceDomainSource() {
-            return DEFAULT_SOURCE;
+            return instanceDomainSource;
         }
     };
     
@@ -29,7 +31,7 @@ public interface IdentifierSourceSet {
      * values for Instances
      */
     public static IdentifierSourceSet EXPLICIT_SET = new IdentifierSourceSet() {
-        private final IdentifierSource DEFAULT_SOURCE = new HashingIdentifierSource();
+        private final IdentifierSource DEFAULT_SOURCE = new HashingIdentifierSource(Integer.MAX_VALUE);
         private final IdentifierSource ERROR_SOURCE = new ErrorThrowingIdentifierSource();
         
         @Override

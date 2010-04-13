@@ -1,13 +1,12 @@
 package com.custardsource.parfait.dxm;
 
-import static org.junit.Assert.assertEquals;
+import com.google.common.collect.Sets;
+import org.junit.Test;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Test;
-
-import com.google.common.collect.Sets;
+import static org.junit.Assert.assertEquals;
 
 public class HashingIdentifierSourceTest {
     @Test
@@ -21,8 +20,13 @@ public class HashingIdentifierSourceTest {
     }
 
     @Test
-    public void hashToMaxintShouldProduceMaxintIdentifier() {
-        assertHashEquals(stringWhichHashesTo(Integer.MAX_VALUE), Integer.MAX_VALUE);
+    public void hashToMaxintShouldProduceZeroIdentifier() {
+        assertHashEquals(stringWhichHashesTo(Integer.MAX_VALUE), 0);
+    }
+
+    @Test
+    public void hashToNearlyMaxintShouldProduceNearlyMaxint() {
+        assertHashEquals(stringWhichHashesTo(Integer.MAX_VALUE - 1), Integer.MAX_VALUE - 1);
     }
 
     @Test
@@ -46,13 +50,27 @@ public class HashingIdentifierSourceTest {
         assertHashEquals(stringWhichHashesTo(Integer.MIN_VALUE), 0);
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void hashWithAllValuesUsedShouldThrow() {
+        System.out.println(new HashingIdentifierSource(3).calculateId(stringWhichHashesTo(2), Sets.newHashSet(0, 1, 2)));
+    }
+
+    @Test
+    public void hashValueShouldWrapToZeroWhenHashUsed() {
+        assertHashEquals(stringWhichHashesTo(Integer.MAX_VALUE - 1), 0, Sets.newHashSet(Integer.MAX_VALUE - 1));
+    }
+
     private void assertHashEquals(String input, int expectedOutput) {
         assertHashEquals(input, expectedOutput, new HashSet<Integer>());
 
     }
 
     private void assertHashEquals(String input, int expectedOutput, Set<Integer> existingIdentifiers) {
-        assertEquals(expectedOutput, new HashingIdentifierSource().calculateId(input,
+        assertHashEquals(input, expectedOutput, existingIdentifiers, Integer.MAX_VALUE);
+    }
+
+    private void assertHashEquals(String input, int expectedOutput, Set<Integer> existingIdentifiers, int identifierCount) {
+        assertEquals(expectedOutput, new HashingIdentifierSource(identifierCount).calculateId(input,
                 existingIdentifiers));
     }
 
