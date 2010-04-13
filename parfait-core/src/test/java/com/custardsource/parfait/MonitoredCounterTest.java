@@ -1,8 +1,8 @@
 package com.custardsource.parfait;
 
-import static org.junit.Assert.assertEquals;
-
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 
 public class MonitoredCounterTest {
@@ -30,9 +30,11 @@ public class MonitoredCounterTest {
         assertEquals(77L, counter.get().longValue());
     }
 
-    @Test(expected=IllegalArgumentException.class)
-    public void cannotIncrementWithNegativeValue() {
-        newCounter().inc(-1);
+    @Test
+    public void canIncrementByNegativeNumber() {
+        MonitoredCounter counter = newCounter();
+        counter.inc(-1L);
+        assertEquals(-1L, counter.get().longValue());
     }
 
     @Test

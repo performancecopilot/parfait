@@ -66,10 +66,6 @@ public class MonitoredCounter extends AbstractMonitorable<Long> implements Count
      *            the amount to increment. Should be non-negative
      */
     public void inc(long value) {
-        if (value < 0) {
-            throw new IllegalArgumentException("Cannot increment counter " + getName()
-                    + " by negative value " + value);
-        }
         this.value.addAndGet(value);
         notifyMonitors();
     }
