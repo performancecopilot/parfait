@@ -1,8 +1,7 @@
 package com.custardsource.parfait;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 import javax.measure.unit.Unit;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * A MonitoredCounter is a useful implementation of {@link Monitorable} specifically for
@@ -57,6 +56,19 @@ public class MonitoredCounter extends AbstractMonitorable<Long> implements Count
     @Override
     public Long get() {
         return value.get();
+    }
+
+    /**
+     * <p>Reset the counter to a specific value. This is <em>not</em> the typical use of this class;
+     * this class' value is typically monotonically increasing, and should not roam freely, making
+     * {@link #inc(long)} the more common usage </p>
+     * <p>Use this method in the case of a 'reset' or similar functionality, or in the case where
+     * values are being extracted from a monotonically-increasing source and we need to use
+     * that source's value verbatim.</p>
+     */
+    public void set(long newValue) {
+        value.set(newValue);
+        notifyMonitors();
     }
 
     /**

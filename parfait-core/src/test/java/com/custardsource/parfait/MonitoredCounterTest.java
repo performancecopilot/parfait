@@ -44,6 +44,13 @@ public class MonitoredCounterTest {
         assertEquals(0L, counter.get().longValue());
     }
 
+    @Test
+    public void canSetToNewValue() {
+        MonitoredCounter counter = newCounter();
+        counter.set(1337L);
+        assertEquals(1337L, counter.get().longValue());
+    }
+
     private MonitoredCounter newCounter() {
         return new MonitoredCounter("A", "aaa", new MonitorableRegistry());
     }
