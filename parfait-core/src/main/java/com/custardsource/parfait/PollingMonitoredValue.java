@@ -1,18 +1,18 @@
 package com.custardsource.parfait;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
+import com.google.common.base.Preconditions;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.log4j.Logger;
 
-import com.google.common.base.Preconditions;
+import javax.measure.unit.Unit;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Monitors the value returned by calls at the provided interval to the provided
  * {@link Poller}.
  */
-public class PollingMonitoredValue<T> extends MonitoredValue<T> {
+public class PollingMonitoredValue<T> extends SettableValue<T> {
     private static final Logger LOG = Logger.getLogger("parfait.polling");
 
     /**
@@ -33,14 +33,21 @@ public class PollingMonitoredValue<T> extends MonitoredValue<T> {
      *            not be less than {@link #MIN_UPDATE_INTERVAL}
      */
     public PollingMonitoredValue(String name, String description,
-            int updateInterval, Poller<T> poller) {
-        this(name, description, MonitorableRegistry.DEFAULT_REGISTRY,
-                updateInterval, poller);
+            MonitorableRegistry registry, int updateInterval, Poller<T> poller, ValueSemantics semantics) {
+        this(name, description, registry, updateInterval, poller, semantics, Unit.ONE);
     }
 
-    public PollingMonitoredValue(String name, String description,
-            MonitorableRegistry registry, int updateInterval, Poller<T> poller) {
-        super(name, description, registry, poller.poll());
+    /**
+     * Creates a new {@link PollingMonitoredValue} with the specified polling
+     * interval.
+     *
+     * @param updateInterval
+     *            how frequently the Poller should be checked for updates (may
+     *            not be less than {@link #MIN_UPDATE_INTERVAL}
+     */
+    public PollingMonitoredValue(String name, String description, MonitorableRegistry registry, int updateInterval,
+            Poller<T> poller, ValueSemantics semantics, Unit<?> unit) {
+        super(name, description, registry, poller.poll(), unit, semantics);
         this.poller = poller;
         Preconditions.checkState(updateInterval >= MIN_UPDATE_INTERVAL,
                 "updateInterval is too short.");

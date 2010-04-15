@@ -10,8 +10,7 @@ public class PollingMonitoredValueTest extends TestCase {
     public void testDoesCallThePollerAtCorrectInterval() throws InterruptedException {
         TestPoller poller = new TestPoller();
         PollingMonitoredValue<Integer> p = new PollingMonitoredValue<Integer>("polling.test", "",
-                275, poller);
-
+                MonitorableRegistry.DEFAULT_REGISTRY, 275, poller, ValueSemantics.FREE_RUNNING);
         poller.count.tryAcquire(6, 10, TimeUnit.SECONDS);
 
         // Need to sleep just a tiny bit to let the poller update it's current value.

@@ -1,5 +1,18 @@
 package com.custardsource.parfait.jmx;
 
+import com.custardsource.parfait.Monitorable;
+import com.custardsource.parfait.MonitorableRegistry;
+import com.custardsource.parfait.MonitoredConstant;
+import com.custardsource.parfait.MonitoredValue;
+import com.custardsource.parfait.Poller;
+import com.custardsource.parfait.PollingMonitoredValue;
+import com.custardsource.parfait.ValueSemantics;
+import com.google.common.base.Preconditions;
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.jmx.support.JmxUtils;
+
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
@@ -11,18 +24,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import javax.management.openmbean.CompositeData;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.jmx.support.JmxUtils;
-
-import com.custardsource.parfait.Monitorable;
-import com.custardsource.parfait.MonitoredConstant;
-import com.custardsource.parfait.MonitoredValue;
-import com.custardsource.parfait.Poller;
-import com.custardsource.parfait.PollingMonitoredValue;
-import com.google.common.base.Preconditions;
+import javax.measure.unit.Unit;
 
 /**
  * Factory bean that generates a monitor which tracks the value of the provided MBean attribute.
@@ -30,6 +32,7 @@ import com.google.common.base.Preconditions;
  * Support is provided for monitoring simple attributes and also the data items of attributes that
  * are of type {@link CompositeData}.
  */
+// TODO - use a builder pattern here, construction of this class is getting very unwieldy
 public class MonitoredMBeanAttributeFactory<T> implements FactoryBean {
 
     public static final Logger LOG = Logger.getLogger(MonitoredMBeanAttributeFactory.class.getName());
@@ -53,24 +56,42 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean {
     private final String attributeName;
 
     private final String compositeDataItem;
+
+    private final Unit<?> unit;
     
-    public MonitoredMBeanAttributeFactory(String name, String description, String mBeanName,
-            String attributeName) {
-        this(name, description, DO_NOT_UPDATE_VALUE, mBeanName, attributeName, null);
-    }
+    private final ValueSemantics semantics;
 
-    public MonitoredMBeanAttributeFactory(String name, String description, String mBeanName,
-            String attributeName, String compositeDataItem) {
-        this(name, description, DO_NOT_UPDATE_VALUE, mBeanName, attributeName, compositeDataItem);
-    }
+    private final MonitorableRegistry monitorableRegistry;
 
-    public MonitoredMBeanAttributeFactory(String name, String description, int updateInterval,
-            String mBeanName, String attributeName) {
-        this(name, description, updateInterval, mBeanName, attributeName, null);
-    }
-
-    public MonitoredMBeanAttributeFactory(String name, String description, int updateInterval,
+    public MonitoredMBeanAttributeFactory(MonitorableRegistry registry, String name, String description, int updateInterval, ValueSemantics semantics,
             String mBeanName, String attributeName, String compositeDataItem) {
+        this(registry, name, description, updateInterval, semantics, mBeanName, attributeName, compositeDataItem, Unit.ONE);
+    }
+
+    public MonitoredMBeanAttributeFactory(MonitorableRegistry registry, String name, String description, int updateInterval, ValueSemantics semantics,
+            String mBeanName, String attributeName, Unit<?> unit) {
+        this(registry, name, description, updateInterval, semantics, mBeanName, attributeName, null, unit);
+    }
+
+    public MonitoredMBeanAttributeFactory(MonitorableRegistry registry, String name, String description,
+            String mBeanName, String attributeName, Unit<?> unit) {
+        this(registry, name, description, DO_NOT_UPDATE_VALUE, ValueSemantics.CONSTANT, mBeanName, attributeName, null, unit);
+    }
+
+    public MonitoredMBeanAttributeFactory(MonitorableRegistry registry, String name, String description,
+            String mBeanName, String attributeName, String compositeDataItem, Unit<?> unit) {
+        this(registry, name, description, DO_NOT_UPDATE_VALUE, ValueSemantics.CONSTANT, mBeanName, attributeName, compositeDataItem, unit);
+    }
+
+    public MonitoredMBeanAttributeFactory(MonitorableRegistry registry, String name, String description,
+            String mBeanName, String attributeName, String compositeDataItem) {
+        this(registry, name, description, DO_NOT_UPDATE_VALUE, ValueSemantics.CONSTANT, mBeanName, attributeName, compositeDataItem, Unit.ONE);
+    }
+
+
+    public MonitoredMBeanAttributeFactory(MonitorableRegistry registry, String name, String description, int updateInterval, ValueSemantics semantics,
+            String mBeanName, String attributeName, String compositeDataItem, Unit<?> unit) {
+        this.monitorableRegistry = registry;
         this.name = name;
         this.description = description;
         this.updateInterval = updateInterval;
@@ -83,6 +104,8 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean {
         }
         this.attributeName = attributeName;
         this.compositeDataItem = compositeDataItem;
+        this.semantics = semantics;
+        this.unit = unit;
     }
     
     public Monitorable<T> getObject() throws InstanceNotFoundException, IntrospectionException,
@@ -103,7 +126,7 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean {
                     + "] does not have an attribute named [" + attributeName + "]");
         }
 
-        if (compositeDataItem != null) {
+        if (StringUtils.isNotEmpty(compositeDataItem)) {
 			Preconditions
 					.checkState(
 							CompositeData.class.getName().equals(
@@ -121,13 +144,13 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean {
         if (isConstant()) {
         	return new MonitoredConstant<T>(name, description, getAttributeValue());
         } else {
-        	return new PollingMonitoredValue<T>(name, description, updateInterval, new Poller<T>() {
+        	return new PollingMonitoredValue<T>(name, description, monitorableRegistry, updateInterval, new Poller<T>() {
         		
         		public T poll() {
         			return getAttributeValue();
         		}
         		
-        	});
+        	}, semantics, unit);
         }
     }
 
@@ -146,7 +169,7 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean {
     @SuppressWarnings("unchecked")
 	protected T getAttributeValue() {
         try {
-            if (compositeDataItem != null) {
+            if (StringUtils.isNotEmpty(compositeDataItem)) {
                 CompositeData data = (CompositeData) server.getAttribute(mBeanName, attributeName);
                 return (T) data.get(compositeDataItem);
             } else {
