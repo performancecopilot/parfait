@@ -49,4 +49,27 @@ public interface IdentifierSourceSet {
             return ERROR_SOURCE;
         }
     };
+
+    /**
+     * An IdentifierSourceSet for use in contexts where identifiers truly do not matter and are not limited in range
+     * -- e.g. test cases or writers which do not need to limit identifiers
+     */
+    public static IdentifierSourceSet LIMITLESS_SET = new IdentifierSourceSet() {
+        private final IdentifierSource defaultSource = new HashingIdentifierSource(Integer.MAX_VALUE);
+
+        @Override
+        public IdentifierSource metricSource() {
+            return defaultSource;
+        }
+
+        @Override
+        public IdentifierSource instanceSource(String domain) {
+            return defaultSource;
+        }
+
+        @Override
+        public IdentifierSource instanceDomainSource() {
+            return defaultSource;
+        }
+    };
 }
