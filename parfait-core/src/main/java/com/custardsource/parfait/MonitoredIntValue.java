@@ -1,5 +1,6 @@
 package com.custardsource.parfait;
 
+import javax.measure.unit.Unit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -8,14 +9,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MonitoredIntValue extends MonitoredNumeric<AtomicInteger> {
 	public MonitoredIntValue(String name, String description,
 			MonitorableRegistry registry, Integer initialValue) {
-		super(name, description, registry, new AtomicInteger(initialValue));
+		this(name, description, registry, initialValue, Unit.ONE);
 	}
 
 	public MonitoredIntValue(String name, String description,
 			Integer initialValue) {
-        super(name, description, MonitorableRegistry.DEFAULT_REGISTRY, new AtomicInteger(
-                initialValue));
+        this(name, description, MonitorableRegistry.DEFAULT_REGISTRY,
+                initialValue, Unit.ONE);
 	}
+
+    public MonitoredIntValue(String name, String description, MonitorableRegistry registry,
+            Integer initialValue, Unit<?> unit) {
+        super(name, description, registry, new AtomicInteger(
+                initialValue), unit);
+
+    }
 
     /**
      * Convenience method to increment atomic numeric types.

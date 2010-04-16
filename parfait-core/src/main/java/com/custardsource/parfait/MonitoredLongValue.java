@@ -1,5 +1,6 @@
 package com.custardsource.parfait;
 
+import javax.measure.unit.Unit;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -8,13 +9,18 @@ import java.util.concurrent.atomic.AtomicLong;
 public class MonitoredLongValue extends MonitoredNumeric<AtomicLong> implements Counter {
 	public MonitoredLongValue(String name, String description,
 			MonitorableRegistry registry, Long initialValue) {
-		super(name, description, registry, new AtomicLong(initialValue));
+		this(name, description, registry, initialValue, Unit.ONE);
 	}
 
 	public MonitoredLongValue(String name, String description,
 			Long initialValue) {
-		super(name, description, MonitorableRegistry.DEFAULT_REGISTRY, new AtomicLong(initialValue));
+		this(name, description, MonitorableRegistry.DEFAULT_REGISTRY, initialValue, Unit.ONE);
 	}
+
+    public MonitoredLongValue(String name, String description,
+            MonitorableRegistry registry, Long initialValue, Unit<?> unit) {
+        super(name, description, registry, new AtomicLong(initialValue), unit);
+    }
 
     /**
      * Convenience method to increment atomic numeric types.

@@ -1,5 +1,7 @@
 package com.custardsource.parfait;
 
+import javax.measure.unit.Unit;
+
 /**
  * Base implementation of {@link Monitorable} which deals with numeric values.
  * Provides convenience methods to increment and decrement the current value by
@@ -7,8 +9,8 @@ package com.custardsource.parfait;
  */
 abstract class MonitoredNumeric<T extends Number> extends MonitoredValue<T> {
     public MonitoredNumeric(String name, String description, MonitorableRegistry registry,
-            T initialValue) {
-        super(name, description, registry, initialValue);
+            T initialValue, Unit<?> unit) {
+        super(name, description, registry, initialValue, unit);
     }
 
     /**
