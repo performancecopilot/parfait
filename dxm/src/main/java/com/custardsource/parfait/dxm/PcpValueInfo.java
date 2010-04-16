@@ -5,7 +5,7 @@ package com.custardsource.parfait.dxm;
 
 import com.custardsource.parfait.dxm.types.TypeHandler;
 
-final class PcpValueInfo implements PcpOffset {
+public final class PcpValueInfo implements PcpOffset {
 	private final MetricName metricName;
 	private final Object initialValue;
 	private final PcpMetricInfo metricInfo;
@@ -26,7 +26,7 @@ final class PcpValueInfo implements PcpOffset {
         }
     }
 
-    MetricName getMetricName() {
+    public MetricName getMetricName() {
         return metricName;
     }
 
@@ -40,11 +40,11 @@ final class PcpValueInfo implements PcpOffset {
         this.offset = offset;
     }
 
-    TypeHandler<?> getTypeHandler() {
+    public TypeHandler<?> getTypeHandler() {
         return metricInfo.getTypeHandler();
     }
 
-    Object getInitialValue() {
+    public Object getInitialValue() {
         return initialValue;
     }
 
