@@ -49,52 +49,29 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean {
 
     private final String description;
 
-    private final int updateInterval;
-
     private final ObjectName mBeanName;
 
     private final String attributeName;
 
     private final String compositeDataItem;
 
-    private final Unit<?> unit;
+    private int updateInterval = DO_NOT_UPDATE_VALUE;
+
+    private Unit<?> unit = Unit.ONE;
     
-    private final ValueSemantics semantics;
+    private ValueSemantics semantics = ValueSemantics.FREE_RUNNING;
 
-    private final MonitorableRegistry monitorableRegistry;
+    private MonitorableRegistry monitorableRegistry = MonitorableRegistry.DEFAULT_REGISTRY;
 
-    public MonitoredMBeanAttributeFactory(MonitorableRegistry registry, String name, String description, int updateInterval, ValueSemantics semantics,
+    public MonitoredMBeanAttributeFactory(String name, String description,
+            String mBeanName, String attributeName) {
+        this(name, description, mBeanName, attributeName, null);
+    }
+
+    public MonitoredMBeanAttributeFactory(String name, String description,
             String mBeanName, String attributeName, String compositeDataItem) {
-        this(registry, name, description, updateInterval, semantics, mBeanName, attributeName, compositeDataItem, Unit.ONE);
-    }
-
-    public MonitoredMBeanAttributeFactory(MonitorableRegistry registry, String name, String description, int updateInterval, ValueSemantics semantics,
-            String mBeanName, String attributeName, Unit<?> unit) {
-        this(registry, name, description, updateInterval, semantics, mBeanName, attributeName, null, unit);
-    }
-
-    public MonitoredMBeanAttributeFactory(MonitorableRegistry registry, String name, String description,
-            String mBeanName, String attributeName, Unit<?> unit) {
-        this(registry, name, description, DO_NOT_UPDATE_VALUE, ValueSemantics.CONSTANT, mBeanName, attributeName, null, unit);
-    }
-
-    public MonitoredMBeanAttributeFactory(MonitorableRegistry registry, String name, String description,
-            String mBeanName, String attributeName, String compositeDataItem, Unit<?> unit) {
-        this(registry, name, description, DO_NOT_UPDATE_VALUE, ValueSemantics.CONSTANT, mBeanName, attributeName, compositeDataItem, unit);
-    }
-
-    public MonitoredMBeanAttributeFactory(MonitorableRegistry registry, String name, String description,
-            String mBeanName, String attributeName, String compositeDataItem) {
-        this(registry, name, description, DO_NOT_UPDATE_VALUE, ValueSemantics.CONSTANT, mBeanName, attributeName, compositeDataItem, Unit.ONE);
-    }
-
-
-    public MonitoredMBeanAttributeFactory(MonitorableRegistry registry, String name, String description, int updateInterval, ValueSemantics semantics,
-            String mBeanName, String attributeName, String compositeDataItem, Unit<?> unit) {
-        this.monitorableRegistry = registry;
         this.name = name;
         this.description = description;
-        this.updateInterval = updateInterval;
         String beanName = registerBeanName(mBeanName);
         try {
             this.mBeanName = new ObjectName(beanName);
@@ -104,7 +81,21 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean {
         }
         this.attributeName = attributeName;
         this.compositeDataItem = compositeDataItem;
-        this.semantics = semantics;
+    }
+
+    public void setMonitorableRegistry(MonitorableRegistry registry) {
+        this.monitorableRegistry = Preconditions.checkNotNull(registry);
+    }
+
+    public void setUpdateInterval(int updateInterval) {
+        this.updateInterval = updateInterval;
+    }
+
+    public void setValueSemantics(ValueSemantics semantics) {
+        this.semantics = Preconditions.checkNotNull(semantics);
+    }
+
+    public void setUnit(Unit<?> unit) {
         this.unit = unit;
     }
     
