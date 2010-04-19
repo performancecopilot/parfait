@@ -17,6 +17,8 @@ import javax.measure.unit.NonSI;
 import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
 
+import org.apache.log4j.BasicConfigurator;
+
 import com.custardsource.parfait.dxm.semantics.Semantics;
 import com.custardsource.parfait.dxm.semantics.UnitMapping;
 import com.custardsource.parfait.dxm.types.AbstractTypeHandler;
@@ -478,7 +480,8 @@ public class PcpMmvWriter extends BasePcpWriter {
 
     public static void main(String[] args) throws IOException {
         PcpMmvWriter bridge;
-
+        
+        BasicConfigurator.configure();
         if (args.length == 0) {
             // use $PCP_PMDAS_DIR/mmv/mmvdump (no args) as diagnostic tool
             bridge = new PcpMmvWriter("test", IdentifierSourceSet.DEFAULT_SET);
