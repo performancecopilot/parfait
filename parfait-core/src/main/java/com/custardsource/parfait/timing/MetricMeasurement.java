@@ -74,11 +74,11 @@ class MetricMeasurement {
     }
 
     public String ownTimeValueFormatted() {
-        return ownTimeValue() + metricSource.getUnit();
+        return ownTimeValue() + metricSource.getUnit().toString();
     }
 
     public String totalValueFormatted() {
-        return totalValue() + metricSource.getUnit();
+        return totalValue() + metricSource.getUnit().toString();
     }
 
     public ThreadMetric getMetricSource() {

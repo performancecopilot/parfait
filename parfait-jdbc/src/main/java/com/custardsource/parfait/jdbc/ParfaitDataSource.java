@@ -1,5 +1,13 @@
 package com.custardsource.parfait.jdbc;
 
+import com.custardsource.parfait.timing.ThreadMetric;
+import com.custardsource.parfait.timing.ThreadValue;
+import com.custardsource.parfait.timing.ThreadValueMetric;
+import com.google.common.collect.ImmutableList;
+
+import javax.measure.unit.SI;
+import javax.measure.unit.Unit;
+import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -11,13 +19,6 @@ import java.sql.Statement;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicLong;
 
-import javax.sql.DataSource;
-
-import com.custardsource.parfait.timing.ThreadMetric;
-import com.custardsource.parfait.timing.ThreadValue;
-import com.custardsource.parfait.timing.ThreadValueMetric;
-import com.google.common.collect.ImmutableList;
-
 public class ParfaitDataSource implements DataSource {
 	private final DataSource wrapped;
     private final ThreadLocal<AtomicLong> executionCounts = longThreadLocal();
@@ -27,9 +28,9 @@ public class ParfaitDataSource implements DataSource {
 
 	public ParfaitDataSource(DataSource wrapped) {
 		this.wrapped = wrapped;
-		this.counterMetric = newThreadMetric("Database call count", "", "db.count",
+		this.counterMetric = newThreadMetric("Database call count", Unit.ONE, "db.count",
                 "Number of database calls made during event", executionCounts);
-		this.timeMetric = newThreadMetric("Database execution time", "", "db.time",
+		this.timeMetric = newThreadMetric("Database execution time", SI.MILLI(SI.SECOND), "db.time",
                "Time spent in database calls during event", executionTimes);
 	}
 
@@ -147,7 +148,7 @@ public class ParfaitDataSource implements DataSource {
         return timeMetric;
     }
 
-    protected final ThreadMetric newThreadMetric(String name, String unit, String counterSuffix,
+    protected final ThreadMetric newThreadMetric(String name, Unit<?> unit, String counterSuffix,
             String description, final ThreadLocal<AtomicLong> threadLocal) {
         return new ThreadValueMetric(name, unit, counterSuffix, description,
                 new ThreadValue.ThreadLocalMap<Number>(threadLocal));

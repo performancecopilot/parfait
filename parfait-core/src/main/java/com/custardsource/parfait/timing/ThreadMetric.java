@@ -1,12 +1,14 @@
 package com.custardsource.parfait.timing;
 
+import javax.measure.unit.Unit;
+
 
 public interface ThreadMetric {
     long getValueForThread(Thread t);
 
     String getMetricName();
 
-    String getUnit();
+    Unit<?> getUnit();
 
     String getCounterSuffix();
 

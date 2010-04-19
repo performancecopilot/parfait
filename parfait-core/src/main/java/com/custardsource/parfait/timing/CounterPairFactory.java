@@ -18,7 +18,7 @@ public class CounterPairFactory {
         MonitoredCounter metric = new MonitoredCounter(globalCounterName, description, registry, unit);
         ThreadCounter threadCounter = new ThreadCounter.ThreadMapCounter();
 
-        ThreadMetric threadMetric = new ThreadValueMetric(threadMetricName, unit.toString(), threadMetricSuffix,
+        ThreadMetric threadMetric = new ThreadValueMetric(threadMetricName, unit, threadMetricSuffix,
                 description, threadCounter);
         metricSuite.addMetric(threadMetric);
         return new CounterPair(metric, threadCounter);

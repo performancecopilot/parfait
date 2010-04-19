@@ -1,9 +1,11 @@
 package com.custardsource.parfait.timing;
 
+import javax.measure.unit.Unit;
+
 public class ThreadValueMetric extends AbstractThreadMetric {
     public ThreadValue<? extends Number> source;
     
-    public ThreadValueMetric(String name, String unit, String counterSuffix,
+    public ThreadValueMetric(String name, Unit<?> unit, String counterSuffix,
             String description, ThreadValue<? extends Number> source) {
         super(name, unit, counterSuffix, description);
         this.source = source;

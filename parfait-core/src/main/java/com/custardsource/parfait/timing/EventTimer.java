@@ -1,14 +1,14 @@
 package com.custardsource.parfait.timing;
 
+import com.custardsource.parfait.MonitorableRegistry;
+import com.custardsource.parfait.MonitoredCounter;
+import org.apache.log4j.Logger;
+
+import javax.measure.unit.Unit;
 import java.lang.management.ManagementFactory;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.log4j.Logger;
-
-import com.custardsource.parfait.MonitorableRegistry;
-import com.custardsource.parfait.MonitoredCounter;
 
 /**
  * A class to provide a {@link EventMetricCollector} to each {@link Timeable} on demand, guaranteed
@@ -66,35 +66,35 @@ public class EventTimer {
 
     private EventCounters getCounterSet(String beanName) {
         EventMetricCounters invocationCounter = createEventMetricCounters(beanName, "count",
-                "Total number of times the event was directly triggered");
+                "Total number of times the event was directly triggered", Unit.ONE);
         EventCounters counters = new EventCounters(invocationCounter);
 
         for (ThreadMetric metric : metricSuite.metrics()) {
             EventMetricCounters timingCounter = createEventMetricCounters(beanName, metric
-                    .getCounterSuffix(), metric.getDescription());
+                    .getCounterSuffix(), metric.getDescription(), metric.getUnit());
             counters.addMetric(metric, timingCounter);
         }
 
         return counters;
     }
 
-    private MonitoredCounter createMetric(String beanName, String metric, String description) {
+    private MonitoredCounter createMetric(String beanName, String metric, String description, Unit<?> unit) {
         String metricName = getMetricName(beanName, metric);
         String metricDescription = String.format(description, beanName);
         LOG.debug("Created metric: " + metricName + "\t" + metricDescription);
-        return new MonitoredCounter(metricName, metricDescription, registry);
+        return new MonitoredCounter(metricName, metricDescription, registry, unit);
     }
 
     private EventMetricCounters createEventMetricCounters(String beanName, String metric,
-            String metricDescription) {
+            String metricDescription, Unit<?> unit) {
         MonitoredCounter metricCounter = createMetric(beanName, metric, metricDescription + " ["
-                + beanName + "]");
+                + beanName + "]", unit);
         MonitoredCounter totalCounter;
 
         totalCounter = totalCountersAcrossEvents.get(metric);
         if (totalCounter == null) {
             totalCounter = new MonitoredCounter(getTotalMetricName(metric), metricDescription
-                    + " [TOTAL]", registry);
+                    + " [TOTAL]", registry, unit);
             totalCountersAcrossEvents.put(metric, totalCounter);
         }
 

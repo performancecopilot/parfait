@@ -1,13 +1,17 @@
 package com.custardsource.parfait.timing;
 
+import com.google.common.collect.ImmutableList;
+
+import javax.measure.unit.SI;
+import javax.measure.unit.Unit;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.util.Collection;
 
-import com.google.common.collect.ImmutableList;
-
 public class StandardThreadMetrics {
-    public static final ThreadMetric CLOCK_TIME = new AbstractThreadMetric("Elapsed time", "ms",
+    private static final Unit<?> MILLISECONDS = SI.MILLI(SI.SECOND);
+
+    public static final ThreadMetric CLOCK_TIME = new AbstractThreadMetric("Elapsed time", MILLISECONDS,
             "time", "Total wall time (in ms) spent executing event") {
         @Override
         public long getValueForThread(Thread t) {
@@ -15,7 +19,7 @@ public class StandardThreadMetrics {
         }
     };
     
-    public static final ThreadMetric TOTAL_CPU_TIME = new AbstractThreadMetric("Total CPU", "ms",
+    public static final ThreadMetric TOTAL_CPU_TIME = new AbstractThreadMetric("Total CPU", MILLISECONDS,
             "cputime", "Total CPU time (in ms) spent executing event") {
         @Override
         public long getValueForThread(Thread t) {
@@ -23,7 +27,7 @@ public class StandardThreadMetrics {
         }
     };
 
-    public static final ThreadMetric USER_CPU_TIME = new AbstractThreadMetric("User CPU", "ms",
+    public static final ThreadMetric USER_CPU_TIME = new AbstractThreadMetric("User CPU", MILLISECONDS,
             "utime", "User CPU time (in ms) spent executing event") {
         @Override
         public long getValueForThread(Thread t) {
@@ -31,7 +35,7 @@ public class StandardThreadMetrics {
         }
     };
 
-    public static final ThreadMetric SYSTEM_CPU_TIME = new AbstractThreadMetric("System CPU", "ms",
+    public static final ThreadMetric SYSTEM_CPU_TIME = new AbstractThreadMetric("System CPU", MILLISECONDS,
             "stime", "System CPU time (in ms) spent executing event") {
         @Override
         public long getValueForThread(Thread t) {
@@ -40,7 +44,7 @@ public class StandardThreadMetrics {
         }
     };
 
-    public static final ThreadMetric BLOCKED_COUNT = new ThreadInfoMetric("Blocked count", "",
+    public static final ThreadMetric BLOCKED_COUNT = new ThreadInfoMetric("Blocked count", Unit.ONE,
             "blocked.count", "Number of times thread entered BLOCKED state during event") {
         @Override
         public long getValue(ThreadInfo threadInfo) {
@@ -48,7 +52,7 @@ public class StandardThreadMetrics {
         }
     };
 
-    public static final ThreadMetric BLOCKED_TIME = new ThreadInfoMetric("Blocked time", "ms",
+    public static final ThreadMetric BLOCKED_TIME = new ThreadInfoMetric("Blocked time", MILLISECONDS,
             "blocked.time", "ms spent in BLOCKED state during event") {
         @Override
         public long getValue(ThreadInfo threadInfo) {
@@ -56,7 +60,7 @@ public class StandardThreadMetrics {
         }
     };
 
-    public static final ThreadMetric WAITED_COUNT = new ThreadInfoMetric("Wait count", "",
+    public static final ThreadMetric WAITED_COUNT = new ThreadInfoMetric("Wait count", MILLISECONDS,
             "waited.count",
             "Number of times thread entered WAITING or TIMED_WAITING state during event") {
         @Override
@@ -65,7 +69,7 @@ public class StandardThreadMetrics {
         }
     };
 
-    public static final ThreadMetric WAITED_TIME = new ThreadInfoMetric("Wait time", "ms",
+    public static final ThreadMetric WAITED_TIME = new ThreadInfoMetric("Wait time", MILLISECONDS,
             "waited.time", "ms spent in WAITING or TIMED_WAITING state during event") {
         @Override
         public long getValue(ThreadInfo threadInfo) {
@@ -85,7 +89,7 @@ public class StandardThreadMetrics {
     }
 
     private static abstract class ThreadInfoMetric extends AbstractThreadMetric {
-        public ThreadInfoMetric(String name, String unit, String counterSuffix, String description) {
+        public ThreadInfoMetric(String name, Unit<?> unit, String counterSuffix, String description) {
             super(name, unit, counterSuffix, description);
         }
 

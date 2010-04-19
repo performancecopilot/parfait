@@ -160,6 +160,6 @@ public class MetricMeasurementTest extends TestCase {
         timing.startTimer();
         timing.stopTimer();
         assertTrue("Metric value should end with correct unit name", timing.ownTimeValueFormatted()
-                .endsWith(StandardThreadMetrics.CLOCK_TIME.getUnit()));
+                .endsWith(StandardThreadMetrics.CLOCK_TIME.getUnit().toString()));
     }
 }

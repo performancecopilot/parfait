@@ -1,12 +1,14 @@
 package com.custardsource.parfait.timing;
 
+import javax.measure.unit.Unit;
+
 public abstract class AbstractThreadMetric implements ThreadMetric {
     private final String name;
-    private final String unit;
+    private final Unit<?> unit;
     private final String counterSuffix;
     private final String description;
 
-    public AbstractThreadMetric(String name, String unit, String counterSuffix, String description) {
+    public AbstractThreadMetric(String name, Unit<?> unit, String counterSuffix, String description) {
         this.name = name;
         this.unit = unit;
         this.counterSuffix = counterSuffix;
@@ -17,7 +19,7 @@ public abstract class AbstractThreadMetric implements ThreadMetric {
         return name;
     }
 
-    public String getUnit() {
+    public Unit<?> getUnit() {
         return unit;
     }
 
