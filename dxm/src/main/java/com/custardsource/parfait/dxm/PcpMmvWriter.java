@@ -183,10 +183,15 @@ public class PcpMmvWriter extends BasePcpWriter {
     private static File mmvFileFromName(String name) {
         Preconditions.checkArgument(!name.contains(File.separator), "MMV logical name must not contain path separators");
 
+        File tmpDir = null;
         PcpConfig pcp = new PcpConfig();
         String pcpTemp = pcp.getValue("PCP_TMP_DIR");
-
-        File tmpDir = new File(pcp.getRoot(), pcpTemp);
+        if (pcpTemp == null) {
+            // PCP not installed, so create mapping in tmpdir
+            tmpDir = new File(System.getProperty("java.io.tmpdir"));
+        } else {
+            tmpDir = new File(pcp.getRoot(), pcpTemp);
+        }
         File mmvDir = new File(tmpDir, "mmv");
 
         return new File(mmvDir, name);
