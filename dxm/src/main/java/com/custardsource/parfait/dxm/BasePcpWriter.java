@@ -237,7 +237,7 @@ public abstract class BasePcpWriter implements PcpWriter {
             metricInfo.setInstanceDomain(domain);
         }
         metricInfo.setTypeHandler(pcpType);
-        metricInfo.setUnit(unit == null ? Unit.ONE : unit);
+        metricInfo.setUnit(unit);
         metricInfo.setSemantics(semantics);
         
         PcpValueInfo info = new PcpValueInfo(name, metricInfo, instance, initialValue, this);
