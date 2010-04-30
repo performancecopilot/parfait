@@ -1,7 +1,8 @@
 package com.custardsource.parfait;
 
-import javax.measure.unit.Unit;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.measure.unit.Unit;
 
 /**
  * {@link Monitorable} implementation for a free-running Integer value.
@@ -29,15 +30,24 @@ public class MonitoredIntValue extends MonitoredNumeric<AtomicInteger> {
      * Convenience method to increment atomic numeric types.
      */
     public void inc() {
-        value.incrementAndGet();
+        inc(1);
+    }
+
+    @Override
+    public void inc(int delta) {
+        value.addAndGet(delta);
         notifyMonitors();
     }
-    
+
     /**
      * Convenience method to decrement atomic numeric types.
      */
     public void dec() {
-    	value.decrementAndGet();
-        notifyMonitors();
+        dec(1);
+    }
+
+    @Override
+    public void dec(int delta) {
+        inc(-delta);
     }
 }

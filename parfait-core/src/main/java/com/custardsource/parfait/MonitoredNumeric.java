@@ -19,7 +19,17 @@ abstract class MonitoredNumeric<T extends Number> extends MonitoredValue<T> {
     public abstract void inc();
 
     /**
+     * Increments the current value by the specified amount.
+     */
+    public abstract void inc(int delta);
+
+    /**
      * Decrements the current value by 1.
      */
     public abstract void dec();
+
+    /**
+     * Decrements the current value by the specified amount.
+     */
+    public abstract void dec(int delta);
 }

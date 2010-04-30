@@ -1,7 +1,8 @@
 package com.custardsource.parfait;
 
-import javax.measure.unit.Unit;
 import java.util.concurrent.atomic.AtomicLong;
+
+import javax.measure.unit.Unit;
 
 /**
  * {@link Monitorable} implementation for a free-running Long value.
@@ -26,7 +27,14 @@ public class MonitoredLongValue extends MonitoredNumeric<AtomicLong> implements 
      * Convenience method to increment atomic numeric types.
      */
     public void inc() {
+        inc(1);
         value.incrementAndGet();
+        notifyMonitors();
+    }
+
+    @Override
+    public void inc(int delta) {
+        value.addAndGet(delta);
         notifyMonitors();
     }
 
@@ -34,8 +42,12 @@ public class MonitoredLongValue extends MonitoredNumeric<AtomicLong> implements 
      * Convenience method to decrement atomic numeric types.
      */
     public void dec() {
-    	value.decrementAndGet();
-        notifyMonitors();
+        dec(1);
+    }
+
+    @Override
+    public void dec(int delta) {
+        inc(-delta);
     }
 
     @Override
