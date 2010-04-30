@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import com.google.common.base.Strings;
 import org.apache.log4j.Logger;
 
 import com.google.common.base.Function;
@@ -132,7 +132,7 @@ public class InProgressSnapshot {
     public static final Function<InProgressSnapshot, String> TO_FORMATTED_STRING = new InProgressFormatter() {
         @Override
         protected String formatColumnValue(String value) {
-            return StringUtils.leftPad(value, 20);
+            return Strings.padStart(value, 20, ' ');
         }
     };
 }

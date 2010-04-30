@@ -1,18 +1,5 @@
 package com.custardsource.parfait.jmx;
 
-import com.custardsource.parfait.Monitorable;
-import com.custardsource.parfait.MonitorableRegistry;
-import com.custardsource.parfait.MonitoredConstant;
-import com.custardsource.parfait.MonitoredValue;
-import com.custardsource.parfait.Poller;
-import com.custardsource.parfait.PollingMonitoredValue;
-import com.custardsource.parfait.ValueSemantics;
-import com.google.common.base.Preconditions;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.jmx.support.JmxUtils;
-
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
@@ -25,6 +12,20 @@ import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import javax.management.openmbean.CompositeData;
 import javax.measure.unit.Unit;
+
+import com.custardsource.parfait.Monitorable;
+import com.custardsource.parfait.MonitorableRegistry;
+import com.custardsource.parfait.MonitoredConstant;
+import com.custardsource.parfait.MonitoredValue;
+import com.custardsource.parfait.Poller;
+import com.custardsource.parfait.PollingMonitoredValue;
+import com.custardsource.parfait.ValueSemantics;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.jmx.support.JmxUtils;
 
 /**
  * Factory bean that generates a monitor which tracks the value of the provided MBean attribute.
@@ -117,7 +118,7 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean {
                     + "] does not have an attribute named [" + attributeName + "]");
         }
 
-        if (StringUtils.isNotEmpty(compositeDataItem)) {
+        if (!Strings.isNullOrEmpty(compositeDataItem)) {
 			Preconditions
 					.checkState(
 							CompositeData.class.getName().equals(
@@ -160,7 +161,7 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean {
     @SuppressWarnings("unchecked")
 	protected T getAttributeValue() {
         try {
-            if (StringUtils.isNotEmpty(compositeDataItem)) {
+            if (!Strings.isNullOrEmpty(compositeDataItem)) {
                 CompositeData data = (CompositeData) server.getAttribute(mBeanName, attributeName);
                 return (T) data.get(compositeDataItem);
             } else {
@@ -175,7 +176,7 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean {
         int pos = beanName.lastIndexOf(",name=");
         if (pos > 0) {
             String baseString = beanName.substring(0, pos);
-            String[] namesString = StringUtils.split(beanName.substring(beanName.lastIndexOf("=")+1), "|");
+            Iterable<String> namesString = Splitter.on('|').split(beanName.substring(beanName.lastIndexOf("=")+1));
             for (String name : namesString) {
                 try {
                     String returnValue = baseString+",name="+name;

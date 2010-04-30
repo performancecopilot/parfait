@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import org.apache.commons.io.IOUtils;
+import com.google.common.io.Closeables;
 
 public class PcpConfig {
 
@@ -41,7 +41,7 @@ public class PcpConfig {
             // just drop these, and go with defaults
         }
         finally {
-            IOUtils.closeQuietly(is);
+            Closeables.closeQuietly(is);
         }
         return value;
     }

@@ -2,8 +2,7 @@ package com.custardsource.parfait;
 
 import javax.measure.unit.Unit;
 
-import org.apache.commons.lang.ObjectUtils;
-
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
 /**
@@ -35,7 +34,7 @@ abstract class SettableValue<T> extends AbstractMonitorable<T> {
      */
     public void set(T newValue) {
         Preconditions.checkNotNull(newValue, "Monitored value can not be null");
-        if (ObjectUtils.equals(this.value, newValue)) {
+        if (Objects.equal(this.value, newValue)) {
             return;
         }
         this.value = newValue;

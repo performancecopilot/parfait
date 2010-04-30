@@ -13,14 +13,13 @@ import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 
-import org.apache.commons.lang.StringUtils;
-import org.springframework.jmx.export.annotation.ManagedAttribute;
-import org.springframework.jmx.export.annotation.ManagedResource;
-
 import com.custardsource.parfait.Monitor;
 import com.custardsource.parfait.Monitorable;
 import com.custardsource.parfait.MonitorableRegistry;
 import com.custardsource.parfait.MonitoringView;
+import com.google.common.base.Objects;
+import org.springframework.jmx.export.annotation.ManagedAttribute;
+import org.springframework.jmx.export.annotation.ManagedResource;
 
 @ManagedResource
 public class JmxView extends MonitoringView {
@@ -62,7 +61,7 @@ public class JmxView extends MonitoringView {
 
             for (Monitorable<?> monitorable : monitorables) {
                 jmxMonitoredNames[index] = monitorable.getName();
-                descriptions[index] = StringUtils.defaultIfEmpty(monitorable.getDescription(),
+                descriptions[index] = Objects.firstNonNull(monitorable.getDescription(),
                         "(unknown)");
                 types[index] = getJmxType(monitorable.getType());
                 jmxArrayIndexMap.put(monitorable.getName(), index);

@@ -7,7 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import com.google.common.base.Joiner;
+import com.google.common.base.Strings;
 
 public class StepMeasurements {
     private final StepMeasurements parent;
@@ -87,7 +88,7 @@ public class StepMeasurements {
             for (StepMeasurements child : children) {
                 childTraces.add(child.getForwardTrace());
             }
-            return stackTraceElement() + "/{" + StringUtils.join(childTraces, '|') + "}";
+            return stackTraceElement() + "/{" + Joiner.on('|').join(childTraces) + "}";
         }
     }
 
@@ -96,7 +97,7 @@ public class StepMeasurements {
     }
 
     private String stackTraceElement() {
-        return eventClass.getSimpleName() + (StringUtils.isEmpty(action) ? "" : ":" + action);
+        return eventClass.getSimpleName() + (Strings.isNullOrEmpty(action) ? "" : ":" + action);
     }
 
     Class<?> getEventClass() {
