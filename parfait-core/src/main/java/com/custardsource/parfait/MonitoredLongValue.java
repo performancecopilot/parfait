@@ -28,8 +28,6 @@ public class MonitoredLongValue extends MonitoredNumeric<AtomicLong> implements 
      */
     public void inc() {
         inc(1);
-        value.incrementAndGet();
-        notifyMonitors();
     }
 
     @Override
