@@ -27,6 +27,10 @@ public class InProgressSnapshot {
         descriptions.add("Thread name");
         classes.add(String.class);
 
+        names.add("Thread ID");
+        descriptions.add("Thread ID");
+        classes.add(Long.class);
+
         names.add("Event");
         descriptions.add("Event");
         classes.add(String.class);
@@ -54,6 +58,7 @@ public class InProgressSnapshot {
                 Map<ThreadMetric, Long> snapshotValues = m.snapshotValues();
                 Map<String, Object> keyedValues = new HashMap<String, Object>();
                 keyedValues.put("Thread name", entry.getKey().getName());
+                keyedValues.put("Thread ID", entry.getKey().getId());
                 keyedValues.put("Event", event);
                 for (ThreadMetric metric : timer.getMetricSuite().metrics()) {
                     keyedValues.put(metric.getMetricName(), snapshotValues.get(metric));
