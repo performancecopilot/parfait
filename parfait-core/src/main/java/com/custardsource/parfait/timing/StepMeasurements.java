@@ -18,7 +18,7 @@ public class StepMeasurements {
     private final Class<?> eventClass;
     private final String action;
     private volatile boolean started = false;
-    
+
     public StepMeasurements(StepMeasurements parent,
             Class<?> eventClass, String action) {
         this.parent = parent;
@@ -32,11 +32,11 @@ public class StepMeasurements {
     public StepMeasurements getParent() {
         return parent;
     }
-    
+
     public void addMetricInstance(MetricMeasurement metric) {
         metricInstances.add(metric);
     }
-    
+
     public void startAll() {
         for (MetricMeasurement metric : metricInstances) {
             metric.startTimer();
@@ -50,11 +50,13 @@ public class StepMeasurements {
             metric.stopTimer();
         }
     }
+
     public void pauseAll() {
         for (MetricMeasurement metric : metricInstances) {
             metric.pauseOwnTime();
         }
     }
+
     public void resumeAll() {
         for (MetricMeasurement metric : metricInstances) {
             metric.resumeOwnTime();
@@ -107,10 +109,10 @@ public class StepMeasurements {
     public Collection<MetricMeasurement> getMetricInstances() {
         return metricInstances;
     }
-    
+
     public Map<ThreadMetric, Long> snapshotValues() {
         if (!started) {
-            return Collections.<ThreadMetric, Long>emptyMap();
+            return Collections.emptyMap();
         }
         Collection<MetricMeasurement> snapshot = new ArrayList<MetricMeasurement>(metricInstances);
         Map<ThreadMetric, Long> results = new HashMap<ThreadMetric, Long>();

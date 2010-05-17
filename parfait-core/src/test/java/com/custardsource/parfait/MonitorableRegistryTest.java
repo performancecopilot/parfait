@@ -23,7 +23,7 @@ public class MonitorableRegistryTest {
     public void registerWhenFrozenThrowsException() {
         MonitorableRegistry registry = newRegistry();
         registry.freeze();
-        registry.register((Monitorable<?>) new DummyMonitorable("foo"));
+        registry.register(new DummyMonitorable("foo"));
     }
 
     @Test
@@ -48,14 +48,14 @@ public class MonitorableRegistryTest {
         MonitorableRegistry registry2 = MonitorableRegistry.getNamedInstance("xxx");
         assertSame(registry1, registry2);
     }
-    
+
     private MonitorableRegistry newRegistry() {
         return new MonitorableRegistry();
     }
-    
+
     private static class DummyMonitorable implements Monitorable<String> {
         private final String name;
-        
+
         private DummyMonitorable(String name) {
             this.name = name;
         }
@@ -97,6 +97,6 @@ public class MonitorableRegistryTest {
         @Override
         public void removeMonitor(Monitor m) {
         }
-        
+
     }
 }

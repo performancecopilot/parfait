@@ -13,12 +13,12 @@ public interface ThreadValue<T> {
     boolean canRetrieveAcrossThreads();
 
     T getForThread(Thread thread);
-    
+
     Map<Thread, T> asMap();
 
     public static class ThreadLocalMap<T> implements ThreadValue<T> {
         protected final ThreadLocal<? extends T> threadLocal;
-        
+
         public ThreadLocalMap(ThreadLocal<? extends T> threadLocal) {
             this.threadLocal = threadLocal;
         }
@@ -43,7 +43,7 @@ public interface ThreadValue<T> {
 
         @Override
         public final Map<Thread, T> asMap() {
-            return Collections.<Thread, T>emptyMap();
+            return Collections.emptyMap();
         }
     }
 

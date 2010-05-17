@@ -2,9 +2,8 @@ package com.custardsource.parfait.timing;
 
 import java.util.Random;
 
-import org.apache.log4j.BasicConfigurator;
-
 import com.custardsource.parfait.MonitorableRegistry;
+import org.apache.log4j.BasicConfigurator;
 
 // Sample code to try out the in-progress measurement stuff. To be replaced with a proper test case.
 public class SampleRun {
@@ -30,12 +29,12 @@ public class SampleRun {
 
         t1.start();
         t2.start();
-        
+
         InProgressExporter exporter = new InProgressExporter(timer, context);
-        
+
         for (int i = 1; i <= 5; i++) {
             Thread.sleep(5000);
-            
+
             InProgressSnapshot snapshot = exporter.getSnapshot();
             System.out.println(snapshot.asFormattedString());
         }
@@ -79,18 +78,17 @@ public class SampleRun {
                     context.remove("Company");
                 } catch (Exception e) {
                     throw new RuntimeException(e);
-                } finally {
                 }
             }
         }
 
         private String randomCompany() {
-            final String[] COMPANIES = new String[]{"ABC Corp", "Boople Inc", "Cabbages Pty Ltd", "Druggles MV"}; 
+            final String[] COMPANIES = new String[]{"ABC Corp", "Boople Inc", "Cabbages Pty Ltd", "Druggles MV"};
             return COMPANIES[random.nextInt(COMPANIES.length)];
         }
 
         private String randomName() {
-            final String[] NAMES = new String[]{"Alex", "Betty", "Carlos", "Dietrich", "Edna"}; 
+            final String[] NAMES = new String[]{"Alex", "Betty", "Carlos", "Dietrich", "Edna"};
             return NAMES[random.nextInt(NAMES.length)];
         }
 
