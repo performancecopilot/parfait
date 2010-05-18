@@ -19,8 +19,8 @@
   <url>http://code.google.com/p/parfait/</url>
   <inceptionYear>2009</inceptionYear>
   <scm>
-    <connection>scm:svn:http://parfait.googlecode.com/svn</connection>
-    <developerConnection>scm:svn:https://parfait.googlecode.com/svn</developerConnection>
+    <connection>scm:hg:http://parfait.googlecode.com/hg</connection>
+    <developerConnection>scm:hg:https://parfait.googlecode.com/hg</developerConnection>
     <url>http://code.google.com/p/parfait/source/browse/</url>
   </scm>
   <licenses>
