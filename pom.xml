@@ -3,7 +3,7 @@
   <groupId>com.custardsource</groupId>
   <artifactId>parfait</artifactId>
   <packaging>pom</packaging>
-  <version>0.1.6.1.liveupdates-SNAPSHOT</version>
+  <version>0.1.6.1.liveupdates</version>
   <name>parfait</name>
   <description>Java performance monitoring framework, including PCP bridge</description>
   <modules>
