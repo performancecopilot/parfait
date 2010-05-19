@@ -9,7 +9,7 @@
   <parent>
     <groupId>com.custardsource</groupId>
     <artifactId>parfait</artifactId>
-    <version>0.1.7-SNAPSHOT</version>
+    <version>0.1.6.1.liveupdates-SNAPSHOT</version>
   </parent>
   <dependencies>
 <!--

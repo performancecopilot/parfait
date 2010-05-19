@@ -2,7 +2,7 @@
   <parent>
     <artifactId>parfait</artifactId>
     <groupId>com.custardsource</groupId>
-    <version>0.1.7-SNAPSHOT</version>
+    <version>0.1.6.1.liveupdates-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.custardsource.parfait</groupId>
