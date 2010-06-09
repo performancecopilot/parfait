@@ -60,7 +60,7 @@ public class StandardThreadMetrics {
         }
     };
 
-    public static final ThreadMetric WAITED_COUNT = new ThreadInfoMetric("Wait count", MILLISECONDS,
+    public static final ThreadMetric WAITED_COUNT = new ThreadInfoMetric("Wait count", Unit.ONE,
             "waited.count",
             "Number of times thread entered WAITING or TIMED_WAITING state during event") {
         @Override
