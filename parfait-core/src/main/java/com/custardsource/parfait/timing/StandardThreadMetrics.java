@@ -1,46 +1,48 @@
 package com.custardsource.parfait.timing;
 
-import com.google.common.collect.ImmutableList;
-
-import javax.measure.unit.SI;
-import javax.measure.unit.Unit;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.util.Collection;
 
+import javax.measure.unit.SI;
+import javax.measure.unit.Unit;
+
+import com.google.common.collect.ImmutableList;
+
 public class StandardThreadMetrics {
     private static final Unit<?> MILLISECONDS = SI.MILLI(SI.SECOND);
+    private static final Unit<?> NANOSECONDS = SI.NANO(SI.SECOND);
 
-    public static final ThreadMetric CLOCK_TIME = new AbstractThreadMetric("Elapsed time", MILLISECONDS,
+    public static final ThreadMetric CLOCK_TIME = new AbstractThreadMetric("Elapsed time", NANOSECONDS,
             "time", "Total wall time (in ms) spent executing event") {
         @Override
         public long getValueForThread(Thread t) {
-            return System.currentTimeMillis();
+            return System.nanoTime();
         }
     };
     
-    public static final ThreadMetric TOTAL_CPU_TIME = new AbstractThreadMetric("Total CPU", MILLISECONDS,
-            "cputime", "Total CPU time (in ms) spent executing event") {
+    public static final ThreadMetric TOTAL_CPU_TIME = new AbstractThreadMetric("Total CPU", NANOSECONDS,
+            "cputime", "Total CPU time (in ns) spent executing event") {
         @Override
         public long getValueForThread(Thread t) {
-            return nanosToMillis(ManagementFactory.getThreadMXBean().getThreadCpuTime(t.getId()));
+            return ManagementFactory.getThreadMXBean().getThreadCpuTime(t.getId());
         }
     };
 
-    public static final ThreadMetric USER_CPU_TIME = new AbstractThreadMetric("User CPU", MILLISECONDS,
-            "utime", "User CPU time (in ms) spent executing event") {
+    public static final ThreadMetric USER_CPU_TIME = new AbstractThreadMetric("User CPU", NANOSECONDS,
+            "utime", "User CPU time (in ns) spent executing event") {
         @Override
         public long getValueForThread(Thread t) {
-            return nanosToMillis(ManagementFactory.getThreadMXBean().getThreadUserTime(t.getId()));
+            return ManagementFactory.getThreadMXBean().getThreadUserTime(t.getId());
         }
     };
 
-    public static final ThreadMetric SYSTEM_CPU_TIME = new AbstractThreadMetric("System CPU", MILLISECONDS,
-            "stime", "System CPU time (in ms) spent executing event") {
+    public static final ThreadMetric SYSTEM_CPU_TIME = new AbstractThreadMetric("System CPU", NANOSECONDS,
+            "stime", "System CPU time (in ns) spent executing event") {
         @Override
         public long getValueForThread(Thread t) {
-            return nanosToMillis(ManagementFactory.getThreadMXBean().getThreadCpuTime(t.getId())
-                    - ManagementFactory.getThreadMXBean().getThreadUserTime(t.getId()));
+            return ManagementFactory.getThreadMXBean().getThreadCpuTime(t.getId())
+                    - ManagementFactory.getThreadMXBean().getThreadUserTime(t.getId());
         }
     };
 
@@ -76,11 +78,6 @@ public class StandardThreadMetrics {
             return threadInfo.getWaitedTime();
         }
     };
-
-    private static long nanosToMillis(long nanos) {
-        final long NANOS_PER_MILLI = 1000000L;
-        return nanos / NANOS_PER_MILLI;
-    }
 
     public static Collection<? extends ThreadMetric> defaults() {
         // TOTAL_CPU_TIME is not included by default (you can get it from other places)
