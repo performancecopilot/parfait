@@ -133,12 +133,12 @@
     <repository>
       <id>custardsource</id>
       <name>custardsource releases</name>
-      <url>ftp://repo.custardsource.com/repo.custardsource.com/releases</url>
+      <url>ftp://repo.custardsource.com/releases</url>
     </repository>
     <snapshotRepository>
       <id>custardsource-snapshots</id>
       <name>custardsource snapshots</name>
-      <url>ftp://repo.custardsource.com/repo.custardsource.com/snapshots</url>
+      <url>ftp://repo.custardsource.com/snapshots</url>
     </snapshotRepository>
   </distributionManagement>
   <properties>
