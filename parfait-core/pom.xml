@@ -25,7 +25,7 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>r03</version>
+      <version>r05</version>
       <type>jar</type>
       <scope>compile</scope>
     </dependency>
