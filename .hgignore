@@ -1,3 +1,4 @@
 target
 .*\.iws
 .*\.ipr
+atlassian-ide-plugin.xml
