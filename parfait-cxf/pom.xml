@@ -20,6 +20,12 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>com.custardsource.parfait</groupId>
+      <artifactId>parfait-spring</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
     	<groupId>org.apache.cxf</groupId>
     	<artifactId>cxf-api</artifactId>
         <version>${cxf.version}</version>

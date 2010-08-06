@@ -13,7 +13,7 @@ import com.google.common.collect.ImmutableList;
  * sources). Each {@link Monitorable} is associated with a particular
  * MonitorableRegistry, and informs the registry of its own details via a
  * callback to {@link #register(Monitorable)} when the Monitorable is created. A
- * {@link MonitorableRegistry} is then provided to a {@link MonitoringView},
+ * {@link MonitorableRegistry} is then provided to a {@link AbstractMonitoringView},
  * which can optionally stop the addition of further Monitorables with
  * {@link #freeze()}, and then commence monitoring the monitorables in question.
  */
@@ -61,7 +61,7 @@ public class MonitorableRegistry {
 
     /**
      * Locks this {@link MonitorableRegistry} so that no further metrics may be
-     * added. To be used by {@link MonitoringView MonitoringViews} which do not
+     * added. To be used by {@link AbstractMonitoringView MonitoringViews} which do not
      * permit the addition of new metrics after startup.
      */
     public synchronized void freeze() {

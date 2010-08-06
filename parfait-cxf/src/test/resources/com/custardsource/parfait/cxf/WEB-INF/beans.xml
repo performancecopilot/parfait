@@ -24,7 +24,7 @@ http://cxf.apache.org/schemas/jaxrs.xsd">
   	<constructor-arg value="true" />
   </bean>
 
-  <bean id="timerInjector" class="com.custardsource.parfait.timing.EventTimerInjector">
+  <bean id="timerInjector" class="com.custardsource.parfait.spring.timing.SpringEventTimerInjector">
     <constructor-arg ref="timer" />
   </bean>
 

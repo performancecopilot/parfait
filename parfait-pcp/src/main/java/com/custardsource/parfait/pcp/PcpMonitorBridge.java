@@ -7,13 +7,11 @@ import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import org.apache.log4j.Logger;
-import org.springframework.jmx.export.annotation.ManagedAttribute;
-import org.springframework.jmx.export.annotation.ManagedResource;
 
 import com.custardsource.parfait.Monitor;
 import com.custardsource.parfait.Monitorable;
 import com.custardsource.parfait.MonitorableRegistry;
-import com.custardsource.parfait.MonitoringView;
+import com.custardsource.parfait.AbstractMonitoringView;
 import com.custardsource.parfait.ValueSemantics;
 import com.custardsource.parfait.dxm.MetricName;
 import com.custardsource.parfait.dxm.PcpWriter;
@@ -26,8 +24,7 @@ import com.google.common.collect.ImmutableMap;
  * monitor agent. The bridge works by persisting any changes to a Monitorable into a section of
  * memory that is also mapped into the PCP monitor agents address space.
  */
-@ManagedResource
-public class PcpMonitorBridge extends MonitoringView {
+public class PcpMonitorBridge extends AbstractMonitoringView {
 
     private static final Logger LOG = Logger.getLogger(PcpMonitorBridge.class);
     
@@ -49,14 +46,7 @@ public class PcpMonitorBridge extends MonitoringView {
     private final TextSource shortTextSource;
     private final TextSource longTextSource;
 
-    /*
-     * Determines whether value changes detected are written out to an external file for external
-     * monitoring by the PCP agent.
-     */
-    private boolean outputValuesToPCPFile = true;
-
 	private volatile PcpWriter pcpWriter;
-
 
 
     public PcpMonitorBridge(PcpWriter writer) {
@@ -162,30 +152,11 @@ public class PcpMonitorBridge extends MonitoringView {
     private class PcpMonitorBridgeMonitor implements Monitor {
 
         public void valueChanged(Monitorable<?> monitorable) {
-            /*
-             * If the master-arm switch to output values to a file is off, then abandon quickly. The
-             * only reason it would be turned off is because we have suspected it is causing
-             * performance grief. Highly unlikely, but just in case.
-             */
-            if (!isOutputValuesToPCPFile()) {
-                return;
-            }
-
             if (!monitorablesPendingUpdate.offer(monitorable)) {
             	// Don't care about return value here. If this failed, the queue must be full;
             	// This will get detected by the Updater and logged. We should do nothing here as we 
             	// don't want to block.
             }
         }
-    }
-
-    @ManagedAttribute(description = "If set, value changes are written to an external file monitored PCP Agent.")
-    public boolean isOutputValuesToPCPFile() {
-        return outputValuesToPCPFile;
-    }
-
-    @ManagedAttribute
-    public void setOutputValuesToPCPFile(boolean outputValuesToPCPFile) {
-        this.outputValuesToPCPFile = outputValuesToPCPFile;
     }
 }

@@ -34,4 +34,12 @@
 
     <bean id="test" class="com.custardsource.parfait.spring.DelayingBean" />
     <bean id="other" class="com.custardsource.parfait.spring.DelayingBean" />
+
+    <bean id="beanWithNoMeta" class="java.util.concurrent.atomic.AtomicInteger" />
+    <bean id="beanWithMetaFoo" class="java.util.concurrent.atomic.AtomicInteger">
+        <meta key="metakey" value="foo"/>
+    </bean>
+    <bean id="beanWithMetaBar" class="java.util.concurrent.atomic.AtomicInteger">
+        <meta key="metakey" value="bar"/>
+    </bean>
 </beans>

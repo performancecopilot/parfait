@@ -13,16 +13,16 @@ import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
 
+import com.custardsource.parfait.AbstractMonitoringView;
 import com.custardsource.parfait.Monitor;
 import com.custardsource.parfait.Monitorable;
 import com.custardsource.parfait.MonitorableRegistry;
-import com.custardsource.parfait.MonitoringView;
 import com.google.common.base.Objects;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
 @ManagedResource
-public class JmxView extends MonitoringView {
+public class JmxView extends AbstractMonitoringView {
     private String[] jmxMonitoredNames;
     private Object[] jmxMonitoredValues;
     private Map<String, Integer> jmxArrayIndexMap;
