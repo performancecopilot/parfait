@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import com.google.common.base.Preconditions;
 
-public abstract class AbstractMonitoringView {
+public abstract class AbstractMonitoringView implements MonitoringView {
     private final MonitorableRegistry registry;
     private volatile boolean running = false;
 

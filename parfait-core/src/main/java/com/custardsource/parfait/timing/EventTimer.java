@@ -1,14 +1,15 @@
 package com.custardsource.parfait.timing;
 
-import com.custardsource.parfait.MonitorableRegistry;
-import com.custardsource.parfait.MonitoredCounter;
-import org.apache.log4j.Logger;
-
-import javax.measure.unit.Unit;
 import java.lang.management.ManagementFactory;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.measure.unit.Unit;
+
+import com.custardsource.parfait.MonitorableRegistry;
+import com.custardsource.parfait.MonitoredCounter;
+import org.apache.log4j.Logger;
 
 /**
  * A class to provide a {@link EventMetricCollector} to each {@link Timeable} on demand, guaranteed
