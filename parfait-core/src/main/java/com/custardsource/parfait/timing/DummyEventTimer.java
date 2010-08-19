@@ -13,18 +13,22 @@ public final class DummyEventTimer extends EventTimer {
 
     private static final EventMetricCollector DUMMY_EVENT_METRIC_COLLECTOR = new EventMetricCollector(
             null) {
-        public void startTiming(Timeable source, String action) {
+        @Override
+        public void startTiming(Object eventGroup, String event) {
             // no-op
         }
 
+        @Override
         public void stopTiming() {
             // no-op
         }
 
+        @Override
         public void pauseForForward() {
             // no-op
         }
 
+        @Override
         public void resumeAfterForward() {
             // no-op
         }
