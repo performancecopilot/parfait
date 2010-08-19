@@ -1,9 +1,7 @@
 package com.custardsource.parfait.timing;
 
-import junit.framework.TestCase;
-
 import com.custardsource.parfait.MonitorableRegistry;
-import com.custardsource.parfait.timing.EventCounters;
+import junit.framework.TestCase;
 
 public class EventTimerTest extends TestCase {
 
@@ -37,7 +35,7 @@ public class EventTimerTest extends TestCase {
          */
         Integer totalEventCounterSize = metricFactory.getNumberOfTotalEventCounters();
         EventCounters wizardCounterSet = metricFactory
-                .getCounterSetForEvent(workflowWizardControl);
+                .getCounterSetForEventGroup(workflowWizardControl);
         Integer numberOfMetricCounters = wizardCounterSet.numberOfTimerCounters();
         assertEquals("Should be the same number of per event and total counters",
                 --totalEventCounterSize, numberOfMetricCounters);
@@ -48,7 +46,7 @@ public class EventTimerTest extends TestCase {
                 "Number of total event counters should not change after adding event",
                 ++totalEventCounterSize, metricFactory.getNumberOfTotalEventCounters());
         EventCounters logonCounterSet = metricFactory
-                .getCounterSetForEvent(logonControl);
+                .getCounterSetForEventGroup(logonControl);
         assertEquals("Should be the same number of per event and total counters",
                 --totalEventCounterSize, logonCounterSet.numberOfTimerCounters());
 
@@ -57,7 +55,7 @@ public class EventTimerTest extends TestCase {
                 "Number of total event counters should not change after adding event",
                 ++totalEventCounterSize, metricFactory.getNumberOfTotalEventCounters());
         EventCounters attachmentCounterSet = metricFactory
-                .getCounterSetForEvent(attachmentControl);
+                .getCounterSetForEventGroup(attachmentControl);
         assertEquals("Should be the same number of per event and total counters",
                 --totalEventCounterSize, attachmentCounterSet.numberOfTimerCounters());
 
@@ -69,10 +67,10 @@ public class EventTimerTest extends TestCase {
         metricFactory.registerTimeable(workflowWizardControl, "/WorkflowWizard");
         metricFactory.registerTimeable(attachmentControl, "/Attachments");
 
-        EventCounters wizardCounterSet = metricFactory.getCounterSetForEvent(workflowWizardControl);
-        EventCounters logonCounterSet = metricFactory.getCounterSetForEvent(logonControl);
+        EventCounters wizardCounterSet = metricFactory.getCounterSetForEventGroup(workflowWizardControl);
+        EventCounters logonCounterSet = metricFactory.getCounterSetForEventGroup(logonControl);
         EventCounters attachmentsCounterSet = metricFactory
-                .getCounterSetForEvent(attachmentControl);
+                .getCounterSetForEventGroup(attachmentControl);
 
         assertNotNull("Couldnt obtain counter set for workflow wizard event", wizardCounterSet);
         assertNotNull("Couldnt obtain counter set for logon event", logonCounterSet);
@@ -99,7 +97,7 @@ public class EventTimerTest extends TestCase {
         }
 
     }
-    
+
     public static class DummyTimeable implements Timeable {
         public void setEventTimer(EventTimer timer) {
         }

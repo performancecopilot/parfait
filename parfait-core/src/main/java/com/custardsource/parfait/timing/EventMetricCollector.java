@@ -1,8 +1,8 @@
 package com.custardsource.parfait.timing;
 
-import java.util.Map;
-
 import org.apache.log4j.Logger;
+
+import java.util.Map;
 
 /**
  * <p>
@@ -16,31 +16,31 @@ import org.apache.log4j.Logger;
  */
 public class EventMetricCollector {
     private volatile StepMeasurements top = null;
-    
+
     private StepMeasurements current = null;
     /**
      * The number of nested events invoked so far. When we hit depth of 0 we know we've reached
      * the top-level event requested by the user.
      */
     private int depth = 0;
-    private Timeable topLevelEvent;
+    private Object topLevelEvent;
 
-    private final Map<Timeable, EventCounters> perEventCounters;
+    private final Map<Object, EventCounters> perEventCounters;
 
     private static final Logger LOG = Logger.getLogger(EventMetricCollector.class);
 
-    public EventMetricCollector(Map<Timeable, EventCounters> perEventCounters) {
+    public EventMetricCollector(Map<Object, EventCounters> perEventCounters) {
         this.perEventCounters = perEventCounters;
     }
 
-    public void startTiming(Timeable event, String action) {
-        StepMeasurements newTiming = new StepMeasurements(current, event.getClass(),
-                action);
-        for (ThreadMetric metric : perEventCounters.get(event).getMetricSources()) {
+    public void startTiming(Object eventGroup, String event) {
+        StepMeasurements newTiming = new StepMeasurements(current, eventGroup.getClass(),
+                event);
+        for (ThreadMetric metric : perEventCounters.get(eventGroup).getMetricSources()) {
             newTiming.addMetricInstance(new MetricMeasurement(metric, Thread.currentThread()));
         }
         current = newTiming;
-        topLevelEvent = event;
+        topLevelEvent = eventGroup;
         depth++;
         if (top == null) {
             top = newTiming;
@@ -94,7 +94,7 @@ public class EventMetricCollector {
     public void resumeAfterForward() {
         current.resumeAll();
     }
-    
+
     final StepMeasurements getInProgressMeasurements() {
         return top;
     }

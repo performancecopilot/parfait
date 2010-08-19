@@ -1,15 +1,14 @@
 package com.custardsource.parfait.timing;
 
+import com.custardsource.parfait.MonitorableRegistry;
+import com.custardsource.parfait.MonitoredCounter;
+import org.apache.log4j.Logger;
+
+import javax.measure.unit.Unit;
 import java.lang.management.ManagementFactory;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import javax.measure.unit.Unit;
-
-import com.custardsource.parfait.MonitorableRegistry;
-import com.custardsource.parfait.MonitoredCounter;
-import org.apache.log4j.Logger;
 
 /**
  * A class to provide a {@link EventMetricCollector} to each {@link Timeable} on demand, guaranteed
@@ -23,28 +22,28 @@ public class EventTimer {
      */
     private static final Logger LOG = Logger.getLogger(EventTimer.class);
 
-    private final Map<Timeable, EventCounters> perTimeableCounters = new ConcurrentHashMap<Timeable, EventCounters>();
+    private final Map<Object, EventCounters> perEventGroupCounters = new ConcurrentHashMap<Object, EventCounters>();
 
     private final ThreadValue<EventMetricCollector> metricCollectors = new ThreadValue.WeakReferenceThreadMap<EventMetricCollector>() {
         @Override
         protected EventMetricCollector initialValue() {
-            return new EventMetricCollector(perTimeableCounters);
+            return new EventMetricCollector(perEventGroupCounters);
         }
     };
-    
-    
+
+
     /**
      * Holds the singleton total counters which are used across all events. The key is the
      * metric name
      */
     private final Map<String, MonitoredCounter> totalCountersAcrossEvents = new HashMap<String, MonitoredCounter>();
-    
+
     private final ThreadMetricSuite metricSuite;
     private final String prefix;
     private final MonitorableRegistry registry;
 
     public EventTimer(String prefix, MonitorableRegistry registry, ThreadMetricSuite metrics,
-            boolean enableCpuCollection, boolean enableContentionCollection) {
+                      boolean enableCpuCollection, boolean enableContentionCollection) {
         this.metricSuite = metrics;
         this.prefix = prefix;
         this.registry = registry;
@@ -60,18 +59,22 @@ public class EventTimer {
         return metricCollectors.get();
     }
 
-    public void registerTimeable(Timeable timeable, String beanName) {
+    public void registerTimeable(Timeable timeable, String eventGroup) {
         timeable.setEventTimer(this);
-        perTimeableCounters.put(timeable, getCounterSet(beanName));
+        perEventGroupCounters.put(timeable, getCounterSet(eventGroup));
     }
 
-    private EventCounters getCounterSet(String beanName) {
-        EventMetricCounters invocationCounter = createEventMetricCounters(beanName, "count",
+    public void registerMetric(String eventGroup) {
+        perEventGroupCounters.put(eventGroup, getCounterSet(eventGroup));
+    }
+
+    private EventCounters getCounterSet(String eventGroup) {
+        EventMetricCounters invocationCounter = createEventMetricCounters(eventGroup, "count",
                 "Total number of times the event was directly triggered", Unit.ONE);
         EventCounters counters = new EventCounters(invocationCounter);
 
         for (ThreadMetric metric : metricSuite.metrics()) {
-            EventMetricCounters timingCounter = createEventMetricCounters(beanName, metric
+            EventMetricCounters timingCounter = createEventMetricCounters(eventGroup, metric
                     .getCounterSuffix(), metric.getDescription(), metric.getUnit());
             counters.addMetric(metric, timingCounter);
         }
@@ -87,7 +90,7 @@ public class EventTimer {
     }
 
     private EventMetricCounters createEventMetricCounters(String beanName, String metric,
-            String metricDescription, Unit<?> unit) {
+                                                          String metricDescription, Unit<?> unit) {
         MonitoredCounter metricCounter = createMetric(beanName, metric, metricDescription + " ["
                 + beanName + "]", unit);
         MonitoredCounter totalCounter;
@@ -102,9 +105,9 @@ public class EventTimer {
         return new EventMetricCounters(metricCounter, totalCounter);
     }
 
-    private String getMetricName(String beanName, String metric) {
+    private String getMetricName(String eventGroup, String metric) {
         // TODO do name cleanup elsewhere
-        return prefix + "." + beanName.replace("/", "") + "." + metric;
+        return prefix + "." + eventGroup.replace("/", "") + "." + metric;
     }
 
     private String getTotalMetricName(String metric) {
@@ -115,14 +118,14 @@ public class EventTimer {
         return totalCountersAcrossEvents.size();
     }
 
-    EventCounters getCounterSetForEvent(Timeable event) {
-        return perTimeableCounters.get(event);
+    EventCounters getCounterSetForEventGroup(Object eventGroup) {
+        return perEventGroupCounters.get(eventGroup);
     }
 
     ThreadMetricSuite getMetricSuite() {
         return metricSuite;
     }
-    
+
     Map<Thread, EventMetricCollector> getCollectorThreadMap() {
         return metricCollectors.asMap();
     }
