@@ -143,9 +143,9 @@ public class MetricMeasurementTest extends TestCase {
         timing.pauseOwnTime();
         timing.resumeOwnTime();
         timing.stopTimer();
-        assertTrue(timing.ownTimeValue() >= 0);
-        assertTrue(timing.totalValue() >= 0);
-        assertTrue(timing.ownTimeValue() <= timing.totalValue());
+        assertTrue(timing.ownTimeValue().getValue().longValue() >= 0);
+        assertTrue(timing.totalValue().getValue().longValue() >= 0);
+        assertTrue(timing.ownTimeValue().getValue().longValue() <= timing.totalValue().getValue().longValue());
     }
 
     public void testMetricName() {
@@ -159,7 +159,7 @@ public class MetricMeasurementTest extends TestCase {
                 .currentThread());
         timing.startTimer();
         timing.stopTimer();
-        assertTrue("Metric value should end with correct unit name", timing.ownTimeValueFormatted()
+        assertTrue("Metric value should end with correct unit name", timing.ownTimeValue().toString()
                 .endsWith(StandardThreadMetrics.CLOCK_TIME.getUnit().toString()));
     }
 }

@@ -1,8 +1,11 @@
 package com.custardsource.parfait.timing;
 
-import org.apache.log4j.Logger;
-
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+
+import com.google.common.collect.ImmutableList;
+import org.apache.log4j.Logger;
 
 /**
  * <p>
@@ -16,7 +19,7 @@ import java.util.Map;
  */
 public class EventMetricCollector {
     private volatile StepMeasurements top = null;
-
+    
     private StepMeasurements current = null;
     /**
      * The number of nested events invoked so far. When we hit depth of 0 we know we've reached
@@ -26,11 +29,18 @@ public class EventMetricCollector {
     private Object topLevelEvent;
 
     private final Map<Object, EventCounters> perEventCounters;
+    private final List<StepMeasurementSink> sinks;
 
     private static final Logger LOG = Logger.getLogger(EventMetricCollector.class);
 
     public EventMetricCollector(Map<Object, EventCounters> perEventCounters) {
+        this(perEventCounters, Collections.<StepMeasurementSink>singletonList(new Log4jSink()));
+    }
+
+    public EventMetricCollector(Map<Object, EventCounters> perEventCounters,
+            List<StepMeasurementSink> measurementSinks) {
         this.perEventCounters = perEventCounters;
+        this.sinks = ImmutableList.copyOf(measurementSinks);
     }
 
     public void startTiming(Object eventGroup, String event) {
@@ -51,15 +61,11 @@ public class EventMetricCollector {
     public void stopTiming() {
         current.stopAll();
         depth--;
-        String depthText = (depth > 0) ? "Nested (" + depth + ")" : "Top";
 
-        String metricData = "";
-        for (MetricMeasurement metric : current.getMetricInstances()) {
-            metricData += "\t" + metric.getMetricName() + ": own " +
-                    metric.ownTimeValueFormatted() + ", total " + metric.totalValueFormatted();
+        for (StepMeasurementSink sink : sinks) {
+            sink.handle(current, depth);
         }
-        LOG.info(String.format("%s\t%s\t%s\t%s", depthText, current.getForwardTrace(), current
-                .getBackTrace(), metricData));
+
         if (depth == 0 && perEventCounters.containsKey(topLevelEvent)) {
             // We're at the top level, increment our event counters too
             EventCounters counters = perEventCounters.get(topLevelEvent);
@@ -71,12 +77,12 @@ public class EventMetricCollector {
                     // SYSTEM_CPU_TIME) cannot be calculated atomically, as they are derived from 2
                     // non-atomic measurements. Depending on when the kernel counter increments, we
                     // may see spurious negative values on such derived metrics. We clip to 0 to
-                    // avoid this. Example: at the start of a thread execution, we may get total 
-                    // cpu=1000ms, user=800ms, system is calculated as 200ms. At completion, 
-                    // total=1000ms, user=810ms (only user has 'ticked' over), system calculated as 
-                    // 190ms. We spuriously think that the individual request has taken 
+                    // avoid this. Example: at the start of a thread execution, we may get total
+                    // cpu=1000ms, user=800ms, system is calculated as 200ms. At completion,
+                    // total=1000ms, user=810ms (only user has 'ticked' over), system calculated as
+                    // 190ms. We spuriously think that the individual request has taken
                     // (190 - 200) = -10ms.
-                    counter.incrementCounters(Math.max(metric.totalValue(), 0L));
+                    counter.incrementCounters(Math.max(metric.totalValue().getValue().longValue(), 0L));
                 }
             }
             counters.getInvocationCounter().incrementCounters(1);

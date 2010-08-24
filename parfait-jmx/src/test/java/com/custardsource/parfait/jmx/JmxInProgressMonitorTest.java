@@ -26,7 +26,7 @@ public class JmxInProgressMonitorTest {
             public void setEventTimer(EventTimer timer) {
             }
         };
-        
+
         EventTimer timer = new EventTimer("foo",
                 new MonitorableRegistry(), ThreadMetricSuite.blank(), false, false);
         timer.registerTimeable(t, "foo");

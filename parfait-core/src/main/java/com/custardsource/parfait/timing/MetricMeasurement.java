@@ -1,5 +1,7 @@
 package com.custardsource.parfait.timing;
 
+import javax.measure.Measure;
+
 import com.google.common.base.Preconditions;
 
 /**
@@ -49,14 +51,14 @@ class MetricMeasurement {
         endValue = metricSource.getValueForThread(thread);
     }
 
-    public long totalValue() {
+    public Measure<?> totalValue() {
     	Preconditions.checkState(endValue != null, "Can't measure time until timer is stopped");
-        return endValue - startValue;
+        return Measure.valueOf(endValue - startValue, metricSource.getUnit());
     }
 
-    public long ownTimeValue() {
+    public Measure<?> ownTimeValue() {
     	Preconditions.checkState(endValue != null, "Can't measure time until timer is stopped");
-        return ownValueSoFar;
+        return Measure.valueOf(ownValueSoFar, metricSource.getUnit());
     }
 
     public long inProgressValue() {
@@ -71,14 +73,6 @@ class MetricMeasurement {
 
     public String getMetricName() {
         return metricSource.getMetricName();
-    }
-
-    public String ownTimeValueFormatted() {
-        return ownTimeValue() + metricSource.getUnit().toString();
-    }
-
-    public String totalValueFormatted() {
-        return totalValue() + metricSource.getUnit().toString();
     }
 
     public ThreadMetric getMetricSource() {
