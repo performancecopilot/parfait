@@ -1,5 +1,6 @@
 package com.custardsource.parfait.timing;
 
+import java.util.Collections;
 import java.util.Random;
 
 import com.custardsource.parfait.MonitorableRegistry;
@@ -17,7 +18,8 @@ public class SampleRun {
         suite.addMetric(StandardThreadMetrics.BLOCKED_TIME);
         suite.addMetric(StandardThreadMetrics.WAITED_TIME);
         suite.addMetric(StandardThreadMetrics.USER_CPU_TIME);
-        EventTimer timer = new EventTimer("blah", new MonitorableRegistry(), suite, true, true);
+        EventTimer timer = new EventTimer("blah", new MonitorableRegistry(), suite, true, true,
+                Collections.<StepMeasurementSink>singletonList(new Log4jSink()));
         ThreadContext context = new ThreadContext();
         EmailSender sender = new EmailSender(context);
         CheckoutBuyer buyer = new CheckoutBuyer(context);

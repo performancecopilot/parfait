@@ -1,14 +1,18 @@
 package com.custardsource.parfait.timing;
 
-import com.custardsource.parfait.MonitorableRegistry;
-import com.custardsource.parfait.MonitoredCounter;
-import org.apache.log4j.Logger;
-
-import javax.measure.unit.Unit;
 import java.lang.management.ManagementFactory;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.measure.unit.Unit;
+
+import com.custardsource.parfait.MonitorableRegistry;
+import com.custardsource.parfait.MonitoredCounter;
+import com.google.common.collect.ImmutableList;
+import org.apache.log4j.Logger;
 
 /**
  * A class to provide a {@link EventMetricCollector} to each {@link Timeable} on demand, guaranteed
@@ -24,10 +28,12 @@ public class EventTimer {
 
     private final Map<Object, EventCounters> perEventGroupCounters = new ConcurrentHashMap<Object, EventCounters>();
 
+    private final List<StepMeasurementSink> stepMeasurementSinks;
+
     private final ThreadValue<EventMetricCollector> metricCollectors = new ThreadValue.WeakReferenceThreadMap<EventMetricCollector>() {
         @Override
         protected EventMetricCollector initialValue() {
-            return new EventMetricCollector(perEventGroupCounters);
+            return new EventMetricCollector(perEventGroupCounters, stepMeasurementSinks);
         }
     };
 
@@ -44,6 +50,11 @@ public class EventTimer {
 
     public EventTimer(String prefix, MonitorableRegistry registry, ThreadMetricSuite metrics,
                       boolean enableCpuCollection, boolean enableContentionCollection) {
+        this(prefix, registry, metrics, enableCpuCollection, enableContentionCollection, Collections.<StepMeasurementSink>emptyList());
+    }
+
+    public EventTimer(String prefix, MonitorableRegistry registry, ThreadMetricSuite metrics,
+                      boolean enableCpuCollection, boolean enableContentionCollection, List<StepMeasurementSink> stepMeasurementSinks) {
         this.metricSuite = metrics;
         this.prefix = prefix;
         this.registry = registry;
@@ -53,6 +64,7 @@ public class EventTimer {
         if (enableContentionCollection) {
             ManagementFactory.getThreadMXBean().setThreadContentionMonitoringEnabled(true);
         }
+        this.stepMeasurementSinks = ImmutableList.copyOf(stepMeasurementSinks);
     }
 
     public EventMetricCollector getCollector() {

@@ -1,5 +1,7 @@
 package com.custardsource.parfait.timing;
 
+import java.util.Collections;
+
 import com.custardsource.parfait.MonitorableRegistry;
 import junit.framework.TestCase;
 
@@ -17,7 +19,7 @@ public class EventTimerTest extends TestCase {
 
     private void initEvents() {
         metricFactory = new EventTimer("test", new MonitorableRegistry(), ThreadMetricSuite
-                .withDefaultMetrics(), true, true);
+                .withDefaultMetrics(), true, true, Collections.<StepMeasurementSink>singletonList(new Log4jSink()));
         workflowWizardControl = new DummyTimeable();
         logonControl = new DummyTimeable();
         attachmentControl = new DummyTimeable();

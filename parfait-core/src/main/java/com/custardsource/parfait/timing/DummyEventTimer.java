@@ -1,5 +1,7 @@
 package com.custardsource.parfait.timing;
 
+import java.util.Collections;
+
 import com.custardsource.parfait.MonitorableRegistry;
 
 
@@ -8,11 +10,12 @@ import com.custardsource.parfait.MonitorableRegistry;
  */
 public final class DummyEventTimer extends EventTimer {
     public DummyEventTimer() {
-        super("dummy", new MonitorableRegistry(), ThreadMetricSuite.blank(), false, false);
+        super("dummy", new MonitorableRegistry(), ThreadMetricSuite.blank(), false, false,
+                Collections.<StepMeasurementSink>emptyList());
     }
 
     private static final EventMetricCollector DUMMY_EVENT_METRIC_COLLECTOR = new EventMetricCollector(
-            null) {
+            null, Collections.<StepMeasurementSink>emptyList()) {
         @Override
         public void startTiming(Object eventGroup, String event) {
             // no-op

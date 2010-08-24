@@ -1,10 +1,8 @@
 package com.custardsource.parfait.timing;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.ImmutableList;
 import org.apache.log4j.Logger;
 
 /**
@@ -19,7 +17,7 @@ import org.apache.log4j.Logger;
  */
 public class EventMetricCollector {
     private volatile StepMeasurements top = null;
-    
+
     private StepMeasurements current = null;
     /**
      * The number of nested events invoked so far. When we hit depth of 0 we know we've reached
@@ -33,14 +31,11 @@ public class EventMetricCollector {
 
     private static final Logger LOG = Logger.getLogger(EventMetricCollector.class);
 
-    public EventMetricCollector(Map<Object, EventCounters> perEventCounters) {
-        this(perEventCounters, Collections.<StepMeasurementSink>singletonList(new Log4jSink()));
-    }
-
-    public EventMetricCollector(Map<Object, EventCounters> perEventCounters,
+    EventMetricCollector(Map<Object, EventCounters> perEventCounters,
             List<StepMeasurementSink> measurementSinks) {
         this.perEventCounters = perEventCounters;
-        this.sinks = ImmutableList.copyOf(measurementSinks);
+        // Our creator keeps an immutable copy of this so we don't need to defensively clone
+        this.sinks = measurementSinks;
     }
 
     public void startTiming(Object eventGroup, String event) {
