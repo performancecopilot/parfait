@@ -30,8 +30,12 @@ public class PcpConfig {
         Properties properties = new Properties();
         File configuration = getConfigFile();
         InputStream is = null;
-        String value = null;
- 
+        String value = System.getenv(key);
+
+        if (value != null) {
+            return value;
+        }
+
         try {
             is = new FileInputStream(configuration);
             properties.load(is);
