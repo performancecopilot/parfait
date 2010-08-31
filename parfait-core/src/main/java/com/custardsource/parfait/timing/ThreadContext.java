@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.MDC;
 
 import com.google.common.base.Function;
@@ -25,9 +26,10 @@ import com.google.common.collect.MapMaker;
  * Most methods operate on the context of the calling thread; only {@link #forThread(Thread)} allows
  * cross-thread information retrieval.
  * </p>
- * 
+ *
  * @author Cowan
  */
+@ThreadSafe
 public class ThreadContext {
     private static final Function<Thread, Map<String, Object>> NEW_CONTEXT_CREATOR = new Function<Thread, Map<String, Object>>() {
         public Map<String, Object> apply(Thread thread) {
@@ -71,12 +73,12 @@ public class ThreadContext {
     }
 
     /**
-     * Retrieves a copy of the thread context for the given thread 
+     * Retrieves a copy of the thread context for the given thread
      */
     public Map<String, Object> forThread(Thread t) {
         return new HashMap<String, Object>(PER_THREAD_CONTEXTS.get(t));
     }
-    
+
     public Collection<String> allKeys() {
         Set<String> keys = new HashSet<String>();
         for (Map<String, Object> threadMdc : PER_THREAD_CONTEXTS.values()) {
@@ -84,9 +86,9 @@ public class ThreadContext {
         }
         return keys;
     }
-    
+
     public Object getForThread(Thread thread, String key) {
         return PER_THREAD_CONTEXTS.get(thread).get(key);
     }
-    
+
 }

@@ -12,12 +12,14 @@ import javax.measure.unit.Unit;
 import com.custardsource.parfait.MonitorableRegistry;
 import com.custardsource.parfait.MonitoredCounter;
 import com.google.common.collect.ImmutableList;
+import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 
 /**
  * A class to provide a {@link EventMetricCollector} to each {@link Timeable} on demand, guaranteed
  * to be thread-safe as long is it's only ever used by the requesting thread.
  */
+@ThreadSafe
 public class EventTimer {
 
     /**

@@ -8,8 +8,10 @@ import javax.measure.quantity.Quantity;
 import javax.measure.unit.Unit;
 
 import com.google.common.collect.Maps;
+import net.jcip.annotations.ThreadSafe;
 import org.apache.log4j.Logger;
 
+@ThreadSafe
 public class Log4jSink implements StepMeasurementSink {
     private final Logger logger;
     private final Map<Unit<?>, Unit<?>> normalizations = Maps.newConcurrentMap();
