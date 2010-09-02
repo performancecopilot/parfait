@@ -15,17 +15,17 @@ public class StepMeasurements {
     private final List<StepMeasurements> children = new ArrayList<StepMeasurements>();
     private final List<MetricMeasurement> metricInstances = new ArrayList<MetricMeasurement>();
 
-    private final Class<?> eventClass;
+    private final String eventName;
     private final String action;
     private volatile boolean started = false;
 
     public StepMeasurements(StepMeasurements parent,
-            Class<?> eventClass, String action) {
+            String eventName, String action) {
         this.parent = parent;
         if (parent != null) {
             parent.addChildExecution(this);
         }
-        this.eventClass = eventClass;
+        this.eventName = eventName;
         this.action = action;
     }
 
@@ -99,11 +99,11 @@ public class StepMeasurements {
     }
 
     private String stackTraceElement() {
-        return eventClass.getSimpleName() + (Strings.isNullOrEmpty(action) ? "" : ":" + action);
+        return eventName + (Strings.isNullOrEmpty(action) ? "" : ":" + action);
     }
 
-    Class<?> getEventClass() {
-        return eventClass;
+    String getEventName() {
+        return eventName;
     }
 
     public Collection<MetricMeasurement> getMetricInstances() {

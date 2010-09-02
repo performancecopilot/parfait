@@ -39,7 +39,7 @@ public class EventMetricCollector {
     }
 
     public void startTiming(Object eventGroup, String event) {
-        StepMeasurements newTiming = new StepMeasurements(current, eventGroup.getClass(),
+        StepMeasurements newTiming = new StepMeasurements(current, perEventCounters.get(eventGroup).getEventGroupName(),
                 event);
         for (ThreadMetric metric : perEventCounters.get(eventGroup).getMetricSources()) {
             newTiming.addMetricInstance(new MetricMeasurement(metric, Thread.currentThread()));

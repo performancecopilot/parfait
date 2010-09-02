@@ -85,7 +85,7 @@ public class EventTimer {
     private EventCounters getCounterSet(String eventGroup) {
         EventMetricCounters invocationCounter = createEventMetricCounters(eventGroup, "count",
                 "Total number of times the event was directly triggered", Unit.ONE);
-        EventCounters counters = new EventCounters(invocationCounter);
+        EventCounters counters = new EventCounters(invocationCounter, cleanName(eventGroup));
 
         for (ThreadMetric metric : metricSuite.metrics()) {
             EventMetricCounters timingCounter = createEventMetricCounters(eventGroup, metric
@@ -120,8 +120,12 @@ public class EventTimer {
     }
 
     private String getMetricName(String eventGroup, String metric) {
+        return prefix + "." + cleanName(eventGroup) + "." + metric;
+    }
+
+    private String cleanName(String eventGroup) {
         // TODO do name cleanup elsewhere
-        return prefix + "." + eventGroup.replace("/", "") + "." + metric;
+        return eventGroup.replace("/", "");
     }
 
     private String getTotalMetricName(String metric) {

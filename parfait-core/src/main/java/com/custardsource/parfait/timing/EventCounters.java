@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.custardsource.parfait.timing;
 
@@ -11,9 +11,11 @@ import java.util.Map;
 class EventCounters {
     private final Map<ThreadMetric, EventMetricCounters> metrics = new LinkedHashMap<ThreadMetric, EventMetricCounters>();
     private final EventMetricCounters invocationCounter;
+    private final String eventGroupName;
 
-    public EventCounters(EventMetricCounters invocationCounter) {
+    public EventCounters(EventMetricCounters invocationCounter, String eventGroupName) {
         this.invocationCounter = invocationCounter;
+        this.eventGroupName = eventGroupName;
     }
 
     public EventMetricCounters getInvocationCounter() {
@@ -42,5 +44,9 @@ class EventCounters {
 
     Map<ThreadMetric, EventMetricCounters> getMetrics() {
         return Collections.unmodifiableMap(metrics);
+    }
+
+    public String getEventGroupName() {
+        return eventGroupName;
     }
 }

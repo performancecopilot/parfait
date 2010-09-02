@@ -3,60 +3,64 @@ package com.custardsource.parfait.timing;
 import junit.framework.TestCase;
 
 public class StepMeasurementsTest extends TestCase {
+    private static final String PARENT = "floop";
+    private static final String CHILD = "bloop";
+    private static final String OTHER_CHILD = "gloop";
+
     public void testNullParent() {
-        StepMeasurements timing = new StepMeasurements(null, String.class, null);
+        StepMeasurements timing = new StepMeasurements(null, PARENT, null);
         assertNull(timing.getParent());
     }
 
     public void testParentSettingInConstructor() {
-        StepMeasurements mummy = new StepMeasurements(null, String.class, null);
-        StepMeasurements timing = new StepMeasurements(mummy, String.class, null);
+        StepMeasurements mummy = new StepMeasurements(null, PARENT, null);
+        StepMeasurements timing = new StepMeasurements(mummy, CHILD, null);
         assertEquals(mummy, timing.getParent());
     }
 
     public void testBackTraceWithNoParentShowsOnlySelf() {
-        StepMeasurements timing = new StepMeasurements(null, String.class, null);
-        assertEquals("String", timing.getBackTrace());
+        StepMeasurements timing = new StepMeasurements(null, PARENT, null);
+        assertEquals(PARENT, timing.getBackTrace());
     }
 
     public void testBackTraceWithParentShowsCorrectPath() {
-        StepMeasurements mummy = new StepMeasurements(null, String.class, null);
-        StepMeasurements timing = new StepMeasurements(mummy, Integer.class,
+        StepMeasurements mummy = new StepMeasurements(null, PARENT, null);
+        StepMeasurements timing = new StepMeasurements(mummy, CHILD,
                 null);
-        assertEquals("String/Integer", timing.getBackTrace());
+        assertEquals("floop/bloop", timing.getBackTrace());
     }
 
     public void testBackTraceShowsAction() {
-        StepMeasurements timing = new StepMeasurements(null, String.class,
+        StepMeasurements timing = new StepMeasurements(null, PARENT,
                 "scratchButt");
-        assertEquals("String:scratchButt", timing.getBackTrace());
+        assertEquals("floop:scratchButt", timing.getBackTrace());
     }
 
     public void testForwardTraceWithNoChildrenShowsOnlySelf() {
-        StepMeasurements timing = new StepMeasurements(null, String.class, null);
-        assertEquals("String", timing.getForwardTrace());
+        StepMeasurements timing = new StepMeasurements(null, PARENT, null);
+        assertEquals(PARENT, timing.getForwardTrace());
     }
 
     public void testForwardTraceWithOneChildShowsCorrectPath() {
-        StepMeasurements timing = new StepMeasurements(null, Integer.class,
+        StepMeasurements timing = new StepMeasurements(null, PARENT,
                 null);
-        new StepMeasurements(timing, String.class, null);
-        assertEquals("Integer/String", timing.getForwardTrace());
+        new StepMeasurements(timing, CHILD, null);
+        assertEquals("floop/bloop", timing.getForwardTrace());
     }
 
     public void testForwardTraceWithMultipleChildrenShowsCorrectPath() {
-        StepMeasurements timing = new StepMeasurements(null, Integer.class,
+        StepMeasurements timing = new StepMeasurements(null, PARENT,
                 null);
-        new StepMeasurements(timing, String.class, null);
-        new StepMeasurements(timing, Float.class, null);
-        assertEquals("Integer/{String|Float}", timing
+        new StepMeasurements(timing, CHILD, null);
+        new StepMeasurements(timing, OTHER_CHILD, null);
+        assertEquals("floop/{bloop|gloop}", timing
                 .getForwardTrace());
     }
 
     public void testForwardTraceShowsAction() {
-        StepMeasurements timing = new StepMeasurements(null, String.class,
+        StepMeasurements timing = new StepMeasurements(null, PARENT,
                 "scratchButt");
-        assertEquals("String:scratchButt", timing.getForwardTrace());
+        assertEquals("floop:scratchButt", timing.getForwardTrace());
     }
 
 }
