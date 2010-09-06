@@ -41,7 +41,6 @@ public class PcpMonitorBridge extends AbstractMonitoringView {
     		UPDATE_QUEUE_SIZE);
 
     private final Monitor monitor = new PcpMonitorBridgeMonitor();
-    private final Thread updateThread;
     private final MetricNameMapper mapper;
     private final TextSource shortTextSource;
     private final TextSource longTextSource;
@@ -65,9 +64,6 @@ public class PcpMonitorBridge extends AbstractMonitoringView {
 		this.mapper = Preconditions.checkNotNull(mapper);
         this.shortTextSource = Preconditions.checkNotNull(shortTextSource);
         this.longTextSource = Preconditions.checkNotNull(longTextSource);
-		this.updateThread = new Thread(new Updater());
-		this.updateThread.setName("PcpMonitorBridge-Updater");
-		this.updateThread.setDaemon(true);
     }
 
     @Override
@@ -96,8 +92,6 @@ public class PcpMonitorBridge extends AbstractMonitoringView {
             }
             pcpWriter.start();
 
-            updateThread.start();
-
             LOG.info("PCP monitoring bridge started for writer [" + pcpWriter + "]");
         } catch (IOException e) {
             throw new RuntimeException("Unable to initialise PCP monitoring bridge", e);
@@ -109,42 +103,6 @@ public class PcpMonitorBridge extends AbstractMonitoringView {
     }
 
     /**
-     * The Updater is responsible for taking any Monitorables that are pending in the update queue
-     * and saving their current value to the PCP shared data file.
-     */
-    private class Updater implements Runnable {
-
-        public void run() {
-            try {
-                Collection<Monitorable<?>> monitorablesToUpdate = new ArrayList<Monitorable<?>>();
-                PcpWriter writerCopy;
-                while ((writerCopy = pcpWriter) != null) {
-                    try {
-                        monitorablesToUpdate.add(monitorablesPendingUpdate.take());
-                        monitorablesPendingUpdate.drainTo(monitorablesToUpdate);
-                        for (Monitorable<?> monitorable : monitorablesToUpdate) {
-							writerCopy.updateMetric(mapper.map(monitorable
-									.getName()), monitorable.get());
-                        }
-                        if (monitorablesPendingUpdate.size() >= UPDATE_QUEUE_SIZE) {
-                            LOG.warn("Update queue was full - some updates may have been lost.");
-                        }
-                        monitorablesToUpdate.clear();
-                    } catch (InterruptedException e) {
-                        LOG.error("Updater was unexpectedly interrupted", e);
-                    }
-                }
-            } catch (RuntimeException e) {
-                LOG.fatal("Updater dying because of unexpected exception", e);
-                throw e;
-            } catch (Error e) {
-                LOG.fatal("Updater dying because of unexpected exception", e);
-                throw e;
-            }
-        }
-    }
-
-    /**
      * Responsible for adding any Monitorables that change to the queue of Monitorables that are
      * pending update. This class will never block, if the update queue is ever full then the we
      * just do nothing.
@@ -152,11 +110,16 @@ public class PcpMonitorBridge extends AbstractMonitoringView {
     private class PcpMonitorBridgeMonitor implements Monitor {
 
         public void valueChanged(Monitorable<?> monitorable) {
-            if (!monitorablesPendingUpdate.offer(monitorable)) {
-            	// Don't care about return value here. If this failed, the queue must be full;
-            	// This will get detected by the Updater and logged. We should do nothing here as we 
-            	// don't want to block.
-            }
+            writeUpdate(monitorable);
         }
     }
+
+    private void writeUpdate(Monitorable<?> monitorable) {
+        PcpWriter writerCopy = pcpWriter;
+        if (writerCopy == null) {
+            return;
+        }
+        writerCopy.updateMetric(mapper.map(monitorable.getName()), monitorable.get());
+    }
+
 }

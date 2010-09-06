@@ -9,30 +9,33 @@ import java.nio.channels.FileChannel.MapMode;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.measure.unit.Unit;
 
 import com.custardsource.parfait.dxm.semantics.Semantics;
 import com.custardsource.parfait.dxm.types.DefaultTypeHandlers;
 import com.custardsource.parfait.dxm.types.TypeHandler;
+import com.google.common.collect.Maps;
+import net.jcip.annotations.GuardedBy;
 
 public abstract class BasePcpWriter implements PcpWriter {
-	// TODO concurrency safety audit
 	// TODO only include in-use indoms/instances/metrics (/strings?) in the header
 	private final File dataFile;
 	private final Store<PcpMetricInfo> metricInfoStore;
     private final Store<InstanceDomain> instanceDomainStore;
 	
-    private final Map<MetricName, PcpValueInfo> metricData = new LinkedHashMap<MetricName, PcpValueInfo>();
-    private final Map<Class<?>, TypeHandler<?>> typeHandlers = new HashMap<Class<?>, TypeHandler<?>>(
+    private final Map<MetricName, PcpValueInfo> metricData = Maps.newConcurrentMap();
+    private final Map<Class<?>, TypeHandler<?>> typeHandlers = new ConcurrentHashMap<Class<?>, TypeHandler<?>>(
             DefaultTypeHandlers.getDefaultMappings());
     private volatile boolean started = false;
-    private ByteBuffer dataFileBuffer = null;
-    private Collection<PcpString> stringInfo = new ArrayList<PcpString>();
+    @GuardedBy("itself")
+    private volatile ByteBuffer dataFileBuffer = null;
+    private final Collection<PcpString> stringInfo = new CopyOnWriteArrayList<PcpString>();
 
     protected BasePcpWriter(File dataFile, IdentifierSourceSet identifierSources) {
         this.dataFile = dataFile;
@@ -99,7 +102,9 @@ public abstract class BasePcpWriter implements PcpWriter {
         }
         initialiseOffsets();
         dataFileBuffer = initialiseBuffer(dataFile, getFileLength());
-        populateDataBuffer(dataFileBuffer, metricData.values());
+        synchronized (dataFileBuffer) {
+            populateDataBuffer(dataFileBuffer, metricData.values());
+        }
 
         started = true;
     }
@@ -121,9 +126,11 @@ public abstract class BasePcpWriter implements PcpWriter {
     @SuppressWarnings("unchecked")
     protected final void updateValue(PcpValueInfo info, Object value) {
         TypeHandler rawHandler = info.getTypeHandler();
-        dataFileBuffer.position(rawHandler.requiresLargeStorage() ? info.getLargeValue()
-                .getOffset() : info.getOffset());
-        rawHandler.putBytes(dataFileBuffer, value);
+        synchronized (dataFileBuffer) {
+            dataFileBuffer.position(rawHandler.requiresLargeStorage() ? info.getLargeValue()
+                    .getOffset() : info.getOffset());
+            rawHandler.putBytes(dataFileBuffer, value);
+        }
     }
 
     private ByteBuffer initialiseBuffer(File file, int length) throws IOException {
@@ -278,7 +285,7 @@ public abstract class BasePcpWriter implements PcpWriter {
 
 		protected abstract T newInstance(String name, Set<Integer> usedIds);
 
-		int size() {
+		synchronized int size() {
 			return byName.size();
 		}
 	}
