@@ -1,12 +1,13 @@
 package com.custardsource.parfait;
 
-import com.google.common.base.Preconditions;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.log4j.Logger;
-
-import javax.measure.unit.Unit;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import javax.measure.unit.Unit;
+
+import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
+import org.apache.log4j.Logger;
 
 /**
  * Monitors the value returned by calls at the provided interval to the provided
@@ -27,7 +28,7 @@ public class PollingMonitoredValue<T> extends SettableValue<T> {
     /**
      * Creates a new {@link PollingMonitoredValue} with the specified polling
      * interval.
-     * 
+     *
      * @param updateInterval
      *            how frequently the Poller should be checked for updates (may
      *            not be less than {@link #MIN_UPDATE_INTERVAL}
@@ -56,7 +57,7 @@ public class PollingMonitoredValue<T> extends SettableValue<T> {
 
     @Override
     public String toString() {
-        return ToStringBuilder.reflectionToString(this);
+        return Objects.toStringHelper(this).add("name", getName()).add("description", getDescription()).add("poller", poller).toString();
     }
 
     private class PollerTask extends TimerTask {
