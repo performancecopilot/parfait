@@ -1,4 +1,5 @@
 target
 .*\.iws
 .*\.ipr
+.*\.iml
 atlassian-ide-plugin.xml
