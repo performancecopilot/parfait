@@ -1,11 +1,9 @@
 package com.custardsource.parfait;
 
+import org.junit.Test;
+
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-
-import javax.measure.unit.Unit;
-
-import org.junit.Test;
 
 
 public class MonitorableRegistryTest {
@@ -49,53 +47,37 @@ public class MonitorableRegistryTest {
         assertSame(registry1, registry2);
     }
 
+    @Test
+    public void registryNotifiesOfChangeAfterNewRegistration(){
+
+        final MonitorableRegistry monitorableRegistry = new MonitorableRegistry();
+
+        final MonitorableRegistryListenerTester monitorableRegistryListener = new MonitorableRegistryListenerTester();
+        monitorableRegistry.addRegistryListener(monitorableRegistryListener);
+
+        final DummyMonitorable dummyMonitorable = new DummyMonitorable("foo");
+        final DummyMonitorable dummyMonitorable2 = new DummyMonitorable("bar");
+
+        monitorableRegistry.register(dummyMonitorable);
+
+        assertTrue("Should have notified of new Monitorable added", monitorableRegistryListener.monitorablesAdded == 1);
+
+        monitorableRegistry.register(dummyMonitorable2);
+
+        assertTrue("Should have notified of second new Monitorable added", monitorableRegistryListener.monitorablesAdded == 2);
+    }
+
     private MonitorableRegistry newRegistry() {
         return new MonitorableRegistry();
     }
 
-    private static class DummyMonitorable implements Monitorable<String> {
-        private final String name;
+    private static class MonitorableRegistryListenerTester implements MonitorableRegistryListener {
 
-        private DummyMonitorable(String name) {
-            this.name = name;
-        }
+        private int monitorablesAdded = 0;
 
         @Override
-        public String get() {
-            return "DummyValue";
-        }
-
-        @Override
-        public String getDescription() {
-            return "Blah";
-        }
-
-        @Override
-        public String getName() {
-            return name;
-        }
-
-        @Override
-        public ValueSemantics getSemantics() {
-            return ValueSemantics.CONSTANT;
-        }
-
-        @Override
-        public Class<String> getType() {
-            return String.class;
-        }
-
-        @Override
-        public Unit<?> getUnit() {
-            return Unit.ONE;
-        }
-
-        @Override
-        public void attachMonitor(Monitor m) {
-        }
-
-        @Override
-        public void removeMonitor(Monitor m) {
+        public void monitorableAdded(Monitorable<?> monitorable){
+            monitorablesAdded++;
         }
 
     }

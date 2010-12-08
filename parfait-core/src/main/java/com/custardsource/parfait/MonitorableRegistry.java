@@ -1,12 +1,14 @@
 package com.custardsource.parfait;
 
+import com.google.common.collect.ImmutableList;
+
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
-import com.google.common.collect.ImmutableList;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * A collection of Monitorables to be monitored by a given output source (or
@@ -33,7 +35,9 @@ public class MonitorableRegistry {
      */
     private final Map<String, Monitorable<?>> monitorables = new TreeMap<String, Monitorable<?>>();
 
+    // TODO this frozen thing has to go...
     private boolean stateFrozen = false;
+    private final List<MonitorableRegistryListener> registryListeners = new CopyOnWriteArrayList<MonitorableRegistryListener>();
 
     /**
      * Informs this MonitorableRegistry of a new {@link Monitorable}; that
@@ -57,6 +61,13 @@ public class MonitorableRegistry {
                     + "] registered.");
         }
         monitorables.put(monitorable.getName(), monitorable);
+        notifyListenersOfNewMonitorable(monitorable);
+    }
+
+    private void notifyListenersOfNewMonitorable(Monitorable<?> monitorable) {
+        for (MonitorableRegistryListener listener : registryListeners) {
+            listener.monitorableAdded(monitorable);
+        }
     }
 
     /**
@@ -105,5 +116,9 @@ public class MonitorableRegistry {
             }
         }
         return instance;
+    }
+
+    public void addRegistryListener(MonitorableRegistryListener monitorableRegistryListener) {
+        this.registryListeners.add(monitorableRegistryListener);
     }
 }
