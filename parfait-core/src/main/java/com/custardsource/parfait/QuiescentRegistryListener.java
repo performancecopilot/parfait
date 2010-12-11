@@ -10,14 +10,18 @@ public class QuiescentRegistryListener implements MonitorableRegistryListener {
     private static final Timer quiescentTimer = new Timer(QuiescentRegistryListener.class.getSimpleName(), true);
     private volatile long lastTimeMonitorableAdded = 0;
 
+    private final Object lock = new Object();
+
 
     public QuiescentRegistryListener(final Runnable runnable, final long quietPeriodInMillis) {
         quiescentTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                if (lastTimeMonitorableAdded > 0 && System.currentTimeMillis() > (lastTimeMonitorableAdded + quietPeriodInMillis)) {
-                    runnable.run();
-                    lastTimeMonitorableAdded = 0;
+                synchronized (lock) {
+                    if (lastTimeMonitorableAdded > 0 && System.currentTimeMillis() > (lastTimeMonitorableAdded + quietPeriodInMillis)) {
+                        runnable.run();
+                        lastTimeMonitorableAdded = 0;
+                    }
                 }
             }
         }, 1000, quietPeriodInMillis

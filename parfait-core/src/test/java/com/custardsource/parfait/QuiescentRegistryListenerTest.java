@@ -2,6 +2,7 @@ package com.custardsource.parfait;
 
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class QuiescentRegistryListenerTest {
@@ -12,7 +13,7 @@ public class QuiescentRegistryListenerTest {
     @Test
     public void quiescentListenerShouldFireAfterAppropriateDelay() {
         final DelayedRunnableTester delayedRunnableTester = new DelayedRunnableTester();
-        final QuiescentRegistryListener listener = new QuiescentRegistryListener(delayedRunnableTester, QUIET_PERIOD_IN_SECONDS*MS_PER_SECOND);
+        final QuiescentRegistryListener listener = new QuiescentRegistryListener(delayedRunnableTester, QUIET_PERIOD_IN_SECONDS * MS_PER_SECOND);
 
         final MonitorableRegistry monitorableRegistry = new MonitorableRegistry();
         monitorableRegistry.addRegistryListener(listener);
@@ -22,21 +23,21 @@ public class QuiescentRegistryListenerTest {
         monitorableRegistry.register(dummyMonitorable);
 
         try {
-            Thread.sleep((QUIET_PERIOD_IN_SECONDS+1) * MS_PER_SECOND);
+            Thread.sleep((QUIET_PERIOD_IN_SECONDS + 1) * MS_PER_SECOND);
         } catch (InterruptedException e) {
         }
 
-        assertTrue("Delayed trigger should have fired", delayedRunnableTester.runCount() == 1);
+        assertEquals("Delayed trigger should have fired", 1, delayedRunnableTester.runCount());
 
 
-        assertTrue(String.format("QuiescentListener should not have fired so quickly: %d", delayedRunnableTester.delayTaken()), delayedRunnableTester.delayTaken() >= QUIET_PERIOD_IN_SECONDS* MS_PER_SECOND);
+        assertTrue(String.format("QuiescentListener should not have fired so quickly: %d", delayedRunnableTester.delayTaken()), delayedRunnableTester.delayTaken() >= QUIET_PERIOD_IN_SECONDS * MS_PER_SECOND);
 
         try {
             Thread.sleep((QUIET_PERIOD_IN_SECONDS + 2) * MS_PER_SECOND);
         } catch (InterruptedException e) {
         }
 
-        assertTrue("Should not have fired more than once: " + delayedRunnableTester.runCount(), delayedRunnableTester.runCount() == 1);
+        assertEquals("Should not have fired more than once: " + delayedRunnableTester.runCount(), 1, delayedRunnableTester.runCount());
 
     }
 
@@ -49,14 +50,14 @@ public class QuiescentRegistryListenerTest {
         @Override
         public void run() {
             runInvoked = System.currentTimeMillis();
-            runCount ++;
+            runCount++;
         }
 
         public int runCount() {
             return runCount;
         }
 
-        public long delayTaken(){
+        public long delayTaken() {
             return runInvoked - creationTimeStamp;
         }
     }
