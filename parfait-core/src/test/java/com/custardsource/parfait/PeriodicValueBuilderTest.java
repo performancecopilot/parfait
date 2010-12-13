@@ -58,7 +58,7 @@ public class PeriodicValueBuilderTest {
 		CompositeCounter wrapped = builder.wrapCounter(counter);
 		wrapped.inc(23);
 		assertEquals(Long.valueOf(23L), counter.get());
-		// TODO Should have this assertion, but neet better framework for PollingMonitoredValue
-		// assertEquals(Long.valueOf(23L), registry.getMetric("iggle.5s").get());
+		PollingMonitoredValue.runAllTasks();
+		assertEquals(Long.valueOf(23L), registry.getMetric("iggle.5s").get());
 	}
 }

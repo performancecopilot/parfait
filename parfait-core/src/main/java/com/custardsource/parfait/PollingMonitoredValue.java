@@ -1,10 +1,13 @@
 package com.custardsource.parfait;
 
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.measure.unit.Unit;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import org.apache.log4j.Logger;
@@ -23,6 +26,11 @@ public class PollingMonitoredValue<T> extends SettableValue<T> {
 
     private static final Timer POLLING_TIMER = new Timer("PollingMonitoredValue-poller", true);
 
+    /**
+     * All timer tasks that have been scheduled in PollingMonitoredValues; useful only for testing.
+     */
+    private static final List<TimerTask> SCHEDULED_TASKS = new CopyOnWriteArrayList<TimerTask>();
+    
     private final Poller<T> poller;
 
     /**
@@ -52,7 +60,9 @@ public class PollingMonitoredValue<T> extends SettableValue<T> {
         this.poller = poller;
         Preconditions.checkState(updateInterval >= MIN_UPDATE_INTERVAL,
                 "updateInterval is too short.");
-        POLLING_TIMER.scheduleAtFixedRate(new PollerTask(), updateInterval, updateInterval);
+        TimerTask task = new PollerTask();
+        SCHEDULED_TASKS.add(task);
+        POLLING_TIMER.scheduleAtFixedRate(task, updateInterval, updateInterval);
     }
 
     @Override
@@ -69,5 +79,12 @@ public class PollingMonitoredValue<T> extends SettableValue<T> {
                 LOG.error("Error running poller " + this + "; will rerun next cycle", t);
             }
         }
+    }
+    
+    @VisibleForTesting
+    static void runAllTasks() {
+    	for (TimerTask task : SCHEDULED_TASKS) {
+    		task.run();
+    	}
     }
 }
