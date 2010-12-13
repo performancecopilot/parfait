@@ -3,38 +3,42 @@ package com.custardsource.parfait;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import com.custardsource.parfait.PeriodicValueBuilder.Period;
+
 public class PeriodicValueBuilderTest {
 	private MonitorableRegistry registry;
 	private Monitorable<Long> template;
+	private PeriodicValueBuilder builder;
 
 	@Before
 	public void setUp() {
 		registry = new MonitorableRegistry();
 		template = new MonitoredCounter("foo", "bar", registry,
 				Unit.ONE.times(1000));
-		PeriodicValueBuilder builder = new PeriodicValueBuilder(template,
-				registry);
-		builder.addPeriod(1000, 5000, "5s");
+		builder = new PeriodicValueBuilder(registry);
+		builder.addPeriod(Period.of(1000, 5000, "5s"));
 	}
 
 	@Test
-	public void metricsShouldUseTemplateNameWithSuffix() {
+	public void metricsShouldBeCreatedWithProvidedValues() {
+		builder.build("baz", "moop", SI.LUX);
+		assertTrue(registry.containsMetric("baz.5s"));
+		assertEquals("moop [5s]", registry.getMetric("baz.5s").getDescription());
+		assertEquals(SI.LUX, registry.getMetric("baz.5s").getUnit());
+	}
+
+	@Test
+	public void metricsShouldBeCreatedWithValuesCopiedFromTemplate() {
+		builder.copyFrom(template);
 		assertTrue(registry.containsMetric("foo.5s"));
-	}
-
-	@Test
-	public void metricsShouldCopyUnitFromTemplate() {
+		assertEquals("bar [5s]", registry.getMetric("foo.5s").getDescription());
 		assertEquals(Unit.ONE.times(1000), registry.getMetric("foo.5s")
 				.getUnit());
-	}
-
-	@Test
-	public void metricsShouldUseTemplateDescriptionWithSuffix() {
-		assertEquals("bar [5s]", registry.getMetric("foo.5s").getDescription());
 	}
 }
