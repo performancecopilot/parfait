@@ -3,8 +3,6 @@ package com.custardsource.parfait.timing;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
-
 /**
  * <p>
  * Coordinates multiple {@link MetricMeasurement MetricMeasurements} for all the events invoked in
@@ -28,8 +26,6 @@ public class EventMetricCollector {
 
     private final Map<Object, EventCounters> perEventCounters;
     private final List<StepMeasurementSink> sinks;
-
-    private static final Logger LOG = Logger.getLogger(EventMetricCollector.class);
 
     EventMetricCollector(Map<Object, EventCounters> perEventCounters,
             List<StepMeasurementSink> measurementSinks) {

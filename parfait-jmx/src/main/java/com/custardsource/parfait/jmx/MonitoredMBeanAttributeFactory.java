@@ -34,7 +34,7 @@ import org.springframework.jmx.support.JmxUtils;
  * are of type {@link CompositeData}.
  */
 // TODO - use a builder pattern here, construction of this class is getting very unwieldy
-public class MonitoredMBeanAttributeFactory<T> implements FactoryBean {
+public class MonitoredMBeanAttributeFactory<T> implements FactoryBean<Monitorable<T>> {
 
     public static final Logger LOG = Logger.getLogger(MonitoredMBeanAttributeFactory.class.getName());
 

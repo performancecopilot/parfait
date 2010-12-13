@@ -1,24 +1,21 @@
 package com.custardsource.parfait.spring.timing;
 
-import com.custardsource.parfait.timing.EventTimer;
-import com.custardsource.parfait.timing.Timeable;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.context.ApplicationContext;
+
+import com.custardsource.parfait.timing.EventTimer;
+import com.custardsource.parfait.timing.Timeable;
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 
 /**
  * A {@link BeanPostProcessor} responsible for adding all {@link com.custardsource.parfait.timing.Timeable}s to the
  * specified {@link com.custardsource.parfait.timing.EventTimer}
  */
 public final class SpringEventTimerInjector implements BeanPostProcessor, BeanFactoryPostProcessor {
-    private static final String GROUP_ATTRIBUTE = "parfaitTimingGroup";
-
     private final EventTimer eventTimer;
-    private ApplicationContext applicationContext;
     private ConfigurableListableBeanFactory beanFactory;
     private final Predicate<? super BeanSpecification> beanPredicate;
 

@@ -3,13 +3,14 @@ package com.custardsource.parfait.timing;
 import java.util.Collection;
 import java.util.Map;
 
-import javax.measure.Measure;
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.Unit;
 
-import com.google.common.collect.Maps;
 import net.jcip.annotations.ThreadSafe;
+
 import org.apache.log4j.Logger;
+
+import com.google.common.collect.Maps;
 
 @ThreadSafe
 public class Log4jSink implements StepMeasurementSink {
@@ -46,11 +47,9 @@ public class Log4jSink implements StepMeasurementSink {
         return result;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     String buildSingleMetricResult(MetricMeasurement metric) {
-        Measure<?> ownTimeValue = metric.ownTimeValue();
-        Measure<?> totalValue = metric.totalValue();
-        Unit canonicalUnit = normalizations.get(metric.getMetricSource().getUnit());
+    	Unit canonicalUnit = normalizations.get(metric.getMetricSource().getUnit());
         if (canonicalUnit == null) {
             canonicalUnit = metric.getMetricSource().getUnit();
         }
