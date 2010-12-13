@@ -1,13 +1,11 @@
 package com.custardsource.parfait.jmx;
 
-import java.io.IOException;
-
-import javax.management.openmbean.CompositeData;
-
-import junit.framework.TestCase;
-
 import com.custardsource.parfait.MonitorableRegistry;
 import com.custardsource.parfait.MonitoredValue;
+import junit.framework.TestCase;
+
+import javax.management.openmbean.CompositeData;
+import java.io.IOException;
 
 public class JmxViewTest extends TestCase {
     private MonitoredValue<Boolean> booleanValue = null;
@@ -32,15 +30,15 @@ public class JmxViewTest extends TestCase {
         doubleValue = new MonitoredValue<Double>("double.value", "double.value.desc", registry, 1d);
         stringValue = new MonitoredValue<String>("string.value", "string.value.desc", registry, "!");
 
-        jmx = new JmxView(registry);
+        jmx = new JmxView();
     }
 
     public void tearDown() {
-        jmx.stop();
+        jmx.stopMonitoring(registry.getMonitorables());
     }
 
     public void testSupportsAllTypes() throws IOException, InterruptedException {
-        jmx.start();
+        jmx.startMonitoring(registry.getMonitorables());
 
         checkDataValues();
 

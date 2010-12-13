@@ -70,14 +70,6 @@ public class MonitorableRegistry {
         }
     }
 
-    /**
-     * Locks this {@link MonitorableRegistry} so that no further metrics may be
-     * added. To be used by {@link AbstractMonitoringView MonitoringViews} which do not
-     * permit the addition of new metrics after startup.
-     */
-    public synchronized void freeze() {
-        stateFrozen = true;
-    }
 
     /**
      * @return a list of all Monitorables which are registered with this
@@ -120,5 +112,9 @@ public class MonitorableRegistry {
 
     public void addRegistryListener(MonitorableRegistryListener monitorableRegistryListener) {
         this.registryListeners.add(monitorableRegistryListener);
+    }
+
+    public void removeRegistryListener(QuiescentRegistryListener quiescentRegistryListener) {
+        this.registryListeners.remove(quiescentRegistryListener);
     }
 }

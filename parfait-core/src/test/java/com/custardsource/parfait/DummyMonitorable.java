@@ -2,10 +2,10 @@ package com.custardsource.parfait;
 
 import javax.measure.unit.Unit;
 
-class DummyMonitorable implements Monitorable<String> {
+public class DummyMonitorable implements Monitorable<String> {
     private final String name;
 
-    DummyMonitorable(String name) {
+    public DummyMonitorable(String name) {
         this.name = name;
     }
 

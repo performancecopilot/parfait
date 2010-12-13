@@ -1,5 +1,7 @@
 package com.custardsource.parfait;
 
+import org.apache.log4j.Logger;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -7,7 +9,10 @@ import java.util.TimerTask;
  * Designed to run code after the MonitorableRegistry has become quiet, in terms of addition of new metrics
  */
 public class QuiescentRegistryListener implements MonitorableRegistryListener {
-    private static final Timer quiescentTimer = new Timer(QuiescentRegistryListener.class.getSimpleName(), true);
+
+    private static final Logger LOG = Logger.getLogger(QuiescentRegistryListener.class);
+
+    private final Timer quiescentTimer = new Timer(QuiescentRegistryListener.class.getSimpleName(), true);
     private volatile long lastTimeMonitorableAdded = 0;
 
     private final Object lock = new Object();
@@ -19,6 +24,7 @@ public class QuiescentRegistryListener implements MonitorableRegistryListener {
             public void run() {
                 synchronized (lock) {
                     if (lastTimeMonitorableAdded > 0 && System.currentTimeMillis() > (lastTimeMonitorableAdded + quietPeriodInMillis)) {
+                        LOG.info(String.format("New Monitorables detected after quiet period of %dms", quietPeriodInMillis));
                         runnable.run();
                         lastTimeMonitorableAdded = 0;
                     }
@@ -32,5 +38,9 @@ public class QuiescentRegistryListener implements MonitorableRegistryListener {
     @Override
     public void monitorableAdded(Monitorable<?> monitorable) {
         this.lastTimeMonitorableAdded = System.currentTimeMillis();
+    }
+
+    public void stop(){
+        quiescentTimer.cancel();
     }
 }

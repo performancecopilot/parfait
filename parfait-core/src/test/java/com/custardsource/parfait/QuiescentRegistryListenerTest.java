@@ -39,6 +39,19 @@ public class QuiescentRegistryListenerTest {
 
         assertEquals("Should not have fired more than once: " + delayedRunnableTester.runCount(), 1, delayedRunnableTester.runCount());
 
+        /*
+         Also, should have a test case for the other important case:
+         set up with 3s quiescent period
+         add monitorable
+         sleep for (say) 2s
+         add another monitorable
+         sleep for (say) 2s more (so past original T+3seconds firing time)
+         should NOT have fired
+         sleep until after T+6s
+         should have fired now
+
+      (or something) */
+
     }
 
     private static class DelayedRunnableTester implements Runnable {

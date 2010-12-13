@@ -1,30 +1,27 @@
 package com.custardsource.parfait.pcp;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
-
-import org.apache.log4j.Logger;
-
 import com.custardsource.parfait.Monitor;
 import com.custardsource.parfait.Monitorable;
-import com.custardsource.parfait.MonitorableRegistry;
-import com.custardsource.parfait.AbstractMonitoringView;
+import com.custardsource.parfait.MonitoringView;
 import com.custardsource.parfait.ValueSemantics;
 import com.custardsource.parfait.dxm.MetricName;
 import com.custardsource.parfait.dxm.PcpWriter;
 import com.custardsource.parfait.dxm.semantics.Semantics;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
+import org.apache.log4j.Logger;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
 
 /**
  * PcpMonitorBridge bridges between the set of {@link Monitorable}s in the current system and a PCP
  * monitor agent. The bridge works by persisting any changes to a Monitorable into a section of
  * memory that is also mapped into the PCP monitor agents address space.
  */
-public class PcpMonitorBridge extends AbstractMonitoringView {
+public class PcpMonitorBridge implements MonitoringView{
 
     private static final Logger LOG = Logger.getLogger(PcpMonitorBridge.class);
     
@@ -46,20 +43,16 @@ public class PcpMonitorBridge extends AbstractMonitoringView {
     private final TextSource longTextSource;
 
 	private volatile PcpWriter pcpWriter;
+    private boolean started;
 
 
     public PcpMonitorBridge(PcpWriter writer) {
-    	this(writer, MonitorableRegistry.DEFAULT_REGISTRY);
-    }
-
-    public PcpMonitorBridge(PcpWriter writer, MonitorableRegistry registry) {
-        this(writer, registry, MetricNameMapper.PASSTHROUGH_MAPPER, DEFAULT_SHORT_TEXT_SOURCE,
+        this(writer, MetricNameMapper.PASSTHROUGH_MAPPER, DEFAULT_SHORT_TEXT_SOURCE,
                 DEFAULT_LONG_TEXT_SOURCE);
     }
     
-    public PcpMonitorBridge(PcpWriter writer, MonitorableRegistry registry,
+    public PcpMonitorBridge(PcpWriter writer, 
             MetricNameMapper mapper, TextSource shortTextSource, TextSource longTextSource) {
-		super(registry);
 		this.pcpWriter = Preconditions.checkNotNull(writer);
 		this.mapper = Preconditions.checkNotNull(mapper);
         this.shortTextSource = Preconditions.checkNotNull(shortTextSource);
@@ -72,14 +65,24 @@ public class PcpMonitorBridge extends AbstractMonitoringView {
         for (Monitorable<?> monitorable : monitorables) {
             monitorable.removeMonitor(monitor);
         }
+        this.started = false;
+
+    }
+
+    @Override
+    public boolean isRunning() {
+        return started;
     }
 
     public boolean hasUpdatesPending() {
         return monitorablesPendingUpdate.size() > 0;
     }
 
+    // TODO synchronization checking
+    
     @Override
-    protected void startMonitoring(Collection<Monitorable<?>> monitorables) {
+    public void startMonitoring(Collection<Monitorable<?>> monitorables) {
+        // TODO precondition check on whether this is already started or not
         try {
             for (Monitorable<?> monitorable : monitorables) {
             	monitorable.attachMonitor(monitor);
@@ -91,6 +94,8 @@ public class PcpMonitorBridge extends AbstractMonitoringView {
                         monitorable, metricName), longTextSource.getText(monitorable, metricName));
             }
             pcpWriter.start();
+
+            this.started=true;
 
             LOG.info("PCP monitoring bridge started for writer [" + pcpWriter + "]");
         } catch (IOException e) {

@@ -1,5 +1,7 @@
 package com.custardsource.parfait;
 
+import java.util.Collection;
+
 /**
  * An output bridge for a particular set of Monitorables. A MonitoringView
  * provides a convenient lifecycle for an output destination to know when all
@@ -10,22 +12,21 @@ package com.custardsource.parfait;
  * subsystem is being shut down.
  */
 public interface MonitoringView {
+
     /**
-     * Starts monitoring all of the Monitorables contained withing the provided
-     * {@link MonitorableRegistry}. Is permitted to (but is not required to)
-     * 'freeze' the registry so that no further metrics can be added, if
-     * post-start addition of {@link Monitorable Monitorables} is not supported
-     * by the view.
+     * TODO properly document
+     * Begins, or resets the monitoring view state, if startMonitoring has been previously called
+     * then the owner of this instance should call stopMonitoring first.
      */
-    void start();
+    void startMonitoring(Collection<Monitorable<?>> monitorables);
 
     /**
      * Stops monitoring updates on the Monitorables in the provided registry.
      */
-    void stop();
+    void stopMonitoring(Collection<Monitorable<?>> monitorables);
 
     /**
-     * @return whether or not this view has been started with {@link #start()}
+     * @return whether or not this view has been started with {@link #startMonitoring(java.util.Collection)} ()}
      */
     boolean isRunning();
 }
