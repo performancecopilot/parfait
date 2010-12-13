@@ -41,4 +41,24 @@ public class PeriodicValueBuilderTest {
 		assertEquals(Unit.ONE.times(1000), registry.getMetric("foo.5s")
 				.getUnit());
 	}
+
+	@Test
+	public void wrapCounterShouldProduceNewMetricsWithCopiedValues() {
+		MonitoredCounter counter = new MonitoredCounter("plink", "plunk", registry, SI.FARAD);
+		builder.wrapCounter(counter);
+		assertTrue(registry.containsMetric("plink.5s"));
+		assertEquals("plunk [5s]", registry.getMetric("plink.5s").getDescription());
+		assertEquals(SI.FARAD, registry.getMetric("plink.5s")
+				.getUnit());
+	}
+
+	@Test
+	public void wrappedCounterShouldIncrementOriginalWhenIncremented() {
+		MonitoredCounter counter = new MonitoredCounter("iggle", "piggle", registry, SI.SIEVERT);
+		CompositeCounter wrapped = builder.wrapCounter(counter);
+		wrapped.inc(23);
+		assertEquals(Long.valueOf(23L), counter.get());
+		// TODO Should have this assertion, but neet better framework for PollingMonitoredValue
+		// assertEquals(Long.valueOf(23L), registry.getMetric("iggle.5s").get());
+	}
 }
