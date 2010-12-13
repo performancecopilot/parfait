@@ -12,7 +12,6 @@ public class PeriodicValueBuilder {
 	private final List<PeriodicValue> values = Lists.newArrayList();
 	private final Supplier<Long> timeSource;
 	private final Monitorable<Long> templateMonitorable;
-	private int updateInterval = 1000;
 	private final MonitorableRegistry registry;
 
 	public PeriodicValueBuilder(Monitorable<Long> templateMonitorable,
@@ -27,18 +26,13 @@ public class PeriodicValueBuilder {
 		this.timeSource = timeSource;
 	}
 
-	public PeriodicValueBuilder withUpdateInterval(int updateInterval) {
-		this.updateInterval = updateInterval;
-		return this;
-	}
-
-	public void addPeriod(long resolution, long period, String name) {
+	public void addPeriod(int resolution, long period, String name) {
 		final PeriodicValue value = new PeriodicValue(resolution, period,
 				timeSource);
 
 		new PollingMonitoredValue<Long>(templateMonitorable.getName() + "."
 				+ name, templateMonitorable.getDescription() + " [" + name
-				+ "]", registry, updateInterval, new Poller<Long>() {
+				+ "]", registry, resolution, new Poller<Long>() {
 			@Override
 			public Long poll() {
 				return value.get();
