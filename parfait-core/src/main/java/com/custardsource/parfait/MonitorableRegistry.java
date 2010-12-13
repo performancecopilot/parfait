@@ -106,4 +106,13 @@ public class MonitorableRegistry {
         }
         return instance;
     }
+
+	boolean containsMetric(String name) {
+		return monitorables.containsKey(name);
+	}
+
+	Monitorable<?> getMetric(String name) {
+		return monitorables.get(name);
+	}
+
 }

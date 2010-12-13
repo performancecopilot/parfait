@@ -2,15 +2,13 @@ package com.custardsource.parfait;
 
 import java.util.Arrays;
 
-import javax.measure.unit.Unit;
+import net.jcip.annotations.GuardedBy;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 
-import net.jcip.annotations.GuardedBy;
-
-public class PeriodicValue extends AbstractMonitorable<Long> implements Counter {
+public class PeriodicValue implements Counter {
 	static final Supplier<Long> SYSTEM_TIME_SOURCE = new Supplier<Long>() {
 		@Override
 		public Long get() {
@@ -31,15 +29,12 @@ public class PeriodicValue extends AbstractMonitorable<Long> implements Counter 
 	private final Object lock = new Object();
 	private final Supplier<Long> timeSource;
 
-	public PeriodicValue(String name, String description, Unit<?> unit,
+	public PeriodicValue(String name, String description, 
 			long resolution, long periodCovered) {
-		this(name, description, unit, resolution, periodCovered,
-				SYSTEM_TIME_SOURCE);
+		this(resolution, periodCovered, SYSTEM_TIME_SOURCE);
 	}
 
-	PeriodicValue(String name, String description, Unit<?> unit,
-			long resolution, long periodCovered, Supplier<Long> timeSource) {
-		super(name, description, Long.class, unit, ValueSemantics.FREE_RUNNING);
+	PeriodicValue(long resolution, long periodCovered, Supplier<Long> timeSource) {
 		Preconditions.checkArgument(resolution > 0L,
 				"resolution must be positive");
 		Preconditions.checkArgument(periodCovered > 0L,
@@ -76,7 +71,6 @@ public class PeriodicValue extends AbstractMonitorable<Long> implements Counter 
 		}
 	}
 
-	@Override
 	public Long get() {
 		synchronized (lock) {
 			cleanState();

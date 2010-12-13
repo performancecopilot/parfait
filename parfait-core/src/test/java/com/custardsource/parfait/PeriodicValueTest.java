@@ -4,8 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import javax.measure.unit.Unit;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -31,22 +29,22 @@ public class PeriodicValueTest {
 
 	@Test(expected=IllegalArgumentException.class)
 	public void constructionShouldRejectZeroPeriod() {
-		new PeriodicValue("foo", "foo", Unit.ONE, 100, 0);
+		new PeriodicValue("foo", "foo", 100, 0);
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void constructionShouldRejectZeroResolution() {
-		new PeriodicValue("foo", "foo", Unit.ONE, 0, 400);
+		new PeriodicValue("foo", "foo", 0, 400);
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void constructionShouldRejectPeriodNotMultipleOfResolution() {
-		new PeriodicValue("foo", "foo", Unit.ONE, 3, 10);
+		new PeriodicValue("foo", "foo", 3, 10);
 	}
 
 	@Test
 	public void incrementShouldUpdateValue() {
-		PeriodicValue value = new PeriodicValue("foo", "foo", Unit.ONE, 100, 1000);
+		PeriodicValue value = new PeriodicValue("foo", "foo", 100, 1000);
 		value.inc();
 		assertEquals(1L, value.get().longValue());
 		value.inc(5);
@@ -56,7 +54,7 @@ public class PeriodicValueTest {
 	
 	@Test
 	public void sameBucketShouldIncrementDuringSameResolution() {
-		PeriodicValue value = new PeriodicValue("foo", "foo", Unit.ONE, RESOLUTION, PERIOD, timeSource);
+		PeriodicValue value = new PeriodicValue(RESOLUTION, PERIOD, timeSource);
 		value.inc();
 		assertEquals("[1, 0, 0]", value.counterState());
 		currentTime.addAndGet(RESOLUTION - 1L);
@@ -68,7 +66,7 @@ public class PeriodicValueTest {
 	
 	@Test
 	public void nextBucketShouldIncrementAfterResolutionElapsed() {
-		PeriodicValue value = new PeriodicValue("foo", "foo", Unit.ONE, RESOLUTION, PERIOD, timeSource);
+		PeriodicValue value = new PeriodicValue(RESOLUTION, PERIOD, timeSource);
 		value.inc();
 		assertEquals("[1, 0, 0]", value.counterState());
 		currentTime.addAndGet(RESOLUTION);
@@ -80,7 +78,7 @@ public class PeriodicValueTest {
 	
 	@Test
 	public void bucketShouldOverwriteOldValuesAfterPeriod() {
-		PeriodicValue value = new PeriodicValue("foo", "foo", Unit.ONE, RESOLUTION, PERIOD, timeSource);
+		PeriodicValue value = new PeriodicValue(RESOLUTION, PERIOD, timeSource);
 		value.inc(3L);
 		assertEquals("[3, 0, 0]", value.counterState());
 		
@@ -101,7 +99,7 @@ public class PeriodicValueTest {
 	
 	@Test
 	public void getShouldCleanOldValues() {
-		PeriodicValue value = new PeriodicValue("foo", "foo", Unit.ONE, RESOLUTION, PERIOD, timeSource);
+		PeriodicValue value = new PeriodicValue(RESOLUTION, PERIOD, timeSource);
 		value.inc();
 		currentTime.addAndGet(PERIOD);
 		assertEquals(0L, value.get().longValue());
@@ -109,7 +107,7 @@ public class PeriodicValueTest {
 	
 	@Test
 	public void toStringShouldReturnExpectedFormat() {
-		PeriodicValue value = new PeriodicValue("foo", "foo", Unit.ONE, RESOLUTION, PERIOD, timeSource);
+		PeriodicValue value = new PeriodicValue(RESOLUTION, PERIOD, timeSource);
 		value.inc();
 		assertEquals("last 3000ms=1", value.toString());
 	}	
