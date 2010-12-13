@@ -29,6 +29,12 @@ public class PeriodicValueBuilder {
 	}
 
 	public CompositeCounter build(String baseName, String baseDescription, Unit<?> unit) {
+		List<Counter> values = getSubCounters(baseName, baseDescription, unit);
+		return new CompositeCounter(values);
+	}
+
+	private List<Counter> getSubCounters(String baseName,
+			String baseDescription, Unit<?> unit) {
 		List<Counter> values = Lists.newArrayList();
 		for (Period period : periods) {
 			final PeriodicValue value = new PeriodicValue(period.getResolution(), period.getPeriod(),
@@ -45,12 +51,19 @@ public class PeriodicValueBuilder {
 			
 			values.add(value);
 		}
-		return new CompositeCounter(values);
+		return values;
 	}
 	
 	public CompositeCounter copyFrom(Monitorable<?> templateMonitorable) {
 		return build(templateMonitorable.getName(), templateMonitorable.getDescription(),
 				templateMonitorable.getUnit());
+	}
+
+	public CompositeCounter wrapCounter(MonitoredCounter templateCounter) {
+		List<Counter> subCounters = Lists.<Counter>newArrayList(templateCounter);
+		subCounters.addAll(getSubCounters(templateCounter.getName(), templateCounter.getDescription(),
+				templateCounter.getUnit()));
+		return new CompositeCounter(subCounters);
 	}
 	
 	public static final class Period {
