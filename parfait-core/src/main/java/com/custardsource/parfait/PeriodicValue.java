@@ -11,7 +11,7 @@ import com.google.common.base.Supplier;
 import net.jcip.annotations.GuardedBy;
 
 public class PeriodicValue extends AbstractMonitorable<Long> implements Counter {
-	private static final Supplier<Long> SYSTEM_TIME_SOURCE = new Supplier<Long>() {
+	static final Supplier<Long> SYSTEM_TIME_SOURCE = new Supplier<Long>() {
 		@Override
 		public Long get() {
 			return System.currentTimeMillis();
@@ -63,6 +63,7 @@ public class PeriodicValue extends AbstractMonitorable<Long> implements Counter 
 		}
 	}
 
+	@GuardedBy("lock")
 	private void cleanState() {
 		long eventTime = timeSource.get();
 		long bucketsToSkip = (eventTime - headTime) / resolution;
