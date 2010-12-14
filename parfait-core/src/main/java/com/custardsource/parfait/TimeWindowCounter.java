@@ -29,8 +29,7 @@ public class TimeWindowCounter implements Counter {
 	private final Object lock = new Object();
 	private final Supplier<Long> timeSource;
 
-	public TimeWindowCounter(String name, String description, 
-			long resolution, long periodCovered) {
+	public TimeWindowCounter(long resolution, long periodCovered) {
 		this(resolution, periodCovered, SYSTEM_TIME_SOURCE);
 	}
 

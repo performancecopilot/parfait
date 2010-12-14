@@ -29,22 +29,22 @@ public class TimeWindowCounterTest {
 
 	@Test(expected=IllegalArgumentException.class)
 	public void constructionShouldRejectZeroPeriod() {
-		new TimeWindowCounter("foo", "foo", 100, 0);
+		new TimeWindowCounter(100, 0);
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void constructionShouldRejectZeroResolution() {
-		new TimeWindowCounter("foo", "foo", 0, 400);
+		new TimeWindowCounter(0, 400);
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void constructionShouldRejectPeriodNotMultipleOfResolution() {
-		new TimeWindowCounter("foo", "foo", 3, 10);
+		new TimeWindowCounter(3, 10);
 	}
 
 	@Test
 	public void incrementShouldUpdateValue() {
-		TimeWindowCounter counter = new TimeWindowCounter("foo", "foo", 100, 1000);
+		TimeWindowCounter counter = new TimeWindowCounter(100, 1000);
 		counter.inc();
 		assertEquals(1L, counter.get().longValue());
 		counter.inc(5);
