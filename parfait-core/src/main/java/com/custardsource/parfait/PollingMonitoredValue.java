@@ -48,12 +48,18 @@ public class PollingMonitoredValue<T> extends SettableValue<T> {
      */
     public PollingMonitoredValue(String name, String description, MonitorableRegistry registry, int updateInterval,
             Poller<T> poller, ValueSemantics semantics, Unit<?> unit) {
-        super(name, description, registry, poller.poll(), unit, semantics);
-        this.poller = poller;
-        Preconditions.checkState(updateInterval >= MIN_UPDATE_INTERVAL,
-                "updateInterval is too short.");
-        POLLING_TIMER.scheduleAtFixedRate(new PollerTask(), updateInterval, updateInterval);
+    	this(name, description, registry, updateInterval, poller, semantics, unit, SHARED_TIMER_SCHEDULER);
     }
+
+	public PollingMonitoredValue(String name, String description,
+			MonitorableRegistry registry, int updateInterval, Poller<T> poller,
+			ValueSemantics semantics, Unit<?> unit, Scheduler scheduler) {
+		super(name, description, registry, poller.poll(), unit, semantics);
+		this.poller = poller;
+		Preconditions.checkState(updateInterval >= MIN_UPDATE_INTERVAL,
+				"updateInterval is too short.");
+		scheduler.schedule(new PollerTask(), updateInterval);
+	}
 
     @Override
     public String toString() {
@@ -70,4 +76,14 @@ public class PollingMonitoredValue<T> extends SettableValue<T> {
             }
         }
     }
+    
+    interface Scheduler {
+    	public void schedule(TimerTask task, int rate);
+    }
+    
+    private static Scheduler SHARED_TIMER_SCHEDULER = new Scheduler() {
+		@Override
+		public void schedule(TimerTask task, int rate) {
+			POLLING_TIMER.scheduleAtFixedRate(task, rate, rate);
+		}};
 }
