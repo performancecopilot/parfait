@@ -10,48 +10,48 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
 
 @NotThreadSafe
-public class PeriodicValueBuilder {
-	private final List<Period> periods = Lists.newArrayList();
+public class TimeWindowCounterBuilder {
+	private final List<TimeWindow> timeWindows = Lists.newArrayList();
 	private final Supplier<Long> timeSource;
 	private final MonitorableRegistry registry;
 
-	public PeriodicValueBuilder(MonitorableRegistry registry) {
-		this(PeriodicValue.SYSTEM_TIME_SOURCE, registry);
+	public TimeWindowCounterBuilder(MonitorableRegistry registry) {
+		this(TimeWindowCounter.SYSTEM_TIME_SOURCE, registry);
 	}
 
-	PeriodicValueBuilder(Supplier<Long> timeSource, MonitorableRegistry registry) {
+	TimeWindowCounterBuilder(Supplier<Long> timeSource, MonitorableRegistry registry) {
 		this.registry = registry;
 		this.timeSource = timeSource;
 	}
 
-	public void addPeriod(Period period) {
-		periods.add(period);
+	public void addWindow(TimeWindow window) {
+		timeWindows.add(window);
 	}
 
 	public CompositeCounter build(String baseName, String baseDescription, Unit<?> unit) {
-		List<Counter> values = getSubCounters(baseName, baseDescription, unit);
-		return new CompositeCounter(values);
+		List<Counter> counters = getSubCounters(baseName, baseDescription, unit);
+		return new CompositeCounter(counters);
 	}
 
 	private List<Counter> getSubCounters(String baseName,
 			String baseDescription, Unit<?> unit) {
-		List<Counter> values = Lists.newArrayList();
-		for (Period period : periods) {
-			final PeriodicValue value = new PeriodicValue(period.getResolution(), period.getPeriod(),
+		List<Counter> counters = Lists.newArrayList();
+		for (TimeWindow timeWindow : timeWindows) {
+			final TimeWindowCounter value = new TimeWindowCounter(timeWindow.getResolution(), timeWindow.getPeriod(),
 					timeSource);
 			
 			new PollingMonitoredValue<Long>(baseName + "."
-					+ period.getName(), baseDescription + " [" + period.getName()
-					+ "]", registry, period.getResolution(), new Poller<Long>() {
+					+ timeWindow.getName(), baseDescription + " [" + timeWindow.getName()
+					+ "]", registry, timeWindow.getResolution(), new Poller<Long>() {
 				@Override
 				public Long poll() {
 					return value.get();
 				}
 			}, ValueSemantics.FREE_RUNNING, unit);
 			
-			values.add(value);
+			counters.add(value);
 		}
-		return values;
+		return counters;
 	}
 	
 	public CompositeCounter copyFrom(Monitorable<?> templateMonitorable) {
@@ -66,12 +66,12 @@ public class PeriodicValueBuilder {
 		return new CompositeCounter(subCounters);
 	}
 	
-	public static final class Period {
+	public static final class TimeWindow {
 		private final int resolution;
 		private final long period;
 		private final String name;
 		
-		private Period(int resolution, long period, String name) {
+		private TimeWindow(int resolution, long period, String name) {
 			this.resolution = resolution;
 			this.period = period;
 			this.name = name;
@@ -89,8 +89,8 @@ public class PeriodicValueBuilder {
 			return period;
 		}
 		
-		public static Period of(int resolution, long period, String name) {
-			return new Period(resolution, period, name);
+		public static TimeWindow of(int resolution, long period, String name) {
+			return new TimeWindow(resolution, period, name);
 		}
 	}
 }

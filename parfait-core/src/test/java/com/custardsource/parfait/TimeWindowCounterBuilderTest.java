@@ -9,20 +9,20 @@ import javax.measure.unit.Unit;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.custardsource.parfait.PeriodicValueBuilder.Period;
+import com.custardsource.parfait.TimeWindowCounterBuilder.TimeWindow;
 
-public class PeriodicValueBuilderTest {
+public class TimeWindowCounterBuilderTest {
 	private MonitorableRegistry registry;
 	private Monitorable<Long> template;
-	private PeriodicValueBuilder builder;
+	private TimeWindowCounterBuilder builder;
 
 	@Before
 	public void setUp() {
 		registry = new MonitorableRegistry();
 		template = new MonitoredCounter("foo", "bar", registry,
 				Unit.ONE.times(1000));
-		builder = new PeriodicValueBuilder(registry);
-		builder.addPeriod(Period.of(1000, 5000, "5s"));
+		builder = new TimeWindowCounterBuilder(registry);
+		builder.addWindow(TimeWindow.of(1000, 5000, "5s"));
 	}
 
 	@Test

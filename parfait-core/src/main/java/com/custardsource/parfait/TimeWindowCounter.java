@@ -8,7 +8,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 
-public class PeriodicValue implements Counter {
+public class TimeWindowCounter implements Counter {
 	static final Supplier<Long> SYSTEM_TIME_SOURCE = new Supplier<Long>() {
 		@Override
 		public Long get() {
@@ -29,12 +29,12 @@ public class PeriodicValue implements Counter {
 	private final Object lock = new Object();
 	private final Supplier<Long> timeSource;
 
-	public PeriodicValue(String name, String description, 
+	public TimeWindowCounter(String name, String description, 
 			long resolution, long periodCovered) {
 		this(resolution, periodCovered, SYSTEM_TIME_SOURCE);
 	}
 
-	PeriodicValue(long resolution, long periodCovered, Supplier<Long> timeSource) {
+	TimeWindowCounter(long resolution, long periodCovered, Supplier<Long> timeSource) {
 		Preconditions.checkArgument(resolution > 0L,
 				"resolution must be positive");
 		Preconditions.checkArgument(periodCovered > 0L,
