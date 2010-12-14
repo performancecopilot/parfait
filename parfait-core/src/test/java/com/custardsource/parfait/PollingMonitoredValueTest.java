@@ -9,6 +9,7 @@ import javax.measure.unit.Unit;
 
 import org.junit.Test;
 
+import com.google.common.base.Supplier;
 import com.google.common.collect.Maps;
 
 public class PollingMonitoredValueTest {
@@ -57,10 +58,11 @@ public class PollingMonitoredValueTest {
 
 	}
 
-	private final class TestPoller implements Poller<Integer> {
+	
+	private final class TestPoller implements Supplier<Integer> {
 		private int value = 0;
 
-		public Integer poll() {
+		public Integer get() {
 			return value;
 		}
 	}

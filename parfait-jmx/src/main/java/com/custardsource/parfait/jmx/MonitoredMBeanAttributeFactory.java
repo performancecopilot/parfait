@@ -17,12 +17,13 @@ import com.custardsource.parfait.Monitorable;
 import com.custardsource.parfait.MonitorableRegistry;
 import com.custardsource.parfait.MonitoredConstant;
 import com.custardsource.parfait.MonitoredValue;
-import com.custardsource.parfait.Poller;
 import com.custardsource.parfait.PollingMonitoredValue;
 import com.custardsource.parfait.ValueSemantics;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.common.base.Supplier;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.jmx.support.JmxUtils;
@@ -136,9 +137,9 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean<Monitorabl
         if (isConstant()) {
         	return new MonitoredConstant<T>(name, description, getAttributeValue());
         } else {
-        	return new PollingMonitoredValue<T>(name, description, monitorableRegistry, updateInterval, new Poller<T>() {
+        	return new PollingMonitoredValue<T>(name, description, monitorableRegistry, updateInterval, new Supplier<T>() {
         		
-        		public T poll() {
+        		public T get() {
         			return getAttributeValue();
         		}
         		
