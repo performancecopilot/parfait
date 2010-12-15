@@ -1,5 +1,7 @@
 package com.custardsource.parfait;
 
+import net.jcip.annotations.ThreadSafe;
+
 import com.google.common.base.Preconditions;
 
 /**
@@ -7,14 +9,9 @@ import com.google.common.base.Preconditions;
  * delta over a limited, sliding time window. For example, the number of
  * requests served or bytes written in the last 60 seconds. Takes both a period
  * (the amount of time represented by each window), and a resolution (the
- * duration at which events will be grouped together). For example, a period of
- * 60 seconds and a resolution of 5 seconds will create 12 buckets to keep count
- * of events. This means that as each bucket is overwritten after 60 seconds,
- * the total count may be understated by as much as (5/60) = 8%. This, however,
- * means that the memory footprint is approximately that of just the 12
- * counters, rather than having to track the time of each individual event.
- * 
+ * duration at which events will be clustered together).
  */
+@ThreadSafe
 public final class TimeWindow {
 	private final int resolution;
 	private final long period;
