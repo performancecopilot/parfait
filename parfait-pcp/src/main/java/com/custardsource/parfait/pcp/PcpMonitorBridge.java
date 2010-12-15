@@ -61,11 +61,12 @@ public class PcpMonitorBridge implements MonitoringView{
 
     @Override
     public void stopMonitoring(Collection<Monitorable<?>> monitorables) {
-        pcpWriter = null;
         for (Monitorable<?> monitorable : monitorables) {
             monitorable.removeMonitor(monitor);
         }
         this.started = false;
+
+        pcpWriter.reset();
 
     }
 

@@ -4,16 +4,21 @@ import com.custardsource.parfait.DummyMonitorable;
 import com.custardsource.parfait.Monitorable;
 import com.custardsource.parfait.MonitorableRegistry;
 import com.custardsource.parfait.MonitoringView;
+import com.custardsource.parfait.dxm.IdentifierSourceSet;
+import com.custardsource.parfait.dxm.InMemoryByteBufferFactory;
+import com.custardsource.parfait.dxm.PcpMmvWriter;
+import com.custardsource.parfait.dxm.PcpWriter;
+import com.custardsource.parfait.pcp.PcpMonitorBridge;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -25,12 +30,13 @@ public class SelfStartingMonitoringViewTest {
 
     List<Monitorable<?>> monitorables = Collections.<Monitorable<?>>singletonList(new DummyMonitorable("foo"));
 
-    @Mock MonitoringView monitoringView;
-    
+    @Mock
+    MonitoringView monitoringView;
+
     private SelfStartingMonitoringView selfStartingMonitoringView;
 
     @Before
-    public void setUp(){
+    public void setUp() {
         MockitoAnnotations.initMocks(this);
         selfStartingMonitoringView = new SelfStartingMonitoringView(monitorableRegistry, monitoringView, 2000);
         when(monitorableRegistry.getMonitorables()).thenReturn(monitorables);
@@ -58,5 +64,47 @@ public class SelfStartingMonitoringViewTest {
         selfStartingMonitoringView.start();
         when(monitoringView.isRunning()).thenReturn(true);
         assertTrue(selfStartingMonitoringView.isRunning());
+    }
+
+    @Test
+    public void testMetricsAddedLaterAppear() {
+
+        final InMemoryByteBufferFactory bufferFactory = new InMemoryByteBufferFactory();
+        final PcpWriter writer = new PcpMmvWriter(bufferFactory, IdentifierSourceSet.DEFAULT_SET);
+        final PcpMonitorBridge pcpMonitorBridge = new PcpMonitorBridge(writer);
+        final MonitorableRegistry registry = new MonitorableRegistry();
+        final SelfStartingMonitoringView dynamicallyModifiedView = new SelfStartingMonitoringView(registry, pcpMonitorBridge, 1000);
+
+        registry.register(new DummyMonitorable("foo"));
+
+        dynamicallyModifiedView.start();
+
+        ByteBuffer buffer = bufferFactory.getAllocatedBuffer();
+
+        assertEquals(1, bufferFactory.getNumAllocations());
+
+        assertBufferContainsExpectedStrings(buffer, "foo");
+
+        registry.register(new DummyMonitorable("eek"));
+
+        try {
+            Thread.sleep(2500);
+        } catch (Exception e) {
+        }
+
+        assertEquals("Expected only 2 Buffer allocations", 2, bufferFactory.getNumAllocations());
+
+        buffer = bufferFactory.getAllocatedBuffer();
+
+        assertBufferContainsExpectedStrings(buffer, "eek");
+
+    }
+
+    /**
+     *  TODO this probably isn't the best/most accurate way to assert these conditions, but it does kinda work..
+     */
+    private void assertBufferContainsExpectedStrings(ByteBuffer buffer, final CharSequence expectedString) {
+        final String stringVersion = new String(buffer.array(), PcpMmvWriter.PCP_CHARSET);
+        assertTrue(stringVersion.contains(expectedString));
     }
 }

@@ -1,11 +1,15 @@
 package com.custardsource.parfait.dxm;
 
+import com.custardsource.parfait.dxm.semantics.Semantics;
+import com.custardsource.parfait.dxm.types.DefaultTypeHandlers;
+import com.custardsource.parfait.dxm.types.TypeHandler;
+import com.google.common.collect.Maps;
+import net.jcip.annotations.GuardedBy;
+
+import javax.measure.unit.Unit;
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.channels.FileChannel.MapMode;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,17 +19,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import javax.measure.unit.Unit;
-
-import com.custardsource.parfait.dxm.semantics.Semantics;
-import com.custardsource.parfait.dxm.types.DefaultTypeHandlers;
-import com.custardsource.parfait.dxm.types.TypeHandler;
-import com.google.common.collect.Maps;
-import net.jcip.annotations.GuardedBy;
-
 public abstract class BasePcpWriter implements PcpWriter {
 	// TODO only include in-use indoms/instances/metrics (/strings?) in the header
-	private final File dataFile;
 	private final Store<PcpMetricInfo> metricInfoStore;
     private final Store<InstanceDomain> instanceDomainStore;
 	
@@ -36,9 +31,15 @@ public abstract class BasePcpWriter implements PcpWriter {
     @GuardedBy("itself")
     private volatile ByteBuffer dataFileBuffer = null;
     private final Collection<PcpString> stringInfo = new CopyOnWriteArrayList<PcpString>();
+    private final ByteBufferFactory byteBufferFactory;
 
-    protected BasePcpWriter(File dataFile, IdentifierSourceSet identifierSources) {
-        this.dataFile = dataFile;
+
+    protected BasePcpWriter(File file, IdentifierSourceSet identifierSources) {
+        this(new FileByteBufferFactory(file), identifierSources);
+    }
+    
+    protected BasePcpWriter(ByteBufferFactory byteBufferFactory, IdentifierSourceSet identifierSources) {
+        this.byteBufferFactory = byteBufferFactory;
         this.metricInfoStore = new MetricInfoStore(identifierSources);
         this.instanceDomainStore = new InstanceDomainStore(identifierSources);
     }
@@ -94,14 +95,9 @@ public abstract class BasePcpWriter implements PcpWriter {
      * @see com.custardsource.parfait.pcp.PcpWriter#start()
      */
     public final void start() throws IOException {
-        if (started) {
-            throw new IllegalStateException("Writer is already started");
-        }
-        if (metricData.isEmpty()) {
-            throw new IllegalStateException("Cannot create an MMV file with no metrics");
-        }
         initialiseOffsets();
-        dataFileBuffer = initialiseBuffer(dataFile, getFileLength());
+
+        dataFileBuffer = byteBufferFactory.build(getDataLength());
         synchronized (dataFileBuffer) {
             populateDataBuffer(dataFileBuffer, metricData.values());
         }
@@ -133,34 +129,6 @@ public abstract class BasePcpWriter implements PcpWriter {
         }
     }
 
-    private ByteBuffer initialiseBuffer(File file, int length) throws IOException {
-        RandomAccessFile fos = null;
-        try {
-            if (file.getParentFile().exists()) {
-                file.delete();  /* directory update visible to MMV PMDA */
-                if (file.exists()) {
-                    throw new RuntimeException(
-                            "Could not delete existing file "
-                            + file.getCanonicalPath());
-                }
-            } else if (!file.getParentFile().mkdirs()) {
-				throw new RuntimeException(
-                            "Could not create output directory "
-                            + file.getParentFile().getCanonicalPath());
-            }
-            fos = new RandomAccessFile(file, "rw");
-            fos.setLength(length);
-            ByteBuffer tempDataFile = fos.getChannel().map(MapMode.READ_WRITE, 0, length);
-            tempDataFile.order(ByteOrder.nativeOrder());
-            fos.close();
-
-            return tempDataFile;
-        } finally {
-            if (fos != null) {
-                fos.close();
-            }
-        }
-    }
 
     protected abstract void initialiseOffsets();
 
@@ -177,7 +145,7 @@ public abstract class BasePcpWriter implements PcpWriter {
 
     protected abstract Charset getCharset();
 
-    protected abstract int getFileLength();
+    protected abstract int getDataLength();
 
     protected final PcpMetricInfo getMetricInfo(String name) {
     	return metricInfoStore.byName(name);
@@ -210,17 +178,14 @@ public abstract class BasePcpWriter implements PcpWriter {
     protected final Collection<PcpString> getStrings() {
         return stringInfo;
     }
-    
-    protected final File getDataFile() {
-    	return dataFile;
+
+    @Override
+    public void reset() {
+        metricData.clear();
     }
-
-
+    
     private synchronized void addMetricInfo(MetricName name, Semantics semantics, Unit<?> unit,
             Object initialValue, TypeHandler<?> pcpType) {
-        if (started) {
-            throw new IllegalStateException("Cannot add metric " + name + " after starting");
-        }
         if (metricData.containsKey(name)) {
             throw new IllegalArgumentException("Metric " + name
                     + " has already been added to writer");
