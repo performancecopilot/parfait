@@ -9,7 +9,6 @@ import javax.measure.unit.Unit;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.custardsource.parfait.TimeWindowCounterBuilder.TimeWindow;
 
 public class TimeWindowCounterBuilderTest {
 	private MonitorableRegistry registry;
@@ -21,8 +20,7 @@ public class TimeWindowCounterBuilderTest {
 		registry = new MonitorableRegistry();
 		template = new MonitoredCounter("foo", "bar", registry,
 				Unit.ONE.times(1000));
-		builder = new TimeWindowCounterBuilder(registry);
-		builder.addWindow(TimeWindow.of(1000, 5000, "5s"));
+		builder = new TimeWindowCounterBuilder(registry, TimeWindow.of(1000, 5000, "5s"));
 	}
 
 	@Test

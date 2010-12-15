@@ -10,8 +10,9 @@ import org.junit.Test;
 import com.google.common.base.Supplier;
 
 public class TimeWindowCounterTest {
-	private static final long RESOLUTION = 1000L;
+	private static final int RESOLUTION = 1000;
 	private static final long PERIOD = 3 * RESOLUTION;
+	private static final TimeWindow WINDOW = TimeWindow.of(RESOLUTION, PERIOD, "3s");
 	
 	private AtomicLong currentTime = new AtomicLong();
 	private final Supplier<Long> timeSource = new Supplier<Long>() {
@@ -20,31 +21,17 @@ public class TimeWindowCounterTest {
 			return currentTime.get();
 		}
 	};
+	private TimeWindowCounter counter;
 	
 	@Before
 	public void setUp() {
 	   currentTime.set(0L);	
+	   counter = new TimeWindowCounter(WINDOW, timeSource);
 	}
 	
 
-	@Test(expected=IllegalArgumentException.class)
-	public void constructionShouldRejectZeroPeriod() {
-		new TimeWindowCounter(100, 0);
-	}
-
-	@Test(expected=IllegalArgumentException.class)
-	public void constructionShouldRejectZeroResolution() {
-		new TimeWindowCounter(0, 400);
-	}
-
-	@Test(expected=IllegalArgumentException.class)
-	public void constructionShouldRejectPeriodNotMultipleOfResolution() {
-		new TimeWindowCounter(3, 10);
-	}
-
 	@Test
 	public void incrementShouldUpdateValue() {
-		TimeWindowCounter counter = new TimeWindowCounter(100, 1000);
 		counter.inc();
 		assertEquals(1L, counter.get().longValue());
 		counter.inc(5);
@@ -54,7 +41,6 @@ public class TimeWindowCounterTest {
 	
 	@Test
 	public void sameBucketShouldIncrementDuringSameResolution() {
-		TimeWindowCounter counter = new TimeWindowCounter(RESOLUTION, PERIOD, timeSource);
 		counter.inc();
 		assertEquals("[1, 0, 0]", counter.counterState());
 		currentTime.addAndGet(RESOLUTION - 1L);
@@ -66,7 +52,6 @@ public class TimeWindowCounterTest {
 	
 	@Test
 	public void nextBucketShouldIncrementAfterResolutionElapsed() {
-		TimeWindowCounter counter = new TimeWindowCounter(RESOLUTION, PERIOD, timeSource);
 		counter.inc();
 		assertEquals("[1, 0, 0]", counter.counterState());
 		currentTime.addAndGet(RESOLUTION);
@@ -78,7 +63,6 @@ public class TimeWindowCounterTest {
 	
 	@Test
 	public void bucketShouldOverwriteOldValuesAfterPeriod() {
-		TimeWindowCounter counter = new TimeWindowCounter(RESOLUTION, PERIOD, timeSource);
 		counter.inc(3L);
 		assertEquals("[3, 0, 0]", counter.counterState());
 		
@@ -99,7 +83,6 @@ public class TimeWindowCounterTest {
 	
 	@Test
 	public void getShouldCleanOldValues() {
-		TimeWindowCounter counter = new TimeWindowCounter(RESOLUTION, PERIOD, timeSource);
 		counter.inc();
 		currentTime.addAndGet(PERIOD);
 		assertEquals(0L, counter.get().longValue());
@@ -107,8 +90,7 @@ public class TimeWindowCounterTest {
 	
 	@Test
 	public void toStringShouldReturnExpectedFormat() {
-		TimeWindowCounter counter = new TimeWindowCounter(RESOLUTION, PERIOD, timeSource);
 		counter.inc();
-		assertEquals("last 3000ms=1", counter.toString());
+		assertEquals("last 3s=1", counter.toString());
 	}	
 }

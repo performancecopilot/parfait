@@ -5,7 +5,6 @@ import java.util.Arrays;
 import net.jcip.annotations.GuardedBy;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 
 public class TimeWindowCounter implements Counter {
@@ -15,8 +14,6 @@ public class TimeWindowCounter implements Counter {
 			return System.currentTimeMillis();
 		}
 	};
-	private final long resolution;
-	private final long periodCovered;
 	@GuardedBy("lock")
 	private long overallValue;
 	@GuardedBy("lock")
@@ -28,22 +25,15 @@ public class TimeWindowCounter implements Counter {
 
 	private final Object lock = new Object();
 	private final Supplier<Long> timeSource;
+	private final TimeWindow window;
 
-	public TimeWindowCounter(long resolution, long periodCovered) {
-		this(resolution, periodCovered, SYSTEM_TIME_SOURCE);
+	public TimeWindowCounter(TimeWindow window) {
+		this(window, SYSTEM_TIME_SOURCE);
 	}
 
-	TimeWindowCounter(long resolution, long periodCovered, Supplier<Long> timeSource) {
-		Preconditions.checkArgument(resolution > 0L,
-				"resolution must be positive");
-		Preconditions.checkArgument(periodCovered > 0L,
-				"period covered must be positive");
-		Preconditions.checkArgument(periodCovered % resolution == 0,
-				"period covered %s must be divisible by resolution %s",
-				periodCovered, resolution);
-		this.resolution = resolution;
-		this.periodCovered = periodCovered;
-		this.interimValues = new long[(int) (periodCovered / resolution)];
+	TimeWindowCounter(TimeWindow window, Supplier<Long> timeSource) {
+		this.window = window;
+		this.interimValues = new long[(int) (window.getBuckets())];
 		this.timeSource = timeSource;
 		this.headTime = timeSource.get();
 	}
@@ -60,13 +50,13 @@ public class TimeWindowCounter implements Counter {
 	@GuardedBy("lock")
 	private void cleanState() {
 		long eventTime = timeSource.get();
-		long bucketsToSkip = (eventTime - headTime) / resolution;
+		long bucketsToSkip = (eventTime - headTime) / window.getResolution();
 		while (bucketsToSkip > 0) {
 			head = (head + 1) % interimValues.length;
 			bucketsToSkip--;
 			overallValue -= interimValues[head];
 			interimValues[head] = 0L;
-			headTime += resolution;
+			headTime += window.getResolution();
 		}
 	}
 
@@ -84,7 +74,7 @@ public class TimeWindowCounter implements Counter {
 
 	@Override
 	public String toString() {
-		return String.format("last %sms=%s", periodCovered, overallValue);
+		return String.format("last %s=%s", window.getName(), overallValue);
 	}
 	
 	@VisibleForTesting
