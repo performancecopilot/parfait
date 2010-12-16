@@ -37,6 +37,7 @@ public class SelfStartingMonitoringView implements Lifecycle {
         this.quietPeriodInMillis = quietPeriodInMillis;
     }
 
+    // TODO Pass in a MonitorableRegistryListener in a constructor so we can make unit tests even easier.  
     @Override
     public void start() {
         previouslySeenMonitorables = monitorableRegistry.getMonitorables();
@@ -56,7 +57,7 @@ public class SelfStartingMonitoringView implements Lifecycle {
         monitorableRegistry.removeRegistryListener(quiescentRegistryListener);
         this.quiescentRegistryListener.stop();
 
-        if (previouslySeenMonitorables.size() > 0) {
+        if (!previouslySeenMonitorables.isEmpty()) {
             monitoringView.stopMonitoring(previouslySeenMonitorables);
         }
     }

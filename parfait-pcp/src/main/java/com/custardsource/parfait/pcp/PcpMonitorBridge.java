@@ -21,10 +21,10 @@ import java.util.concurrent.ArrayBlockingQueue;
  * monitor agent. The bridge works by persisting any changes to a Monitorable into a section of
  * memory that is also mapped into the PCP monitor agents address space.
  */
-public class PcpMonitorBridge implements MonitoringView{
+public class PcpMonitorBridge implements MonitoringView {
 
     private static final Logger LOG = Logger.getLogger(PcpMonitorBridge.class);
-    
+
     private static final TextSource DEFAULT_SHORT_TEXT_SOURCE = new MetricDescriptionTextSource();
     private static final TextSource DEFAULT_LONG_TEXT_SOURCE = new EmptyTextSource();
 
@@ -35,26 +35,26 @@ public class PcpMonitorBridge implements MonitoringView{
             Semantics.INSTANT, ValueSemantics.MONOTONICALLY_INCREASING, Semantics.COUNTER);
 
     private final ArrayBlockingQueue<Monitorable<?>> monitorablesPendingUpdate = new ArrayBlockingQueue<Monitorable<?>>(
-    		UPDATE_QUEUE_SIZE);
+            UPDATE_QUEUE_SIZE);
 
     private final Monitor monitor = new PcpMonitorBridgeMonitor();
     private final MetricNameMapper mapper;
     private final TextSource shortTextSource;
     private final TextSource longTextSource;
 
-	private volatile PcpWriter pcpWriter;
-    private boolean started;
+    private volatile PcpWriter pcpWriter;
+    private volatile boolean started;
 
 
     public PcpMonitorBridge(PcpWriter writer) {
         this(writer, MetricNameMapper.PASSTHROUGH_MAPPER, DEFAULT_SHORT_TEXT_SOURCE,
                 DEFAULT_LONG_TEXT_SOURCE);
     }
-    
-    public PcpMonitorBridge(PcpWriter writer, 
-            MetricNameMapper mapper, TextSource shortTextSource, TextSource longTextSource) {
-		this.pcpWriter = Preconditions.checkNotNull(writer);
-		this.mapper = Preconditions.checkNotNull(mapper);
+
+    public PcpMonitorBridge(PcpWriter writer,
+                            MetricNameMapper mapper, TextSource shortTextSource, TextSource longTextSource) {
+        this.pcpWriter = Preconditions.checkNotNull(writer);
+        this.mapper = Preconditions.checkNotNull(mapper);
         this.shortTextSource = Preconditions.checkNotNull(shortTextSource);
         this.longTextSource = Preconditions.checkNotNull(longTextSource);
     }
@@ -80,14 +80,14 @@ public class PcpMonitorBridge implements MonitoringView{
     }
 
     // TODO synchronization checking
-    
+
     @Override
     public void startMonitoring(Collection<Monitorable<?>> monitorables) {
         // TODO precondition check on whether this is already started or not
         try {
             for (Monitorable<?> monitorable : monitorables) {
-            	monitorable.attachMonitor(monitor);
-            	MetricName metricName = mapper.map(monitorable.getName());
+                monitorable.attachMonitor(monitor);
+                MetricName metricName = mapper.map(monitorable.getName());
                 pcpWriter.addMetric(metricName,
                         convertToPcpSemantics(monitorable.getSemantics()), monitorable.getUnit(),
                         monitorable.get());
@@ -96,7 +96,7 @@ public class PcpMonitorBridge implements MonitoringView{
             }
             pcpWriter.start();
 
-            this.started=true;
+            this.started = true;
 
             LOG.info("PCP monitoring bridge started for writer [" + pcpWriter + "]");
         } catch (IOException e) {

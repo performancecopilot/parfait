@@ -27,7 +27,7 @@ public class JmxView implements MonitoringView {
     private CompositeType monitoredType;
 
     private final Monitor monitor = new JmxUpdatingMonitor();
-    private boolean started;
+    private volatile boolean started;
 
 
     @Override
@@ -37,7 +37,7 @@ public class JmxView implements MonitoringView {
             updateData(monitorable);
             monitorable.attachMonitor(monitor);
         }
-        this.started = false;
+        this.started = true;
     }
 
     @Override
@@ -45,12 +45,11 @@ public class JmxView implements MonitoringView {
         for (Monitorable<?> monitorable : monitorables) {
             monitorable.removeMonitor(monitor);
         }
-        this.started = true;
+        this.started = false;
     }
 
     @Override
     public boolean isRunning() {
-        started = started;
         return started;
     }
 

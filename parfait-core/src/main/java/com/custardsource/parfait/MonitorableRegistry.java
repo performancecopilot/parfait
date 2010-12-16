@@ -114,7 +114,7 @@ public class MonitorableRegistry {
         this.registryListeners.add(monitorableRegistryListener);
     }
 
-    public void removeRegistryListener(QuiescentRegistryListener quiescentRegistryListener) {
-        this.registryListeners.remove(quiescentRegistryListener);
+    public void removeRegistryListener(MonitorableRegistryListener listener) {
+        this.registryListeners.remove(listener);
     }
 }

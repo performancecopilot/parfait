@@ -12,7 +12,6 @@ public class InMemoryByteBufferFactory implements ByteBufferFactory{
 
     @Override
     public ByteBuffer build(int length) throws IOException {
-        byteBuffer = this.byteBuffer;
         byteBuffer =  ByteBuffer.allocate(length);
         numAllocations++;
         return byteBuffer;
@@ -22,7 +21,6 @@ public class InMemoryByteBufferFactory implements ByteBufferFactory{
      * Returns the _last_ allocated ByteBuffer used during creation, so that further inspection can be done during unit tests.
      *
      * You are reminded that this class may be used multiple times, this reference is only the last one created
-     * @return
      */
     public ByteBuffer getAllocatedBuffer() {
         return byteBuffer;
@@ -31,7 +29,6 @@ public class InMemoryByteBufferFactory implements ByteBufferFactory{
     /**
      * Returns the # ByteBuffer allocations that have occured, since this Factory may produce more than one in its
      * life
-     * @return
      */
     public int getNumAllocations() {
         return numAllocations;

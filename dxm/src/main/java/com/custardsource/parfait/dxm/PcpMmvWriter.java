@@ -249,12 +249,12 @@ public class PcpMmvWriter extends BasePcpWriter {
         }
 
         dataFileBuffer.position(getTocOffset(tocBlockIndex++));
-        if (metrics.size()>0) {
+        if (metrics.isEmpty()) {
             writeToc(dataFileBuffer, TocType.METRICS, metrics.size(), metrics.iterator().next()
                     .getOffset());
         }
         dataFileBuffer.position(getTocOffset(tocBlockIndex++));
-        if (valueInfos.size()>0) {
+        if (valueInfos.isEmpty()) {
             writeToc(dataFileBuffer, TocType.VALUES, valueInfos.size(), valueInfos.iterator().next()
                     .getOffset());
         }
@@ -447,6 +447,8 @@ public class PcpMmvWriter extends BasePcpWriter {
     protected int getInstanceNameLimit() {
         return INSTANCE_NAME_LIMIT;
     }
+
+    // TODO there's lots of synchronization points we need to properly think out here, including the PcpMonitorBridge
 
     @Override
     protected synchronized void initialiseOffsets() {

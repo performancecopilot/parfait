@@ -43,7 +43,7 @@ public class SelfStartingMonitoringViewTest {
     }
 
     @Test
-    public void testStartAndStop() throws Exception {
+    public void startAndStopShouldStartAndStopMonitoringOnWrappedView() throws Exception {
 
         selfStartingMonitoringView.start();
 
@@ -57,7 +57,7 @@ public class SelfStartingMonitoringViewTest {
 
 
     @Test
-    public void testIsRunning() throws Exception {
+    public void isRunningShouldDelegateToWrappedView() throws Exception {
 
         when(monitoringView.isRunning()).thenReturn(false);
         assertFalse(selfStartingMonitoringView.isRunning());
@@ -67,7 +67,7 @@ public class SelfStartingMonitoringViewTest {
     }
 
     @Test
-    public void testMetricsAddedLaterAppear() {
+    public void metricsAddedAfterStartShouldAppearEventually() {
 
         final InMemoryByteBufferFactory bufferFactory = new InMemoryByteBufferFactory();
         final PcpWriter writer = new PcpMmvWriter(bufferFactory, IdentifierSourceSet.DEFAULT_SET);
@@ -102,6 +102,9 @@ public class SelfStartingMonitoringViewTest {
 
     /**
      *  TODO this probably isn't the best/most accurate way to assert these conditions, but it does kinda work..
+     *
+     * use Guava's Bytes.indexOf(byte[], byte[]) and cast the expectedString to the proper Charset for proper comparison
+     * because this really only works because the PCP_CHARSET is currently US_ASCII
      */
     private void assertBufferContainsExpectedStrings(ByteBuffer buffer, final CharSequence expectedString) {
         final String stringVersion = new String(buffer.array(), PcpMmvWriter.PCP_CHARSET);
