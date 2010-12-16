@@ -22,8 +22,11 @@ public class QuiescentRegistryListenerTest {
 
         monitorableRegistry.register(dummyMonitorable);
 
+        /**
+         * Due to an initial delay of 1second in the Timer, we need to wait at least a few seconds
+         */
         try {
-            Thread.sleep((QUIET_PERIOD_IN_SECONDS + 1) * MS_PER_SECOND);
+            Thread.sleep((QUIET_PERIOD_IN_SECONDS + 2) * MS_PER_SECOND);
         } catch (InterruptedException e) {
         }
 
