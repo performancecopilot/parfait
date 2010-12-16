@@ -54,6 +54,9 @@ public class JmxView implements MonitoringView {
     }
 
     private void setupJmxValues(Collection<Monitorable<?>> monitorables) {
+        if (monitorables.isEmpty()) {
+            return;
+        }
         try {
             jmxMonitoredNames = new String[monitorables.size()];
             String[] descriptions = new String[monitorables.size()];
