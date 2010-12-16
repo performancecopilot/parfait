@@ -17,7 +17,7 @@ import com.google.common.base.Supplier;
  * with a period of 60 seconds and a resolution of 5 seconds, 12 'buckets' will
  * be created to keep count of events. This means that as each bucket is
  * overwritten after 60 seconds, the total count may be understated by as much
- * as (5/60) = 8%. This, however, means that the memory footprint is
+ * as (5/60) ≅ 8%. This, however, means that the memory footprint is
  * approximately that of just the 12 counters, rather than having to track the
  * time of each individual event.
  * </p>
