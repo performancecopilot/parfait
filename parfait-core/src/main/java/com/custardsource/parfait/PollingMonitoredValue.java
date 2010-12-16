@@ -5,16 +5,18 @@ import java.util.TimerTask;
 
 import javax.measure.unit.Unit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
-import org.apache.log4j.Logger;
 
 /**
  * Monitors the value returned by calls at the provided interval to the provided
  * {@link Poller}.
  */
 public class PollingMonitoredValue<T> extends SettableValue<T> {
-    private static final Logger LOG = Logger.getLogger("parfait.polling");
+    private static final Logger LOG = LoggerFactory.getLogger("parfait.polling");
 
     /**
      * The minimum time in ms that may be specified as an updateInterval.

@@ -7,15 +7,15 @@ import javax.measure.unit.NonSI;
 import javax.measure.unit.SI;
 import javax.measure.unit.Unit;
 
-import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.custardsource.parfait.dxm.semantics.PcpScale.SpaceScale;
 import com.custardsource.parfait.dxm.semantics.PcpScale.TimeScale;
 import com.custardsource.parfait.dxm.semantics.PcpScale.UnitScale;
 
 public final class UnitMapping {
-    private static final Logger LOG = Logger.getLogger(UnitMapping.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UnitMapping.class);
 
     private final Unit<?> unit;
     private final PcpDimensionSet dimensionSet;
@@ -130,8 +130,6 @@ public final class UnitMapping {
     }
 
     public static void main(String[] args) {
-        BasicConfigurator.configure();
-
         System.out.println(UnitMapping.findUnitMapping(NonSI.BYTE));
         System.out.println(UnitMapping.findUnitMapping(NonSI.BYTE.divide(SI.SECOND)));
         System.out.println(UnitMapping.findUnitMapping(NonSI.BYTE.times(1024).divide(SI.SECOND)));

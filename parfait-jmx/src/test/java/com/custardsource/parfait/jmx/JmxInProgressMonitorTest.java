@@ -10,7 +10,7 @@ import javax.management.openmbean.TabularData;
 import com.custardsource.parfait.MonitorableRegistry;
 import com.custardsource.parfait.timing.EventTimer;
 import com.custardsource.parfait.timing.InProgressSnapshot;
-import com.custardsource.parfait.timing.Log4jSink;
+import com.custardsource.parfait.timing.LoggerSink;
 import com.custardsource.parfait.timing.StepMeasurementSink;
 import com.custardsource.parfait.timing.ThreadContext;
 import com.custardsource.parfait.timing.ThreadMetricSuite;
@@ -32,7 +32,7 @@ public class JmxInProgressMonitorTest {
 
         EventTimer timer = new EventTimer("foo",
                 new MonitorableRegistry(), ThreadMetricSuite.blank(), false, false,
-                Collections.<StepMeasurementSink>singletonList(new Log4jSink()));
+                Collections.<StepMeasurementSink>singletonList(new LoggerSink()));
         timer.registerTimeable(t, "foo");
         timer.getCollector().startTiming(t, "stuff");
         InProgressSnapshot snapshot = InProgressSnapshot.capture(timer, context);

@@ -5,7 +5,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.measure.unit.Unit;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Convenience base class for implementing {@link Monitorable}. Provides implementations for
@@ -28,7 +29,7 @@ public abstract class AbstractMonitorable<T> implements Monitorable<T> {
         this.type = type;
         this.unit = unit;
         this.semantics = semantics;
-        LOG = Logger.getLogger("parfait."+name);
+        LOG = LoggerFactory.getLogger("parfait."+name);
     }
 
     protected void registerSelf(MonitorableRegistry registry) {

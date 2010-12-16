@@ -9,24 +9,24 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import net.jcip.annotations.ThreadSafe;
-import org.apache.log4j.MDC;
-
 import com.google.common.base.Function;
 import com.google.common.collect.MapMaker;
 
 /**
  * <p>
- * Map-like functions to keep track of key/value pairs for application threads. Keys are Strings,
- * with values of any arbitrary object. Keeps the log4j {@link MDC} weakly in sync with changes --
- * that is, there is no atomicity guarantee so it's plausible that this class' context information
- * and log4js will not be in a consistent state; however, MDC exposes data <em>only</em> to the
- * current thread via a thread-local so this is unlikely to be a problem in practice.
+ * Map-like functions to keep track of key/value pairs for application threads.
+ * Keys are Strings, with values of any arbitrary object. Optionally keeps a log
+ * framework's MDC weakly in sync with changes -- that is, there is no atomicity
+ * guarantee so it's plausible that this class' context information and the
+ * logger's will not be in a consistent state; however, log4j and logback's MDC
+ * expose data <em>only</em> to the current thread via a thread-local so this is
+ * unlikely to be a problem in practice.
  * </p>
  * <p>
- * Most methods operate on the context of the calling thread; only {@link #forThread(Thread)} allows
- * cross-thread information retrieval.
+ * Most methods operate on the context of the calling thread; only
+ * {@link #forThread(Thread)} allows cross-thread information retrieval.
  * </p>
- *
+ * 
  * @author Cowan
  */
 @ThreadSafe
@@ -40,13 +40,15 @@ public class ThreadContext {
     private final ConcurrentMap<Thread, Map<String, Object>> PER_THREAD_CONTEXTS = new MapMaker()
             .weakKeys().makeComputingMap(NEW_CONTEXT_CREATOR);
 
+    private static volatile MdcBridge mdcBridge = new NullMdcBridge();
+    
     /**
      * Adds the given key/value pair to the current thread's context, and updates {@link MDC} with
      * same.
      */
     public void put(String key, Object value) {
         PER_THREAD_CONTEXTS.get(Thread.currentThread()).put(key, value);
-        MDC.put(key, value);
+        mdcBridge.put(key, value);
     }
 
     /**
@@ -54,7 +56,7 @@ public class ThreadContext {
      */
     public void remove(String key) {
         PER_THREAD_CONTEXTS.get(Thread.currentThread()).remove(key);
-        MDC.remove(key);
+        mdcBridge.remove(key);
     }
 
     /**
@@ -90,5 +92,47 @@ public class ThreadContext {
     public Object getForThread(Thread thread, String key) {
         return PER_THREAD_CONTEXTS.get(thread).get(key);
     }
+    
+    public interface MdcBridge {
+    	void put(String key, Object object);
+
+		void remove(String key);
+    }
+    
+    public static class NullMdcBridge implements MdcBridge {
+		@Override
+		public void put(String key, Object object) {
+			// no-op
+		}
+
+		@Override
+		public void remove(String key) {
+			// no-op
+		}
+    }
+    
+    public static class Log4jMdcBridge implements MdcBridge {
+		@Override
+		public void put(String key, Object object) {
+			org.apache.log4j.MDC.put(key, object);
+		}
+
+		@Override
+		public void remove(String key) {
+			org.apache.log4j.MDC.remove(key);
+		}
+	}
+
+    public static class Slf4jMDCBridge implements MdcBridge {
+		@Override
+		public void put(String key, Object object) {
+			org.slf4j.MDC.put(key, String.valueOf(object));
+		}
+
+		@Override
+		public void remove(String key) {
+			org.slf4j.MDC.remove(key);
+		}
+	}
 
 }

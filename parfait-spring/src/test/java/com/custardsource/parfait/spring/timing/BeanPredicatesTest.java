@@ -3,7 +3,6 @@ package com.custardsource.parfait.spring.timing;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.apache.log4j.BasicConfigurator;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -15,7 +14,6 @@ public class BeanPredicatesTest {
 
     @Before
     public void setUp() {
-        BasicConfigurator.configure();
         context = new ClassPathXmlApplicationContext(new String[]{"test.xml"});
     }
 

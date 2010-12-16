@@ -23,7 +23,9 @@ import com.custardsource.parfait.ValueSemantics;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
-import org.apache.log4j.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.jmx.support.JmxUtils;
 
@@ -36,7 +38,7 @@ import org.springframework.jmx.support.JmxUtils;
 // TODO - use a builder pattern here, construction of this class is getting very unwieldy
 public class MonitoredMBeanAttributeFactory<T> implements FactoryBean {
 
-    public static final Logger LOG = Logger.getLogger(MonitoredMBeanAttributeFactory.class.getName());
+    public static final Logger LOG = LoggerFactory.getLogger(MonitoredMBeanAttributeFactory.class.getName());
 
     /**
      * May be passed as the update interval to indicate that no updates are required. This is useful
@@ -182,9 +184,7 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean {
                     String returnValue = baseString+",name="+name;
                     ObjectName objectName = new ObjectName(returnValue);
                     if (server.isRegistered(objectName)) {
-                        if (LOG.isInfoEnabled()) {
-                            LOG.info(this.name+" registered as "+returnValue);
-                        }
+                        LOG.info(this.name + " registered as " + returnValue);
                         return returnValue;
                     }
                 }
