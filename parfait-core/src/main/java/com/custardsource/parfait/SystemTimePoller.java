@@ -1,7 +1,5 @@
 package com.custardsource.parfait;
 
-import java.util.Calendar;
-
 import com.google.common.base.Supplier;
 
 /**
@@ -10,7 +8,7 @@ import com.google.common.base.Supplier;
 public class SystemTimePoller implements Supplier<Long> {
 
     public Long get() {
-        return Calendar.getInstance().getTimeInMillis();
+        return System.currentTimeMillis();
     }
 
 }
