@@ -1,7 +1,5 @@
 package com.custardsource.parfait;
 
-import com.google.common.collect.ImmutableList;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +7,9 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 
 /**
  * A collection of Monitorables to be monitored by a given output source (or
@@ -121,4 +122,14 @@ public class MonitorableRegistry {
     public void addRegistryListener(MonitorableRegistryListener monitorableRegistryListener) {
         this.registryListeners.add(monitorableRegistryListener);
     }
+
+    @VisibleForTesting
+	boolean containsMetric(String name) {
+		return monitorables.containsKey(name);
+	}
+
+    @VisibleForTesting
+	Monitorable<?> getMetric(String name) {
+		return monitorables.get(name);
+	}
 }
