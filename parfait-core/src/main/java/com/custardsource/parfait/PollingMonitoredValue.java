@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Supplier;
 
 /**
  * Monitors the value returned by calls at the provided interval to the provided
@@ -25,7 +26,7 @@ public class PollingMonitoredValue<T> extends SettableValue<T> {
 
     private static final Timer POLLING_TIMER = new Timer("PollingMonitoredValue-poller", true);
 
-    private final Poller<T> poller;
+    private final Supplier<T> poller;
 
     /**
      * Creates a new {@link PollingMonitoredValue} with the specified polling
@@ -36,7 +37,7 @@ public class PollingMonitoredValue<T> extends SettableValue<T> {
      *            not be less than {@link #MIN_UPDATE_INTERVAL}
      */
     public PollingMonitoredValue(String name, String description,
-            MonitorableRegistry registry, int updateInterval, Poller<T> poller, ValueSemantics semantics) {
+            MonitorableRegistry registry, int updateInterval, Supplier<T> poller, ValueSemantics semantics) {
         this(name, description, registry, updateInterval, poller, semantics, Unit.ONE);
     }
 
@@ -49,13 +50,19 @@ public class PollingMonitoredValue<T> extends SettableValue<T> {
      *            not be less than {@link #MIN_UPDATE_INTERVAL}
      */
     public PollingMonitoredValue(String name, String description, MonitorableRegistry registry, int updateInterval,
-            Poller<T> poller, ValueSemantics semantics, Unit<?> unit) {
-        super(name, description, registry, poller.poll(), unit, semantics);
-        this.poller = poller;
-        Preconditions.checkState(updateInterval >= MIN_UPDATE_INTERVAL,
-                "updateInterval is too short.");
-        POLLING_TIMER.scheduleAtFixedRate(new PollerTask(), updateInterval, updateInterval);
+            Supplier<T> poller, ValueSemantics semantics, Unit<?> unit) {
+    	this(name, description, registry, updateInterval, poller, semantics, unit, SHARED_TIMER_SCHEDULER);
     }
+
+	public PollingMonitoredValue(String name, String description,
+			MonitorableRegistry registry, int updateInterval, Supplier<T> poller,
+			ValueSemantics semantics, Unit<?> unit, Scheduler scheduler) {
+		super(name, description, registry, poller.get(), unit, semantics);
+		this.poller = poller;
+		Preconditions.checkState(updateInterval >= MIN_UPDATE_INTERVAL,
+				"updateInterval is too short.");
+		scheduler.schedule(new PollerTask(), updateInterval);
+	}
 
     @Override
     public String toString() {
@@ -66,10 +73,20 @@ public class PollingMonitoredValue<T> extends SettableValue<T> {
         @Override
         public void run() {
             try {
-                set(poller.poll());
+                set(poller.get());
             } catch (Throwable t) {
                 LOG.error("Error running poller " + this + "; will rerun next cycle", t);
             }
         }
     }
+    
+    interface Scheduler {
+    	public void schedule(TimerTask task, int rate);
+    }
+    
+    private static Scheduler SHARED_TIMER_SCHEDULER = new Scheduler() {
+		@Override
+		public void schedule(TimerTask task, int rate) {
+			POLLING_TIMER.scheduleAtFixedRate(task, rate, rate);
+		}};
 }

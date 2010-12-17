@@ -1,39 +1,70 @@
 package com.custardsource.parfait;
 
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
+import static org.junit.Assert.assertEquals;
 
-import junit.framework.TestCase;
+import java.util.Map;
+import java.util.TimerTask;
 
-public class PollingMonitoredValueTest extends TestCase {
+import javax.measure.unit.Unit;
 
-    public void testDoesCallThePollerAtCorrectInterval() throws InterruptedException {
-        TestPoller poller = new TestPoller();
-        PollingMonitoredValue<Integer> p = new PollingMonitoredValue<Integer>("polling.test", "",
-                MonitorableRegistry.DEFAULT_REGISTRY, 275, poller, ValueSemantics.FREE_RUNNING);
-        poller.count.tryAcquire(6, 10, TimeUnit.SECONDS);
+import org.junit.Test;
 
-        // Need to sleep just a tiny bit to let the poller update it's current value.
-        Thread.sleep(50);
-        assertEquals(6, (int) p.get());
-        assertTrue(poller.averagePollInterval > 250 && poller.averagePollInterval < 300);
-    }
+import com.google.common.base.Supplier;
+import com.google.common.collect.Maps;
 
-    private final class TestPoller implements Poller<Integer> {
-        private long averagePollInterval = 250;
+public class PollingMonitoredValueTest {
 
-        private long lastPollTime = System.currentTimeMillis();
+	@Test
+	public void shouldScheduleTaskAtDesiredRate() {
+		TestPoller poller = new TestPoller();
+		TestScheduler scheduler = new TestScheduler();
+		new PollingMonitoredValue<Integer>("polling.test", "",
+				new MonitorableRegistry(), 275, poller,
+				ValueSemantics.FREE_RUNNING, Unit.ONE, scheduler);
+		assertEquals(1, scheduler.scheduledRates.size());
+		assertEquals(275, scheduler.scheduledRates.values().iterator().next()
+				.intValue());
+	}
 
-        private final Semaphore count = new Semaphore(0);
+	@Test
+	public void scheduledTaskExecutionShouldUpdateValue()
+			throws InterruptedException {
+		TestPoller poller = new TestPoller();
+		MonitorableRegistry registry = new MonitorableRegistry();
+		TestScheduler scheduler = new TestScheduler();
+		PollingMonitoredValue<Integer> p = new PollingMonitoredValue<Integer>(
+				"polling.test", "", registry, 275,
+				poller, ValueSemantics.FREE_RUNNING, Unit.ONE, scheduler);
+		poller.value = 17;
+		assertEquals(0, p.get().intValue());
+		scheduler.runAllScheduledTasks();
+		assertEquals(17, p.get().intValue());
+	}
 
-        public Integer poll() {
-            long now = System.currentTimeMillis();
-            averagePollInterval = ((now - lastPollTime) + averagePollInterval) / 2;
-            lastPollTime = now;
-            int permits = count.availablePermits();
-            count.release();
-            return permits + 1;
-        }
-    }
+	private final class TestScheduler implements
+			PollingMonitoredValue.Scheduler {
+		private Map<TimerTask, Integer> scheduledRates = Maps.newHashMap();
+
+		@Override
+		public void schedule(TimerTask task, int rate) {
+			scheduledRates.put(task, rate);
+		}
+
+		private void runAllScheduledTasks() {
+			for (TimerTask task : scheduledRates.keySet()) {
+				task.run();
+			}
+		}
+
+	}
+
+	
+	private final class TestPoller implements Supplier<Integer> {
+		private int value = 0;
+
+		public Integer get() {
+			return value;
+		}
+	}
 
 }

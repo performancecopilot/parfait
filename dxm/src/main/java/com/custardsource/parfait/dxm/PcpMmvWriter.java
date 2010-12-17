@@ -372,7 +372,7 @@ public class PcpMmvWriter extends BasePcpWriter {
      * @param value
      *            the PcpValueInfo to be written to the file
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private void writeValueSection(ByteBuffer dataFileBuffer, PcpValueInfo info) {
         int originalPosition = dataFileBuffer.position();
         TypeHandler rawHandler = info.getTypeHandler();

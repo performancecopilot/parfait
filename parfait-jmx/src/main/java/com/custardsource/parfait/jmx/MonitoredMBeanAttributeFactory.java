@@ -13,21 +13,21 @@ import javax.management.ReflectionException;
 import javax.management.openmbean.CompositeData;
 import javax.measure.unit.Unit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.jmx.support.JmxUtils;
+
 import com.custardsource.parfait.Monitorable;
 import com.custardsource.parfait.MonitorableRegistry;
 import com.custardsource.parfait.MonitoredConstant;
 import com.custardsource.parfait.MonitoredValue;
-import com.custardsource.parfait.Poller;
 import com.custardsource.parfait.PollingMonitoredValue;
 import com.custardsource.parfait.ValueSemantics;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.jmx.support.JmxUtils;
+import com.google.common.base.Supplier;
 
 /**
  * Factory bean that generates a monitor which tracks the value of the provided MBean attribute.
@@ -36,7 +36,7 @@ import org.springframework.jmx.support.JmxUtils;
  * are of type {@link CompositeData}.
  */
 // TODO - use a builder pattern here, construction of this class is getting very unwieldy
-public class MonitoredMBeanAttributeFactory<T> implements FactoryBean {
+public class MonitoredMBeanAttributeFactory<T> implements FactoryBean<Monitorable<T>> {
 
     public static final Logger LOG = LoggerFactory.getLogger(MonitoredMBeanAttributeFactory.class.getName());
 
@@ -138,9 +138,9 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean {
         if (isConstant()) {
         	return new MonitoredConstant<T>(name, description, getAttributeValue());
         } else {
-        	return new PollingMonitoredValue<T>(name, description, monitorableRegistry, updateInterval, new Poller<T>() {
+        	return new PollingMonitoredValue<T>(name, description, monitorableRegistry, updateInterval, new Supplier<T>() {
         		
-        		public T poll() {
+        		public T get() {
         			return getAttributeValue();
         		}
         		
