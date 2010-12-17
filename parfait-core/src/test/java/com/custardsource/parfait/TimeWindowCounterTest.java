@@ -2,30 +2,21 @@ package com.custardsource.parfait;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.common.base.Supplier;
 
 public class TimeWindowCounterTest {
 	private static final int RESOLUTION = 1000;
 	private static final long PERIOD = 3 * RESOLUTION;
 	private static final TimeWindow WINDOW = TimeWindow.of(RESOLUTION, PERIOD, "3s");
-	
-	private AtomicLong currentTime = new AtomicLong();
-	private final Supplier<Long> timeSource = new Supplier<Long>() {
-		@Override
-		public Long get() {
-			return currentTime.get();
-		}
-	};
+
+	private final TestTimeSupplier timeSource = new TestTimeSupplier();
 	private TimeWindowCounter counter;
 	
 	@Before
 	public void setUp() {
-	   currentTime.set(0L);	
+	   timeSource.setTime(0L);	
 	   counter = new TimeWindowCounter(WINDOW, timeSource);
 	}
 	
@@ -43,7 +34,7 @@ public class TimeWindowCounterTest {
 	public void sameBucketShouldIncrementDuringSameResolution() {
 		counter.inc();
 		assertEquals("[1, 0, 0]", counter.counterState());
-		currentTime.addAndGet(RESOLUTION - 1L);
+		timeSource.tick(RESOLUTION - 1L);
 		counter.inc();
 		assertEquals("[2, 0, 0]", counter.counterState());
 		assertEquals(2L, counter.get().longValue());
@@ -54,7 +45,7 @@ public class TimeWindowCounterTest {
 	public void nextBucketShouldIncrementAfterResolutionElapsed() {
 		counter.inc();
 		assertEquals("[1, 0, 0]", counter.counterState());
-		currentTime.addAndGet(RESOLUTION);
+		timeSource.tick(RESOLUTION);
 		counter.inc();
 		assertEquals("[1, 1, 0]", counter.counterState());
 		assertEquals(2L, counter.get().longValue());
@@ -66,16 +57,16 @@ public class TimeWindowCounterTest {
 		counter.inc(3L);
 		assertEquals("[3, 0, 0]", counter.counterState());
 		
-		currentTime.addAndGet(RESOLUTION * 2);
+		timeSource.tick(RESOLUTION * 2);
 		counter.inc(4L);
 		assertEquals("[3, 0, 4]", counter.counterState());
 		
-		currentTime.addAndGet(RESOLUTION);
+		timeSource.tick(RESOLUTION);
 		counter.inc();
 		assertEquals("[1, 0, 4]", counter.counterState());
 		assertEquals(5L, counter.get().longValue());
 
-		currentTime.addAndGet(RESOLUTION * 3);
+		timeSource.tick(RESOLUTION * 3);
 		counter.inc(2L);
 		assertEquals("[2, 0, 0]", counter.counterState());
 		assertEquals(2L, counter.get().longValue());
@@ -84,7 +75,7 @@ public class TimeWindowCounterTest {
 	@Test
 	public void getShouldCleanOldValues() {
 		counter.inc();
-		currentTime.addAndGet(PERIOD);
+		timeSource.tick(PERIOD);
 		assertEquals(0L, counter.get().longValue());
 	}
 	

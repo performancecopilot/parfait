@@ -6,6 +6,7 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 
 /**
@@ -107,10 +108,12 @@ public class MonitorableRegistry {
         return instance;
     }
 
+    @VisibleForTesting
 	boolean containsMetric(String name) {
 		return monitorables.containsKey(name);
 	}
 
+    @VisibleForTesting
 	Monitorable<?> getMetric(String name) {
 		return monitorables.get(name);
 	}

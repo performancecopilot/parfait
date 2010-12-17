@@ -25,6 +25,8 @@ public final class TimeWindow {
 		Preconditions.checkArgument(period % resolution == 0,
 				"period covered %s must be divisible by resolution %s", period,
 				resolution);
+		Preconditions.checkArgument(period / resolution < Integer.MAX_VALUE,
+				"cannot have more than Integer.MAX_VALUE windows");
 		this.resolution = resolution;
 		this.period = period;
 		this.name = Preconditions.checkNotNull(name);
@@ -61,6 +63,7 @@ public final class TimeWindow {
 	}
 
 	public int getBuckets() {
+		// We know that bucket count fits in an int, per our constructor checks
 		return (int) (period / resolution);
 	}
 }

@@ -70,6 +70,14 @@ public class TimeWindowCounter implements Counter {
 		}
 	}
 
+	/**
+	 * Clean out old data from the buckets, getting us ready to enter a new
+	 * bucket. interimValues, headTime, and headIndex comprise a circular buffer
+	 * of the last n sub-values, and the start time of the head bucket. On each
+	 * write or get, we progressively clear out entries in the circular buffer
+	 * until headTime is within one 'tick' of the current time; we have then
+	 * found the correct bucket.
+	 */
 	@GuardedBy("lock")
 	private void cleanState() {
 		long eventTime = timeSource.get();

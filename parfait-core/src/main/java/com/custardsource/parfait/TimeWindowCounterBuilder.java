@@ -65,9 +65,11 @@ public class TimeWindowCounterBuilder {
 			final TimeWindowCounter value = new TimeWindowCounter(timeWindow,
 					timeSource);
 
-			new PollingMonitoredValue<Long>(baseName + "."
-					+ timeWindow.getName(), baseDescription + " ["
-					+ timeWindow.getName() + "]", registry,
+			String name = String
+					.format("%s.%s", baseName, timeWindow.getName());
+			String description = String.format("%s [%s]", baseDescription,
+					timeWindow.getName());
+			PollingMonitoredValue.poll(name, description, registry,
 					timeWindow.getResolution(), new Poller<Long>() {
 						@Override
 						public Long poll() {
@@ -82,19 +84,19 @@ public class TimeWindowCounterBuilder {
 
 	/**
 	 * Creates a new CompositeCounter wrapping TimeWindowCounters (and creating
-	 * PollingMonitoredValues), using the supplied Monitorable's name,
+	 * PollingMonitoredValues), using the supplied counter's name,
 	 * description, and unit as the template.
 	 * 
-	 * @param templateMonitorable
-	 *            a Monitorable whose name, description, and unit should be
+	 * @param templateCounter
+	 *            a MonitoredCounter whose name, description, and unit should be
 	 *            copied
 	 * @return a CompositeCounter wrapping a set of new TimeWindow-based
 	 *         counters
 	 */
-	public CompositeCounter copyFrom(Monitorable<?> templateMonitorable) {
-		return build(templateMonitorable.getName(),
-				templateMonitorable.getDescription(),
-				templateMonitorable.getUnit());
+	public CompositeCounter copyFrom(MonitoredCounter templateCounter) {
+		return build(templateCounter.getName(),
+				templateCounter.getDescription(),
+				templateCounter.getUnit());
 	}
 
 	/**
