@@ -9,7 +9,6 @@ import java.net.URL;
 import java.net.URLConnection;
 
 import org.apache.cxf.testutil.common.AbstractTestServerBase;
-import org.apache.log4j.BasicConfigurator;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,7 +18,6 @@ public class ParfaitIntegrationTest {
 
 	@Before
     public void startServer() throws Exception {
-		BasicConfigurator.configure();
     	testServer = new SpringCreatedTestServer();
     	testServer.startInProcess();
     }

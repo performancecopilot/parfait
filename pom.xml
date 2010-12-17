@@ -32,6 +32,8 @@
 
   <properties>
       <spring.version>3.0.5.RELEASE</spring.version>
+      <slf4j.version>1.6.1</slf4j.version>
+      <log4j.version>1.2.14</log4j.version>
   </properties>
   <dependencyManagement>
       <dependencies>
@@ -50,14 +52,19 @@
               <artifactId>spring-jdbc</artifactId>
               <version>${spring.version}</version>
           </dependency>
+          <dependency>
+              <groupId>org.slf4j</groupId>
+              <artifactId>slf4j-api</artifactId>
+              <version>${slf4j.version}</version>
+          </dependency>
+          <dependency>
+              <groupId>log4j</groupId>
+              <artifactId>log4j</artifactId>
+              <version>${log4j.version}</version>
+          </dependency>
       </dependencies>
   </dependencyManagement>
   <dependencies>
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <version>1.2.14</version>
-    </dependency>
     <dependency>
     	<groupId>junit</groupId>
     	<artifactId>junit</artifactId>
@@ -65,5 +72,15 @@
     	<type>jar</type>
     	<scope>test</scope>
     </dependency>
+    <dependency>
+       <groupId>org.slf4j</groupId>
+       <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <optional>true</optional>
+    </dependency>
+
   </dependencies>
 </project>

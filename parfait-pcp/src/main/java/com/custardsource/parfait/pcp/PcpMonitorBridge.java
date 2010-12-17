@@ -6,7 +6,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.custardsource.parfait.Monitor;
 import com.custardsource.parfait.Monitorable;
@@ -26,7 +27,7 @@ import com.google.common.collect.ImmutableMap;
  */
 public class PcpMonitorBridge extends AbstractMonitoringView {
 
-    private static final Logger LOG = Logger.getLogger(PcpMonitorBridge.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PcpMonitorBridge.class);
     
     private static final TextSource DEFAULT_SHORT_TEXT_SOURCE = new MetricDescriptionTextSource();
     private static final TextSource DEFAULT_LONG_TEXT_SOURCE = new EmptyTextSource();

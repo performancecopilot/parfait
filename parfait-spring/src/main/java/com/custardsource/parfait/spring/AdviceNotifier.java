@@ -1,6 +1,7 @@
 package com.custardsource.parfait.spring;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.aop.Advisor;
 import org.springframework.aop.aspectj.AbstractAspectJAdvice;
 import org.springframework.aop.aspectj.AspectJPointcutAdvisor;
@@ -9,7 +10,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
 public class AdviceNotifier implements BeanPostProcessor {
-	private static final Logger LOG = Logger.getLogger(AdviceNotifier.class);
+	private static final Logger LOG = LoggerFactory.getLogger(AdviceNotifier.class);
 	private final AdvisedAware aspect;
 
 	public AdviceNotifier(AdvisedAware aspect) {

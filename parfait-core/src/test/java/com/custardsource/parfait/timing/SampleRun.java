@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.Random;
 
 import com.custardsource.parfait.MonitorableRegistry;
-import org.apache.log4j.BasicConfigurator;
 
 // Sample code to try out the in-progress measurement stuff. To be replaced with a proper test case.
 public class SampleRun {
@@ -12,14 +11,13 @@ public class SampleRun {
     public static final Object LOCK = new Object();
 
     public static void main(String[] args) throws InterruptedException {
-        BasicConfigurator.configure();
         ThreadMetricSuite suite = ThreadMetricSuite.blank();
         suite.addMetric(StandardThreadMetrics.CLOCK_TIME);
         suite.addMetric(StandardThreadMetrics.BLOCKED_TIME);
         suite.addMetric(StandardThreadMetrics.WAITED_TIME);
         suite.addMetric(StandardThreadMetrics.USER_CPU_TIME);
         EventTimer timer = new EventTimer("blah", new MonitorableRegistry(), suite, true, true,
-                Collections.<StepMeasurementSink>singletonList(new Log4jSink()));
+                Collections.<StepMeasurementSink>singletonList(new LoggerSink()));
         ThreadContext context = new ThreadContext();
         EmailSender sender = new EmailSender(context);
         CheckoutBuyer buyer = new CheckoutBuyer(context);

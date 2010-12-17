@@ -3,19 +3,20 @@ package com.custardsource.parfait.cxf;
 import java.net.URISyntaxException;
 
 import org.apache.cxf.testutil.common.AbstractBusTestServerBase;
-import org.apache.log4j.Logger;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.handler.DefaultHandler;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.webapp.WebAppContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SpringCreatedTestServer extends AbstractBusTestServerBase {
 
     private org.mortbay.jetty.Server server;
 
-    private static final Logger LOG = Logger.getLogger(SpringCreatedTestServer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SpringCreatedTestServer.class);
 
     protected void run() {
         LOG.debug("Starting Server");

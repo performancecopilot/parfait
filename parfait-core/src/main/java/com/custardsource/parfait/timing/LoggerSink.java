@@ -7,21 +7,23 @@ import javax.measure.Measure;
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.Unit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.Maps;
 import net.jcip.annotations.ThreadSafe;
-import org.apache.log4j.Logger;
 
 @ThreadSafe
-public class Log4jSink implements StepMeasurementSink {
+public class LoggerSink implements StepMeasurementSink {
     private final Logger logger;
     private final Map<Unit<?>, Unit<?>> normalizations = Maps.newConcurrentMap();
 
-    public Log4jSink() {
-        this(Log4jSink.class.getName());
+    public LoggerSink() {
+        this(LoggerSink.class.getName());
     }
 
-    public Log4jSink(String loggerName) {
-        logger = Logger.getLogger(loggerName);
+    public LoggerSink(String loggerName) {
+        logger = LoggerFactory.getLogger(loggerName);
     }
 
 
