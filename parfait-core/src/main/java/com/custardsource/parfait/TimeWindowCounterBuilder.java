@@ -26,7 +26,7 @@ public class TimeWindowCounterBuilder {
 
 	public TimeWindowCounterBuilder(MonitorableRegistry registry,
 			TimeWindow... windows) {
-		this(TimeWindowCounter.SYSTEM_TIME_SOURCE, registry, windows);
+		this(new SystemTimePoller(), registry, windows);
 	}
 
 	TimeWindowCounterBuilder(Supplier<Long> timeSource,

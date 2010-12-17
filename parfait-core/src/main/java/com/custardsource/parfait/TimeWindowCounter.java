@@ -29,13 +29,6 @@ import com.google.common.base.Supplier;
  */
 @ThreadSafe
 public class TimeWindowCounter implements Counter {
-	static final Supplier<Long> SYSTEM_TIME_SOURCE = new Supplier<Long>() {
-		@Override
-		public Long get() {
-			return System.currentTimeMillis();
-		}
-	};
-
 	@GuardedBy("lock")
 	private long overallValue;
 	@GuardedBy("lock")
@@ -50,7 +43,7 @@ public class TimeWindowCounter implements Counter {
 	private final TimeWindow window;
 
 	public TimeWindowCounter(TimeWindow window) {
-		this(window, SYSTEM_TIME_SOURCE);
+		this(window, new SystemTimePoller());
 	}
 
 	@VisibleForTesting
