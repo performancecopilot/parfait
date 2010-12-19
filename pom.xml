@@ -79,6 +79,11 @@
               <artifactId>spring-jdbc</artifactId>
               <version>${spring.version}</version>
           </dependency>
+          <dependency>
+            <groupId>javax.measure</groupId>
+            <artifactId>jsr-275</artifactId>
+            <version>0.9.1</version>
+          </dependency>
       </dependencies>
   </dependencyManagement>
   <dependencies>
