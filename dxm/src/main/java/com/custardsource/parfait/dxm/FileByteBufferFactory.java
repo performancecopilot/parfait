@@ -1,5 +1,8 @@
 package com.custardsource.parfait.dxm;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -41,6 +44,15 @@ public class FileByteBufferFactory implements ByteBufferFactory {
             if (fos != null) {
                 fos.close();
             }
+        }
+    }
+
+    @Override
+    public String toString() {
+        try {
+            return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("file", file.getCanonicalPath()).toString();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }
