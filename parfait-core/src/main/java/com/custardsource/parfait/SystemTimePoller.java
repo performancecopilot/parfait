@@ -1,14 +1,14 @@
 package com.custardsource.parfait;
 
-import java.util.Calendar;
+import com.google.common.base.Supplier;
 
 /**
  * An implementation of {@link Poller} to get the System time.
  */
-public class SystemTimePoller implements Poller<Long> {
+public class SystemTimePoller implements Supplier<Long> {
 
-    public Long poll() {
-        return Calendar.getInstance().getTimeInMillis();
+    public Long get() {
+        return System.currentTimeMillis();
     }
 
 }

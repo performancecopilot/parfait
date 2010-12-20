@@ -7,15 +7,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.base.Strings;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Strings;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 public class InProgressSnapshot {
-    private static final Logger LOG = Logger.getLogger(InProgressSnapshot.class);
+    private static final Logger LOG = LoggerFactory.getLogger(InProgressSnapshot.class);
 
     private final List<String> names = new ArrayList<String>();
     private final List<String> descriptions = new ArrayList<String>();

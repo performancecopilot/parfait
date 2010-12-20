@@ -123,7 +123,8 @@ public abstract class BasePcpWriter implements PcpWriter {
 
     @SuppressWarnings("unchecked")
     protected final void updateValue(PcpValueInfo info, Object value) {
-        TypeHandler rawHandler = info.getTypeHandler();
+        @SuppressWarnings("rawtypes")
+		TypeHandler rawHandler = info.getTypeHandler();
         synchronized (dataFileBuffer) {
             dataFileBuffer.position(rawHandler.requiresLargeStorage() ? info.getLargeValue()
                     .getOffset() : info.getOffset());

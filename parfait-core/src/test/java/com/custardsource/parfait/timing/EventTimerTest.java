@@ -19,7 +19,7 @@ public class EventTimerTest extends TestCase {
 
     private void initEvents() {
         metricFactory = new EventTimer("test", new MonitorableRegistry(), ThreadMetricSuite
-                .withDefaultMetrics(), true, true, Collections.<StepMeasurementSink>singletonList(new Log4jSink()));
+                .withDefaultMetrics(), true, true, Collections.<StepMeasurementSink>singletonList(new LoggerSink()));
         workflowWizardControl = new DummyTimeable();
         logonControl = new DummyTimeable();
         attachmentControl = new DummyTimeable();

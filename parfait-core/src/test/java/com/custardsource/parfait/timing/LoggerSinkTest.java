@@ -6,16 +6,16 @@ import javax.measure.unit.Unit;
 import junit.framework.TestCase;
 
 
-public class Log4jSinkTest extends TestCase {
+public class LoggerSinkTest extends TestCase {
     public void testShouldProduceExpectedMetricString() {
         MetricMeasurement measurement = getUnitMeasurement(SI.HERTZ, 1);
-        String result = new Log4jSink().buildSingleMetricResult(measurement);
+        String result = new LoggerSink().buildSingleMetricResult(measurement);
         assertEquals("dummy: own 1 Hz, total 1 Hz", result);
     }
 
     public void testShouldNormalizeMetricStringToCorrectUnit() {
         MetricMeasurement measurement = getUnitMeasurement(SI.HERTZ, 1000000001);
-        Log4jSink sink = new Log4jSink();
+        LoggerSink sink = new LoggerSink();
         sink.normalizeUnits(SI.HERTZ, SI.MEGA(SI.HERTZ));
         String result = sink.buildSingleMetricResult(measurement);
         assertEquals("dummy: own 1000.000001 MHz, total 1000.000001 MHz", result);

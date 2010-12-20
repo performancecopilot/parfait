@@ -9,11 +9,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.measure.unit.Unit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.custardsource.parfait.MonitorableRegistry;
 import com.custardsource.parfait.MonitoredCounter;
 import com.google.common.collect.ImmutableList;
 import net.jcip.annotations.ThreadSafe;
-import org.apache.log4j.Logger;
 
 /**
  * A class to provide a {@link EventMetricCollector} to each {@link Timeable} on demand, guaranteed
@@ -26,7 +28,7 @@ public class EventTimer {
      * Setting this {@link Logger} to DEBUG level will list all the created metrics in a
      * tab-delimited format, useful for importing elsewhere
      */
-    private static final Logger LOG = Logger.getLogger(EventTimer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(EventTimer.class);
 
     private final Map<Object, EventCounters> perEventGroupCounters = new ConcurrentHashMap<Object, EventCounters>();
 
