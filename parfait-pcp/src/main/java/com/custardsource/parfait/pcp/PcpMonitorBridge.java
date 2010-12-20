@@ -1,29 +1,16 @@
 package com.custardsource.parfait.pcp;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.custardsource.parfait.AbstractMonitoringView;
-
 import com.custardsource.parfait.Monitor;
 import com.custardsource.parfait.Monitorable;
-
 import com.custardsource.parfait.MonitoringView;
-
-import com.custardsource.parfait.MonitorableRegistry;
-
 import com.custardsource.parfait.ValueSemantics;
 import com.custardsource.parfait.dxm.MetricName;
 import com.custardsource.parfait.dxm.PcpWriter;
 import com.custardsource.parfait.dxm.semantics.Semantics;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Collection;
