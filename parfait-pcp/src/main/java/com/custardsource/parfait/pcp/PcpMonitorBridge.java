@@ -9,6 +9,7 @@ import com.custardsource.parfait.dxm.PcpWriter;
 import com.custardsource.parfait.dxm.semantics.Semantics;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
+import net.jcip.annotations.NotThreadSafe;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +22,14 @@ import java.util.concurrent.ArrayBlockingQueue;
  * PcpMonitorBridge bridges between the set of {@link Monitorable}s in the current system and a PCP
  * monitor agent. The bridge works by persisting any changes to a Monitorable into a section of
  * memory that is also mapped into the PCP monitor agents address space.
+ *
+ * NOTE: This class is not thread safe, it is expected that clients interacting with the
+ * start/stop nature of this class do this with their own thread safety, or use {@link com.custardsource.parfait.QuiescentRegistryListener}
+ * as that'll manage it nicely for you..
+ *
+ * @see com.custardsource.parfait.QuiescentRegistryListener
  */
+@NotThreadSafe
 public class PcpMonitorBridge implements MonitoringView {
 
     private static final Logger LOG = LoggerFactory.getLogger(PcpMonitorBridge.class);
@@ -80,11 +88,9 @@ public class PcpMonitorBridge implements MonitoringView {
         return monitorablesPendingUpdate.size() > 0;
     }
 
-    // TODO synchronization checking
-
     @Override
     public void startMonitoring(Collection<Monitorable<?>> monitorables) {
-        // TODO precondition check on whether this is already started or not
+        Preconditions.checkArgument(!started, "Should have called stopMonitoring before calling start again");
         try {
             for (Monitorable<?> monitorable : monitorables) {
                 monitorable.attachMonitor(monitor);
