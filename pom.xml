@@ -86,7 +86,7 @@
             <artifactId>jsr-275</artifactId>
             <version>0.9.1</version>
           </dependency>
-          <dependengy>
+          <dependency>
            <groupId>org.slf4j</groupId>
            <artifactId>slf4j-api</artifactId>
            <version>${slf4j.version}</version>
