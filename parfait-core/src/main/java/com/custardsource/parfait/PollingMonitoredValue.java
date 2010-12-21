@@ -29,6 +29,8 @@ public class PollingMonitoredValue<T> extends SettableValue<T> {
 
 	private static final Timer POLLING_TIMER = new Timer(
 			"PollingMonitoredValue-poller", true);
+	private static Scheduler SHARED_TIMER_SCHEDULER = new TimerScheduler(
+			POLLING_TIMER);
 
     private final Supplier<T> poller;
 
@@ -101,17 +103,6 @@ public class PollingMonitoredValue<T> extends SettableValue<T> {
         }
     }
     
-    interface Scheduler {
-    	public void schedule(TimerTask task, int rate);
-    }
-    
-    private static Scheduler SHARED_TIMER_SCHEDULER = new Scheduler() {
-		@Override
-		public void schedule(TimerTask task, int rate) {
-			POLLING_TIMER.scheduleAtFixedRate(task, rate, rate);
-		}};
-		
-
 	@VisibleForTesting
 	static void runAllTasks() {
 		for (TimerTask task : SCHEDULED_TASKS) {
