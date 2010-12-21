@@ -1,10 +1,11 @@
 package com.custardsource.parfait.jmx;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
+import com.custardsource.parfait.Monitor;
+import com.custardsource.parfait.Monitorable;
+import com.custardsource.parfait.MonitoringView;
+import com.google.common.base.Objects;
+import org.springframework.jmx.export.annotation.ManagedAttribute;
+import org.springframework.jmx.export.annotation.ManagedResource;
 
 import javax.management.openmbean.CompositeData;
 import javax.management.openmbean.CompositeDataSupport;
@@ -12,45 +13,50 @@ import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
-
-import com.custardsource.parfait.AbstractMonitoringView;
-import com.custardsource.parfait.Monitor;
-import com.custardsource.parfait.Monitorable;
-import com.custardsource.parfait.MonitorableRegistry;
-import com.google.common.base.Objects;
-import org.springframework.jmx.export.annotation.ManagedAttribute;
-import org.springframework.jmx.export.annotation.ManagedResource;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 @ManagedResource
-public class JmxView extends AbstractMonitoringView {
+public class JmxView implements MonitoringView {
     private String[] jmxMonitoredNames;
     private Object[] jmxMonitoredValues;
     private Map<String, Integer> jmxArrayIndexMap;
     private CompositeType monitoredType;
 
     private final Monitor monitor = new JmxUpdatingMonitor();
+    private volatile boolean started;
 
-    public JmxView(MonitorableRegistry registry) {
-        super(registry);
-    }
 
     @Override
-    protected void startMonitoring(Collection<Monitorable<?>> monitorables) {
+    public void startMonitoring(Collection<Monitorable<?>> monitorables) {
         setupJmxValues(monitorables);
         for (Monitorable<?> monitorable : monitorables) {
             updateData(monitorable);
             monitorable.attachMonitor(monitor);
         }
+        this.started = true;
     }
 
     @Override
-    protected void stopMonitoring(Collection<Monitorable<?>> monitorables) {
+    public void stopMonitoring(Collection<Monitorable<?>> monitorables) {
         for (Monitorable<?> monitorable : monitorables) {
             monitorable.removeMonitor(monitor);
         }
+        this.started = false;
+    }
+
+    @Override
+    public boolean isRunning() {
+        return started;
     }
 
     private void setupJmxValues(Collection<Monitorable<?>> monitorables) {
+        if (monitorables.isEmpty()) {
+            return;
+        }
         try {
             jmxMonitoredNames = new String[monitorables.size()];
             String[] descriptions = new String[monitorables.size()];

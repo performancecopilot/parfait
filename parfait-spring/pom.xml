@@ -38,5 +38,26 @@
             <artifactId>parfait-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.custardsource.parfait</groupId>
+            <artifactId>parfait-core</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+            <classifier>tests</classifier>
+        </dependency>
+        <!-- this needed by the SelfStartingMonitoringViewTest only, perhaps that test should be in an integration-test module? -->
+        <dependency>
+            <groupId>com.custardsource.parfait</groupId>
+            <artifactId>parfait-pcp</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>1.8.0</version>
+        </dependency>
+
     </dependencies>
 </project>

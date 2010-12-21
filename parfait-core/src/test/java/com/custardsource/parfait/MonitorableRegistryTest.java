@@ -17,17 +17,10 @@ public class MonitorableRegistryTest {
         registry.register(dummy2);
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void registerWhenFrozenThrowsException() {
-        MonitorableRegistry registry = newRegistry();
-        registry.freeze();
-        registry.register(new DummyMonitorable("foo"));
-    }
 
     @Test
     public void getMonitorablesOnNewRegistryReturnsEmptyCollection() {
         MonitorableRegistry registry = newRegistry();
-        registry.freeze();
         assertTrue(registry.getMonitorables().isEmpty());
     }
 
@@ -36,7 +29,6 @@ public class MonitorableRegistryTest {
         MonitorableRegistry registry = newRegistry();
         Monitorable<?> dummy = new DummyMonitorable("foo");
         registry.register(dummy);
-        registry.freeze();
         assertTrue(registry.getMonitorables().contains(dummy));
     }
 

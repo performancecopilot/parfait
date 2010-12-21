@@ -1,11 +1,11 @@
 package com.custardsource.parfait.dxm;
 
-import java.io.IOException;
-
-import javax.measure.unit.Unit;
-
 import com.custardsource.parfait.dxm.semantics.Semantics;
 import com.custardsource.parfait.dxm.types.TypeHandler;
+
+import javax.measure.unit.Unit;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
 public interface PcpWriter {
     /**
@@ -114,5 +114,11 @@ public interface PcpWriter {
      *            implementation
      */
     public void setMetricHelpText(String metricName, String shortHelpText, String longHelpText);
+
+    /**
+     * Prepares for a restart
+     */
+    public void reset();
+
 
 }

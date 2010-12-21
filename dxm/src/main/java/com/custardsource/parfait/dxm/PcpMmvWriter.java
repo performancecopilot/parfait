@@ -162,7 +162,12 @@ public class PcpMmvWriter extends BasePcpWriter {
      *            the sources to use for coming up with identifiers for new metrics etc.
      */
     public PcpMmvWriter(File file, IdentifierSourceSet identifierSources) {
-        super(file, identifierSources);
+        this(new FileByteBufferFactory(file), identifierSources);
+
+    }
+
+    public PcpMmvWriter(ByteBufferFactory byteBufferFactory, IdentifierSourceSet identifierSources) {
+        super(byteBufferFactory, identifierSources);
         registerType(String.class, MMV_STRING_HANDLER);
     }
 
@@ -242,11 +247,15 @@ public class PcpMmvWriter extends BasePcpWriter {
         }
 
         dataFileBuffer.position(getTocOffset(tocBlockIndex++));
-        writeToc(dataFileBuffer, TocType.METRICS, metrics.size(), metrics.iterator().next()
-                .getOffset());
+        if (!metrics.isEmpty()) {
+            writeToc(dataFileBuffer, TocType.METRICS, metrics.size(), metrics.iterator().next()
+                    .getOffset());
+        }
         dataFileBuffer.position(getTocOffset(tocBlockIndex++));
-        writeToc(dataFileBuffer, TocType.VALUES, valueInfos.size(), valueInfos.iterator().next()
-                .getOffset());
+        if (!valueInfos.isEmpty()) {
+            writeToc(dataFileBuffer, TocType.VALUES, valueInfos.size(), valueInfos.iterator().next()
+                    .getOffset());
+        }
 
         if (!getStrings().isEmpty()) {
             dataFileBuffer.position(getTocOffset(tocBlockIndex++));
@@ -299,7 +308,7 @@ public class PcpMmvWriter extends BasePcpWriter {
     }
 
     @Override
-    protected int getFileLength() {
+    protected int getDataLength() {
         int instanceDomainCount = getInstanceDomains().size();
         int metricCount = getMetricInfos().size();
         int instanceCount = getInstances().size();
@@ -436,6 +445,8 @@ public class PcpMmvWriter extends BasePcpWriter {
     protected int getInstanceNameLimit() {
         return INSTANCE_NAME_LIMIT;
     }
+
+    // TODO there's lots of synchronization points we need to properly think out here, including the PcpMonitorBridge
 
     @Override
     protected synchronized void initialiseOffsets() {

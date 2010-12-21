@@ -15,10 +15,10 @@ import com.google.common.collect.ImmutableList;
  * A collection of Monitorables to be monitored by a given output source (or
  * sources). Each {@link Monitorable} is associated with a particular
  * MonitorableRegistry, and informs the registry of its own details via a
- * callback to {@link #register(Monitorable)} when the Monitorable is created. A
- * {@link MonitorableRegistry} is then provided to a {@link AbstractMonitoringView},
- * which can optionally stop the addition of further Monitorables with
- * {@link #freeze()}, and then commence monitoring the monitorables in question.
+ * callback to {@link #register(Monitorable)} when the Monitorable is created.
+ * the MonitorableRegistryListener interface can be used for clients interested in state changes
+ * to be made aware of when new Monitorables are added, such as objects that wish
+ * to serialize state to external stores. (ie... A PCPmmvWriter.. say..)
  */
 public class MonitorableRegistry {
     private static final ConcurrentMap<String, MonitorableRegistry> NAMED_INSTANCES = new ConcurrentHashMap<String, MonitorableRegistry>();
@@ -36,8 +36,6 @@ public class MonitorableRegistry {
      */
     private final Map<String, Monitorable<?>> monitorables = new TreeMap<String, Monitorable<?>>();
 
-    // TODO this frozen thing has to go...
-    private boolean stateFrozen = false;
     private final List<MonitorableRegistryListener> registryListeners = new CopyOnWriteArrayList<MonitorableRegistryListener>();
 
     /**
@@ -45,17 +43,11 @@ public class MonitorableRegistry {
      * Monitorable will be added to the registry, assuming no Monitorable with
      * the same name has previously been registered.
      * 
-     * @throws IllegalStateException
-     *             if this registry has been frozen with {@link #freeze()}
      * @throws UnsupportedOperationException
      *             if the name of the provided monitorable has already been
      *             registered
      */
     public synchronized <T> void register(Monitorable<T> monitorable) {
-        if (stateFrozen) {
-            throw new IllegalStateException("Cannot register monitorable " + monitorable.getName()
-                    + " after MonitorableRegistry has been frozen");
-        }
         if (monitorables.containsKey(monitorable.getName())) {
             throw new UnsupportedOperationException(
                     "There is already an instance of the Monitorable [" + monitorable.getName()
@@ -71,14 +63,6 @@ public class MonitorableRegistry {
         }
     }
 
-    /**
-     * Locks this {@link MonitorableRegistry} so that no further metrics may be
-     * added. To be used by {@link AbstractMonitoringView MonitoringViews} which do not
-     * permit the addition of new metrics after startup.
-     */
-    public synchronized void freeze() {
-        stateFrozen = true;
-    }
 
     /**
      * @return a list of all Monitorables which are registered with this
@@ -123,6 +107,11 @@ public class MonitorableRegistry {
         this.registryListeners.add(monitorableRegistryListener);
     }
 
+
+    public void removeRegistryListener(MonitorableRegistryListener listener) {
+        this.registryListeners.remove(listener);
+    }
+
     @VisibleForTesting
 	boolean containsMetric(String name) {
 		return monitorables.containsKey(name);
@@ -132,4 +121,5 @@ public class MonitorableRegistry {
 	Monitorable<?> getMetric(String name) {
 		return monitorables.get(name);
 	}
+
 }
