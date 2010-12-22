@@ -308,7 +308,7 @@ public class PcpMmvWriter extends BasePcpWriter {
     }
 
     @Override
-    protected int getDataLength() {
+    protected int getBufferLength() {
         int instanceDomainCount = getInstanceDomains().size();
         int metricCount = getMetricInfos().size();
         int instanceCount = getInstances().size();

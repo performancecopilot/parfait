@@ -99,7 +99,7 @@ public abstract class BasePcpWriter implements PcpWriter {
     public final void start() throws IOException {
         initialiseOffsets();
 
-        dataFileBuffer = byteBufferFactory.build(getDataLength());
+        dataFileBuffer = byteBufferFactory.build(getBufferLength());
         synchronized (dataFileBuffer) {
             populateDataBuffer(dataFileBuffer, metricData.values());
         }
@@ -148,7 +148,7 @@ public abstract class BasePcpWriter implements PcpWriter {
 
     protected abstract Charset getCharset();
 
-    protected abstract int getDataLength();
+    protected abstract int getBufferLength();
 
     protected final PcpMetricInfo getMetricInfo(String name) {
     	return metricInfoStore.byName(name);
