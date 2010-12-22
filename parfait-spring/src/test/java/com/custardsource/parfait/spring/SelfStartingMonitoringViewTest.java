@@ -89,6 +89,8 @@ public class SelfStartingMonitoringViewTest {
 
         registry.register(new DummyMonitorable("eek"));
 
+        // TODO Mad mad MAD props for changing this to use Scheduler; QuiescentRegistryListenerTest was failing for me ~50% of the time for some reason, and you really do notice that 2.5s. Would rather not do this if possible....
+
         try {
             Thread.sleep(2500);
         } catch (Exception e) {
