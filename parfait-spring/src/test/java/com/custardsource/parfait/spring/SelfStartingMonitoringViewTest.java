@@ -9,6 +9,8 @@ import com.custardsource.parfait.dxm.InMemoryByteBufferFactory;
 import com.custardsource.parfait.dxm.PcpMmvWriter;
 import com.custardsource.parfait.dxm.PcpWriter;
 import com.custardsource.parfait.pcp.PcpMonitorBridge;
+import com.google.common.base.Charsets;
+import com.google.common.primitives.Bytes;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -101,13 +103,10 @@ public class SelfStartingMonitoringViewTest {
     }
 
     /**
-     *  TODO this probably isn't the best/most accurate way to assert these conditions, but it does kinda work..
-     *
-     * use Guava's Bytes.indexOf(byte[], byte[]) and cast the expectedString to the proper Charset for proper comparison
-     * because this really only works because the PCP_CHARSET is currently US_ASCII
+     * we cast the string to US-ASCII charset because that's what PCP uses and then find it in the ByteBuffer array
+     * to ensure it's there.
      */
-    private void assertBufferContainsExpectedStrings(ByteBuffer buffer, final CharSequence expectedString) {
-        final String stringVersion = new String(buffer.array(), PcpMmvWriter.PCP_CHARSET);
-        assertTrue(stringVersion.contains(expectedString));
+    private void assertBufferContainsExpectedStrings(ByteBuffer buffer, final String expectedString) {
+        assertTrue(Bytes.indexOf(buffer.array(), expectedString.getBytes(Charsets.US_ASCII)) >= 0);
     }
 }
