@@ -1,16 +1,20 @@
 package com.custardsource.parfait;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 
 import java.util.Collection;
+import java.util.List;
+
+import static com.google.common.collect.ImmutableList.copyOf;
 
 public class CompositeMonitoringView implements MonitoringView{
 
-    private final MonitoringView[] monitoringViews;
+    private final List<MonitoringView> monitoringViews;
 
     public CompositeMonitoringView(MonitoringView... monitoringViews) {
-        this.monitoringViews = monitoringViews;
+        this.monitoringViews = copyOf(monitoringViews);
     }
 
     @Override
@@ -32,7 +36,7 @@ public class CompositeMonitoringView implements MonitoringView{
      * For a Composite view, isRunning() is true if any of the underlying views are still running
      */
     public boolean isRunning() {
-        return Iterators.any(Iterators.forArray(monitoringViews), new Predicate<MonitoringView>() {
+        return Iterators.any(monitoringViews.iterator(), new Predicate<MonitoringView>() {
             @Override
             public boolean apply(MonitoringView mv) {
                 return mv.isRunning();
