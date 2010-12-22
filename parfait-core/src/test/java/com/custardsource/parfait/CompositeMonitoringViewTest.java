@@ -7,6 +7,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Collection;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,7 +39,7 @@ public class CompositeMonitoringViewTest {
     }
 
     @Test
-    public void testStartMonitoring() {
+    public void startMonitoringShouldStartAllViews() {
 
         compositeMonitoringView.startMonitoring(monitorables);
 
@@ -48,7 +49,7 @@ public class CompositeMonitoringViewTest {
     }
 
     @Test
-    public void testStopMonitoring() {
+    public void stopMonitoringShouldStopAllViews() {
         compositeMonitoringView.stopMonitoring(monitorables);
 
         verify(monitoringView1).stopMonitoring(monitorables);
@@ -56,7 +57,13 @@ public class CompositeMonitoringViewTest {
     }
 
     @Test
-    public void testIsRunning() {
+    public void isRunningReturnsTrueIfAnyRunning() {
         assertTrue(compositeMonitoringView.isRunning());
+    }
+
+    @Test
+    public void isRunningReturnsFalseIfAllAreNotRunning() {
+        CompositeMonitoringView monitoringView = new CompositeMonitoringView(monitoringView1);
+        assertFalse(monitoringView.isRunning());
     }
 }
