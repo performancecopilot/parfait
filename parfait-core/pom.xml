@@ -12,28 +12,19 @@
         <artifactId>parfait</artifactId>
         <version>0.2.7-SNAPSHOT</version>
     </parent>
-    <build>
-        <plugins>
-
-        </plugins>
-    </build>
     <dependencies>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>1.8.0</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>net.jcip</groupId>
             <artifactId>jcip-annotations</artifactId>
-            <version>1.0</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>r05</version>
-            <type>jar</type>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>javax.measure</groupId>
