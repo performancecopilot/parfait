@@ -247,15 +247,15 @@ public class PcpMmvWriter extends BasePcpWriter {
         }
 
         dataFileBuffer.position(getTocOffset(tocBlockIndex++));
-        if (!metrics.isEmpty()) {
-            writeToc(dataFileBuffer, TocType.METRICS, metrics.size(), metrics.iterator().next()
-                    .getOffset());
-        }
+
+        int metricsFirstEntryOffset = metrics.isEmpty() ? 0 : metrics.iterator().next().getOffset();
+        int valuesFirstEntryOffset = valueInfos.isEmpty() ? 0 : valueInfos.iterator().next().getOffset();
+
+
+        writeToc(dataFileBuffer, TocType.METRICS, metrics.size(), metricsFirstEntryOffset);
         dataFileBuffer.position(getTocOffset(tocBlockIndex++));
-        if (!valueInfos.isEmpty()) {
-            writeToc(dataFileBuffer, TocType.VALUES, valueInfos.size(), valueInfos.iterator().next()
-                    .getOffset());
-        }
+        writeToc(dataFileBuffer, TocType.VALUES, valueInfos.size(), valuesFirstEntryOffset);
+
 
         if (!getStrings().isEmpty()) {
             dataFileBuffer.position(getTocOffset(tocBlockIndex++));
