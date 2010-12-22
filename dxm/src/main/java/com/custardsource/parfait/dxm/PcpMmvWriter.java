@@ -203,6 +203,7 @@ public class PcpMmvWriter extends BasePcpWriter {
     }
 
     public void setClusterIdentifier(int clusterIdentifier) {
+        Preconditions.checkArgument((clusterIdentifier & 0xFFFFF000)==0, "ClusterIdentifier can only be a 12bit value");
     	this.clusterIdentifier = clusterIdentifier;
     }
     
