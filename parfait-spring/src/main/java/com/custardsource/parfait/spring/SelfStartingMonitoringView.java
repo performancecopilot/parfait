@@ -56,10 +56,7 @@ public class SelfStartingMonitoringView implements Lifecycle {
     public void stop() {
         monitorableRegistry.removeRegistryListener(quiescentRegistryListener);
         this.quiescentRegistryListener.stop();
-
-        if (!previouslySeenMonitorables.isEmpty()) {
-            monitoringView.stopMonitoring(previouslySeenMonitorables);
-        }
+        monitoringView.stopMonitoring(previouslySeenMonitorables);
     }
 
     @Override
