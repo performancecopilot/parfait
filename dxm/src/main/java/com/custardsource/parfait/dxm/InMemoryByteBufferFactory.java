@@ -18,7 +18,7 @@ public class InMemoryByteBufferFactory implements ByteBufferFactory{
     }
 
     /**
-     * Returns the _last_ allocated ByteBuffer used during creation, so that further inspection can be done during unit tests.
+     * Returns the <em>last</em> allocated ByteBuffer used during creation, so that further inspection can be done during unit tests.
      *
      * You are reminded that this class may be used multiple times, this reference is only the last one created
      */
