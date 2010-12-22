@@ -116,7 +116,8 @@ public interface PcpWriter {
     public void setMetricHelpText(String metricName, String shortHelpText, String longHelpText);
 
     /**
-     * Prepares for a restart
+     * Prepares this object such that it can be restarted by invoking the {@link #start()} method
+     * again.
      */
     public void reset();
 
