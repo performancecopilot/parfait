@@ -14,11 +14,11 @@ import java.util.Collection;
 public interface MonitoringView {
 
     /**
-     * Instructs the view to begin it's work using the set of Monitorable instances
+     * Instructs the view to begin its work using the set of Monitorable instances
      * as the basis for whatever it is this 'view' wants to do with it (say, start externalising
      * the state of the metrics to an external file).
      *
-     * It is expected that this view tracks it's own start/stop state, and that clients
+     * It is expected that this view tracks its own start/stop state, and that clients
      * of this implementation should correctly call {@link #stopMonitoring(java.util.Collection)}  before recalling startMonitoring.
      */
     void startMonitoring(Collection<Monitorable<?>> monitorables);
