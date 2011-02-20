@@ -26,25 +26,29 @@ public class MonitorTest extends TestCase {
 
         assertNotNull("registry should not be null", registry);
 
-        // TODO some Hamcrest matcher goodness on assertions that specific monitorable exists?
-
         assertTrue("should have located counter", counterExists(registry, "xx.other.count"));
         assertTrue("should have located counter", counterExists(registry, "xx.test.count"));
 
         MonitoredCounter otherCounter = (MonitoredCounter) findCounter(registry, "xx.other.count");
+        MonitoredCounter testCounter = (MonitoredCounter) findCounter(registry, "xx.test.count");
 
         assertNotNull("should have located the basic counter for 'other'", otherCounter);
         assertEquals(0L, otherCounter.get().longValue());
+
+        assertNotNull("should have located the basic counter for 'test'", testCounter);
+        assertEquals(0L, testCounter.get().longValue());
 
 
 		test.doThing();
 		other.doThing();
 
         assertEquals(1L, otherCounter.get().longValue());
+        assertEquals(1L, testCounter.get().longValue());
 
 
 	}
 
+    // TODO some Hamcrest matcher goodness on assertions that specific monitorable exists?
     private Monitorable<?> findCounter(MonitorableRegistry registry, final String name) {
         Collection<Monitorable<?>> monitorables = registry.getMonitorables();
         Monitorable<?> monitorable = Iterators.find(monitorables.iterator(), new Predicate<Monitorable<?>>() {
@@ -70,11 +74,5 @@ public class MonitorTest extends TestCase {
         return false;
     }
 
-    public void testAspectMethodCounters(){
 
-        //ApplicationContext context = new ClassPathXmlApplicationContext(new String[]{"testAspectMethodCounters.xml"});
-
-        //context.getBean("dao");
-
-    }
 }
