@@ -31,6 +31,10 @@ public class SelfStartingMonitoringView implements Lifecycle {
         this(MonitorableRegistry.DEFAULT_REGISTRY, monitoringView, quietPeriodInMillis);
     }
 
+    public SelfStartingMonitoringView(MonitorableRegistry registry, MonitoringView monitoringView) {
+        this(registry, monitoringView, DEFAULT_QUIET_PERIOD);
+    }
+
     public SelfStartingMonitoringView(MonitorableRegistry registry, MonitoringView monitoringView, final long quietPeriodInMillis) {
         this.monitoringView = monitoringView;
         this.monitorableRegistry = registry;
@@ -62,5 +66,9 @@ public class SelfStartingMonitoringView implements Lifecycle {
     @Override
     public boolean isRunning() {
         return monitoringView.isRunning();
+    }
+
+    public static final long defaultQuietPeriod() {
+        return DEFAULT_QUIET_PERIOD;
     }
 }
