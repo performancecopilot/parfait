@@ -28,7 +28,7 @@ public class AdviceNotifier implements BeanPostProcessor {
 					String foundName = ((AbstractAspectJAdvice) ((AspectJPointcutAdvisor) advisor)
 							.getAdvice()).getAspectName();
 					if (aspect.getName().equals(foundName)) {
-						LOG.info("Found bean advised by " + aspect + "; injecting");
+						LOG.info(String.format("Found bean '%s' advised by %s; injecting", beanName, aspect));
 						try {
 							aspect.addAdvised(advised.getTargetSource().getTarget(), beanName);
 						} catch (Exception e) {
