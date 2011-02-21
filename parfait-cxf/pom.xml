@@ -2,7 +2,7 @@
   <parent>
     <artifactId>parfait</artifactId>
     <groupId>com.custardsource</groupId>
-    <version>0.2.7-SNAPSHOT</version>
+    <version>0.3.0-SNAPSHOT</version>
   </parent>
   <properties>
     <cxf.version>2.2.3</cxf.version>
