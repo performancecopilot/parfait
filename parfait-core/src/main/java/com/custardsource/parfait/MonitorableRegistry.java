@@ -57,6 +57,33 @@ public class MonitorableRegistry {
         notifyListenersOfNewMonitorable(monitorable);
     }
 
+    /**
+     * Registers the monitorable if it does not already exist, but otherwise returns an already registered
+     * Monitorable with the same name, Semantics and UNnit definition.  This method is useful when objects
+     * appear and disappear, and then return, and the lifecycle of the application requires an attempt to recreate
+     * the Monitorable without knowing if it has already been created.
+     *
+     * If there exists a Monitorable with the same name, but with different Semantics or Unit then an IllegalArgumentException
+     * is thrown.
+     *
+     */
+    public synchronized <T> T registerOrReuse(Monitorable<T> monitorable) {
+        String name = monitorable.getName();
+        if (monitorables.containsKey(name)) {
+            Monitorable<?> existingMonitorableWithSameName = monitorables.get(name);
+            if (monitorable.getSemantics().equals(existingMonitorableWithSameName.getSemantics()) && monitorable.getUnit().equals(existingMonitorableWithSameName.getUnit())) {
+                return (T) existingMonitorableWithSameName;
+            } else {
+                throw new IllegalArgumentException(String.format("Cannot reuse the same name %s for a monitorable with different Semantics or Unit: requested=%s, existing=%s", name, monitorable, existingMonitorableWithSameName));
+            }
+
+        }else {
+            monitorables.put(name, monitorable);
+            notifyListenersOfNewMonitorable(monitorable);
+            return (T) monitorable;
+        }
+    }
+
     private void notifyListenersOfNewMonitorable(Monitorable<?> monitorable) {
         for (MonitorableRegistryListener listener : registryListeners) {
             listener.monitorableAdded(monitorable);

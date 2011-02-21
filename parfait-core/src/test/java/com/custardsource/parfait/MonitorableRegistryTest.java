@@ -17,6 +17,18 @@ public class MonitorableRegistryTest {
         registry.register(dummy2);
     }
 
+    @Test
+    public void willReusePreviouslyRegisteredMetricInstead() {
+
+        MonitorableRegistry registry = newRegistry();
+
+        Monitorable<?> dummy = new DummyMonitorable("foo");
+        registry.register(dummy);
+
+        Monitorable<?> dummy2 = new DummyMonitorable("foo");
+        Object reusedHopefully = registry.registerOrReuse(dummy2);
+        assertSame("Should have returned the same object reference from the first registration, instead brought back " + reusedHopefully, dummy, reusedHopefully);
+    }
 
     @Test
     public void getMonitorablesOnNewRegistryReturnsEmptyCollection() {
