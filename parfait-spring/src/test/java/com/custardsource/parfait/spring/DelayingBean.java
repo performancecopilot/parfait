@@ -2,7 +2,7 @@ package com.custardsource.parfait.spring;
 
 import java.util.Random;
 
-@TestAnnotation
+@Profiled
 public class DelayingBean {
 	private final int delay;
 	
@@ -10,7 +10,7 @@ public class DelayingBean {
 		this.delay = new Random().nextInt(100);
 	}
 	
-	@TestAnnotation
+	@Profiled
 	public void doThing() {
 		try {
 			Thread.sleep(delay);
