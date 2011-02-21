@@ -30,7 +30,7 @@
     <aop:config>
         <aop:aspect ref="profiler">
             <aop:pointcut id="profiledMethods"
-                          expression="@within(com.custardsource.parfait.spring.TestAnnotation) &amp;&amp; @annotation(com.custardsource.parfait.spring.TestAnnotation)"/>
+                          expression="@within(com.custardsource.parfait.spring.Profiled) &amp;&amp; @annotation(com.custardsource.parfait.spring.Profiled)"/>
             <aop:around pointcut-ref="profiledMethods" method="profileMethod"/>
         </aop:aspect>
     </aop:config>
