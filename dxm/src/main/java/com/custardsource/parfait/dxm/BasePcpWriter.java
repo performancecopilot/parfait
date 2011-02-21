@@ -82,7 +82,7 @@ public abstract class BasePcpWriter implements PcpWriter {
      */
     public final void updateMetric(MetricName name, Object value) {
         if (!started) {
-            throw new IllegalStateException("Cannot update metric unless writer is running");
+            return;
         }
         PcpValueInfo info = metricData.get(name);
         if (info == null) {
