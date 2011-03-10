@@ -40,8 +40,17 @@ public class ThreadContext {
     private final ConcurrentMap<Thread, Map<String, Object>> PER_THREAD_CONTEXTS = new MapMaker()
             .weakKeys().makeComputingMap(NEW_CONTEXT_CREATOR);
 
-    private static volatile MdcBridge mdcBridge = new NullMdcBridge();
-    
+    private volatile MdcBridge mdcBridge = new NullMdcBridge();
+
+    public ThreadContext() {
+        this(new NullMdcBridge());
+    }
+
+    public ThreadContext(MdcBridge mdcBridge) {
+        // TODO should that be a static variable..?
+        this.mdcBridge=mdcBridge;
+    }
+
     /**
      * Adds the given key/value pair to the current thread's context, and updates {@link MDC} with
      * same.
@@ -71,6 +80,15 @@ public class ThreadContext {
      * Clears all values for the current thread.
      */
     public void clear() {
+
+        /**
+         * Unfortunately log4j's MDC historically never had a mechanism to block remove keys,
+         * so we're forced to do this one by one.
+         */
+        for (String key : allKeys()) {
+           mdcBridge.remove(key);
+        }
+
         PER_THREAD_CONTEXTS.get(Thread.currentThread()).clear();
     }
 
@@ -92,7 +110,21 @@ public class ThreadContext {
     public Object getForThread(Thread thread, String key) {
         return PER_THREAD_CONTEXTS.get(thread).get(key);
     }
-    
+
+    /**
+     * Factory method that creates a new ThreadContext initialized to also update Log4j's MDC.
+     */
+    public static ThreadContext newMDCEnabledContext() {
+        return new ThreadContext(new Log4jMdcBridge());
+    }
+
+    /**
+     * Factory method that creates a new ThreadContext initialised to also update SLF4J's MDC
+     */
+    public static ThreadContext newSLF4JEnabledContext() {
+        return new ThreadContext(new Slf4jMDCBridge());
+    }
+
     public interface MdcBridge {
     	void put(String key, Object object);
 
