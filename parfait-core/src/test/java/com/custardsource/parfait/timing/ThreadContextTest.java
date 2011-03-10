@@ -1,7 +1,10 @@
 package com.custardsource.parfait.timing;
 
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+
+import org.apache.log4j.MDC;
 
 import junit.framework.TestCase;
 
@@ -10,7 +13,14 @@ public class ThreadContextTest extends TestCase {
     
     public void setUp() {
         context = new ThreadContext();
+
+        Hashtable hashtable = MDC.getContext();
+        if (hashtable != null) {
+            hashtable.clear();
+        }
     }
+
+
 
     public void testGetOfUnusedKeyReturnsNull() {
         final String testKey = "handy";
@@ -58,5 +68,26 @@ public class ThreadContextTest extends TestCase {
         context.put(testKey, 7);
         context.clear();
         assertNull("get() after clear should return null", context.get(testKey));
+    }
+
+    public void testClearRemovesMDCValue(){
+
+        ThreadContext log4jThreadContext = ThreadContext.newMDCEnabledContext();
+
+        Hashtable mdcContext = MDC.getContext();
+        assertNull(mdcContext);
+
+        final String testKey = "painter";
+        log4jThreadContext.put(testKey, 7);
+
+        mdcContext = MDC.getContext();
+        assertEquals(1, mdcContext.size());
+
+
+        log4jThreadContext.clear();
+
+        assertEquals(0, mdcContext.size());
+
+        assertNull("get() after clear should return null", log4jThreadContext.get(testKey));
     }
 }
