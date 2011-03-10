@@ -69,6 +69,15 @@ public class ThreadContext {
      * Clears all values for the current thread.
      */
     public void clear() {
+
+        /**
+         * Unfortunately log4j's MDC historically never had a mechanism to block remove keys,
+         * so we're forced to do this one by one.
+         */
+        for (String key : allKeys()) {
+           MDC.remove(key);
+        }
+
         PER_THREAD_CONTEXTS.get(Thread.currentThread()).clear();
     }
 
