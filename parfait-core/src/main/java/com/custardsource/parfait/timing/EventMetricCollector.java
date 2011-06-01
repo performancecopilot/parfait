@@ -1,5 +1,7 @@
 package com.custardsource.parfait.timing;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +24,7 @@ public class EventMetricCollector {
      * the top-level event requested by the user.
      */
     private int depth = 0;
-    private Object topLevelEvent;
+    private Deque<Object> topLevelEvent = new ArrayDeque<Object>();
 
     private final Map<Object, EventCounters> perEventCounters;
     private final List<StepMeasurementSink> sinks;
@@ -41,7 +43,7 @@ public class EventMetricCollector {
             newTiming.addMetricInstance(new MetricMeasurement(metric, Thread.currentThread()));
         }
         current = newTiming;
-        topLevelEvent = eventGroup;
+        topLevelEvent.addFirst(eventGroup);
         depth++;
         if (top == null) {
             top = newTiming;
@@ -52,14 +54,15 @@ public class EventMetricCollector {
     public void stopTiming() {
         current.stopAll();
         depth--;
+        Object event = topLevelEvent.removeFirst();
 
         for (StepMeasurementSink sink : sinks) {
             sink.handle(current, depth);
         }
 
-        if (depth == 0 && perEventCounters.containsKey(topLevelEvent)) {
+        if (depth == 0 && perEventCounters.containsKey(event)) {
             // We're at the top level, increment our event counters too
-            EventCounters counters = perEventCounters.get(topLevelEvent);
+            EventCounters counters = perEventCounters.get(event);
             for (MetricMeasurement metric : current.getMetricInstances()) {
                 EventMetricCounters counter = counters.getCounterForMetric(metric
                         .getMetricSource());
