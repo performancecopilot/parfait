@@ -9,7 +9,7 @@
   <groupId>com.custardsource</groupId>
   <artifactId>parfait</artifactId>
   <packaging>pom</packaging>
-  <version>0.2.8-SNAPSHOT</version>
+  <version>0.2.8</version>
   <name>parfait</name>
   <description>Java performance monitoring framework, including PCP bridge</description>
   <modules>
