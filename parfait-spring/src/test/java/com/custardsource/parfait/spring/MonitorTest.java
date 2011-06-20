@@ -4,7 +4,6 @@ import com.custardsource.parfait.Monitorable;
 import com.custardsource.parfait.MonitorableRegistry;
 import com.custardsource.parfait.MonitoredCounter;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterators;
 import com.sun.istack.internal.Nullable;
 import org.springframework.context.ApplicationContext;
@@ -13,7 +12,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import junit.framework.TestCase;
 
 import java.util.Collection;
-import java.util.Collections;
 
 
 public class MonitorTest extends TestCase {
