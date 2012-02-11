@@ -2,6 +2,7 @@ package com.custardsource.parfait.benchmark;
 
 import static com.google.common.collect.Lists.newArrayList;
 
+import java.text.NumberFormat;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,6 +17,7 @@ import com.custardsource.parfait.pcp.MetricDescriptionTextSource;
 import com.custardsource.parfait.pcp.MetricNameMapper;
 import com.custardsource.parfait.pcp.PcpMonitorBridge;
 import com.custardsource.parfait.spring.SelfStartingMonitoringView;
+import org.apache.commons.lang.StringUtils;
 
 public class StandardMetricThroughPutBenchmark {
 
@@ -25,9 +27,16 @@ public class StandardMetricThroughPutBenchmark {
     public static void main(String[] args) throws InterruptedException {
 
         int numThreads = 8;
-        int iterations = 1000;
+        int iterations = 10000;
         int numCounters = 1000;
 
+        runBenchmark(numThreads, iterations, numCounters, false);
+        runBenchmark(numThreads, iterations, numCounters, true);
+
+
+    }
+
+    private static void runBenchmark(int numThreads, int iterations, int numCounters, boolean startPcp) throws InterruptedException {
         long begin = System.currentTimeMillis();
         MonitorableRegistry monitorableRegistry = new MonitorableRegistry();
 
@@ -40,16 +49,19 @@ public class StandardMetricThroughPutBenchmark {
         final PcpMonitorBridge pcpMonitorBridge = new PcpMonitorBridge(mmvWriter, MetricNameMapper.PASSTHROUGH_MAPPER, new MetricDescriptionTextSource(), new EmptyTextSource());
 
         SelfStartingMonitoringView selfStartingMonitoringView = new SelfStartingMonitoringView(monitorableRegistry, pcpMonitorBridge, 2000);
-        selfStartingMonitoringView.start();
+
+        if (startPcp) {
+            selfStartingMonitoringView.start();
+        }
 
         List<CounterIncrementer> counterIncrementers = executeBenchmark(numThreads, iterations, counters);
-        selfStartingMonitoringView.stop();
+        if (startPcp) {
+            selfStartingMonitoringView.stop();
+        }
 
         long timeTaken = System.currentTimeMillis() - begin;
 
-        report(numThreads, iterations, counters, timeTaken, counterIncrementers);
-        
-
+        report(startPcp, numThreads, iterations, counters, timeTaken, counterIncrementers);
     }
 
     private static List<MonitoredCounter> createCounters(int numCounters, MonitorableRegistry registry) {
@@ -58,30 +70,37 @@ public class StandardMetricThroughPutBenchmark {
         for (int i = 0; i < numCounters; i++) {
             counters.add(new MonitoredCounter("counter." + i, "Counter " + i, registry));
         }
-        
+
         return counters;
     }
 
-    private static void report(int numThreads, int iterations, List<MonitoredCounter> counters, long timeTaken, List<CounterIncrementer> counterIncrementers) {
+    private static void report(boolean startPcp, int numThreads, int iterations, List<MonitoredCounter> counters, long timeTaken, List<CounterIncrementer> counterIncrementers) {
         long totalBlockedCount = computeTotalBlockedCount(counterIncrementers);
         long totalBlockedTime = computeTotalBlockedTime(counterIncrementers);
         double counterIncrements = computeTotalCounterIncrements(counters);
+        
         double incrementRate = counterIncrements / ((double) timeTaken / 1000);
-
-        System.out.printf("iterations: %d, numThreads: %d, numCounters: %d, incrementRate: %.2f/sec, blockedCount: %d, blockedTime: %d", iterations, numThreads, counters.size(), incrementRate, totalBlockedCount, totalBlockedTime);
+        NumberFormat numberFormat = NumberFormat.getNumberInstance();
+        numberFormat.setGroupingUsed(true);
+        numberFormat.setMaximumFractionDigits(2);
+        numberFormat.setMinimumFractionDigits(2);
+        String incrementRateString = StringUtils.leftPad(numberFormat.format(incrementRate), 15);
+        
+        System.out.printf("pcpStarted: %s\titerations: %d\t numThreads: %d\t numCounters: %d\t incrementRate(/sec): %s\t blockedCount: %d\t blockedTime: %d\n", startPcp, iterations, numThreads, counters.size(), incrementRateString, totalBlockedCount, totalBlockedTime);
     }
 
     private static long computeTotalBlockedCount(List<CounterIncrementer> counterIncrementers) {
         long totalBlockedCount = 0;
         for (CounterIncrementer counterIncrementer : counterIncrementers) {
-            totalBlockedCount+=counterIncrementer.getTotalBlockedCount();
+            totalBlockedCount += counterIncrementer.getTotalBlockedCount();
         }
         return totalBlockedCount;
     }
+
     private static long computeTotalBlockedTime(List<CounterIncrementer> counterIncrementers) {
         long totalBlockedTime = 0;
         for (CounterIncrementer counterIncrementer : counterIncrementers) {
-            totalBlockedTime+=counterIncrementer.getTotalBlockedTime();
+            totalBlockedTime += counterIncrementer.getTotalBlockedTime();
         }
         return totalBlockedTime;
     }
