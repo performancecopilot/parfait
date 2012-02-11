@@ -2,6 +2,10 @@ package com.custardsource.parfait.benchmark;
 
 import static com.google.common.collect.Lists.newArrayList;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
+import java.net.Inet4Address;
+import java.net.UnknownHostException;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -18,25 +22,31 @@ import com.custardsource.parfait.pcp.MetricNameMapper;
 import com.custardsource.parfait.pcp.PcpMonitorBridge;
 import com.custardsource.parfait.spring.SelfStartingMonitoringView;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.SystemUtils;
 
 public class StandardMetricThroughPutBenchmark {
 
-
     private static final int CLUSTER_IDENTIFIER = 123;
 
-    public static void main(String[] args) throws InterruptedException {
-
-        int numThreads = 8;
-        int iterations = 10000;
-        int numCounters = 1000;
-
-        runBenchmark(numThreads, iterations, numCounters, false);
-        runBenchmark(numThreads, iterations, numCounters, true);
+    private final boolean startPcp ;
+    private final boolean usePerMetricLock;
+    private final int numThreads;
+    private final int iterations;
+    private final int numCounters;
+    private final ExecutorService executorService;
 
 
+    public StandardMetricThroughPutBenchmark(int numThreads, int numCounters, int iterations, boolean startPcp, boolean usePerMetricLock) {
+        this.numThreads = numThreads;
+        this.numCounters = numCounters;
+        this.iterations = iterations;
+        this.startPcp = startPcp;
+        this.usePerMetricLock = usePerMetricLock;
+        this.executorService = Executors.newFixedThreadPool(this.numThreads);
     }
 
-    private static void runBenchmark(int numThreads, int iterations, int numCounters, boolean startPcp) throws InterruptedException {
+
+    private void runBenchmark() throws InterruptedException {
         long begin = System.currentTimeMillis();
         MonitorableRegistry monitorableRegistry = new MonitorableRegistry();
 
@@ -44,6 +54,8 @@ public class StandardMetricThroughPutBenchmark {
 
 
         final PcpMmvWriter mmvWriter = new PcpMmvWriter("parfait-microbenchmark-" + StandardMetricThroughPutBenchmark.class.getSimpleName() + ".mmv", IdentifierSourceSet.DEFAULT_SET);
+        mmvWriter.setPerMetricLock(usePerMetricLock);
+
         mmvWriter.setClusterIdentifier(CLUSTER_IDENTIFIER);
 
         final PcpMonitorBridge pcpMonitorBridge = new PcpMonitorBridge(mmvWriter, MetricNameMapper.PASSTHROUGH_MAPPER, new MetricDescriptionTextSource(), new EmptyTextSource());
@@ -61,10 +73,10 @@ public class StandardMetricThroughPutBenchmark {
 
         long timeTaken = System.currentTimeMillis() - begin;
 
-        report(startPcp, numThreads, iterations, counters, timeTaken, counterIncrementers);
+        report(startPcp, counters, timeTaken, counterIncrementers);
     }
 
-    private static List<MonitoredCounter> createCounters(int numCounters, MonitorableRegistry registry) {
+    private List<MonitoredCounter> createCounters(int numCounters, MonitorableRegistry registry) {
         List<MonitoredCounter> counters = newArrayList();
 
         for (int i = 0; i < numCounters; i++) {
@@ -74,7 +86,7 @@ public class StandardMetricThroughPutBenchmark {
         return counters;
     }
 
-    private static void report(boolean startPcp, int numThreads, int iterations, List<MonitoredCounter> counters, long timeTaken, List<CounterIncrementer> counterIncrementers) {
+    private void report(boolean startPcp, List<MonitoredCounter> counters, long timeTaken, List<CounterIncrementer> counterIncrementers) {
         long totalBlockedCount = computeTotalBlockedCount(counterIncrementers);
         long totalBlockedTime = computeTotalBlockedTime(counterIncrementers);
         double counterIncrements = computeTotalCounterIncrements(counters);
@@ -86,10 +98,10 @@ public class StandardMetricThroughPutBenchmark {
         numberFormat.setMinimumFractionDigits(2);
         String incrementRateString = StringUtils.leftPad(numberFormat.format(incrementRate), 15);
         
-        System.out.printf("pcpStarted: %s\titerations: %d\t numThreads: %d\t numCounters: %d\t incrementRate(/sec): %s\t blockedCount: %d\t blockedTime: %d\n", startPcp, iterations, numThreads, counters.size(), incrementRateString, totalBlockedCount, totalBlockedTime);
+        System.out.printf("pcpStarted: %s\tperMetricLock: %s\tincrementRate(/sec): %s\t blockedCount: %d\t blockedTime: %d\n", startPcp, usePerMetricLock, incrementRateString, totalBlockedCount, totalBlockedTime);
     }
 
-    private static long computeTotalBlockedCount(List<CounterIncrementer> counterIncrementers) {
+    private long computeTotalBlockedCount(List<CounterIncrementer> counterIncrementers) {
         long totalBlockedCount = 0;
         for (CounterIncrementer counterIncrementer : counterIncrementers) {
             totalBlockedCount += counterIncrementer.getTotalBlockedCount();
@@ -97,7 +109,7 @@ public class StandardMetricThroughPutBenchmark {
         return totalBlockedCount;
     }
 
-    private static long computeTotalBlockedTime(List<CounterIncrementer> counterIncrementers) {
+    private long computeTotalBlockedTime(List<CounterIncrementer> counterIncrementers) {
         long totalBlockedTime = 0;
         for (CounterIncrementer counterIncrementer : counterIncrementers) {
             totalBlockedTime += counterIncrementer.getTotalBlockedTime();
@@ -105,7 +117,7 @@ public class StandardMetricThroughPutBenchmark {
         return totalBlockedTime;
     }
 
-    private static double computeTotalCounterIncrements(List<MonitoredCounter> counters) {
+    private double computeTotalCounterIncrements(List<MonitoredCounter> counters) {
         double counterIncrements = 0;
         for (MonitoredCounter counter : counters) {
             counterIncrements += counter.get();
@@ -114,9 +126,7 @@ public class StandardMetricThroughPutBenchmark {
     }
 
 
-    private static List<CounterIncrementer> executeBenchmark(int numThreads, int iterations, List<MonitoredCounter> counters) throws InterruptedException {
-        ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
-
+    private List<CounterIncrementer> executeBenchmark(int numThreads, int iterations, List<MonitoredCounter> counters) throws InterruptedException {
         List<CounterIncrementer> counterIncrementers = newArrayList();
         for (int i = 0; i < numThreads; i++) {
             CounterIncrementer counterIncrementer = new CounterIncrementer(counters, iterations);
@@ -127,6 +137,28 @@ public class StandardMetricThroughPutBenchmark {
         executorService.shutdown();
         executorService.awaitTermination(1, TimeUnit.MINUTES);
         return counterIncrementers;
+    }
+
+    public static void main(String[] args) throws InterruptedException, UnknownHostException {
+        int numThreads = args.length<1?Runtime.getRuntime().availableProcessors():Integer.valueOf(args[0]);
+        int numCounters = 1000;
+        int iterations = 10000;
+
+        System.out.printf("Host: %s\tJava: %s\n", Inet4Address.getLocalHost().getCanonicalHostName(), SystemUtils.JAVA_VERSION);
+        ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+        System.out.printf("Thread Contention Supported: %s, Enabled by default: %s\n", threadMXBean.isThreadContentionMonitoringSupported(), threadMXBean.isThreadContentionMonitoringEnabled());
+        System.out.printf("numThreads: %d, numCounters=%d, iterations=%d\n", numThreads, numCounters, iterations);
+
+        new StandardMetricThroughPutBenchmark(numThreads, numCounters, iterations, false, false).runBenchmark();
+        new StandardMetricThroughPutBenchmark(numThreads, numCounters, iterations, true, false).runBenchmark();
+        new StandardMetricThroughPutBenchmark(numThreads, numCounters, iterations, true, true).runBenchmark();
+
+        // now do it all again reverse, in case there's any JVM warmup issues unfairly treating the first/last runs
+        new StandardMetricThroughPutBenchmark(numThreads, numCounters, iterations, true, true).runBenchmark();
+        new StandardMetricThroughPutBenchmark(numThreads, numCounters, iterations, true, false).runBenchmark();
+        new StandardMetricThroughPutBenchmark(numThreads, numCounters, iterations, false, false).runBenchmark();
+
+
     }
 
 }
