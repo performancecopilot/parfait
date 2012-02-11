@@ -13,7 +13,6 @@ public class QuiescentRegistryListener implements MonitorableRegistryListener {
 
     private static final Logger LOG = Logger.getLogger(QuiescentRegistryListener.class);
 
-    private final Timer quiescentTimer = new Timer(getClass().getSimpleName(), true);
     private final Scheduler quiescentScheduler;
     private volatile long lastTimeMonitorableAdded = 0;
     private final Object lock = new Object();
@@ -47,6 +46,5 @@ public class QuiescentRegistryListener implements MonitorableRegistryListener {
     }
 
     public void stop(){
-        quiescentTimer.cancel();
     }
 }
