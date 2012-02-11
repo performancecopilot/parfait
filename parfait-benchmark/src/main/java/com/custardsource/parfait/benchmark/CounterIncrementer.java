@@ -11,8 +11,8 @@ class CounterIncrementer implements Runnable{
     private final List<MonitoredCounter> counters;
     private final int iterations;
     private ThreadInfo initialThreadInfo;
-    private long totalBlockedCount;
-    private long totalBlockedTime;
+    private volatile long totalBlockedCount;
+    private volatile long totalBlockedTime;
 
     public CounterIncrementer(List<MonitoredCounter> counters, int iterations) {
         this.counters = counters;
