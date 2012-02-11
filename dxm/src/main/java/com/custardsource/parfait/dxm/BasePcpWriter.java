@@ -1,12 +1,6 @@
 package com.custardsource.parfait.dxm;
 
-import com.custardsource.parfait.dxm.semantics.Semantics;
-import com.custardsource.parfait.dxm.types.DefaultTypeHandlers;
-import com.custardsource.parfait.dxm.types.TypeHandler;
-import com.google.common.collect.Maps;
-import net.jcip.annotations.GuardedBy;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
+import static com.google.common.collect.Maps.newConcurrentMap;
 
 import javax.measure.unit.Unit;
 import java.io.File;
@@ -21,6 +15,15 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import com.custardsource.parfait.dxm.semantics.Semantics;
+import com.custardsource.parfait.dxm.types.DefaultTypeHandlers;
+import com.custardsource.parfait.dxm.types.TypeHandler;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
+import net.jcip.annotations.GuardedBy;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
+
 public abstract class BasePcpWriter implements PcpWriter {
 	// TODO only include in-use indoms/instances/metrics (/strings?) in the header
 	private final Store<PcpMetricInfo> metricInfoStore;
@@ -32,8 +35,12 @@ public abstract class BasePcpWriter implements PcpWriter {
     private volatile boolean started = false;
     @GuardedBy("itself")
     private volatile ByteBuffer dataFileBuffer = null;
+    private final Object globalLock = new Object();
+
     private final Collection<PcpString> stringInfo = new CopyOnWriteArrayList<PcpString>();
     private final ByteBufferFactory byteBufferFactory;
+    private final Map<PcpValueInfo,ByteBuffer> perMetricByteBuffers = newConcurrentMap();
+    private boolean usePerMetricLock = true;
 
 
     protected BasePcpWriter(File file, IdentifierSourceSet identifierSources) {
@@ -100,8 +107,17 @@ public abstract class BasePcpWriter implements PcpWriter {
         initialiseOffsets();
 
         dataFileBuffer = byteBufferFactory.build(getBufferLength());
-        synchronized (dataFileBuffer) {
+        synchronized (globalLock) {
             populateDataBuffer(dataFileBuffer, metricData.values());
+
+            for (PcpValueInfo info : metricData.values()) {
+                TypeHandler<?> rawHandler = info.getTypeHandler();
+                int bufferPosition = rawHandler.requiresLargeStorage() ? info.getLargeValue()
+                        .getOffset() : info.getOffset();
+                ByteBuffer metricByteBufferSlice = dataFileBuffer.slice();
+                metricByteBufferSlice.position(bufferPosition);
+                perMetricByteBuffers.put(info, metricByteBufferSlice);
+            }
         }
 
         started = true;
@@ -124,8 +140,27 @@ public abstract class BasePcpWriter implements PcpWriter {
     @SuppressWarnings("unchecked")
     protected final void updateValue(PcpValueInfo info, Object value) {
         @SuppressWarnings("rawtypes")
-		TypeHandler rawHandler = info.getTypeHandler();
-        synchronized (dataFileBuffer) {
+        TypeHandler rawHandler = info.getTypeHandler();
+
+        if (usePerMetricLock) {
+            writeValueWithLockPerMetric(info, value, rawHandler);
+        } else {
+            writeValueWithGlobalLock(info, value, rawHandler);
+        }
+    }
+
+    private void writeValueWithLockPerMetric(PcpValueInfo info, Object value, TypeHandler rawHandler) {
+        ByteBuffer perMetricByteBuffer = perMetricByteBuffers.get(info);
+        synchronized (info) {
+            int originalBufferPosition = perMetricByteBuffer.position();
+            rawHandler.putBytes(perMetricByteBuffer, value);
+            perMetricByteBuffer.position(originalBufferPosition);
+        }
+
+    }
+
+    private void writeValueWithGlobalLock(PcpValueInfo info, Object value, TypeHandler rawHandler) {
+        synchronized (globalLock) {
             dataFileBuffer.position(rawHandler.requiresLargeStorage() ? info.getLargeValue()
                     .getOffset() : info.getOffset());
             rawHandler.putBytes(dataFileBuffer, value);
@@ -227,6 +262,12 @@ public abstract class BasePcpWriter implements PcpWriter {
         stringInfo .add(string);
         return string;
     }
+    
+    public void setPerMetricLock(boolean usePerMetricLock) {
+        Preconditions.checkState(!started, "Cannot change use of perMetricLock when started");
+        this.usePerMetricLock = usePerMetricLock;
+    }
+    
 
 	static abstract class Store<T extends PcpId> {
         private final Map<String, T> byName = new LinkedHashMap<String, T>();
