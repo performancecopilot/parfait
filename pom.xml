@@ -21,6 +21,7 @@
     <module>parfait-jdbc</module>
     <module>parfait-cxf</module>
     <module>parfait-spring</module>
+    <module>parfait-benchmark</module>
   </modules>
   <url>http://code.google.com/p/parfait/</url>
   <inceptionYear>2009</inceptionYear>
