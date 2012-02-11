@@ -1,11 +1,10 @@
 package com.custardsource.parfait;
 
-import org.apache.log4j.Logger;
-
 import java.util.Timer;
 import java.util.TimerTask;
 
 import com.google.common.base.Supplier;
+import org.apache.log4j.Logger;
 
 /**
  * Designed to run code after the MonitorableRegistry has become quiet, in terms of addition of new metrics
@@ -21,7 +20,7 @@ public class QuiescentRegistryListener implements MonitorableRegistryListener {
 	private final Supplier<Long> clock;
 
     public QuiescentRegistryListener(final Runnable runnable, final long quietPeriodInMillis) {
-    	this (runnable, new SystemTimePoller(), quietPeriodInMillis, new TimerScheduler(new Timer(QuiescentRegistryListener.class.getName())));
+    	this (runnable, new SystemTimePoller(), quietPeriodInMillis, new TimerScheduler(new Timer(QuiescentRegistryListener.class.getName(),true)));
     }
     
     QuiescentRegistryListener(final Runnable runnable, final Supplier<Long> clock, final long quietPeriodInMillis, Scheduler scheduler) {
