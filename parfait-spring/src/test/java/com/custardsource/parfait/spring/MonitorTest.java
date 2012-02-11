@@ -5,7 +5,6 @@ import com.custardsource.parfait.MonitorableRegistry;
 import com.custardsource.parfait.MonitoredCounter;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
-import com.sun.istack.internal.Nullable;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -51,7 +50,7 @@ public class MonitorTest extends TestCase {
         Collection<Monitorable<?>> monitorables = registry.getMonitorables();
         Monitorable<?> monitorable = Iterators.find(monitorables.iterator(), new Predicate<Monitorable<?>>() {
             @Override
-            public boolean apply(@Nullable Monitorable<?> monitorable) {
+            public boolean apply(Monitorable<?> monitorable) {
                 return monitorable.getName().equals(name);
             }
         });
