@@ -40,7 +40,7 @@ public abstract class BasePcpWriter implements PcpWriter {
     private final Collection<PcpString> stringInfo = new CopyOnWriteArrayList<PcpString>();
     private final ByteBufferFactory byteBufferFactory;
     private final Map<PcpValueInfo,ByteBuffer> perMetricByteBuffers = newConcurrentMap();
-    private boolean usePerMetricLock = true;
+    private volatile boolean usePerMetricLock = true;
 
 
     protected BasePcpWriter(File file, IdentifierSourceSet identifierSources) {
@@ -114,8 +114,10 @@ public abstract class BasePcpWriter implements PcpWriter {
                 TypeHandler<?> rawHandler = info.getTypeHandler();
                 int bufferPosition = rawHandler.requiresLargeStorage() ? info.getLargeValue()
                         .getOffset() : info.getOffset();
+                // need to position the original buffer first, as the sliced buffer starts from there
+                dataFileBuffer.position(bufferPosition);
                 ByteBuffer metricByteBufferSlice = dataFileBuffer.slice();
-                metricByteBufferSlice.position(bufferPosition);
+                metricByteBufferSlice.limit(rawHandler.getDataLength());
                 perMetricByteBuffers.put(info, metricByteBufferSlice);
             }
         }
@@ -151,10 +153,9 @@ public abstract class BasePcpWriter implements PcpWriter {
 
     private void writeValueWithLockPerMetric(PcpValueInfo info, Object value, TypeHandler rawHandler) {
         ByteBuffer perMetricByteBuffer = perMetricByteBuffers.get(info);
-        synchronized (info) {
-            int originalBufferPosition = perMetricByteBuffer.position();
+        synchronized (perMetricByteBuffer) {
+            perMetricByteBuffer.position(0);
             rawHandler.putBytes(perMetricByteBuffer, value);
-            perMetricByteBuffer.position(originalBufferPosition);
         }
 
     }
