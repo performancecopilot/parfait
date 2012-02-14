@@ -119,6 +119,7 @@ public abstract class BasePcpWriter implements PcpWriter {
                 ByteBuffer metricByteBufferSlice = dataFileBuffer.slice();
                 metricByteBufferSlice.limit(rawHandler.getDataLength());
                 perMetricByteBuffers.put(info, metricByteBufferSlice);
+                metricByteBufferSlice.order(dataFileBuffer.order());
             }
         }
 
