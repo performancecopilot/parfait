@@ -78,5 +78,10 @@
             <artifactId>parfait-spring</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.beust</groupId>
+            <artifactId>jcommander</artifactId>
+            <version>1.7</version>
+        </dependency>
     </dependencies>
 </project>
