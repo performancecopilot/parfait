@@ -1,5 +1,7 @@
 package com.custardsource.parfait.benchmark;
 
+import static com.custardsource.parfait.benchmark.BlockedMetricHelper.computeTotalBlockedCount;
+import static com.custardsource.parfait.benchmark.BlockedMetricHelper.computeTotalBlockedTime;
 import static com.google.common.collect.Lists.newArrayList;
 
 import java.lang.management.ManagementFactory;
@@ -21,6 +23,8 @@ import com.custardsource.parfait.pcp.MetricDescriptionTextSource;
 import com.custardsource.parfait.pcp.MetricNameMapper;
 import com.custardsource.parfait.pcp.PcpMonitorBridge;
 import com.custardsource.parfait.spring.SelfStartingMonitoringView;
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.SystemUtils;
 
@@ -34,7 +38,6 @@ public class StandardMetricThroughPutBenchmark {
     private final int iterations;
     private final int numCounters;
     private final ExecutorService executorService;
-
 
     public StandardMetricThroughPutBenchmark(int numThreads, int numCounters, int iterations, boolean startPcp, boolean usePerMetricLock) {
         this.numThreads = numThreads;
@@ -86,35 +89,27 @@ public class StandardMetricThroughPutBenchmark {
         return counters;
     }
 
+    private List<BlockedMetricCollector> transformToListOfBlockedMetricCollectors(List<CounterIncrementer> counterIncrementers) {
+        return Lists.transform(counterIncrementers, new Function<CounterIncrementer, BlockedMetricCollector>() {
+            @Override
+            public BlockedMetricCollector apply(CounterIncrementer input) {
+                return input.getBlockedMetricCollector();
+            }
+        });
+    }
     private void report(boolean startPcp, List<MonitoredCounter> counters, long timeTaken, List<CounterIncrementer> counterIncrementers) {
-        long totalBlockedCount = computeTotalBlockedCount(counterIncrementers);
-        long totalBlockedTime = computeTotalBlockedTime(counterIncrementers);
+        long totalBlockedCount = computeTotalBlockedCount(transformToListOfBlockedMetricCollectors(counterIncrementers));
+        long totalBlockedTime = computeTotalBlockedTime(transformToListOfBlockedMetricCollectors(counterIncrementers));
         double counterIncrements = computeTotalCounterIncrements(counters);
-        
+
         double incrementRate = counterIncrements / ((double) timeTaken / 1000);
         NumberFormat numberFormat = NumberFormat.getNumberInstance();
         numberFormat.setGroupingUsed(true);
         numberFormat.setMaximumFractionDigits(2);
         numberFormat.setMinimumFractionDigits(2);
         String incrementRateString = StringUtils.leftPad(numberFormat.format(incrementRate), 15);
-        
+
         System.out.printf("pcpStarted: %s\tperMetricLock: %s\tincrementRate(/sec): %s\t blockedCount: %d\t blockedTime: %d\n", startPcp, usePerMetricLock, incrementRateString, totalBlockedCount, totalBlockedTime);
-    }
-
-    private long computeTotalBlockedCount(List<CounterIncrementer> counterIncrementers) {
-        long totalBlockedCount = 0;
-        for (CounterIncrementer counterIncrementer : counterIncrementers) {
-            totalBlockedCount += counterIncrementer.getTotalBlockedCount();
-        }
-        return totalBlockedCount;
-    }
-
-    private long computeTotalBlockedTime(List<CounterIncrementer> counterIncrementers) {
-        long totalBlockedTime = 0;
-        for (CounterIncrementer counterIncrementer : counterIncrementers) {
-            totalBlockedTime += counterIncrementer.getTotalBlockedTime();
-        }
-        return totalBlockedTime;
     }
 
     private double computeTotalCounterIncrements(List<MonitoredCounter> counters) {
