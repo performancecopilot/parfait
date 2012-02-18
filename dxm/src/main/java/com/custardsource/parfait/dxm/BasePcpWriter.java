@@ -109,21 +109,24 @@ public abstract class BasePcpWriter implements PcpWriter {
         dataFileBuffer = byteBufferFactory.build(getBufferLength());
         synchronized (globalLock) {
             populateDataBuffer(dataFileBuffer, metricData.values());
-
-            for (PcpValueInfo info : metricData.values()) {
-                TypeHandler<?> rawHandler = info.getTypeHandler();
-                int bufferPosition = rawHandler.requiresLargeStorage() ? info.getLargeValue()
-                        .getOffset() : info.getOffset();
-                // need to position the original buffer first, as the sliced buffer starts from there
-                dataFileBuffer.position(bufferPosition);
-                ByteBuffer metricByteBufferSlice = dataFileBuffer.slice();
-                metricByteBufferSlice.limit(rawHandler.getDataLength());
-                perMetricByteBuffers.put(info, metricByteBufferSlice);
-                metricByteBufferSlice.order(dataFileBuffer.order());
-            }
+            preparePerMetricBufferSlices();
         }
 
         started = true;
+    }
+
+    private void preparePerMetricBufferSlices() {
+        for (PcpValueInfo info : metricData.values()) {
+            TypeHandler<?> rawHandler = info.getTypeHandler();
+            int bufferPosition = rawHandler.requiresLargeStorage() ? info.getLargeValue()
+                    .getOffset() : info.getOffset();
+            // need to position the original buffer first, as the sliced buffer starts from there
+            dataFileBuffer.position(bufferPosition);
+            ByteBuffer metricByteBufferSlice = dataFileBuffer.slice();
+            metricByteBufferSlice.limit(rawHandler.getDataLength());
+            perMetricByteBuffers.put(info, metricByteBufferSlice);
+            metricByteBufferSlice.order(dataFileBuffer.order());
+        }
     }
 
     @Override
