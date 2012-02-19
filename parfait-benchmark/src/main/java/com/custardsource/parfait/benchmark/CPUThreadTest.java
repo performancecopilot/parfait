@@ -3,7 +3,9 @@ package com.custardsource.parfait.benchmark;
 import static com.custardsource.parfait.benchmark.BlockedMetricHelper.computeTotalBlockedCount;
 import static com.custardsource.parfait.benchmark.BlockedMetricHelper.computeTotalBlockedTime;
 import static com.google.common.collect.Lists.newArrayList;
+import static java.lang.System.currentTimeMillis;
 
+import java.text.NumberFormat;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -42,6 +44,8 @@ public class CPUThreadTest {
         ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
         List<CPUThreadTestRunner> executions = newArrayList();
 
+        long begin = currentTimeMillis();
+
         for (int i = 0; i < numThreads; i++) {
             CPUThreadTestRunner cpuThreadTestRunner = new CPUThreadTestRunner(iterations, cpuTracingEnabled, useThreadIdLookup);
             executorService.execute(cpuThreadTestRunner);
@@ -49,14 +53,22 @@ public class CPUThreadTest {
         }
 
         awaitExecutionCompletion(executorService);
-        report(executions, cpuTracingEnabled, useThreadIdLookup);
+
+        long end = currentTimeMillis();
+        long timeTakenms = end - begin;
+                
+        report(executions,timeTakenms, iterations, cpuTracingEnabled, useThreadIdLookup);
     }
 
-    private void report(List<CPUThreadTestRunner> cpuThreadTestRunners, boolean cpuTracingEnabled, boolean useThreadIdLookup) {
+    private void report(List<CPUThreadTestRunner> cpuThreadTestRunners, double timeTakenms, int iterations, boolean cpuTracingEnabled, boolean useThreadIdLookup) {
         long totalBlockedCount = computeTotalBlockedCount(transformToListOfBlockedMetricCollectors(cpuThreadTestRunners));
         long totalBlockedTime = computeTotalBlockedTime(transformToListOfBlockedMetricCollectors(cpuThreadTestRunners));
 
-        System.out.printf("cpuTracingEnabled: %s\tuseThreadIdLookup: %s\tblockedCount: %d\tblockedTime: %d\n", leftPadBoolean(cpuTracingEnabled), leftPadBoolean(useThreadIdLookup), totalBlockedCount, totalBlockedTime);
+        double iterationsPerSecond = iterations/(timeTakenms/1000);
+        NumberFormat numberInstance = NumberFormat.getNumberInstance();
+        String iterationsPerSecondString = numberInstance.format(iterationsPerSecond);
+
+        System.out.printf("cpuTracingEnabled: %s\tuseThreadIdLookup: %s\titerations/sec: %s\tblockedCount: %d\tblockedTime: %d\n", leftPadBoolean(cpuTracingEnabled), leftPadBoolean(useThreadIdLookup), iterationsPerSecondString, totalBlockedCount, totalBlockedTime);
     }
 
     private String leftPadBoolean(boolean theBoolean) {
