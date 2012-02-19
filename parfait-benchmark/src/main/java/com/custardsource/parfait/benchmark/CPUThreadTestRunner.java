@@ -2,11 +2,9 @@ package com.custardsource.parfait.benchmark;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
-import java.lang.management.ThreadMXBean;
 
 class CPUThreadTestRunner implements Runnable {
     private final int iterations;
-    private final boolean cpuTracingEnabled;
     private final CpuLookupMethod cpuLookupMethod;
     private BlockedMetricCollector blockedMetricCollector;
 
@@ -14,18 +12,14 @@ class CPUThreadTestRunner implements Runnable {
         USE_CURRENT_THREAD_CPU_TIME, USE_CURRENT_THREAD_ID, USE_THREAD_INFO
     }
     
-    public CPUThreadTestRunner(int iterations, boolean cpuTracingEnabled, CpuLookupMethod cpuLookupMethod) {
+    public CPUThreadTestRunner(int iterations, CpuLookupMethod cpuLookupMethod) {
         this.iterations = iterations;
-        this.cpuTracingEnabled = cpuTracingEnabled;
         this.cpuLookupMethod = cpuLookupMethod;
     }
 
     @Override
     public void run() {
         this.blockedMetricCollector = new BlockedMetricCollector();
-
-        ThreadMXBean threadBean = ManagementFactory.getThreadMXBean();
-        threadBean.setThreadContentionMonitoringEnabled(cpuTracingEnabled);
 
         for (int i = 0; i < iterations; i++) {
             switch (cpuLookupMethod) {

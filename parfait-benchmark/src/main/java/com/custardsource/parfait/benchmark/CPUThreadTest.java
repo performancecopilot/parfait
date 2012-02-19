@@ -5,6 +5,8 @@ import static com.custardsource.parfait.benchmark.BlockedMetricHelper.computeTot
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.System.currentTimeMillis;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -46,10 +48,13 @@ public class CPUThreadTest {
         ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
         List<CPUThreadTestRunner> executions = newArrayList();
 
+        ThreadMXBean threadBean = ManagementFactory.getThreadMXBean();
+        threadBean.setThreadCpuTimeEnabled(cpuTracingEnabled);
+
         long begin = currentTimeMillis();
 
         for (int i = 0; i < numThreads; i++) {
-            CPUThreadTestRunner cpuThreadTestRunner = new CPUThreadTestRunner(iterations, cpuTracingEnabled, cpuLookupMethod);
+            CPUThreadTestRunner cpuThreadTestRunner = new CPUThreadTestRunner(iterations, cpuLookupMethod);
             executorService.execute(cpuThreadTestRunner);
             executions.add(cpuThreadTestRunner);
         }
