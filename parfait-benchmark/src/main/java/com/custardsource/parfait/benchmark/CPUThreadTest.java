@@ -21,11 +21,11 @@ import org.apache.commons.lang.StringUtils;
 
 public class CPUThreadTest {
 
-    private static final int MAX_THREAD_COUNT = 50;
+    private static final int DEFAULT_THREAD_COUNT = 50;
     private static final int DEFAULT_ITERATIONS = 100000;
 
     @Parameter(names = {"-numThreads"}, required = false)
-    private int numThreads = MAX_THREAD_COUNT;
+    private int numThreads = DEFAULT_THREAD_COUNT;
 
     @Parameter(names = {"-iterations"}, required = false)
     private int iterations = DEFAULT_ITERATIONS;

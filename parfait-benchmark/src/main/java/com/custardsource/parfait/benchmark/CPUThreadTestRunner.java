@@ -2,6 +2,7 @@ package com.custardsource.parfait.benchmark;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
 
 class CPUThreadTestRunner implements Runnable {
     private final int iterations;
@@ -22,23 +23,28 @@ class CPUThreadTestRunner implements Runnable {
         this.blockedMetricCollector = new BlockedMetricCollector();
 
         for (int i = 0; i < iterations; i++) {
-            switch (cpuLookupMethod) {
-                case USE_CURRENT_THREAD_ID:
-                    ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId());
-                    break;
-                case USE_CURRENT_THREAD_CPU_TIME:
-                    ManagementFactory.getThreadMXBean().getCurrentThreadCpuTime();
-                    break;
-                case USE_THREAD_INFO:
-                    ThreadInfo threadInfo = ManagementFactory.getThreadMXBean().getThreadInfo(Thread.currentThread().getId());
-                    ManagementFactory.getThreadMXBean().getThreadCpuTime(threadInfo.getThreadId());
-                    break;
-                default:
-                    throw new IllegalStateException("Non-valid CpuLookupMethod: " + cpuLookupMethod);
-
-            }
+            ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+            accessThreadCpuInformation(threadMXBean);
         }
         blockedMetricCollector.computeFinalValues();
+    }
+
+    private void accessThreadCpuInformation(ThreadMXBean threadMXBean) {
+        switch (cpuLookupMethod) {
+            case USE_CURRENT_THREAD_ID:
+                threadMXBean.getThreadCpuTime(Thread.currentThread().getId());
+                break;
+            case USE_CURRENT_THREAD_CPU_TIME:
+                threadMXBean.getCurrentThreadCpuTime();
+                break;
+            case USE_THREAD_INFO:
+                ThreadInfo threadInfo = threadMXBean.getThreadInfo(Thread.currentThread().getId());
+                threadMXBean.getThreadCpuTime(threadInfo.getThreadId());
+                break;
+            default:
+                throw new IllegalStateException("Non-valid CpuLookupMethod: " + cpuLookupMethod);
+
+        }
     }
 
     public BlockedMetricCollector getBlockedMetricCollector() {
