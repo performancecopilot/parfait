@@ -1,23 +1,25 @@
 package com.custardsource.parfait.benchmark;
 
 import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
 
 class CPUThreadTestRunner implements Runnable {
     private final int iterations;
-    private final boolean useThreadIdLookup;
     private final boolean cpuTracingEnabled;
+    private final CpuLookupMethod cpuLookupMethod;
     private BlockedMetricCollector blockedMetricCollector;
 
-    public CPUThreadTestRunner(int iterations, boolean cpuTracingEnabled, boolean useThreadIdLookup) {
+    static enum CpuLookupMethod {
+        USE_CURRENT_THREAD_CPU_TIME, USE_CURRENT_THREAD_ID, USE_THREAD_INFO
+    }
+    
+    public CPUThreadTestRunner(int iterations, boolean cpuTracingEnabled, CpuLookupMethod cpuLookupMethod) {
         this.iterations = iterations;
         this.cpuTracingEnabled = cpuTracingEnabled;
-        this.useThreadIdLookup = useThreadIdLookup;
+        this.cpuLookupMethod = cpuLookupMethod;
     }
 
-    //Commenting out different parts of the code produce different results. This will highlight the ThreadMXBean issues.
-    //Also, while this program is running, start a shell script(a basic empty infinite for loop). The CPU usage will be close to what
-    //we see in production.
     @Override
     public void run() {
         this.blockedMetricCollector = new BlockedMetricCollector();
@@ -26,10 +28,20 @@ class CPUThreadTestRunner implements Runnable {
         threadBean.setThreadContentionMonitoringEnabled(cpuTracingEnabled);
 
         for (int i = 0; i < iterations; i++) {
-            if (useThreadIdLookup) {
-                ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId());
-            } else {
-                ManagementFactory.getThreadMXBean().getCurrentThreadCpuTime();
+            switch (cpuLookupMethod) {
+                case USE_CURRENT_THREAD_ID:
+                    ManagementFactory.getThreadMXBean().getThreadCpuTime(Thread.currentThread().getId());
+                    break;
+                case USE_CURRENT_THREAD_CPU_TIME:
+                    ManagementFactory.getThreadMXBean().getCurrentThreadCpuTime();
+                    break;
+                case USE_THREAD_INFO:
+                    ThreadInfo threadInfo = ManagementFactory.getThreadMXBean().getThreadInfo(Thread.currentThread().getId());
+                    ManagementFactory.getThreadMXBean().getThreadCpuTime(threadInfo.getThreadId());
+                    break;
+                default:
+                    throw new IllegalStateException("Non-valid CpuLookupMethod: " + cpuLookupMethod);
+
             }
         }
         blockedMetricCollector.computeFinalValues();

@@ -33,21 +33,23 @@ public class CPUThreadTest {
 
     private void doTest() {
         setUp();
-        runBenchmark(true, false);
-        runBenchmark(true, true);
-        runBenchmark(false, false);
-        runBenchmark(false, true);
+        runBenchmark(true, CPUThreadTestRunner.CpuLookupMethod.USE_CURRENT_THREAD_CPU_TIME);
+        runBenchmark(true, CPUThreadTestRunner.CpuLookupMethod.USE_CURRENT_THREAD_ID);
+        runBenchmark(true, CPUThreadTestRunner.CpuLookupMethod.USE_THREAD_INFO);
+        runBenchmark(false, CPUThreadTestRunner.CpuLookupMethod.USE_CURRENT_THREAD_CPU_TIME);
+        runBenchmark(false, CPUThreadTestRunner.CpuLookupMethod.USE_CURRENT_THREAD_ID);
+        runBenchmark(false, CPUThreadTestRunner.CpuLookupMethod.USE_THREAD_INFO);
 
     }
 
-    private void runBenchmark(boolean cpuTracingEnabled, boolean useThreadIdLookup) {
+    private void runBenchmark(boolean cpuTracingEnabled, CPUThreadTestRunner.CpuLookupMethod cpuLookupMethod) {
         ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
         List<CPUThreadTestRunner> executions = newArrayList();
 
         long begin = currentTimeMillis();
 
         for (int i = 0; i < numThreads; i++) {
-            CPUThreadTestRunner cpuThreadTestRunner = new CPUThreadTestRunner(iterations, cpuTracingEnabled, useThreadIdLookup);
+            CPUThreadTestRunner cpuThreadTestRunner = new CPUThreadTestRunner(iterations, cpuTracingEnabled, cpuLookupMethod);
             executorService.execute(cpuThreadTestRunner);
             executions.add(cpuThreadTestRunner);
         }
@@ -57,10 +59,10 @@ public class CPUThreadTest {
         long end = currentTimeMillis();
         long timeTakenms = end - begin;
                 
-        report(executions,timeTakenms, iterations, cpuTracingEnabled, useThreadIdLookup);
+        report(executions,timeTakenms, iterations, cpuTracingEnabled, cpuLookupMethod);
     }
 
-    private void report(List<CPUThreadTestRunner> cpuThreadTestRunners, double timeTakenms, int iterations, boolean cpuTracingEnabled, boolean useThreadIdLookup) {
+    private void report(List<CPUThreadTestRunner> cpuThreadTestRunners, double timeTakenms, int iterations, boolean cpuTracingEnabled, CPUThreadTestRunner.CpuLookupMethod cpuLookupMethod) {
         long totalBlockedCount = computeTotalBlockedCount(transformToListOfBlockedMetricCollectors(cpuThreadTestRunners));
         long totalBlockedTime = computeTotalBlockedTime(transformToListOfBlockedMetricCollectors(cpuThreadTestRunners));
 
@@ -68,7 +70,11 @@ public class CPUThreadTest {
         NumberFormat numberInstance = NumberFormat.getNumberInstance();
         String iterationsPerSecondString = numberInstance.format(iterationsPerSecond);
 
-        System.out.printf("cpuTracingEnabled: %s\tuseThreadIdLookup: %s\titerations/sec: %s\tblockedCount: %d\tblockedTime: %d\n", leftPadBoolean(cpuTracingEnabled), leftPadBoolean(useThreadIdLookup), iterationsPerSecondString, totalBlockedCount, totalBlockedTime);
+        System.out.printf("cpuTracingEnabled: %s\tcpuLookupMethod: %s\titerations/sec: %s\tblockedCount: %d\tblockedTime: %d\n", leftPadBoolean(cpuTracingEnabled), formatCpuLookupMethod(cpuLookupMethod), iterationsPerSecondString, totalBlockedCount, totalBlockedTime);
+    }
+
+    private String formatCpuLookupMethod(CPUThreadTestRunner.CpuLookupMethod cpuLookupMethod) {
+        return StringUtils.rightPad(cpuLookupMethod.name(), CPUThreadTestRunner.CpuLookupMethod.USE_CURRENT_THREAD_CPU_TIME.name().length());
     }
 
     private String leftPadBoolean(boolean theBoolean) {
