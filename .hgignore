@@ -2,6 +2,7 @@ target
 .*\.orig
 .*\.iws
 .*\.ipr
+.*\.iml
 .*\.project
 .*\.classpath
 .*\.prefs
