@@ -6,7 +6,6 @@ import static com.google.common.collect.Lists.newArrayList;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
-import java.net.Inet4Address;
 import java.net.UnknownHostException;
 import java.text.NumberFormat;
 import java.util.List;
@@ -26,7 +25,6 @@ import com.custardsource.parfait.spring.SelfStartingMonitoringView;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.SystemUtils;
 
 public class StandardMetricThroughPutBenchmark {
 
@@ -139,7 +137,7 @@ public class StandardMetricThroughPutBenchmark {
         int numCounters = 1000;
         int iterations = 10000;
 
-        System.out.printf("Host: %s\tJava: %s\n", Inet4Address.getLocalHost().getCanonicalHostName(), SystemUtils.JAVA_VERSION);
+        ReportHelper.environmentReportHeader();
         ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
         System.out.printf("Thread Contention Supported: %s, Enabled by default: %s\n", threadMXBean.isThreadContentionMonitoringSupported(), threadMXBean.isThreadContentionMonitoringEnabled());
         System.out.printf("numThreads: %d, numCounters=%d, iterations=%d\n", numThreads, numCounters, iterations);

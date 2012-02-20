@@ -51,6 +51,8 @@ public class CPUThreadTest {
         ThreadMXBean threadBean = ManagementFactory.getThreadMXBean();
         threadBean.setThreadCpuTimeEnabled(cpuTracingEnabled);
 
+        threadBean.setThreadContentionMonitoringEnabled(true);
+
         long begin = currentTimeMillis();
 
         for (int i = 0; i < numThreads; i++) {
@@ -105,6 +107,7 @@ public class CPUThreadTest {
     }
 
     private void setUp() {
+        ReportHelper.environmentReportHeader();
         System.out.printf("iterations: %d\n", iterations);
         System.out.printf("numThreads: %d\n", numThreads);
     }
