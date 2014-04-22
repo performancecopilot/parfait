@@ -2,7 +2,7 @@ package com.custardsource.parfait.dxm;
 
 import java.util.Set;
 
-class HashingIdentifierSource implements IdentifierSource {
+public class HashingIdentifierSource implements IdentifierSource {
     private final int allowedIdentifierCount;
 
     public HashingIdentifierSource(int allowedIdentifierCount) {
