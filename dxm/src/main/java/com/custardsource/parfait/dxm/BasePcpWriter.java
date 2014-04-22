@@ -224,6 +224,7 @@ public abstract class BasePcpWriter implements PcpWriter {
 
     @Override
     public void reset() {
+        started = false;
         metricData.clear();
     }
     

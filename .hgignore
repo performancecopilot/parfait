@@ -7,3 +7,5 @@ target
 .*\.classpath
 .*\.prefs
 atlassian-ide-plugin.xml
+\.idea
+
