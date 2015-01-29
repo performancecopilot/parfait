@@ -15,9 +15,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Logger;
 
 public class ParfaitDataSource implements DataSource {
 	private final DataSource wrapped;
@@ -57,6 +59,11 @@ public class ParfaitDataSource implements DataSource {
 	@Override
 	public int getLoginTimeout() throws SQLException {
 		return wrapped.getLoginTimeout();
+	}
+
+	@Override
+	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
+		throw new SQLFeatureNotSupportedException("Parfait does not support java.util.logging");
 	}
 
 	@Override
