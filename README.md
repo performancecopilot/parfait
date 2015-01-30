@@ -14,7 +14,7 @@ Since release 0.2.0, all binary versions of parfait are synced to the Maven cent
         <dependency>
           <groupId>com.custardsource.parfait</groupId>
           <artifactId>parfait-core</artifactId>
-          <version>0.2.2</version>
+          <version>0.3.0.RC1</version>
         </dependency>
         ...
       <dependencies>
