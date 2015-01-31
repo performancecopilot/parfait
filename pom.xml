@@ -23,12 +23,12 @@
     <module>parfait-spring</module>
     <module>parfait-benchmark</module>
   </modules>
-  <url>http://code.google.com/p/parfait/</url>
+  <url>https://github.com/performancecopilot/parfait</url>
   <inceptionYear>2009</inceptionYear>
   <scm>
-    <connection>scm:hg:http://parfait.googlecode.com/hg</connection>
-    <developerConnection>scm:hg:https://parfait.googlecode.com/hg</developerConnection>
-    <url>http://code.google.com/p/parfait/source/browse/</url>
+    <connection>scm:git:git@github.com:performancecopilot/parfait.git</connection>
+    <developerConnection>scm:git:git@github.com:performancecopilot/parfait.git</developerConnection>
+    <url>https://github.com/performancecopilot/parfait</url>
   </scm>
 
   <properties>
