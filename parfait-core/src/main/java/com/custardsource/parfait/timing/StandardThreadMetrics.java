@@ -1,13 +1,13 @@
 package com.custardsource.parfait.timing;
 
+import com.google.common.collect.ImmutableList;
+
+import javax.measure.unit.NonSI;
+import javax.measure.unit.SI;
+import javax.measure.unit.Unit;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.util.Collection;
-
-import javax.measure.unit.SI;
-import javax.measure.unit.Unit;
-
-import com.google.common.collect.ImmutableList;
 
 public class StandardThreadMetrics {
     private static final Unit<?> MILLISECONDS = SI.MILLI(SI.SECOND);
@@ -46,6 +46,18 @@ public class StandardThreadMetrics {
         }
     };
 
+    public static final ThreadMetric HEAP_BYTES = new AbstractThreadMetric("Heap Bytes", NonSI.BYTE,
+            "heap", "Amount of Heap (in bytes) used during the event") {
+        @Override
+        public long getValueForThread(Thread t) {
+            java.lang.management.ThreadMXBean javaLangThreadMXBean = ManagementFactory.getThreadMXBean();
+            if (javaLangThreadMXBean instanceof com.sun.management.ThreadMXBean) {
+                com.sun.management.ThreadMXBean sunThreadMXBean = (com.sun.management.ThreadMXBean) javaLangThreadMXBean;
+                return sunThreadMXBean.getThreadAllocatedBytes(t.getId());
+            }
+            return 0L;
+        }
+    };
     public static final ThreadMetric BLOCKED_COUNT = new ThreadInfoMetric("Blocked count", Unit.ONE,
             "blocked.count", "Number of times thread entered BLOCKED state during event") {
         @Override
@@ -81,7 +93,7 @@ public class StandardThreadMetrics {
 
     public static Collection<? extends ThreadMetric> defaults() {
         // TOTAL_CPU_TIME is not included by default (you can get it from other places)
-        return ImmutableList.of(CLOCK_TIME, TOTAL_CPU_TIME, USER_CPU_TIME, SYSTEM_CPU_TIME,
+        return ImmutableList.of(CLOCK_TIME, TOTAL_CPU_TIME, USER_CPU_TIME, SYSTEM_CPU_TIME, HEAP_BYTES,
                 BLOCKED_COUNT, BLOCKED_TIME, WAITED_COUNT, WAITED_TIME);
     }
 
