@@ -46,7 +46,7 @@ public interface ThreadCounter extends ThreadValue<AtomicLong>, Counter {
 
         @Override
         public void inc(long increment) {
-            map.get(Thread.currentThread()).addAndGet(increment);
+            loadingCache.getUnchecked(Thread.currentThread()).addAndGet(increment);
         }
     }
 }

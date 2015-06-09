@@ -1,11 +1,11 @@
 package com.custardsource.parfait.timing;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
-import com.google.common.base.Function;
-import com.google.common.collect.MapMaker;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
 public interface ThreadValue<T> {
     T get();
@@ -48,13 +48,13 @@ public interface ThreadValue<T> {
     }
 
     public static class WeakReferenceThreadMap<T> implements ThreadValue<T> {
-        protected final Map<Thread, T> map = new MapMaker().weakKeys().makeComputingMap(
-                new Function<Thread, T>() {
-                    @Override
-                    public T apply(Thread from) {
-                        return initialValue();
-                    }
-                });
+
+        protected final LoadingCache<Thread, T> loadingCache = CacheBuilder.newBuilder().build(new CacheLoader<Thread, T>() {
+            @Override
+            public T load(Thread thread) throws Exception {
+                return initialValue();
+            }
+        });
 
         protected T initialValue() {
             return null;
@@ -67,17 +67,17 @@ public interface ThreadValue<T> {
 
         @Override
         public final T get() {
-            return map.get(Thread.currentThread());
+            return loadingCache.getUnchecked(Thread.currentThread());
         }
 
         @Override
         public final T getForThread(Thread thread) {
-            return map.get(thread);
+            return loadingCache.getUnchecked(thread);
         }
 
         @Override
         public final Map<Thread, T> asMap() {
-            return new HashMap<Thread, T>(map);
+            return loadingCache.asMap();
         }
     }
 }

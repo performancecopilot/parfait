@@ -6,11 +6,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import net.jcip.annotations.ThreadSafe;
-import com.google.common.base.Function;
-import com.google.common.collect.MapMaker;
 
 /**
  * <p>
@@ -31,14 +31,13 @@ import com.google.common.collect.MapMaker;
  */
 @ThreadSafe
 public class ThreadContext {
-    private static final Function<Thread, Map<String, Object>> NEW_CONTEXT_CREATOR = new Function<Thread, Map<String, Object>>() {
-        public Map<String, Object> apply(Thread thread) {
-            return new ConcurrentHashMap<String, Object>();
+    private static final CacheLoader<Thread, Map<String, Object>> NEW_CONTEXT_CREATOR = new CacheLoader<Thread, Map<String, Object>>() {
+        @Override
+        public Map<String, Object> load(Thread thread) throws Exception {
+            return new ConcurrentHashMap<>();
         }
     };
-
-    private final ConcurrentMap<Thread, Map<String, Object>> PER_THREAD_CONTEXTS = new MapMaker()
-            .weakKeys().makeComputingMap(NEW_CONTEXT_CREATOR);
+    private final LoadingCache<Thread, Map<String, Object>> PER_THREAD_CONTEXTS = CacheBuilder.newBuilder().weakKeys().build(NEW_CONTEXT_CREATOR);
 
     private volatile MdcBridge mdcBridge = new NullMdcBridge();
 
@@ -52,19 +51,19 @@ public class ThreadContext {
     }
 
     /**
-     * Adds the given key/value pair to the current thread's context, and updates {@link MDC} with
+     * Adds the given key/value pair to the current thread's context, and updates {@link MdcBridge} with
      * same.
      */
     public void put(String key, Object value) {
-        PER_THREAD_CONTEXTS.get(Thread.currentThread()).put(key, value);
+        PER_THREAD_CONTEXTS.getUnchecked(Thread.currentThread()).put(key, value);
         mdcBridge.put(key, value);
     }
 
     /**
-     * Removes the given key from the current thread's context and {@link MDC}.
+     * Removes the given key from the current thread's context and {@link MdcBridge}.
      */
     public void remove(String key) {
-        PER_THREAD_CONTEXTS.get(Thread.currentThread()).remove(key);
+        PER_THREAD_CONTEXTS.getUnchecked(Thread.currentThread()).remove(key);
         mdcBridge.remove(key);
     }
 
@@ -73,7 +72,7 @@ public class ThreadContext {
      * value exists)
      */
     public Object get(String key) {
-        return PER_THREAD_CONTEXTS.get(Thread.currentThread()).get(key);
+        return PER_THREAD_CONTEXTS.getUnchecked(Thread.currentThread()).get(key);
     }
 
     /**
@@ -89,26 +88,26 @@ public class ThreadContext {
            mdcBridge.remove(key);
         }
 
-        PER_THREAD_CONTEXTS.get(Thread.currentThread()).clear();
+        PER_THREAD_CONTEXTS.getUnchecked(Thread.currentThread()).clear();
     }
 
     /**
      * Retrieves a copy of the thread context for the given thread
      */
     public Map<String, Object> forThread(Thread t) {
-        return new HashMap<String, Object>(PER_THREAD_CONTEXTS.get(t));
+        return new HashMap<String, Object>(PER_THREAD_CONTEXTS.getUnchecked(t));
     }
 
     public Collection<String> allKeys() {
         Set<String> keys = new HashSet<String>();
-        for (Map<String, Object> threadMdc : PER_THREAD_CONTEXTS.values()) {
+        for (Map<String, Object> threadMdc : PER_THREAD_CONTEXTS.asMap().values()) {
             keys.addAll(threadMdc.keySet());
         }
         return keys;
     }
 
     public Object getForThread(Thread thread, String key) {
-        return PER_THREAD_CONTEXTS.get(thread).get(key);
+        return PER_THREAD_CONTEXTS.getUnchecked(thread).get(key);
     }
 
     /**
