@@ -114,7 +114,7 @@
           <dependency>
               <groupId>com.google.guava</groupId>
               <artifactId>guava</artifactId>
-              <version>r07</version>
+              <version>18.0</version>
           </dependency>
           <dependency>
               <groupId>org.mockito</groupId>
