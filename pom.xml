@@ -38,6 +38,7 @@
       <log4j.version>1.2.14</log4j.version>
       <java.major.source.version>1.7</java.major.source.version>
       <java.major.target.version>1.7</java.major.target.version>
+      <metrics3.version>3.1.2</metrics3.version>
   </properties>
     <build>
         <plugins>
@@ -149,7 +150,7 @@
           <dependency>
               <groupId>io.dropwizard.metrics</groupId>
               <artifactId>metrics-core</artifactId>
-              <version>3.1.0</version>
+	      <version>${metrics3.version}</version>
           </dependency>
           <dependency>
               <groupId>org.hamcrest</groupId>
