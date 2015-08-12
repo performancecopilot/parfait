@@ -1,6 +1,6 @@
 package com.custardsource.parfait.spring;
 
-import com.custardsource.parfait.MonitoringViewDelegate;
+import com.custardsource.parfait.DynamicMonitoringView;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -13,29 +13,29 @@ public class SelfStartingMonitoringViewTest {
     private SelfStartingMonitoringView selfStartingMonitoringView;
 
     @Mock
-    MonitoringViewDelegate monitoringViewDelegate;
+    DynamicMonitoringView dynamicMonitoringView;
 
     @Before
     public void setUp() {
         initMocks(this);
-        selfStartingMonitoringView = new SelfStartingMonitoringView(monitoringViewDelegate);
+        selfStartingMonitoringView = new SelfStartingMonitoringView(dynamicMonitoringView);
     }
 
     @Test
     public void shouldInvokeDelegateStart() throws Exception {
         selfStartingMonitoringView.start();
-        verify(monitoringViewDelegate).start();
+        verify(dynamicMonitoringView).start();
     }
 
     @Test
     public void shouldInvokeDelegateStop() throws Exception {
         selfStartingMonitoringView.stop();
-        verify(monitoringViewDelegate).stop();
+        verify(dynamicMonitoringView).stop();
     }
 
     @Test
     public void shouldInvokeDelegateIsRunning() throws Exception {
         selfStartingMonitoringView.isRunning();
-        verify(monitoringViewDelegate).isRunning();
+        verify(dynamicMonitoringView).isRunning();
     }
 }

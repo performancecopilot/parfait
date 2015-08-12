@@ -1,6 +1,8 @@
 package com.custardsource.parfait.spring;
 
-import com.custardsource.parfait.*;
+import com.custardsource.parfait.DynamicMonitoringView;
+import com.custardsource.parfait.MonitorableRegistry;
+import com.custardsource.parfait.MonitoringView;
 import org.springframework.context.Lifecycle;
 
 /**
@@ -9,64 +11,64 @@ import org.springframework.context.Lifecycle;
  */
 public class SelfStartingMonitoringView implements Lifecycle {
 
-    private final MonitoringViewDelegate monitoringViewDelegate;
+    private final DynamicMonitoringView dynamicMonitoringView;
 
-    public SelfStartingMonitoringView(MonitoringViewDelegate monitoringViewDelegate) {
-        this.monitoringViewDelegate = monitoringViewDelegate;
+    public SelfStartingMonitoringView(DynamicMonitoringView dynamicMonitoringView) {
+        this.dynamicMonitoringView = dynamicMonitoringView;
     }
 
     /**
      * @deprecated,
-     * Use <code>SelfStartingMonitoringView(MonitoringViewDelegate monitoringViewDelegate)</code> instead.
+     * Use <code>SelfStartingMonitoringView(DynamicMonitoringView dynamicMonitoringView)</code> instead.
      */
     @Deprecated
     public SelfStartingMonitoringView(MonitoringView monitoringView) {
-        monitoringViewDelegate = new MonitoringViewDelegate(monitoringView);
+        dynamicMonitoringView = new DynamicMonitoringView(monitoringView);
     }
 
     /**
      * @deprecated,
-     * Use <code>SelfStartingMonitoringView(MonitoringViewDelegate monitoringViewDelegate)</code> instead.
+     * Use <code>SelfStartingMonitoringView(DynamicMonitoringView dynamicMonitoringView)</code> instead.
      */
     @Deprecated
     public SelfStartingMonitoringView(MonitoringView monitoringView, final long quietPeriodInMillis) {
-        monitoringViewDelegate = new MonitoringViewDelegate(monitoringView, quietPeriodInMillis);
+        dynamicMonitoringView = new DynamicMonitoringView(monitoringView, quietPeriodInMillis);
     }
 
     /**
      * @deprecated,
-     * Use <code>SelfStartingMonitoringView(MonitoringViewDelegate monitoringViewDelegate)</code> instead.
+     * Use <code>SelfStartingMonitoringView(DynamicMonitoringView dynamicMonitoringView)</code> instead.
      */
     @Deprecated
     public SelfStartingMonitoringView(MonitorableRegistry registry, MonitoringView monitoringView) {
-        monitoringViewDelegate = new MonitoringViewDelegate(registry, monitoringView);
+        dynamicMonitoringView = new DynamicMonitoringView(registry, monitoringView);
     }
 
     /**
      * @deprecated,
-     * Use <code>SelfStartingMonitoringView(MonitoringViewDelegate monitoringViewDelegate)</code> instead.
+     * Use <code>SelfStartingMonitoringView(DynamicMonitoringView dynamicMonitoringView)</code> instead.
      */
     @Deprecated
     public SelfStartingMonitoringView(MonitorableRegistry registry, MonitoringView monitoringView, final long quietPeriodInMillis) {
-        monitoringViewDelegate = new MonitoringViewDelegate(registry, monitoringView, quietPeriodInMillis);
+        dynamicMonitoringView = new DynamicMonitoringView(registry, monitoringView, quietPeriodInMillis);
     }
 
     @Override
     public void start() {
-        monitoringViewDelegate.start();
+        dynamicMonitoringView.start();
     }
 
     @Override
     public void stop() {
-        monitoringViewDelegate.stop();
+        dynamicMonitoringView.stop();
     }
 
     @Override
     public boolean isRunning() {
-        return monitoringViewDelegate.isRunning();
+        return dynamicMonitoringView.isRunning();
     }
 
     public static final long defaultQuietPeriod() {
-        return MonitoringViewDelegate.defaultQuietPeriod();
+        return DynamicMonitoringView.defaultQuietPeriod();
     }
 }

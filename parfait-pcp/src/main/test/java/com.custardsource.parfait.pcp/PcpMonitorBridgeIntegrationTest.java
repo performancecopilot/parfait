@@ -2,8 +2,8 @@ package com.custardsource.parfait.pcp;
 
 
 import com.custardsource.parfait.DummyMonitorable;
+import com.custardsource.parfait.DynamicMonitoringView;
 import com.custardsource.parfait.MonitorableRegistry;
-import com.custardsource.parfait.MonitoringViewDelegate;
 import com.custardsource.parfait.dxm.IdentifierSourceSet;
 import com.custardsource.parfait.dxm.InMemoryByteBufferFactory;
 import com.custardsource.parfait.dxm.PcpMmvWriter;
@@ -26,7 +26,7 @@ public class PcpMonitorBridgeIntegrationTest {
         final PcpWriter writer = new PcpMmvWriter(bufferFactory, IdentifierSourceSet.DEFAULT_SET);
         final PcpMonitorBridge pcpMonitorBridge = new PcpMonitorBridge(writer);
         final MonitorableRegistry registry = new MonitorableRegistry();
-        final MonitoringViewDelegate dynamicallyModifiedView = new MonitoringViewDelegate(registry, pcpMonitorBridge, 1000);
+        final DynamicMonitoringView dynamicallyModifiedView = new DynamicMonitoringView(registry, pcpMonitorBridge, 1000);
 
         registry.register(new DummyMonitorable("foo"));
 

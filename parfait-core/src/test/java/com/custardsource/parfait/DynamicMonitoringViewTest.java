@@ -14,7 +14,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 
-public class MonitoringViewDelegateTest {
+public class DynamicMonitoringViewTest {
 
     @Mock
     MonitorableRegistry monitorableRegistry;
@@ -24,23 +24,23 @@ public class MonitoringViewDelegateTest {
     @Mock
     MonitoringView monitoringView;
 
-    private MonitoringViewDelegate monitoringViewDelegate;
+    private DynamicMonitoringView dynamicMonitoringView;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        monitoringViewDelegate = new MonitoringViewDelegate(monitorableRegistry, monitoringView, 2000);
+        dynamicMonitoringView = new DynamicMonitoringView(monitorableRegistry, monitoringView, 2000);
         when(monitorableRegistry.getMonitorables()).thenReturn(monitorables);
     }
 
     @Test
     public void startAndStopShouldStartAndStopMonitoringOnWrappedView() throws Exception {
 
-        monitoringViewDelegate.start();
+        dynamicMonitoringView.start();
 
         verify(monitoringView).startMonitoring(monitorables);
 
-        monitoringViewDelegate.stop();
+        dynamicMonitoringView.stop();
 
         verify(monitoringView).stopMonitoring(monitorables);
 
@@ -50,9 +50,9 @@ public class MonitoringViewDelegateTest {
     public void isRunningShouldDelegateToWrappedView() throws Exception {
 
         when(monitoringView.isRunning()).thenReturn(false);
-        assertFalse(monitoringViewDelegate.isRunning());
-        monitoringViewDelegate.start();
+        assertFalse(dynamicMonitoringView.isRunning());
+        dynamicMonitoringView.start();
         when(monitoringView.isRunning()).thenReturn(true);
-        assertTrue(monitoringViewDelegate.isRunning());
+        assertTrue(dynamicMonitoringView.isRunning());
     }
 }

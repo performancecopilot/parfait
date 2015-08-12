@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 
 import java.util.Collection;
 
-public class MonitoringViewDelegate {
+public class DynamicMonitoringView {
 
     private static final long DEFAULT_QUIET_PERIOD = 5000L;
     private final long quietPeriodInMillis;
@@ -13,25 +13,24 @@ public class MonitoringViewDelegate {
     private Collection<Monitorable<?>> previouslySeenMonitorables = Lists.newArrayList();
     private QuiescentRegistryListener quiescentRegistryListener;
 
-    public MonitoringViewDelegate(MonitoringView monitoringView) {
+    public DynamicMonitoringView(MonitoringView monitoringView) {
         this(monitoringView, DEFAULT_QUIET_PERIOD);
     }
 
-    public MonitoringViewDelegate(MonitoringView monitoringView, final long quietPeriodInMillis) {
+    public DynamicMonitoringView(MonitoringView monitoringView, final long quietPeriodInMillis) {
         this(MonitorableRegistry.DEFAULT_REGISTRY, monitoringView, quietPeriodInMillis);
     }
 
-    public MonitoringViewDelegate(MonitorableRegistry registry, MonitoringView monitoringView) {
+    public DynamicMonitoringView(MonitorableRegistry registry, MonitoringView monitoringView) {
         this(registry, monitoringView, DEFAULT_QUIET_PERIOD);
     }
 
-    public MonitoringViewDelegate(MonitorableRegistry registry, MonitoringView monitoringView, final long quietPeriodInMillis) {
+    public DynamicMonitoringView(MonitorableRegistry registry, MonitoringView monitoringView, final long quietPeriodInMillis) {
         this.monitoringView = monitoringView;
         this.monitorableRegistry = registry;
         this.quietPeriodInMillis = quietPeriodInMillis;
     }
 
-    // TODO Pass in a MonitorableRegistryListener in a constructor so we can make unit tests even easier.
     public void start() {
         previouslySeenMonitorables = monitorableRegistry.getMonitorables();
         monitoringView.startMonitoring(previouslySeenMonitorables);
