@@ -22,5 +22,12 @@
       <artifactId>parfait-core</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.custardsource.parfait</groupId>
+      <artifactId>parfait-core</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+      <classifier>tests</classifier>
+    </dependency>
   </dependencies>
 </project>

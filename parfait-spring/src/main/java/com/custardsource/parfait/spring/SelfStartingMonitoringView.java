@@ -1,13 +1,9 @@
 package com.custardsource.parfait.spring;
 
-import com.custardsource.parfait.Monitorable;
+import com.custardsource.parfait.DynamicMonitoringView;
 import com.custardsource.parfait.MonitorableRegistry;
 import com.custardsource.parfait.MonitoringView;
-import com.custardsource.parfait.QuiescentRegistryListener;
-import com.google.common.collect.Lists;
 import org.springframework.context.Lifecycle;
-
-import java.util.Collection;
 
 /**
  * Adapter between a normal MonitoringView and Spring's Lifecycle interface (which conveniently has the exact-same
@@ -15,60 +11,64 @@ import java.util.Collection;
  */
 public class SelfStartingMonitoringView implements Lifecycle {
 
-    private final MonitoringView monitoringView;
-    private final MonitorableRegistry monitorableRegistry;
-    private Collection<Monitorable<?>> previouslySeenMonitorables = Lists.newArrayList();
-    private static final long DEFAULT_QUIET_PERIOD = 5000L;
-    private QuiescentRegistryListener quiescentRegistryListener;
-    private final long quietPeriodInMillis;
+    private final DynamicMonitoringView dynamicMonitoringView;
 
+    public SelfStartingMonitoringView(DynamicMonitoringView dynamicMonitoringView) {
+        this.dynamicMonitoringView = dynamicMonitoringView;
+    }
 
+    /**
+     * @deprecated,
+     * Use <code>SelfStartingMonitoringView(DynamicMonitoringView dynamicMonitoringView)</code> instead.
+     */
+    @Deprecated
     public SelfStartingMonitoringView(MonitoringView monitoringView) {
-        this(monitoringView, DEFAULT_QUIET_PERIOD);
+        dynamicMonitoringView = new DynamicMonitoringView(monitoringView);
     }
 
+    /**
+     * @deprecated,
+     * Use <code>SelfStartingMonitoringView(DynamicMonitoringView dynamicMonitoringView)</code> instead.
+     */
+    @Deprecated
     public SelfStartingMonitoringView(MonitoringView monitoringView, final long quietPeriodInMillis) {
-        this(MonitorableRegistry.DEFAULT_REGISTRY, monitoringView, quietPeriodInMillis);
+        dynamicMonitoringView = new DynamicMonitoringView(monitoringView, quietPeriodInMillis);
     }
 
+    /**
+     * @deprecated,
+     * Use <code>SelfStartingMonitoringView(DynamicMonitoringView dynamicMonitoringView)</code> instead.
+     */
+    @Deprecated
     public SelfStartingMonitoringView(MonitorableRegistry registry, MonitoringView monitoringView) {
-        this(registry, monitoringView, DEFAULT_QUIET_PERIOD);
+        dynamicMonitoringView = new DynamicMonitoringView(registry, monitoringView);
     }
 
+    /**
+     * @deprecated,
+     * Use <code>SelfStartingMonitoringView(DynamicMonitoringView dynamicMonitoringView)</code> instead.
+     */
+    @Deprecated
     public SelfStartingMonitoringView(MonitorableRegistry registry, MonitoringView monitoringView, final long quietPeriodInMillis) {
-        this.monitoringView = monitoringView;
-        this.monitorableRegistry = registry;
-        this.quietPeriodInMillis = quietPeriodInMillis;
+        dynamicMonitoringView = new DynamicMonitoringView(registry, monitoringView, quietPeriodInMillis);
     }
 
-    // TODO Pass in a MonitorableRegistryListener in a constructor so we can make unit tests even easier.  
     @Override
     public void start() {
-        previouslySeenMonitorables = monitorableRegistry.getMonitorables();
-        monitoringView.startMonitoring(previouslySeenMonitorables);
-        this.quiescentRegistryListener = new QuiescentRegistryListener(new Runnable() {
-            @Override
-            public void run() {
-                stop();
-                start();
-            }
-        }, quietPeriodInMillis);
-        monitorableRegistry.addRegistryListener(quiescentRegistryListener);
+        dynamicMonitoringView.start();
     }
 
     @Override
     public void stop() {
-        monitorableRegistry.removeRegistryListener(quiescentRegistryListener);
-        this.quiescentRegistryListener.stop();
-        monitoringView.stopMonitoring(previouslySeenMonitorables);
+        dynamicMonitoringView.stop();
     }
 
     @Override
     public boolean isRunning() {
-        return monitoringView.isRunning();
+        return dynamicMonitoringView.isRunning();
     }
 
     public static final long defaultQuietPeriod() {
-        return DEFAULT_QUIET_PERIOD;
+        return DynamicMonitoringView.defaultQuietPeriod();
     }
 }
