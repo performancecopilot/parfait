@@ -17,11 +17,13 @@
             <groupId>io.dropwizard</groupId>
             <artifactId>dropwizard-metrics</artifactId>
         </dependency>
+
         <dependency>
             <groupId>com.custardsource.parfait</groupId>
             <artifactId>parfait-pcp</artifactId>
             <version>${project.version}</version>
         </dependency>
+
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
@@ -32,10 +34,17 @@
             <artifactId>hamcrest-all</artifactId>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-configuration</artifactId>
+            <version>${metrics3.version}</version>
         </dependency>
     </dependencies>
 </project>
