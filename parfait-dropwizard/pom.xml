@@ -19,7 +19,8 @@
         </dependency>
         <dependency>
             <groupId>com.custardsource.parfait</groupId>
-            <artifactId>parfait-core</artifactId>
+            <artifactId>parfait-pcp</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
