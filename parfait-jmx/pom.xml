@@ -2,14 +2,14 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.custardsource.parfait</groupId>
   <artifactId>parfait-jmx</artifactId>
-  <version>0.3.4-SNAPSHOT</version>
+  <version>0.3.4</version>
   <packaging>jar</packaging>
   <name>parfait-jmx</name>
   <description>Library to allow Parfait to import metric values from, and export results to, JMX</description>
   <parent>
     <groupId>com.custardsource</groupId>
     <artifactId>parfait</artifactId>
-    <version>0.3.4-SNAPSHOT</version>
+    <version>0.3.4</version>
   </parent>
   <dependencies>
     <dependency>
