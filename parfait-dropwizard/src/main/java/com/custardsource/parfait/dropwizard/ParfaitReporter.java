@@ -15,6 +15,7 @@ import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.ScheduledReporter;
 import com.codahale.metrics.Timer;
+import com.custardsource.parfait.DynamicMonitoringView;
 import com.custardsource.parfait.Monitorable;
 import com.custardsource.parfait.MonitorableRegistry;
 import com.google.common.collect.Maps;
@@ -30,6 +31,8 @@ public class ParfaitReporter extends ScheduledReporter {
     private final Map<String, MetricAdapter> publishedMetrics;
     private final MetricAdapterFactory metricAdapterFactory;
 
+    private DynamicMonitoringView dynamicMonitoringView;
+
     @SuppressWarnings("PMD.ExcessiveParameterList")
     public ParfaitReporter(MetricRegistry metricRegistry,
                            MonitorableRegistry monitorableRegistry,
@@ -43,6 +46,19 @@ public class ParfaitReporter extends ScheduledReporter {
         this.metricNamePrefix = metricNamePrefix;
         this.publishedMetrics = Maps.newHashMap();
         this.metricAdapterFactory = metricAdapterFactory;
+    }
+
+    @SuppressWarnings("PMD.ExcessiveParameterList")
+    public ParfaitReporter(MetricRegistry metricRegistry,
+                           MonitorableRegistry monitorableRegistry,
+                           DynamicMonitoringView dynamicMonitoringView,
+                           MetricAdapterFactory metricAdapterFactory,
+                           TimeUnit rateUnit,
+                           TimeUnit durationUnit,
+                           MetricFilter filter,
+                           String prefix) {
+        this(metricRegistry, monitorableRegistry, metricAdapterFactory, rateUnit, durationUnit, filter, prefix);
+        this.dynamicMonitoringView = dynamicMonitoringView;
     }
 
     @SuppressWarnings("PMD.ExcessiveParameterList")
@@ -74,6 +90,22 @@ public class ParfaitReporter extends ScheduledReporter {
             }
         } catch (RuntimeException ex) {
             LOGGER.error("An exception occurred publishing metrics to Parfait", ex);
+        }
+    }
+
+    @Override
+    public void start(long period, TimeUnit unit) {
+        super.start(period, unit);
+        if (dynamicMonitoringView != null) {
+            dynamicMonitoringView.start();
+        }
+    }
+
+    @Override
+    public void stop() {
+        super.stop();
+        if (dynamicMonitoringView != null) {
+            dynamicMonitoringView.stop();
         }
     }
 

@@ -1,0 +1,20 @@
+reporters:
+  - type: parfait
+    prefix: test
+    pcpName: test-api
+    registryName: dropwizard-default
+    quietPeriod: 5000
+    clusterIdentifier: 100
+    frequency: 10s
+    includes:
+     - io.dropwizard
+    excludes:
+     -
+    replacements:
+      "org.eclipse.jetty.util.thread.": ""
+      "io.dropwizard.jetty.MutableServletContextHandler": "MSCH"
+      "org.eclipse.jetty.server.HttpConnectionFactory.": "HCF"
+      "org.apache.http.conn.HttpClientConnectionManager.": "HCCM"
+      "org.apache.http.client.HttpClient.": ""
+      "\\-": "_"
+      "\\s": "_"
