@@ -2,7 +2,7 @@
   <parent>
     <artifactId>parfait</artifactId>
     <groupId>com.custardsource</groupId>
-    <version>0.3.5</version>
+    <version>0.3.6-SNAPSHOT</version>
   </parent>
   <properties>
     <cxf.version>2.2.3</cxf.version>
@@ -11,7 +11,7 @@
   <groupId>com.custardsource.parfait</groupId>
   <artifactId>parfait-cxf</artifactId>
   <name>parfait-cxf</name>
-  <version>0.3.5</version>
+  <version>0.3.6-SNAPSHOT</version>
   <description>Library for performance monitoring of Apache CXF web services</description>
   <dependencies>
     <dependency>
