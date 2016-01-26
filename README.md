@@ -2,6 +2,8 @@
 
 Parfait is a performance monitoring library for Java which provides mechanisms for collecting counter and timing metrics, then exposing them through a variety of mechanisms (including JMX beans and the open-source cross-platform [Performance Co-Pilot](http://pcp.io) ).
 
+[![Build Status](https://travis-ci.org/performancecopilot/parfait.svg?branch=master)](https://travis-ci.org/performancecopilot/parfait)
+
 #Requirements
 
 Parfait requires Java 7.  It has been used heavily with Oracle Java environments; other JVMs have to been tried.
