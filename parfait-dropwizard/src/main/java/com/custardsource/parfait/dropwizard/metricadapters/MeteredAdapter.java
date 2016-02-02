@@ -19,7 +19,7 @@ public class MeteredAdapter implements MetricAdapter {
     private final NonSelfRegisteringSettableValue<Double> oneMinuteRate;
     private final NonSelfRegisteringSettableValue<Double> meanRate;
     private final NonSelfRegisteringSettableValue<Double> fifteenMinuteRate;
-    private final NonSelfRegisteringSettableValue<Long> rawCounter;
+    private final NonSelfRegisteringSettableValue<Long> count;
 
     public MeteredAdapter(Metered metered, String name, String description) {
         this.metered = metered;
@@ -27,12 +27,12 @@ public class MeteredAdapter implements MetricAdapter {
         this.fiveMinuteRate = new NonSelfRegisteringSettableValue<>(name(name, "five_minute_rate"), description + " - Five minute rate", Unit.ONE, metered.getFiveMinuteRate(), ValueSemantics.FREE_RUNNING);
         this.oneMinuteRate = new NonSelfRegisteringSettableValue<>(name(name, "one_minute_rate"), description + " - One minute rate", Unit.ONE, metered.getOneMinuteRate(), ValueSemantics.FREE_RUNNING);
         this.meanRate = new NonSelfRegisteringSettableValue<>(name(name, "mean_rate"), description + " - Mean rate", Unit.ONE, metered.getMeanRate(), ValueSemantics.FREE_RUNNING);
-        this.rawCounter = new NonSelfRegisteringSettableValue<>(name, description, Unit.ONE, metered.getCount(),ValueSemantics.MONOTONICALLY_INCREASING);
+        this.count = new NonSelfRegisteringSettableValue<>(name(name, "count"), description + " - Count", Unit.ONE, metered.getCount(), ValueSemantics.MONOTONICALLY_INCREASING);
     }
 
     @Override
     public Set<Monitorable> getMonitorables() {
-        return Sets.<Monitorable>newHashSet(fifteenMinuteRate, fiveMinuteRate, oneMinuteRate, meanRate, rawCounter);
+        return Sets.<Monitorable>newHashSet(fifteenMinuteRate, fiveMinuteRate, oneMinuteRate, meanRate, count);
     }
 
     @Override
@@ -41,6 +41,6 @@ public class MeteredAdapter implements MetricAdapter {
         fiveMinuteRate.set(metered.getFiveMinuteRate());
         oneMinuteRate.set(metered.getOneMinuteRate());
         meanRate.set(metered.getMeanRate());
-        rawCounter.set(metered.getCount());
+        count.set(metered.getCount());
     }
 }
