@@ -59,7 +59,7 @@ public class MeteredAdapterTest {
         assertThat(extractMonitorables(meteredAdapter).get(FIFTEEN_MINUTE_RATE).getDescription(), is(DESCRIPTION + " - Fifteen minute rate"));
         assertThat(extractMonitorables(meteredAdapter).get(FIFTEEN_MINUTE_RATE).get(), Matchers.<Object>is(INITIAL_FIFTEEN_MINUTE_RATE));
         assertThat(extractMonitorables(meteredAdapter).get(FIFTEEN_MINUTE_RATE).getSemantics(), is(ValueSemantics.FREE_RUNNING));
-        assertThat(extractMonitorables(meteredAdapter).get(FIFTEEN_MINUTE_RATE).getUnit(), Matchers.<Unit<?>>is(Unit.ONE));
+        assertThat(extractMonitorables(meteredAdapter).get(FIFTEEN_MINUTE_RATE).getUnit(), Matchers.<Unit>is(Unit.ONE));
     }
 
     @Test
@@ -68,7 +68,7 @@ public class MeteredAdapterTest {
         assertThat(extractMonitorables(meteredAdapter).get(FIVE_MINUTE_RATE).getDescription(), is(DESCRIPTION + " - Five minute rate"));
         assertThat(extractMonitorables(meteredAdapter).get(FIVE_MINUTE_RATE).get(), Matchers.<Object>is(INITIAL_FIVE_MINUTE_RATE));
         assertThat(extractMonitorables(meteredAdapter).get(FIVE_MINUTE_RATE).getSemantics(), is(ValueSemantics.FREE_RUNNING));
-        assertThat(extractMonitorables(meteredAdapter).get(FIVE_MINUTE_RATE).getUnit(), Matchers.<Unit<?>>is(Unit.ONE));
+        assertThat(extractMonitorables(meteredAdapter).get(FIVE_MINUTE_RATE).getUnit(), Matchers.<Unit>is(Unit.ONE));
     }
 
     @Test
@@ -77,7 +77,7 @@ public class MeteredAdapterTest {
         assertThat(extractMonitorables(meteredAdapter).get(ONE_MINUTE_RATE).getDescription(), is(DESCRIPTION + " - One minute rate"));
         assertThat(extractMonitorables(meteredAdapter).get(ONE_MINUTE_RATE).get(), Matchers.<Object>is(INITIAL_ONE_MINUTE_RATE));
         assertThat(extractMonitorables(meteredAdapter).get(ONE_MINUTE_RATE).getSemantics(), is(ValueSemantics.FREE_RUNNING));
-        assertThat(extractMonitorables(meteredAdapter).get(ONE_MINUTE_RATE).getUnit(), Matchers.<Unit<?>>is(Unit.ONE));
+        assertThat(extractMonitorables(meteredAdapter).get(ONE_MINUTE_RATE).getUnit(), Matchers.<Unit>is(Unit.ONE));
     }
 
     @Test
@@ -86,7 +86,7 @@ public class MeteredAdapterTest {
         assertThat(extractMonitorables(meteredAdapter).get(MEAN_RATE).getDescription(), is(DESCRIPTION + " - Mean rate"));
         assertThat(extractMonitorables(meteredAdapter).get(MEAN_RATE).get(), Matchers.<Object>is(INITIAL_MEAN_RATE));
         assertThat(extractMonitorables(meteredAdapter).get(MEAN_RATE).getSemantics(), is(ValueSemantics.FREE_RUNNING));
-        assertThat(extractMonitorables(meteredAdapter).get(MEAN_RATE).getUnit(), Matchers.<Unit<?>>is(Unit.ONE));
+        assertThat(extractMonitorables(meteredAdapter).get(MEAN_RATE).getUnit(), Matchers.<Unit>is(Unit.ONE));
     }
 
     @Test
@@ -95,7 +95,7 @@ public class MeteredAdapterTest {
         assertThat(extractMonitorables(meteredAdapter).get(COUNT).getDescription(), is(DESCRIPTION + " - Count"));
         assertThat(extractMonitorables(meteredAdapter).get(COUNT).get(), Matchers.<Object>is(INITIAL_COUNT));
         assertThat(extractMonitorables(meteredAdapter).get(COUNT).getSemantics(), is(ValueSemantics.MONOTONICALLY_INCREASING));
-        assertThat(extractMonitorables(meteredAdapter).get(COUNT).getUnit(), Matchers.<Unit<?>>is(Unit.ONE));
+        assertThat(extractMonitorables(meteredAdapter).get(COUNT).getUnit(), Matchers.<Unit>is(Unit.ONE));
     }
 
     @Test
