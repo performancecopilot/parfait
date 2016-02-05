@@ -17,12 +17,9 @@ import com.google.common.collect.Lists;
 
 public class InProgressSnapshot {
     private static final String EVENT2 = "Event";
-
-	private static final String THREAD_ID = "Thread ID";
-
-	private static final String THREAD_NAME = "Thread name";
-
-	private static final Logger LOG = LoggerFactory.getLogger(InProgressSnapshot.class);
+    private static final String THREAD_ID = "Thread ID";
+    private static final String THREAD_NAME = "Thread name";
+    private static final Logger LOG = LoggerFactory.getLogger(InProgressSnapshot.class);
 
     private final List<String> names = new ArrayList<String>();
     private final List<String> descriptions = new ArrayList<String>();

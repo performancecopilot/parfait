@@ -9,7 +9,8 @@ import com.google.common.collect.Maps;
 
 public class StringParsingIdentifierSourceSet implements IdentifierSourceSet {
     private static final String ERROR_PARSING_LINE = "Error parsing line ";
-	private final IdentifierSourceSet fallbacks;
+    
+    private final IdentifierSourceSet fallbacks;
     private final IdentifierSource metricSource;
     private final InstanceDomainIdentifierSource instanceDomainSource;
 

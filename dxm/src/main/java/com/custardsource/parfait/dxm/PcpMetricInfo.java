@@ -7,8 +7,9 @@ import com.custardsource.parfait.dxm.types.TypeHandler;
 
 final class PcpMetricInfo implements PcpId, PcpOffset {
     private static final String OLD = " (old=";
-	private static final String NEW = ", new=";
-	private final String metricName;
+    private static final String NEW = ", new=";
+    
+    private final String metricName;
     private final int id;
 
     private InstanceDomain domain;
