@@ -16,7 +16,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 public class InProgressSnapshot {
-    private static final Logger LOG = LoggerFactory.getLogger(InProgressSnapshot.class);
+    private static final String EVENT2 = "Event";
+
+	private static final String THREAD_ID = "Thread ID";
+
+	private static final String THREAD_NAME = "Thread name";
+
+	private static final Logger LOG = LoggerFactory.getLogger(InProgressSnapshot.class);
 
     private final List<String> names = new ArrayList<String>();
     private final List<String> descriptions = new ArrayList<String>();
@@ -24,16 +30,16 @@ public class InProgressSnapshot {
     private final List<Map<String, Object>> values = Lists.newArrayList();
 
     private InProgressSnapshot(EventTimer timer, ThreadContext context) {
-        names.add("Thread name");
-        descriptions.add("Thread name");
+        names.add(THREAD_NAME);
+        descriptions.add(THREAD_NAME);
         classes.add(String.class);
 
-        names.add("Thread ID");
-        descriptions.add("Thread ID");
+        names.add(THREAD_ID);
+        descriptions.add(THREAD_ID);
         classes.add(Long.class);
 
-        names.add("Event");
-        descriptions.add("Event");
+        names.add(EVENT2);
+        descriptions.add(EVENT2);
         classes.add(String.class);
 
         for (ThreadMetric metric : timer.getMetricSuite().metrics()) {
@@ -58,9 +64,9 @@ public class InProgressSnapshot {
                 String event = m.getBackTrace();
                 Map<ThreadMetric, Long> snapshotValues = m.snapshotValues();
                 Map<String, Object> keyedValues = new HashMap<String, Object>();
-                keyedValues.put("Thread name", entry.getKey().getName());
-                keyedValues.put("Thread ID", entry.getKey().getId());
-                keyedValues.put("Event", event);
+                keyedValues.put(THREAD_NAME, entry.getKey().getName());
+                keyedValues.put(THREAD_ID, entry.getKey().getId());
+                keyedValues.put(EVENT2, event);
                 for (ThreadMetric metric : timer.getMetricSuite().metrics()) {
                     keyedValues.put(metric.getMetricName(), snapshotValues.get(metric));
                     LOG.trace(String.format("Thread %s in event %s, metric %s has value %s", entry

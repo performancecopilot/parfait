@@ -6,7 +6,9 @@ import com.custardsource.parfait.dxm.semantics.Semantics;
 import com.custardsource.parfait.dxm.types.TypeHandler;
 
 final class PcpMetricInfo implements PcpId, PcpOffset {
-    private final String metricName;
+    private static final String OLD = " (old=";
+	private static final String NEW = ", new=";
+	private final String metricName;
     private final int id;
 
     private InstanceDomain domain;
@@ -62,7 +64,7 @@ final class PcpMetricInfo implements PcpId, PcpOffset {
         if (this.domain != null && !this.domain.equals(domain)) {
             throw new IllegalArgumentException(
                     "Two different instance domains cannot be set for metric " + metricName
-                            + " (old=" + this.domain + ", new=" + domain + ")");
+                            + OLD + this.domain + NEW + domain + ")");
         }
         this.domain = domain;
     }
@@ -84,7 +86,7 @@ final class PcpMetricInfo implements PcpId, PcpOffset {
         if (this.unit != null && !this.unit.equals(unit)) {
             throw new IllegalArgumentException(
                     "Two different units cannot be set for metric " + metricName
-                    + " (old=" + this.unit + ", new=" + unit + ")");
+                    + OLD + this.unit + NEW + unit + ")");
         }
         this.unit = unit;
     }
@@ -97,7 +99,7 @@ final class PcpMetricInfo implements PcpId, PcpOffset {
         if (this.semantics != null && semantics != this.semantics) {
             throw new IllegalArgumentException(
                     "Two different semantics cannot be set for metric " + metricName
-                    + " (old=" + this.semantics + ", new=" + semantics + ")");
+                    + OLD + this.semantics + NEW + semantics + ")");
         }
         this.semantics = semantics;
     }
