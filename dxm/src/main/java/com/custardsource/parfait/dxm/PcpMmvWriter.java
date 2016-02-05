@@ -301,7 +301,7 @@ public class PcpMmvWriter extends BasePcpWriter {
         return flagMask;
     }
 
-    private void writeStringSection(ByteBuffer dataFileBuffer, String value) {
+    private static void writeStringSection(ByteBuffer dataFileBuffer, String value) {
     	byte[] bytes = value.getBytes(PCP_CHARSET);
     	Preconditions.checkArgument(bytes.length < STRING_BLOCK_LENGTH);
         dataFileBuffer.put(bytes);
@@ -383,7 +383,7 @@ public class PcpMmvWriter extends BasePcpWriter {
      *            the PcpValueInfo to be written to the file
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private void writeValueSection(ByteBuffer dataFileBuffer, PcpValueInfo info) {
+    private static void writeValueSection(ByteBuffer dataFileBuffer, PcpValueInfo info) {
         int originalPosition = dataFileBuffer.position();
         TypeHandler rawHandler = info.getTypeHandler();
         if (rawHandler.requiresLargeStorage()) {
@@ -399,7 +399,7 @@ public class PcpMmvWriter extends BasePcpWriter {
         dataFileBuffer.putLong(info.getInstanceOffset());
     }
 
-    private void writeInstanceSection(ByteBuffer dataFileBuffer, Instance instance) {
+    private static void writeInstanceSection(ByteBuffer dataFileBuffer, Instance instance) {
         dataFileBuffer.putLong(instance.getInstanceDomain().getOffset());
         dataFileBuffer.putInt(0);
         dataFileBuffer.putInt(instance.getId());
@@ -414,7 +414,7 @@ public class PcpMmvWriter extends BasePcpWriter {
         dataFileBuffer.putLong(getStringOffset(instanceDomain.getLongHelpText()));
     }
 
-    private long getStringOffset(PcpString text) {
+    private static long getStringOffset(PcpString text) {
         if (text == null) {
             return 0;
         }
@@ -428,7 +428,7 @@ public class PcpMmvWriter extends BasePcpWriter {
      *            the 0-based index of the TOC block to be written
      * @return the file offset used to store that TOC block (32-bit regardless of architecture)
      */
-    private final int getTocOffset(int tocIndex) {
+    private static final int getTocOffset(int tocIndex) {
         return HEADER_LENGTH + (tocIndex * TOC_LENGTH);
     }
 
@@ -460,7 +460,7 @@ public class PcpMmvWriter extends BasePcpWriter {
         initializeOffsets(getStrings(), nextOffset, STRING_BLOCK_LENGTH);
     }
 
-	private int initializeOffsets(Collection<? extends PcpOffset> offsettables,
+	private static int initializeOffsets(Collection<? extends PcpOffset> offsettables,
 			int nextOffset, int blockLength) {
         for (PcpOffset offsettable : offsettables) {
             offsettable.setOffset(nextOffset);
@@ -483,7 +483,7 @@ public class PcpMmvWriter extends BasePcpWriter {
     /**
      * @return the PID of the current running Java Process
      */
-    private int getPid() {
+    private static int getPid() {
         String processIdentifier = ManagementFactory.getRuntimeMXBean().getName();
         return Integer.valueOf(processIdentifier.split("@")[0]);
     }

@@ -22,7 +22,7 @@ public class BlockedMetricCollector {
         this(Thread.currentThread().getId());
     }
 
-    private ThreadInfo getThreadInfo(long threadId) {
+    private static ThreadInfo getThreadInfo(long threadId) {
         return ManagementFactory.getThreadMXBean().getThreadInfo(threadId);
     }
     

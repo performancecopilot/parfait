@@ -79,7 +79,7 @@ public class StringParsingIdentifierSourceSet implements IdentifierSourceSet {
                 .instanceDomainSource());
     }
 
-    private boolean isBlankOrComment(String currentLine) {
+    private static boolean isBlankOrComment(String currentLine) {
         return (currentLine.trim().isEmpty()) || (currentLine.trim().startsWith("#")); 
 	}
 
@@ -98,7 +98,7 @@ public class StringParsingIdentifierSourceSet implements IdentifierSourceSet {
         return instanceDomainSource.getInstanceSource(domain);
     }
 
-    private String parseAllocation(final BiMap<String, Integer> allocations, int lineNumber,
+    private static String parseAllocation(final BiMap<String, Integer> allocations, int lineNumber,
             String currentLine) {
         String[] elements = currentLine.trim().split("\\s+");
         if (elements.length != 2) {
