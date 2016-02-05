@@ -16,8 +16,15 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 public class InProgressSnapshot {
+    public static final Function<InProgressSnapshot, String> TO_TABBED_STRING = new InProgressFormatter();
+    public static final Function<InProgressSnapshot, String> TO_FORMATTED_STRING = new InProgressFormatter() {
+        @Override
+        protected String formatColumnValue(String value) {
+            return Strings.padStart(value, 20, ' ');
+        }
+    };
     private static final Logger LOG = LoggerFactory.getLogger(InProgressSnapshot.class);
-
+    
     private final List<String> names = new ArrayList<String>();
     private final List<String> descriptions = new ArrayList<String>();
     private final List<Class<?>> classes = new ArrayList<Class<?>>();
@@ -132,13 +139,4 @@ public class InProgressSnapshot {
             return value;
         }
     }
-
-    public static final Function<InProgressSnapshot, String> TO_TABBED_STRING = new InProgressFormatter();
-
-    public static final Function<InProgressSnapshot, String> TO_FORMATTED_STRING = new InProgressFormatter() {
-        @Override
-        protected String formatColumnValue(String value) {
-            return Strings.padStart(value, 20, ' ');
-        }
-    };
 }

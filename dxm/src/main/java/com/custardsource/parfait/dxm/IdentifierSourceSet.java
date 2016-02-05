@@ -1,10 +1,6 @@
 package com.custardsource.parfait.dxm;
 
 public interface IdentifierSourceSet {
-    public IdentifierSource instanceDomainSource();
-    public IdentifierSource instanceSource(String domain);
-    public IdentifierSource metricSource();
-    
     public static IdentifierSourceSet DEFAULT_SET = new IdentifierSourceSet() {
         private final IdentifierSource instanceDomainSource = new HashingIdentifierSource(1 << 22);
         private final IdentifierSource instanceSource = new HashingIdentifierSource(Integer.MAX_VALUE);
@@ -49,7 +45,7 @@ public interface IdentifierSourceSet {
             return ERROR_SOURCE;
         }
     };
-
+    
     /**
      * An IdentifierSourceSet for use in contexts where identifiers truly do not matter and are not limited in range
      * -- e.g. test cases or writers which do not need to limit identifiers
@@ -72,4 +68,9 @@ public interface IdentifierSourceSet {
             return defaultSource;
         }
     };
+    
+    public IdentifierSource instanceDomainSource();
+    public IdentifierSource instanceSource(String domain);
+    public IdentifierSource metricSource();
+    
 }

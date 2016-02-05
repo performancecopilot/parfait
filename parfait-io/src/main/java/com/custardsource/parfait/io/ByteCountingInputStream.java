@@ -11,6 +11,14 @@ public class ByteCountingInputStream extends ProxyInputStream {
 
 	private final Counter byteCounter;
 
+    public ByteCountingInputStream(InputStream streamToWrap,
+            Counter counter) {
+        super(streamToWrap);
+        Preconditions.checkNotNull(counter, "MonitoredCounter cannot be null");
+        Preconditions.checkNotNull(streamToWrap, "InputStream cannot be null");
+        this.byteCounter = counter;
+    }
+
     @Override
     public int read(byte[] bts, int st, int end) throws IOException {
         int read = super.read(bts, st, end);
@@ -26,13 +34,7 @@ public class ByteCountingInputStream extends ProxyInputStream {
 
     }
 
-    public ByteCountingInputStream(InputStream streamToWrap,
-			Counter counter) {
-	    super(streamToWrap);
-	    Preconditions.checkNotNull(counter, "MonitoredCounter cannot be null");
-	    Preconditions.checkNotNull(streamToWrap, "InputStream cannot be null");
-		this.byteCounter = counter;
-	}
+    
 	
 	@Override
 	public int read() throws IOException {
