@@ -31,15 +31,12 @@ public class ByteCountingInputStream extends ProxyInputStream {
         int read = super.read(bts);
         eosSafeCountingRead(read);
         return read;
-
     }
-
     
-	
-	@Override
-	public int read() throws IOException {
-	    int readByte = super.read();
-	    /*
+    @Override
+    public int read() throws IOException {
+        int readByte = super.read();
+        /*
          * the other read methods return the # bytes read, not the actual byte like this one does so
          * if we've reached EOS, we don't increment the counter, otherwise we do.
          */
@@ -52,6 +49,4 @@ public class ByteCountingInputStream extends ProxyInputStream {
             byteCounter.inc(numRead);
         }
     }
-
-
 }

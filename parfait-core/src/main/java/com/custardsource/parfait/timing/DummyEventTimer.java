@@ -36,6 +36,7 @@ public final class DummyEventTimer extends EventTimer {
         super("dummy", new MonitorableRegistry(), ThreadMetricSuite.blank(), false, false,
                 Collections.<StepMeasurementSink>emptyList());
     }
+    
     public EventMetricCollector getCollector() {
         return DUMMY_EVENT_METRIC_COLLECTOR;
     }

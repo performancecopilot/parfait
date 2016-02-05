@@ -10,6 +10,7 @@ public interface Counter {
         public void inc(long increment) {
         }
     };
+    
     void inc();
     
     void inc(long increment);
