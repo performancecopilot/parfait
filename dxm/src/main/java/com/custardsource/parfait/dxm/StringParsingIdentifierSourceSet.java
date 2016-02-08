@@ -8,6 +8,8 @@ import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
 
 public class StringParsingIdentifierSourceSet implements IdentifierSourceSet {
+    private static final String ERROR_PARSING_LINE = "Error parsing line ";
+    
     private final IdentifierSourceSet fallbacks;
     private final IdentifierSource metricSource;
     private final InstanceDomainIdentifierSource instanceDomainSource;
@@ -55,7 +57,7 @@ public class StringParsingIdentifierSourceSet implements IdentifierSourceSet {
                 // This is an instance, not an indom
                 if (currentDomain == null) {
                     throw new IllegalArgumentException(
-                            "Error parsing line "
+                            ERROR_PARSING_LINE
                                     + lineNumber
                                     + " of input; leading whitespace should only be used for instance values under an instance domain");
                 }
@@ -102,7 +104,7 @@ public class StringParsingIdentifierSourceSet implements IdentifierSourceSet {
             String currentLine) {
         String[] elements = currentLine.trim().split("\\s+");
         if (elements.length != 2) {
-            throw new IllegalArgumentException("Error parsing line " + lineNumber
+            throw new IllegalArgumentException(ERROR_PARSING_LINE + lineNumber
                     + " of input; should have two columns in format <name><whitespace><id>");
         }
         String metricName = elements[0];
@@ -110,12 +112,12 @@ public class StringParsingIdentifierSourceSet implements IdentifierSourceSet {
         try {
             id = Integer.valueOf(elements[1]);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Error parsing line " + lineNumber
+            throw new IllegalArgumentException(ERROR_PARSING_LINE + lineNumber
                     + " of input; identifier " + metricName + " has unparseable ID string '"
                     + elements[1] + "'");
         }
         if (allocations.containsValue(id)) {
-            throw new IllegalArgumentException("Error parsing line " + lineNumber
+            throw new IllegalArgumentException(ERROR_PARSING_LINE + lineNumber
                     + " of input; identifier " + metricName + " has ID " + id
                     + " which is already in use for identifier " + allocations.inverse().get(id));
         }
