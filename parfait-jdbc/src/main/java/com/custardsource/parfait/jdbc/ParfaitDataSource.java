@@ -1,13 +1,5 @@
 package com.custardsource.parfait.jdbc;
 
-import com.custardsource.parfait.timing.ThreadMetric;
-import com.custardsource.parfait.timing.ThreadValue;
-import com.custardsource.parfait.timing.ThreadValueMetric;
-import com.google.common.collect.ImmutableList;
-
-import javax.measure.unit.SI;
-import javax.measure.unit.Unit;
-import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -20,6 +12,14 @@ import java.sql.Statement;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
+import javax.measure.unit.SI;
+import javax.measure.unit.Unit;
+import javax.sql.DataSource;
+
+import com.custardsource.parfait.timing.ThreadMetric;
+import com.custardsource.parfait.timing.ThreadValue;
+import com.custardsource.parfait.timing.ThreadValueMetric;
+import com.google.common.collect.ImmutableList;
 
 public class ParfaitDataSource implements DataSource {
 	private final DataSource wrapped;
@@ -101,7 +101,7 @@ public class ParfaitDataSource implements DataSource {
 						|| "prepareCall".equals(methodName)) {
 					return proxyStatement((Statement) method.invoke(wrapped, args));
 				}
-				return method.invoke(proxy, args);
+				return method.invoke(wrapped, args);
 			} catch (InvocationTargetException ex) {
 				throw ex.getTargetException();
 			}
