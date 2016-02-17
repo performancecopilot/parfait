@@ -125,7 +125,7 @@ public class EventTimer {
         return prefix + "." + cleanName(eventGroup) + "." + metric;
     }
 
-    private String cleanName(String eventGroup) {
+    private static String cleanName(String eventGroup) {
         // TODO do name cleanup elsewhere
         return eventGroup.replace("/", "");
     }

@@ -80,15 +80,15 @@ public class CPUThreadTest {
         System.out.printf("cpuTracingEnabled: %s\tcpuLookupMethod: %s\titerations/sec: %s\tblockedCount: %d\tblockedTime: %d\n", leftPadBoolean(cpuTracingEnabled), formatCpuLookupMethod(cpuLookupMethod), iterationsPerSecondString, totalBlockedCount, totalBlockedTime);
     }
 
-    private String formatCpuLookupMethod(CPUThreadTestRunner.CpuLookupMethod cpuLookupMethod) {
+    private static String formatCpuLookupMethod(CPUThreadTestRunner.CpuLookupMethod cpuLookupMethod) {
         return StringUtils.rightPad(cpuLookupMethod.name(), CPUThreadTestRunner.CpuLookupMethod.USE_CURRENT_THREAD_CPU_TIME.name().length());
     }
 
-    private String leftPadBoolean(boolean theBoolean) {
+    private static String leftPadBoolean(boolean theBoolean) {
         return StringUtils.leftPad(Boolean.toString(theBoolean), 5);
     }
 
-    private void awaitExecutionCompletion(ExecutorService executorService) {
+    private static void awaitExecutionCompletion(ExecutorService executorService) {
         try {
             executorService.shutdown();
             executorService.awaitTermination(1, TimeUnit.MINUTES);

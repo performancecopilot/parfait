@@ -13,7 +13,7 @@ public class StringParsingTextSource implements TextSource {
         delegate = new MapTextSource(fallback, parseMap(input));
     }
 
-    private Map<String, String> parseMap(Iterable<String> input) {
+    private static Map<String, String> parseMap(Iterable<String> input) {
         Map<String, String> output = Maps.newHashMap();
         int lineNumber = 0;
         for (String currentLine : input) {

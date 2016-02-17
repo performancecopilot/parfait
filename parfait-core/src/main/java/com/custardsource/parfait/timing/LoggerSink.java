@@ -36,7 +36,7 @@ public class LoggerSink implements StepMeasurementSink {
 
     }
 
-    private String buildDepthString(int depth) {
+    private static String buildDepthString(int depth) {
         return (depth > 0) ? "Nested (" + depth + ")" : "Top";
     }
 
