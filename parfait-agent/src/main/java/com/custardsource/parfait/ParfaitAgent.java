@@ -76,14 +76,14 @@ public class ParfaitAgent {
         logger.info("Starting Parfait agent {} with arguments {}", name, args);
 
          
-//      // Inject all metrics via parfait-spring and parfait-jmx
-//      ApplicationContext context = new ClassPathXmlApplicationContext("monitoring.xml");
-//      PcpMonitorBridge monitor = (PcpMonitorBridge) context.getBean("pcpMonitorBridge");
-//      if (monitor == null) {
-//          logger.info("Parfait agent has no spring bean goodness");
-//      } else {
-//          logger.info("Parfait agent got some magic beans!!!");
-//      }
+        // Inject all metrics via parfait-spring and parfait-jmx
+        ApplicationContext context = new ClassPathXmlApplicationContext("monitoring.xml");
+        PcpMonitorBridge monitor = (PcpMonitorBridge) context.getBean("pcpMonitorBridge");
+        if (monitor == null) {
+            logger.info("Parfait agent has no spring bean goodness");
+        } else {
+            logger.info("Parfait agent got some magic beans!!!");
+        }
 
 
         //
