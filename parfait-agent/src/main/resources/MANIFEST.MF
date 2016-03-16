@@ -1,0 +1,1 @@
+premain-Class: com.custardsource.parfait.ParfaitAgent

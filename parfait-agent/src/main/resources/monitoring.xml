@@ -1,0 +1,968 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+
+    <aop:aspectj-autoproxy/>
+
+    <bean id="monitorableRegistry" class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
+        <property name="staticField" value="com.custardsource.parfait.MonitorableRegistry.DEFAULT_REGISTRY"/>
+    </bean>
+
+    <bean id="metricShortTextSource" class="com.custardsource.parfait.pcp.FileParsingTextSource">
+        <constructor-arg>
+            <bean class="com.aconex.spring.SupplierResourceAdapter">
+                <constructor-arg>
+                    <bean class="org.springframework.core.io.ClassPathResource">
+                        <constructor-arg value="com/aconex/monitoring/pcp-shorttext-overrides.txt"/>
+                    </bean>
+                </constructor-arg>
+            </bean>
+        </constructor-arg>
+        <constructor-arg>
+            <bean class="com.custardsource.parfait.pcp.MetricDescriptionTextSource"/>
+        </constructor-arg>
+    </bean>
+
+    <bean id="metricLongTextSource" class="com.custardsource.parfait.pcp.FileParsingTextSource">
+        <constructor-arg>
+            <bean class="com.aconex.spring.SupplierResourceAdapter">
+                <constructor-arg>
+                    <bean class="org.springframework.core.io.ClassPathResource">
+                        <constructor-arg value="com/aconex/monitoring/pcp-longtexts.txt"/>
+                    </bean>
+                </constructor-arg>
+            </bean>
+        </constructor-arg>
+        <constructor-arg>
+            <bean class="com.custardsource.parfait.pcp.MetricDescriptionTextSource"/>
+        </constructor-arg>
+    </bean>
+
+    <bean name="pcpMonitorBridge" class="com.custardsource.parfait.pcp.PcpMonitorBridge">
+        <constructor-arg>
+            <bean id="mmvPcpWriter" class="com.custardsource.parfait.dxm.PcpMmvWriter">
+                <constructor-arg value="${application.target}"/>
+                <constructor-arg>
+                    <bean class="com.custardsource.parfait.dxm.FileParsingIdentifierSourceSet">
+                        <constructor-arg>
+                            <bean class="com.aconex.spring.SupplierResourceAdapter">
+                                <constructor-arg>
+                                    <bean class="org.springframework.core.io.ClassPathResource">
+                                        <constructor-arg value="com/aconex/monitoring/pcp-instanceids-historical.txt"/>
+                                    </bean>
+                                </constructor-arg>
+                            </bean>
+                        </constructor-arg>
+                        <constructor-arg>
+                            <bean class="com.aconex.spring.SupplierResourceAdapter">
+                                <constructor-arg>
+                                    <bean class="org.springframework.core.io.ClassPathResource">
+                                        <constructor-arg value="com/aconex/monitoring/pcp-metric-ids-historical.txt"/>
+                                    </bean>
+                                </constructor-arg>
+                            </bean>
+                        </constructor-arg>
+                        <constructor-arg>
+                            <bean class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
+                                <property name="staticField" value="com.custardsource.parfait.dxm.IdentifierSourceSet.EXPLICIT_SET"/>
+                            </bean>
+                        </constructor-arg>
+                    </bean>
+                </constructor-arg>
+                <property name="clusterIdentifier">
+                    <util:constant static-field="com.aconex.monitoring.ClusterId.ACONEX_APPLICATION_CLUSTER_ID"/>
+                </property>
+            </bean>
+        </constructor-arg>
+        <constructor-arg>
+            <bean class="com.aconex.monitoring.AconexNameMapper">
+                <constructor-arg value="${application.target}"/>
+            </bean>
+        </constructor-arg>
+        <constructor-arg ref="metricShortTextSource"/>
+        <constructor-arg ref="metricLongTextSource"/>
+    </bean>
+
+    <bean name="mmvPcpBridge" class="com.custardsource.parfait.spring.SelfStartingMonitoringView" depends-on="sessionWatcher">
+        <constructor-arg ref="pcpMonitorBridge"/>
+    </bean>
+
+    <bean class="com.custardsource.parfait.MonitoredConstant">
+        <constructor-arg value="java.jvm_version"/>
+        <constructor-arg value="JVM version string"/>
+        <constructor-arg value="${java.runtime.version}"/>
+    </bean>
+
+    <bean name="monitoredMBean" class="com.custardsource.parfait.jmx.MonitoredMBeanAttributeFactory"
+          abstract="true">
+        <property name="monitorableRegistry" ref="monitorableRegistry"/>
+        <property name="updateInterval" value="1000"/>
+    </bean>
+
+    <bean name="optionalMBeanRegistrar" class="com.aconex.monitoring.OptionalMonitorableMBeanRegistrar"
+          abstract="true">
+        <property name="monitorableRegistry" ref="monitorableRegistry"/>
+        <property name="updateInterval" value="1000"/>
+    </bean>
+
+    <bean name="monitoredConstantMBean" class="com.custardsource.parfait.jmx.MonitoredMBeanAttributeFactory"
+          abstract="true">
+        <property name="monitorableRegistry" ref="monitorableRegistry"/>
+        <property name="valueSemantics" value="CONSTANT"/>
+    </bean>
+
+    <bean id="secondUnit" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="javax.measure.unit.SI.si"/>
+        <property name="arguments">
+            <bean class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
+                <property name="staticField" value="javax.measure.unit.SI.SECOND"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="millisecondUnit" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="javax.measure.unit.SI.MILLI"/>
+        <property name="arguments">
+            <bean class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
+                <property name="staticField" value="javax.measure.unit.SI.SECOND"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="nanosecondUnit" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="javax.measure.unit.SI.NANO"/>
+        <property name="arguments">
+            <bean class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
+                <property name="staticField" value="javax.measure.unit.SI.SECOND"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="byteUnit" class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
+        <property name="staticField" value="javax.measure.unit.NonSI.BYTE"/>
+    </bean>
+
+    <bean id="jmxServer" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="org.springframework.jmx.support.JmxUtils.locateMBeanServer" />
+    </bean>
+
+    <bean id="pollingMonitoredValueFactory" class="com.aconex.monitoring.PollingMonitoredValueFactory">
+        <constructor-arg ref="jmxServer"/>
+        <constructor-arg ref="monitorableRegistry"/>
+    </bean>
+
+    <bean id="tomcatThreadPoolMBeanRegistrar" class="com.aconex.monitoring.TomcatThreadPoolMonitorableMBeanRegistrar">
+        <constructor-arg ref="pollingMonitoredValueFactory"/>
+        <constructor-arg>
+            <util:list>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.threadpool.general.insecure.current"/>
+                    <constructor-arg value="Threadpool"/>
+                    <constructor-arg value="${application.target}:type=ThreadPool,name=http-50600"/>
+                    <constructor-arg value="currentThreadCount"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.threadpool.general.insecure.max"/>
+                    <constructor-arg value="Threadpool"/>
+                    <constructor-arg value="${application.target}:type=ThreadPool,name=http-50600"/>
+                    <constructor-arg value="maxThreads"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.threadpool.general.insecure.busy"/>
+                    <constructor-arg value="Threadpool"/>
+                    <constructor-arg value="${application.target}:type=ThreadPool,name=http-50600"/>
+                    <constructor-arg value="currentThreadsBusy"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.threadpool.general.secure.current"/>
+                    <constructor-arg value="Threadpool"/>
+                    <constructor-arg value="${application.target}:type=ThreadPool,name=http-60600"/>
+                    <constructor-arg value="currentThreadCount"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.threadpool.general.secure.max"/>
+                    <constructor-arg value="Threadpool"/>
+                    <constructor-arg value="${application.target}:type=ThreadPool,name=http-60600"/>
+                    <constructor-arg value="maxThreads"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.threadpool.general.secure.busy"/>
+                    <constructor-arg value="Threadpool"/>
+                    <constructor-arg value="${application.target}:type=ThreadPool,name=http-60600"/>
+                    <constructor-arg value="currentThreadsBusy"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.threadpool.general.secure_standby.current"/>
+                    <constructor-arg value="Threadpool"/>
+                    <constructor-arg value="${application.target}:type=ThreadPool,name=http-60596"/>
+                    <constructor-arg value="currentThreadCount"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.threadpool.general.secure_standby.max"/>
+                    <constructor-arg value="Threadpool"/>
+                    <constructor-arg value="${application.target}:type=ThreadPool,name=http-60596"/>
+                    <constructor-arg value="maxThreads"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.threadpool.general.secure_standby.busy"/>
+                    <constructor-arg value="Threadpool"/>
+                    <constructor-arg value="${application.target}:type=ThreadPool,name=http-60596"/>
+                    <constructor-arg value="currentThreadsBusy"/>
+                </bean>
+
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.threadpool.sandbox.secure.current"/>
+                    <constructor-arg value="Threadpool"/>
+                    <constructor-arg value="${application.target}:type=ThreadPool,name=http-60597"/>
+                    <constructor-arg value="currentThreadCount"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.threadpool.sandbox.secure.max"/>
+                    <constructor-arg value="Threadpool"/>
+                    <constructor-arg value="${application.target}:type=ThreadPool,name=http-60597"/>
+                    <constructor-arg value="maxThreads"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.threadpool.sandbox.secure.busy"/>
+                    <constructor-arg value="Threadpool"/>
+                    <constructor-arg value="${application.target}:type=ThreadPool,name=http-60597"/>
+                    <constructor-arg value="currentThreadsBusy"/>
+                </bean>
+
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.threadpool.api.secure.current"/>
+                    <constructor-arg value="Threadpool"/>
+                    <constructor-arg value="${application.target}:type=ThreadPool,name=http-60598"/>
+                    <constructor-arg value="currentThreadCount"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.threadpool.api.secure.max"/>
+                    <constructor-arg value="Threadpool"/>
+                    <constructor-arg value="${application.target}:type=ThreadPool,name=http-60598"/>
+                    <constructor-arg value="maxThreads"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.threadpool.api.secure.busy"/>
+                    <constructor-arg value="Threadpool"/>
+                    <constructor-arg value="${application.target}:type=ThreadPool,name=http-60598"/>
+                    <constructor-arg value="currentThreadsBusy"/>
+                </bean>
+
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.threadpool.download.secure.current"/>
+                    <constructor-arg value="Threadpool"/>
+                    <constructor-arg value="${application.target}:type=ThreadPool,name=http-60599"/>
+                    <constructor-arg value="currentThreadCount"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.threadpool.download.secure.max"/>
+                    <constructor-arg value="Threadpool"/>
+                    <constructor-arg value="${application.target}:type=ThreadPool,name=http-60599"/>
+                    <constructor-arg value="maxThreads"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.threadpool.download.secure.busy"/>
+                    <constructor-arg value="Threadpool"/>
+                    <constructor-arg value="${application.target}:type=ThreadPool,name=http-60599"/>
+                    <constructor-arg value="currentThreadsBusy"/>
+                </bean>
+
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.threadpool.trustedapi.secure.current"/>
+                    <constructor-arg value="Threadpool"/>
+                    <constructor-arg value="${application.target}:type=ThreadPool,name=http-60595"/>
+                    <constructor-arg value="currentThreadCount"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.threadpool.trustedapi.secure.max"/>
+                    <constructor-arg value="Threadpool"/>
+                    <constructor-arg value="${application.target}:type=ThreadPool,name=http-60595"/>
+                    <constructor-arg value="maxThreads"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.threadpool.trustedapi.secure.busy"/>
+                    <constructor-arg value="Threadpool"/>
+                    <constructor-arg value="${application.target}:type=ThreadPool,name=http-60595"/>
+                    <constructor-arg value="currentThreadsBusy"/>
+                </bean>
+
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.requestprocessing.sandbox.secure.bytes_received"/>
+                    <constructor-arg value="GlobalRequestProcessor"/>
+                    <constructor-arg value="${application.target}:type=GlobalRequestProcessor,name=http-60597"/>
+                    <constructor-arg value="bytesReceived"/>
+                    <constructor-arg value="MONOTONICALLY_INCREASING"/>
+                    <constructor-arg ref="byteUnit"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.requestprocessing.sandbox.secure.bytes_sent"/>
+                    <constructor-arg value="GlobalRequestProcessor"/>
+                    <constructor-arg value="${application.target}:type=GlobalRequestProcessor,name=http-60597"/>
+                    <constructor-arg value="bytesSent"/>
+                    <constructor-arg value="MONOTONICALLY_INCREASING"/>
+                    <constructor-arg ref="byteUnit"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.requestprocessing.sandbox.secure.error_count"/>
+                    <constructor-arg value="GlobalRequestProcessor"/>
+                    <constructor-arg value="${application.target}:type=GlobalRequestProcessor,name=http-60597"/>
+                    <constructor-arg value="errorCount"/>
+                    <constructor-arg value="MONOTONICALLY_INCREASING"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.requestprocessing.sandbox.secure.request_count"/>
+                    <constructor-arg value="GlobalRequestProcessor"/>
+                    <constructor-arg value="${application.target}:type=GlobalRequestProcessor,name=http-60597"/>
+                    <constructor-arg value="requestCount"/>
+                    <constructor-arg value="MONOTONICALLY_INCREASING"/>
+                </bean>
+
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.requestprocessing.api.secure.bytes_received"/>
+                    <constructor-arg value="GlobalRequestProcessor"/>
+                    <constructor-arg value="${application.target}:type=GlobalRequestProcessor,name=http-60598"/>
+                    <constructor-arg value="bytesReceived"/>
+                    <constructor-arg value="MONOTONICALLY_INCREASING"/>
+                    <constructor-arg ref="byteUnit"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.requestprocessing.api.secure.bytes_sent"/>
+                    <constructor-arg value="GlobalRequestProcessor"/>
+                    <constructor-arg value="${application.target}:type=GlobalRequestProcessor,name=http-60598"/>
+                    <constructor-arg value="bytesSent"/>
+                    <constructor-arg value="MONOTONICALLY_INCREASING"/>
+                    <constructor-arg ref="byteUnit"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.requestprocessing.api.secure.error_count"/>
+                    <constructor-arg value="GlobalRequestProcessor"/>
+                    <constructor-arg value="${application.target}:type=GlobalRequestProcessor,name=http-60598"/>
+                    <constructor-arg value="errorCount"/>
+                    <constructor-arg value="MONOTONICALLY_INCREASING"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.requestprocessing.api.secure.request_count"/>
+                    <constructor-arg value="GlobalRequestProcessor"/>
+                    <constructor-arg value="${application.target}:type=GlobalRequestProcessor,name=http-60598"/>
+                    <constructor-arg value="requestCount"/>
+                    <constructor-arg value="MONOTONICALLY_INCREASING"/>
+                </bean>
+
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.requestprocessing.download.secure.bytes_received"/>
+                    <constructor-arg value="GlobalRequestProcessor"/>
+                    <constructor-arg value="${application.target}:type=GlobalRequestProcessor,name=http-60599"/>
+                    <constructor-arg value="bytesReceived"/>
+                    <constructor-arg value="MONOTONICALLY_INCREASING"/>
+                    <constructor-arg ref="byteUnit"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.requestprocessing.download.secure.bytes_sent"/>
+                    <constructor-arg value="GlobalRequestProcessor"/>
+                    <constructor-arg value="${application.target}:type=GlobalRequestProcessor,name=http-60599"/>
+                    <constructor-arg value="bytesSent"/>
+                    <constructor-arg value="MONOTONICALLY_INCREASING"/>
+                    <constructor-arg ref="byteUnit"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.requestprocessing.download.secure.error_count"/>
+                    <constructor-arg value="GlobalRequestProcessor"/>
+                    <constructor-arg value="${application.target}:type=GlobalRequestProcessor,name=http-60599"/>
+                    <constructor-arg value="errorCount"/>
+                    <constructor-arg value="MONOTONICALLY_INCREASING"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.requestprocessing.download.secure.request_count"/>
+                    <constructor-arg value="GlobalRequestProcessor"/>
+                    <constructor-arg value="${application.target}:type=GlobalRequestProcessor,name=http-60599"/>
+                    <constructor-arg value="requestCount"/>
+                    <constructor-arg value="MONOTONICALLY_INCREASING"/>
+                </bean>
+
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.requestprocessing.trustedapi.secure.bytes_received"/>
+                    <constructor-arg value="GlobalRequestProcessor"/>
+                    <constructor-arg value="${application.target}:type=GlobalRequestProcessor,name=http-60595"/>
+                    <constructor-arg value="bytesReceived"/>
+                    <constructor-arg value="MONOTONICALLY_INCREASING"/>
+                    <constructor-arg ref="byteUnit"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.requestprocessing.trustedapi.secure.bytes_sent"/>
+                    <constructor-arg value="GlobalRequestProcessor"/>
+                    <constructor-arg value="${application.target}:type=GlobalRequestProcessor,name=http-60595"/>
+                    <constructor-arg value="bytesSent"/>
+                    <constructor-arg value="MONOTONICALLY_INCREASING"/>
+                    <constructor-arg ref="byteUnit"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.requestprocessing.trustedapi.secure.error_count"/>
+                    <constructor-arg value="GlobalRequestProcessor"/>
+                    <constructor-arg value="${application.target}:type=GlobalRequestProcessor,name=http-60595"/>
+                    <constructor-arg value="errorCount"/>
+                    <constructor-arg value="MONOTONICALLY_INCREASING"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="aconex.tomcat.requestprocessing.trustedapi.secure.request_count"/>
+                    <constructor-arg value="GlobalRequestProcessor"/>
+                    <constructor-arg value="${application.target}:type=GlobalRequestProcessor,name=http-60595"/>
+                    <constructor-arg value="requestCount"/>
+                    <constructor-arg value="MONOTONICALLY_INCREASING"/>
+                </bean>
+
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.requestprocessing.general.secure.bytes_received"/>
+                    <constructor-arg value="GlobalRequestProcessor"/>
+                    <constructor-arg value="${application.target}:type=GlobalRequestProcessor,name=http-60600"/>
+                    <constructor-arg value="bytesReceived"/>
+                    <constructor-arg value="MONOTONICALLY_INCREASING"/>
+                    <constructor-arg ref="byteUnit"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.requestprocessing.general.secure.bytes_sent"/>
+                    <constructor-arg value="GlobalRequestProcessor"/>
+                    <constructor-arg value="${application.target}:type=GlobalRequestProcessor,name=http-60600"/>
+                    <constructor-arg value="bytesSent"/>
+                    <constructor-arg value="MONOTONICALLY_INCREASING"/>
+                    <constructor-arg ref="byteUnit"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.requestprocessing.general.secure.error_count"/>
+                    <constructor-arg value="GlobalRequestProcessor"/>
+                    <constructor-arg value="${application.target}:type=GlobalRequestProcessor,name=http-60600"/>
+                    <constructor-arg value="errorCount"/>
+                    <constructor-arg value="MONOTONICALLY_INCREASING"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.requestprocessing.general.secure.request_count"/>
+                    <constructor-arg value="GlobalRequestProcessor"/>
+                    <constructor-arg value="${application.target}:type=GlobalRequestProcessor,name=http-60600"/>
+                    <constructor-arg value="requestCount"/>
+                    <constructor-arg value="MONOTONICALLY_INCREASING"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.requestprocessing.general.secure_standby.bytes_received"/>
+                    <constructor-arg value="GlobalRequestProcessor"/>
+                    <constructor-arg value="${application.target}:type=GlobalRequestProcessor,name=http-60596"/>
+                    <constructor-arg value="bytesReceived"/>
+                    <constructor-arg value="MONOTONICALLY_INCREASING"/>
+                    <constructor-arg ref="byteUnit"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.requestprocessing.general.secure_standby.bytes_sent"/>
+                    <constructor-arg value="GlobalRequestProcessor"/>
+                    <constructor-arg value="${application.target}:type=GlobalRequestProcessor,name=http-60596"/>
+                    <constructor-arg value="bytesSent"/>
+                    <constructor-arg value="MONOTONICALLY_INCREASING"/>
+                    <constructor-arg ref="byteUnit"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.requestprocessing.general.secure_standby.error_count"/>
+                    <constructor-arg value="GlobalRequestProcessor"/>
+                    <constructor-arg value="${application.target}:type=GlobalRequestProcessor,name=http-60596"/>
+                    <constructor-arg value="errorCount"/>
+                    <constructor-arg value="MONOTONICALLY_INCREASING"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.requestprocessing.general.secure_standby.request_count"/>
+                    <constructor-arg value="GlobalRequestProcessor"/>
+                    <constructor-arg value="${application.target}:type=GlobalRequestProcessor,name=http-60596"/>
+                    <constructor-arg value="requestCount"/>
+                    <constructor-arg value="MONOTONICALLY_INCREASING"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.requestprocessing.general.insecure.bytes_received"/>
+                    <constructor-arg value="GlobalRequestProcessor"/>
+                    <constructor-arg value="${application.target}:type=GlobalRequestProcessor,name=http-50600"/>
+                    <constructor-arg value="bytesReceived"/>
+                    <constructor-arg value="MONOTONICALLY_INCREASING"/>
+                    <constructor-arg ref="byteUnit"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.requestprocessing.general.insecure.bytes_sent"/>
+                    <constructor-arg value="GlobalRequestProcessor"/>
+                    <constructor-arg value="${application.target}:type=GlobalRequestProcessor,name=http-50600"/>
+                    <constructor-arg value="bytesSent"/>
+                    <constructor-arg value="MONOTONICALLY_INCREASING"/>
+                    <constructor-arg ref="byteUnit"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.requestprocessing.general.insecure.error_count"/>
+                    <constructor-arg value="GlobalRequestProcessor"/>
+                    <constructor-arg value="${application.target}:type=GlobalRequestProcessor,name=http-50600"/>
+                    <constructor-arg value="errorCount"/>
+                    <constructor-arg value="MONOTONICALLY_INCREASING"/>
+                </bean>
+                <bean class="com.aconex.monitoring.MonitorableDescriptor">
+                    <constructor-arg value="java.tomcat.requestprocessing.general.insecure.request_count"/>
+                    <constructor-arg value="GlobalRequestProcessor"/>
+                    <constructor-arg value="${application.target}:type=GlobalRequestProcessor,name=http-50600"/>
+                    <constructor-arg value="requestCount"/>
+                    <constructor-arg value="MONOTONICALLY_INCREASING"/>
+                </bean>
+
+            </util:list>
+        </constructor-arg>
+    </bean>
+
+    <!-- this list is to force Spring to access the actual beans from the following factories -->
+    <util:list id="monitoredMBeans">
+        <!-- java.lang:type=Runtime monitors -->
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.uptime"/>
+            <constructor-arg value="Application uptime (msec)"/>
+            <constructor-arg value="java.lang:type=Runtime"/>
+            <constructor-arg value="Uptime"/>
+            <property name="unit" ref="millisecondUnit"/>
+        </bean>
+
+        <bean parent="monitoredConstantMBean">
+            <constructor-arg value="java.runtime_name"/>
+            <constructor-arg value="An internal Java process identifier"/>
+            <constructor-arg value="java.lang:type=Runtime"/>
+            <constructor-arg value="Name"/>
+            <property name="unit">
+                <null/>
+            </property>
+        </bean>
+
+        <!-- java.lang:type=Memory monitors -->
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.heap.init"/>
+            <constructor-arg value="Initial Java heap memory configuration size"/>
+            <constructor-arg value="java.lang:type=Memory"/>
+            <constructor-arg value="HeapMemoryUsage"/>
+            <constructor-arg value="init"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.heap.used"/>
+            <constructor-arg value="Actual amount of memory in use for the Java heap"/>
+            <constructor-arg value="java.lang:type=Memory"/>
+            <constructor-arg value="HeapMemoryUsage"/>
+            <constructor-arg value="used"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.heap.committed"/>
+            <constructor-arg value="Virtual memory size"/>
+            <constructor-arg value="java.lang:type=Memory"/>
+            <constructor-arg value="HeapMemoryUsage"/>
+            <constructor-arg value="committed"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.heap.max"/>
+            <constructor-arg value="Maximum Java heap memory size"/>
+            <constructor-arg value="java.lang:type=Memory"/>
+            <constructor-arg value="HeapMemoryUsage"/>
+            <constructor-arg value="max"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.nonheap.init"/>
+            <constructor-arg value="Initial Java heap memory configuration size"/>
+            <constructor-arg value="java.lang:type=Memory"/>
+            <constructor-arg value="NonHeapMemoryUsage"/>
+            <constructor-arg value="init"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.nonheap.used"/>
+            <constructor-arg value="Actual memory in use by Java excluding heap space"/>
+            <constructor-arg value="java.lang:type=Memory"/>
+            <constructor-arg value="NonHeapMemoryUsage"/>
+            <constructor-arg value="used"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.nonheap.committed"/>
+            <constructor-arg value="Virtual memory size"/>
+            <constructor-arg value="java.lang:type=Memory"/>
+            <constructor-arg value="NonHeapMemoryUsage"/>
+            <constructor-arg value="committed"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.nonheap.max"/>
+            <constructor-arg value="Maximum Java memory size excluding heap space"/>
+            <constructor-arg value="java.lang:type=Memory"/>
+            <constructor-arg value="NonHeapMemoryUsage"/>
+            <constructor-arg value="max"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.permgen.init"/>
+            <constructor-arg value="Initial permgen memory configuration size"/>
+            <constructor-arg value="java.lang:type=MemoryPool,name=PS Perm Gen|Perm Gen|CMS Perm Gen"/>
+            <constructor-arg value="Usage"/>
+            <constructor-arg value="init"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.permgen.used"/>
+            <constructor-arg value="Actual memory in use in permgen space"/>
+            <constructor-arg value="java.lang:type=MemoryPool,name=PS Perm Gen|Perm Gen|CMS Perm Gen"/>
+            <constructor-arg value="Usage"/>
+            <constructor-arg value="used"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.permgen.committed"/>
+            <constructor-arg value="Virtual memory size for permgen space"/>
+            <constructor-arg value="java.lang:type=MemoryPool,name=PS Perm Gen|Perm Gen|CMS Perm Gen"/>
+            <constructor-arg value="Usage"/>
+            <constructor-arg value="committed"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.permgen.max"/>
+            <constructor-arg value="Maximum permgen memory size"/>
+            <constructor-arg value="java.lang:type=MemoryPool,name=PS Perm Gen|Perm Gen|CMS Perm Gen"/>
+            <constructor-arg value="Usage"/>
+            <constructor-arg value="max"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.eden.init"/>
+            <constructor-arg value="Initial Eden memory configuration size"/>
+            <constructor-arg value="java.lang:type=MemoryPool,name=PS Eden Space|Eden Space|Par Eden Space"/>
+            <constructor-arg value="Usage"/>
+            <constructor-arg value="init"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.eden.used"/>
+            <constructor-arg value="Actual memory in use in Eden space"/>
+            <constructor-arg value="java.lang:type=MemoryPool,name=PS Eden Space|Eden Space|Par Eden Space"/>
+            <constructor-arg value="Usage"/>
+            <constructor-arg value="used"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.eden.committed"/>
+            <constructor-arg value="Virtual memory size for Eden space"/>
+            <constructor-arg value="java.lang:type=MemoryPool,name=PS Eden Space|Eden Space|Par Eden Space"/>
+            <constructor-arg value="Usage"/>
+            <constructor-arg value="committed"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.eden.max"/>
+            <constructor-arg value="Maximum Eden memory size"/>
+            <constructor-arg value="java.lang:type=MemoryPool,name=PS Eden Space|Eden Space|Par Eden Space"/>
+            <constructor-arg value="Usage"/>
+            <constructor-arg value="max"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.survivor.init"/>
+            <constructor-arg value="Initial survivor memory configuration size"/>
+            <constructor-arg value="java.lang:type=MemoryPool,name=PS Survivor Space|Survivor Space|Par Survivor Space"/>
+            <constructor-arg value="Usage"/>
+            <constructor-arg value="init"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.survivor.used"/>
+            <constructor-arg value="Actual memory in use in survivor space"/>
+            <constructor-arg value="java.lang:type=MemoryPool,name=PS Survivor Space|Survivor Space|Par Survivor Space"/>
+            <constructor-arg value="Usage"/>
+            <constructor-arg value="used"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.survivor.committed"/>
+            <constructor-arg value="Virtual memory size for survivor space"/>
+            <constructor-arg value="java.lang:type=MemoryPool,name=PS Survivor Space|Survivor Space|Par Survivor Space"/>
+            <constructor-arg value="Usage"/>
+            <constructor-arg value="committed"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.survivor.max"/>
+            <constructor-arg value="Maximum survivor memory size"/>
+            <constructor-arg value="java.lang:type=MemoryPool,name=PS Survivor Space|Survivor Space|Par Survivor Space"/>
+            <constructor-arg value="Usage"/>
+            <constructor-arg value="max"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.codecache.init"/>
+            <constructor-arg value="Initial codecache memory configuration size"/>
+            <constructor-arg value="java.lang:type=MemoryPool,name=Code Cache"/>
+            <constructor-arg value="Usage"/>
+            <constructor-arg value="init"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.codecache.used"/>
+            <constructor-arg value="Actual memory in use in codecache space"/>
+            <constructor-arg value="java.lang:type=MemoryPool,name=Code Cache"/>
+            <constructor-arg value="Usage"/>
+            <constructor-arg value="used"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.codecache.committed"/>
+            <constructor-arg value="Virtual memory size for codecache space"/>
+            <constructor-arg value="java.lang:type=MemoryPool,name=Code Cache"/>
+            <constructor-arg value="Usage"/>
+            <constructor-arg value="committed"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.codecache.max"/>
+            <constructor-arg value="Maximum codecache memory size"/>
+            <constructor-arg value="java.lang:type=MemoryPool,name=Code Cache"/>
+            <constructor-arg value="Usage"/>
+            <constructor-arg value="max"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.tenured.init"/>
+            <constructor-arg value="Initial tenured memory configuration size"/>
+            <constructor-arg value="java.lang:type=MemoryPool,name=PS Old Gen|Tenured Gen|CMS Old Gen"/>
+            <constructor-arg value="Usage"/>
+            <constructor-arg value="init"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.tenured.used"/>
+            <constructor-arg value="Actual memory in use in tenured space"/>
+            <constructor-arg value="java.lang:type=MemoryPool,name=PS Old Gen|Tenured Gen|CMS Old Gen"/>
+            <constructor-arg value="Usage"/>
+            <constructor-arg value="used"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.tenured.committed"/>
+            <constructor-arg value="Virtual memory size for tenured space"/>
+            <constructor-arg value="java.lang:type=MemoryPool,name=PS Old Gen|Tenured Gen|CMS Old Gen"/>
+            <constructor-arg value="Usage"/>
+            <constructor-arg value="committed"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.tenured.max"/>
+            <constructor-arg value="Maximum tenured memory size"/>
+            <constructor-arg value="java.lang:type=MemoryPool,name=PS Old Gen|Tenured Gen|CMS Old Gen"/>
+            <constructor-arg value="Usage"/>
+            <constructor-arg value="max"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.gc.full.count"/>
+            <constructor-arg value="Count of JVM full garbage collections"/>
+            <constructor-arg value="java.lang:type=GarbageCollector,name=MarkSweepCompact|PS MarkSweep|ConcurrentMarkSweep"/>
+            <constructor-arg value="CollectionCount"/>
+            <property name="valueSemantics" value="MONOTONICALLY_INCREASING"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.gc.full.time"/>
+            <constructor-arg value="Time spent performing full garbage collections"/>
+            <constructor-arg value="java.lang:type=GarbageCollector,name=MarkSweepCompact|PS MarkSweep|ConcurrentMarkSweep"/>
+            <constructor-arg value="CollectionTime"/>
+            <property name="unit" ref="millisecondUnit"/>
+            <property name="valueSemantics" value="MONOTONICALLY_INCREASING"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.gc.minor.count"/>
+            <constructor-arg value="Count of JVM minor garbage collections"/>
+            <constructor-arg value="java.lang:type=GarbageCollector,name=Copy|PS Scavenge|ParNew"/>
+            <constructor-arg value="CollectionCount"/>
+            <property name="valueSemantics" value="MONOTONICALLY_INCREASING"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.memory.gc.minor.time"/>
+            <constructor-arg value="Time spent performing minor garbage collections"/>
+            <constructor-arg value="java.lang:type=GarbageCollector,name=Copy|PS Scavenge|ParNew"/>
+            <constructor-arg value="CollectionTime"/>
+            <property name="unit" ref="millisecondUnit"/>
+            <property name="valueSemantics" value="MONOTONICALLY_INCREASING"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.jvm.compilation"/>
+            <constructor-arg value="Time spent in the JVM doing Java bytecode compilation"/>
+            <constructor-arg value="java.lang:type=Compilation"/>
+            <constructor-arg value="TotalCompilationTime"/>
+            <property name="unit" ref="millisecondUnit"/>
+            <property name="valueSemantics" value="MONOTONICALLY_INCREASING"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.jvm.classloader.loaded.current"/>
+            <constructor-arg value="Number of classes currently loaded in memory by the classloader"/>
+            <constructor-arg value="java.lang:type=ClassLoading"/>
+            <constructor-arg value="LoadedClassCount"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.jvm.classloader.unloaded.total"/>
+            <constructor-arg value="Number of classes unloaded from memory by the classloader"/>
+            <constructor-arg value="java.lang:type=ClassLoading"/>
+            <constructor-arg value="UnloadedClassCount"/>
+            <property name="valueSemantics" value="MONOTONICALLY_INCREASING"/>
+        </bean>
+
+        <bean parent="monitoredMBean">
+            <constructor-arg value="java.jvm.classloader.loaded.total"/>
+            <constructor-arg value="Total number of classes loaded by the classloader"/>
+            <constructor-arg value="java.lang:type=ClassLoading"/>
+            <constructor-arg value="TotalLoadedClassCount"/>
+            <property name="valueSemantics" value="MONOTONICALLY_INCREASING"/>
+        </bean>
+
+    </util:list>
+
+    <bean id="systemTimeMonitor" class="com.custardsource.parfait.PollingMonitoredValue">
+        <constructor-arg value="java.timestamp"/>
+        <constructor-arg value="Current time on server where the application is running"/>
+        <constructor-arg ref="monitorableRegistry"/>
+        <constructor-arg type="int" value="15000"/>
+        <constructor-arg>
+            <bean id="systemTimePoller" class="com.custardsource.parfait.SystemTimePoller"/>
+        </constructor-arg>
+        <constructor-arg type="com.custardsource.parfait.ValueSemantics" value="FREE_RUNNING"/>
+        <constructor-arg type="javax.measure.unit.Unit" ref="millisecondUnit"/>
+    </bean>
+
+    <bean id="log4jSink" class="com.custardsource.parfait.timing.LoggerSink"/>
+
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetObject" ref="log4jSink"/>
+        <property name="targetMethod" value="normalizeUnits"/>
+        <property name="arguments">
+            <list>
+                <ref local="nanosecondUnit"/>
+                <ref local="millisecondUnit"/>
+            </list>
+        </property>
+
+    </bean>
+
+    <bean id="eventTimer" class="com.custardsource.parfait.timing.EventTimer">
+        <constructor-arg value="tomcat.controllers"/>
+        <constructor-arg ref="monitorableRegistry"/>
+        <constructor-arg>
+            <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+                <property name="targetObject" ref="tomcatMetrics"/>
+                <property name="targetMethod" value="getControllerMetrics"/>
+            </bean>
+        </constructor-arg>
+        <constructor-arg type="boolean" value="true"/>
+        <constructor-arg type="boolean" value="true"/>
+        <constructor-arg>
+            <list>
+                <ref local="log4jSink"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="jmxInProgressMonitor" class="com.custardsource.parfait.jmx.JmxInProgressMonitor">
+        <constructor-arg>
+            <bean class="com.custardsource.parfait.timing.InProgressExporter">
+                <constructor-arg ref="eventTimer"/>
+                <constructor-arg ref="threadContext"/>
+            </bean>
+        </constructor-arg>
+        <meta key="jmxObjectName" value="Aconex:type=Monitoring,name=InProgressRequests"/>
+    </bean>
+
+    <bean id="jmxServiceInProgressMonitor" class="com.custardsource.parfait.jmx.JmxInProgressMonitor">
+        <constructor-arg>
+            <bean class="com.custardsource.parfait.timing.InProgressExporter">
+                <constructor-arg ref="serviceEventTimer"/>
+                <constructor-arg ref="threadContext"/>
+            </bean>
+        </constructor-arg>
+        <meta key="jmxObjectName" value="Aconex:type=Monitoring,name=InProgressServiceRequests"/>
+    </bean>
+
+    <bean id="dbReceivedBytesCallback" class="net.sourceforge.jtds.jdbc.ParfaitByteCallback">
+        <constructor-arg ref="monitorableRegistry"/>
+        <constructor-arg value="in"/>
+    </bean>
+
+    <bean id="dbSentBytesCallback" class="net.sourceforge.jtds.jdbc.ParfaitByteCallback">
+        <constructor-arg ref="monitorableRegistry"/>
+        <constructor-arg value="out"/>
+    </bean>
+
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="net.sourceforge.jtds.jdbc.ResponseStream.setByteCallback"/>
+        <property name="arguments" ref="dbReceivedBytesCallback"/>
+    </bean>
+
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="net.sourceforge.jtds.jdbc.RequestStream.setByteCallback"/>
+        <property name="arguments" ref="dbSentBytesCallback"/>
+    </bean>
+
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="com.aconex.utilities.db.LoggingDriver.setBytesInCallback"/>
+        <property name="arguments" ref="dbReceivedBytesCallback"/>
+    </bean>
+
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="com.aconex.utilities.db.LoggingDriver.setBytesOutCallback"/>
+        <property name="arguments" ref="dbSentBytesCallback"/>
+    </bean>
+
+    <bean id="healthCheckRegistry" class="com.codahale.metrics.health.HealthCheckRegistry"/>
+
+    <bean id="healthCheckBeanPostProcessor" class="com.ryantenney.metrics.spring.HealthCheckBeanPostProcessor">
+        <constructor-arg ref="healthCheckRegistry"/>
+    </bean>
+
+    <bean id="threadDeadlockHealthCheck" class="com.codahale.metrics.health.jvm.ThreadDeadlockHealthCheck"/>
+
+    <bean id="monitoredCounterRegistry" class="com.aconex.monitoring.MonitoredCounterRegistry">
+        <constructor-arg ref="monitorableRegistry"/>
+    </bean>
+
+    <bean class="com.aconex.monitoring.spring.PcpMonitoringAspect">
+        <constructor-arg ref="monitoredCounterRegistry"/>
+        <constructor-arg ref="eventCounterRegistry"/>
+    </bean>
+
+</beans>

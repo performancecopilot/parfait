@@ -11,7 +11,7 @@
   <packaging>pom</packaging>
   <version>0.3.8-SNAPSHOT</version>
   <name>parfait</name>
-  <description>Java performance monitoring framework, including PCP bridge</description>
+  <description>Java performance monitoring framework, including PCP bridge and agent</description>
   <modules>
     <module>parfait-core</module>
     <module>dxm</module>
@@ -23,6 +23,7 @@
     <module>parfait-spring</module>
     <module>parfait-benchmark</module>
     <module>parfait-dropwizard</module>
+    <module>parfait-agent</module>
   </modules>
   <url>https://github.com/performancecopilot/parfait</url>
   <inceptionYear>2009</inceptionYear>
