@@ -22,6 +22,9 @@ import com.custardsource.parfait.dxm.PcpMmvWriter.MmvFlag;
 import com.custardsource.parfait.dxm.MetricName;
 import com.custardsource.parfait.dxm.semantics.Semantics;
 
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,12 +75,26 @@ public class ParfaitAgent {
 
         logger.info("Starting Parfait agent {} with arguments {}", name, args);
 
+         
+//      // Inject all metrics via parfait-spring and parfait-jmx
+//      ApplicationContext context = new ClassPathXmlApplicationContext("monitoring.xml");
+//      PcpMonitorBridge monitor = (PcpMonitorBridge) context.getBean("pcpMonitorBridge");
+//      if (monitor == null) {
+//          logger.info("Parfait agent has no spring bean goodness");
+//      } else {
+//          logger.info("Parfait agent got some magic beans!!!");
+//      }
+
+
+        //
+        // Add sample metrics (for prototyping, just do this "by hand" for now)
+        //
+
         PcpMmvWriter bridge = new PcpMmvWriter(name, IdentifierSourceSet.DEFAULT_SET);
 
         // we'll keep the prefix (remove noprefix flag) and monitor the PID
         bridge.setFlags(EnumSet.of(MmvFlag.MMV_FLAG_PROCESS));
 
-        // Add sample metrics (TODO: inject via parfait-spring and parfait-jmx)
 
         // Automatically uses default int handler
         bridge.addMetric(MetricName.parse("sheep[baabaablack].bagsfull.count"), Semantics.COUNTER, Unit.ONE.times(1000), 3);
