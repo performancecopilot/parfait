@@ -6,3 +6,4 @@ target
 .classpath
 *.class
 *.iml
+*.swp
