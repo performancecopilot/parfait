@@ -1,90 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:util="http://www.springframework.org/schema/util"
        xmlns:aop="http://www.springframework.org/schema/aop"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
-	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
 
     <bean id="monitorableRegistry" class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
         <property name="staticField" value="com.custardsource.parfait.MonitorableRegistry.DEFAULT_REGISTRY"/>
     </bean>
 
-    <bean id="metricShortTextSource" class="com.custardsource.parfait.pcp.FileParsingTextSource">
-        <constructor-arg>
-            <bean class="com.aconex.spring.SupplierResourceAdapter">
-                <constructor-arg>
-                    <bean class="org.springframework.core.io.ClassPathResource">
-                        <constructor-arg value="com/aconex/monitoring/pcp-shorttext-overrides.txt"/>
-                    </bean>
-                </constructor-arg>
-            </bean>
-        </constructor-arg>
-        <constructor-arg>
-            <bean class="com.custardsource.parfait.pcp.MetricDescriptionTextSource"/>
-        </constructor-arg>
-    </bean>
-
-    <bean id="metricLongTextSource" class="com.custardsource.parfait.pcp.FileParsingTextSource">
-        <constructor-arg>
-            <bean class="com.aconex.spring.SupplierResourceAdapter">
-                <constructor-arg>
-                    <bean class="org.springframework.core.io.ClassPathResource">
-                        <constructor-arg value="com/aconex/monitoring/pcp-longtexts.txt"/>
-                    </bean>
-                </constructor-arg>
-            </bean>
-        </constructor-arg>
-        <constructor-arg>
-            <bean class="com.custardsource.parfait.pcp.MetricDescriptionTextSource"/>
-        </constructor-arg>
-    </bean>
-
     <bean name="pcpMonitorBridge" class="com.custardsource.parfait.pcp.PcpMonitorBridge">
         <constructor-arg>
             <bean id="mmvPcpWriter" class="com.custardsource.parfait.dxm.PcpMmvWriter">
-                <constructor-arg value="${application.target}"/>
+                <constructor-arg value="${agent.name}"/>
                 <constructor-arg>
-                    <bean class="com.custardsource.parfait.dxm.FileParsingIdentifierSourceSet">
-                        <constructor-arg>
-                            <bean class="com.aconex.spring.SupplierResourceAdapter">
-                                <constructor-arg>
-                                    <bean class="org.springframework.core.io.ClassPathResource">
-                                        <constructor-arg value="com/aconex/monitoring/pcp-instanceids-historical.txt"/>
-                                    </bean>
-                                </constructor-arg>
-                            </bean>
-                        </constructor-arg>
-                        <constructor-arg>
-                            <bean class="com.aconex.spring.SupplierResourceAdapter">
-                                <constructor-arg>
-                                    <bean class="org.springframework.core.io.ClassPathResource">
-                                        <constructor-arg value="com/aconex/monitoring/pcp-metric-ids-historical.txt"/>
-                                    </bean>
-                                </constructor-arg>
-                            </bean>
-                        </constructor-arg>
-                        <constructor-arg>
-                            <bean class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
-                                <property name="staticField" value="com.custardsource.parfait.dxm.IdentifierSourceSet.EXPLICIT_SET"/>
-                            </bean>
-                        </constructor-arg>
+                    <bean class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
+                        <property name="staticField" value="com.custardsource.parfait.dxm.IdentifierSourceSet.DEFAULT_SET"/>
                     </bean>
                 </constructor-arg>
                 <property name="clusterIdentifier" value="42"/>
             </bean>
         </constructor-arg>
-        <constructor-arg>
-            <bean class="com.aconex.monitoring.AconexNameMapper">
-                <constructor-arg value="${application.target}"/>
-            </bean>
-        </constructor-arg>
-        <constructor-arg ref="metricShortTextSource"/>
-        <constructor-arg ref="metricLongTextSource"/>
     </bean>
 
-    <bean name="mmvPcpBridge" class="com.custardsource.parfait.spring.SelfStartingMonitoringView" depends-on="sessionWatcher">
+    <bean name="mmvPcpBridge" class="com.custardsource.parfait.spring.SelfStartingMonitoringView">
         <constructor-arg ref="pcpMonitorBridge"/>
     </bean>
 
@@ -95,12 +34,6 @@
     </bean>
 
     <bean name="monitoredMBean" class="com.custardsource.parfait.jmx.MonitoredMBeanAttributeFactory"
-          abstract="true">
-        <property name="monitorableRegistry" ref="monitorableRegistry"/>
-        <property name="updateInterval" value="1000"/>
-    </bean>
-
-    <bean name="optionalMBeanRegistrar" class="com.aconex.monitoring.OptionalMonitorableMBeanRegistrar"
           abstract="true">
         <property name="monitorableRegistry" ref="monitorableRegistry"/>
         <property name="updateInterval" value="1000"/>
@@ -147,13 +80,8 @@
         <property name="staticMethod" value="org.springframework.jmx.support.JmxUtils.locateMBeanServer" />
     </bean>
 
-    <bean id="pollingMonitoredValueFactory" class="com.aconex.monitoring.PollingMonitoredValueFactory">
-        <constructor-arg ref="jmxServer"/>
-        <constructor-arg ref="monitorableRegistry"/>
-    </bean>
-
     <!-- this list is to force Spring to access the actual beans from the following factories -->
-    <util:list id="monitoredMBeans">
+    <!-- util:list id="monitoredMBeans" -->
         <!-- java.lang:type=Runtime monitors -->
 
         <bean parent="monitoredMBean">
@@ -494,7 +422,7 @@
             <property name="valueSemantics" value="MONOTONICALLY_INCREASING"/>
         </bean>
 
-    </util:list>
+    <!-- /util:list -->
 
     <bean id="systemTimeMonitor" class="com.custardsource.parfait.PollingMonitoredValue">
         <constructor-arg value="java.timestamp"/>
@@ -508,58 +436,7 @@
         <constructor-arg type="javax.measure.unit.Unit" ref="millisecondUnit"/>
     </bean>
 
-    <bean id="log4jSink" class="com.custardsource.parfait.timing.LoggerSink"/>
-
-    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-        <property name="targetObject" ref="log4jSink"/>
-        <property name="targetMethod" value="normalizeUnits"/>
-        <property name="arguments">
-            <list>
-                <ref local="nanosecondUnit"/>
-                <ref local="millisecondUnit"/>
-            </list>
-        </property>
-
-    </bean>
-
-    <bean id="eventTimer" class="com.custardsource.parfait.timing.EventTimer">
-        <constructor-arg value="tomcat.controllers"/>
-        <constructor-arg ref="monitorableRegistry"/>
-        <constructor-arg>
-            <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-                <property name="targetObject" ref="tomcatMetrics"/>
-                <property name="targetMethod" value="getControllerMetrics"/>
-            </bean>
-        </constructor-arg>
-        <constructor-arg type="boolean" value="true"/>
-        <constructor-arg type="boolean" value="true"/>
-        <constructor-arg>
-            <list>
-                <ref local="log4jSink"/>
-            </list>
-        </constructor-arg>
-    </bean>
-
-    <bean id="jmxInProgressMonitor" class="com.custardsource.parfait.jmx.JmxInProgressMonitor">
-        <constructor-arg>
-            <bean class="com.custardsource.parfait.timing.InProgressExporter">
-                <constructor-arg ref="eventTimer"/>
-                <constructor-arg ref="threadContext"/>
-            </bean>
-        </constructor-arg>
-        <meta key="jmxObjectName" value="Aconex:type=Monitoring,name=InProgressRequests"/>
-    </bean>
-
-    <bean id="jmxServiceInProgressMonitor" class="com.custardsource.parfait.jmx.JmxInProgressMonitor">
-        <constructor-arg>
-            <bean class="com.custardsource.parfait.timing.InProgressExporter">
-                <constructor-arg ref="serviceEventTimer"/>
-                <constructor-arg ref="threadContext"/>
-            </bean>
-        </constructor-arg>
-        <meta key="jmxObjectName" value="Aconex:type=Monitoring,name=InProgressServiceRequests"/>
-    </bean>
-
+    <!-- TODO: JDBC metrics
     <bean id="dbReceivedBytesCallback" class="net.sourceforge.jtds.jdbc.ParfaitByteCallback">
         <constructor-arg ref="monitorableRegistry"/>
         <constructor-arg value="in"/>
@@ -589,7 +466,9 @@
         <property name="staticMethod" value="com.aconex.utilities.db.LoggingDriver.setBytesOutCallback"/>
         <property name="arguments" ref="dbSentBytesCallback"/>
     </bean>
+    -->
 
+    <!-- TODO: CodaHale metrics
     <bean id="healthCheckRegistry" class="com.codahale.metrics.health.HealthCheckRegistry"/>
 
     <bean id="healthCheckBeanPostProcessor" class="com.ryantenney.metrics.spring.HealthCheckBeanPostProcessor">
@@ -597,14 +476,6 @@
     </bean>
 
     <bean id="threadDeadlockHealthCheck" class="com.codahale.metrics.health.jvm.ThreadDeadlockHealthCheck"/>
-
-    <bean id="monitoredCounterRegistry" class="com.aconex.monitoring.MonitoredCounterRegistry">
-        <constructor-arg ref="monitorableRegistry"/>
-    </bean>
-
-    <bean class="com.aconex.monitoring.spring.PcpMonitoringAspect">
-        <constructor-arg ref="monitoredCounterRegistry"/>
-        <constructor-arg ref="eventCounterRegistry"/>
-    </bean>
+    -->
 
 </beans>
