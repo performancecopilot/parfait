@@ -12,7 +12,7 @@
     <bean name="pcpMonitorBridge" class="com.custardsource.parfait.pcp.PcpMonitorBridge">
         <constructor-arg>
             <bean id="mmvPcpWriter" class="com.custardsource.parfait.dxm.PcpMmvWriter">
-                <constructor-arg value="${agent.name}"/>
+                <constructor-arg value="parfaitagent"/>
                 <constructor-arg>
                     <bean class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
                         <property name="staticField" value="com.custardsource.parfait.dxm.IdentifierSourceSet.DEFAULT_SET"/>
@@ -56,15 +56,6 @@
 
     <bean id="millisecondUnit" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="staticMethod" value="javax.measure.unit.SI.MILLI"/>
-        <property name="arguments">
-            <bean class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
-                <property name="staticField" value="javax.measure.unit.SI.SECOND"/>
-            </bean>
-        </property>
-    </bean>
-
-    <bean id="nanosecondUnit" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-        <property name="staticMethod" value="javax.measure.unit.SI.NANO"/>
         <property name="arguments">
             <bean class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
                 <property name="staticField" value="javax.measure.unit.SI.SECOND"/>

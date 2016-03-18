@@ -22,6 +22,7 @@ import com.custardsource.parfait.dxm.PcpMmvWriter.MmvFlag;
 import com.custardsource.parfait.dxm.MetricName;
 import com.custardsource.parfait.dxm.semantics.Semantics;
 
+import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -48,7 +49,7 @@ public class ParfaitAgent {
 
     public static String defaultName(String runtime) {
         String name = "parfait"; // append PID, inferred from runtime
-	String[] pidAndHost = runtime.split("@", 2);
+        String[] pidAndHost = runtime.split("@", 2);
 
         if (pidAndHost.length == 2) {
             name += pidAndHost[0];
@@ -75,57 +76,24 @@ public class ParfaitAgent {
 
         logger.info("Starting Parfait agent {} with arguments {}", name, args);
 
-         
         // Inject all metrics via parfait-spring and parfait-jmx
-        ApplicationContext context = new ClassPathXmlApplicationContext("monitoring.xml");
-        PcpMonitorBridge monitor = (PcpMonitorBridge) context.getBean("pcpMonitorBridge");
-        if (monitor == null) {
-            logger.info("Parfait agent has no spring bean goodness");
-        } else {
-            logger.info("Parfait agent got some magic beans!!!");
-        }
-
-
-        //
-        // Add sample metrics (for prototyping, just do this "by hand" for now)
-        //
-
-        PcpMmvWriter bridge = new PcpMmvWriter(name, IdentifierSourceSet.DEFAULT_SET);
-
-        // we'll keep the prefix (remove noprefix flag) and monitor the PID
-        bridge.setFlags(EnumSet.of(MmvFlag.MMV_FLAG_PROCESS));
-
-
-        // Automatically uses default int handler
-        bridge.addMetric(MetricName.parse("sheep[baabaablack].bagsfull.count"), Semantics.COUNTER, Unit.ONE.times(1000), 3);
-
-        // Automatically uses default boolean-to-int handler
-        bridge.addMetric(MetricName.parse("sheep[baabaablack].bagsfull.haveany"), Semantics.INSTANT, null, new AtomicBoolean(true));
-
-        bridge.addMetric(MetricName.parse("sheep[limpy].bagsfull.haveany"), Semantics.INSTANT, null, new AtomicBoolean(false));
-
-        // Automatically uses default long handler
-        bridge.addMetric(MetricName.parse("sheep[insomniac].jumps"), Semantics.COUNTER, Unit.ONE, 12345678901234L);
-
-        // Set up some help text
-        bridge.setInstanceDomainHelpText("sheep", "sheep in the paddock",
-                "List of all the sheep in the paddock. Includes 'baabaablack', 'insomniac' (who likes to jump fences), and 'limpy' the three-legged wonder sheep.");
-        bridge.setMetricHelpText("sheep.jumps", "# of jumps done",
-                "Number of times the sheep has jumped over its jumpitem");
-
-        // TODO: addShutdownHook - cleanup mmapped file on orderly shutdown
-        // (extend PcpMmvWriter? - it has the path to unlink)
-
-        // All the metrics are added; write the file
         try {
-            bridge.start();
-            // Metrics are visible to the agent from this point on
+            ApplicationContext context = new ClassPathXmlApplicationContext("monitoring.xml");
+            MonitorableRegistry metrics = (MonitorableRegistry)context.getBean("monitorableRegistry");
+            PcpMonitorBridge bridge = (PcpMonitorBridge)context.getBean("pcpMonitorBridge");
+/
+//          PcpMmvWriter writer = (PcpMmvWriter)context.getBean("mmvPcpWriter");
+//          // keep the prefix (remove noprefix flag) and monitor the PID
+//          writer.setFlags(EnumSet.of(MmvFlag.MMV_FLAG_PROCESS));
+//          // TODO: addShutdownHook - cleanup mmapped file on orderly shutdown
+//          // (extend PcpMmvWriter? - it has the path to unlink)
 
-            // Sold a bag! Better update the count
-            bridge.updateMetric(MetricName.parse("sheep[baabaablack].bagsfull.count"), 2);
-            // Values will be reflected in the agent immediately
-        } catch (IOException ioError) {
-           logger.info("Stopping Parfait agent, error observed\n" + ioError);
+            DynamicMonitoringView view = new DynamicMonitoringView(metrics, bridge);
+            view.start();
+
+        } catch (BeansException beansError) {
+            logger.error("Stopping Parfait agent, cannot setup beans");
+            logger.debug(beansError.getMessage());
         }
     }
 }
