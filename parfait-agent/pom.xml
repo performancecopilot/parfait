@@ -17,7 +17,6 @@
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <configuration>
-            <inherited>false</inherited>
           <archive>
             <manifestFile>src/main/resources/MANIFEST.MF</manifestFile>
           </archive>
@@ -33,16 +32,16 @@
           <descriptorRefs>
             <descriptorRef>jar-with-dependencies</descriptorRef>
           </descriptorRefs>
-          <executions>
-            <execution>
-              <id>make-assembly</id>
-              <phase>package</phase>
-              <goals>
-                <goal>single</goal>
-              </goals>
-            </execution>
-          </executions>
         </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
