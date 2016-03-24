@@ -75,11 +75,6 @@ public class ParfaitAgent {
             MonitorableRegistry metrics = (MonitorableRegistry)context.getBean("monitorableRegistry");
             PcpMonitorBridge bridge = (PcpMonitorBridge)context.getBean("pcpMonitorBridge");
 
-//          TODO: TallPaul has the Spring magic to do this correctly:
-//          PcpMmvWriter writer = (PcpMmvWriter)context.getBean("mmvPcpWriter");
-//          // keep the prefix (remove noprefix flag) and monitor the PID
-//          writer.setFlags(EnumSet.of(MmvFlag.MMV_FLAG_PROCESS));
-
 //          // TODO: addShutdownHook - cleanup mmapped file on orderly shutdown
 //          // (extend PcpMmvWriter?  it keeps the path we wish to unlink here)
 

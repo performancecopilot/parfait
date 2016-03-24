@@ -18,6 +18,11 @@
                         <property name="staticField" value="com.custardsource.parfait.dxm.IdentifierSourceSet.DEFAULT_SET"/>
                     </bean>
                 </constructor-arg>
+                <property name="flags">
+                    <set value-type="com.custardsource.parfait.dxm.PcpMmvWriter.MmvFlag">
+                        <value>MMV_FLAG_PROCESS</value>
+                    </set>
+                </property>
                 <property name="clusterIdentifier" value="${parfait.cluster}"/>
             </bean>
         </constructor-arg>
