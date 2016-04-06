@@ -44,6 +44,12 @@
         <property name="updateInterval" value="${parfait.interval}"/>
     </bean>
 
+    <bean name="optionalMBean" class="com.custardsource.parfait.OptionalMonitoredMBeanRegistrar"
+          abstract="true">
+        <property name="monitorableRegistry" ref="monitorableRegistry"/>
+        <property name="updateInterval" value="${parfait.interval}"/>
+    </bean>
+
     <bean name="monitoredConstantMBean" class="com.custardsource.parfait.jmx.MonitoredMBeanAttributeFactory"
           abstract="true">
         <property name="monitorableRegistry" ref="monitorableRegistry"/>
@@ -101,7 +107,7 @@
         <!-- java.lang:type=Memory monitors -->
 
         <bean id="jvmHeapInit" parent="monitoredMBean">
-            <constructor-arg value="java.memory.heap.init"/>
+            <constructor-arg value="java.memory.heap[init]"/>
             <constructor-arg value="Initial Java heap memory configuration size"/>
             <constructor-arg value="java.lang:type=Memory"/>
             <constructor-arg value="HeapMemoryUsage"/>
@@ -110,7 +116,7 @@
         </bean>
 
         <bean id="jvmHeapUsed" parent="monitoredMBean">
-            <constructor-arg value="java.memory.heap.used"/>
+            <constructor-arg value="java.memory.heap[used]"/>
             <constructor-arg value="Actual amount of memory in use for the Java heap"/>
             <constructor-arg value="java.lang:type=Memory"/>
             <constructor-arg value="HeapMemoryUsage"/>
@@ -119,7 +125,7 @@
         </bean>
 
         <bean id="jvmHeapCommitted" parent="monitoredMBean">
-            <constructor-arg value="java.memory.heap.committed"/>
+            <constructor-arg value="java.memory.heap[committed]"/>
             <constructor-arg value="Virtual memory size"/>
             <constructor-arg value="java.lang:type=Memory"/>
             <constructor-arg value="HeapMemoryUsage"/>
@@ -128,7 +134,7 @@
         </bean>
 
         <bean id="jvmHeapMax" parent="monitoredMBean">
-            <constructor-arg value="java.memory.heap.max"/>
+            <constructor-arg value="java.memory.heap[max]"/>
             <constructor-arg value="Maximum Java heap memory size"/>
             <constructor-arg value="java.lang:type=Memory"/>
             <constructor-arg value="HeapMemoryUsage"/>
@@ -137,7 +143,7 @@
         </bean>
 
         <bean id="jvmNonHeapInit" parent="monitoredMBean">
-            <constructor-arg value="java.memory.nonheap.init"/>
+            <constructor-arg value="java.memory.nonheap[init]"/>
             <constructor-arg value="Initial Java memory configuration size excluding heap space"/>
             <constructor-arg value="java.lang:type=Memory"/>
             <constructor-arg value="NonHeapMemoryUsage"/>
@@ -146,7 +152,7 @@
         </bean>
 
         <bean id="jvmNonHeapUsed" parent="monitoredMBean">
-            <constructor-arg value="java.memory.nonheap.used"/>
+            <constructor-arg value="java.memory.nonheap[used]"/>
             <constructor-arg value="Actual memory in use by Java excluding heap space"/>
             <constructor-arg value="java.lang:type=Memory"/>
             <constructor-arg value="NonHeapMemoryUsage"/>
@@ -155,7 +161,7 @@
         </bean>
 
         <bean id="jvmNonHeapCommitted" parent="monitoredMBean">
-            <constructor-arg value="java.memory.nonheap.committed"/>
+            <constructor-arg value="java.memory.nonheap[committed]"/>
             <constructor-arg value="Virtual memory size"/>
             <constructor-arg value="java.lang:type=Memory"/>
             <constructor-arg value="NonHeapMemoryUsage"/>
@@ -164,7 +170,7 @@
         </bean>
 
         <bean id="jvmNonHeapMax" parent="monitoredMBean">
-            <constructor-arg value="java.memory.nonheap.max"/>
+            <constructor-arg value="java.memory.nonheap[max]"/>
             <constructor-arg value="Maximum Java memory size excluding heap space"/>
             <constructor-arg value="java.lang:type=Memory"/>
             <constructor-arg value="NonHeapMemoryUsage"/>
@@ -172,47 +178,116 @@
             <property name="unit" ref="byteUnit"/>
         </bean>
 
-        <!-- TODO: these need to be made conditional, and we need new metrics -->
-        <!--       for G1 garbage collection (no permgen space now in Java 8) -->
-
-        <!-- bean id="jvmPermGenInit" parent="monitoredMBean">
-            <constructor-arg value="java.memory.permgen.init"/>
-            <constructor-arg value="Initial permgen memory configuration size"/>
-            <constructor-arg value="java.lang:type=MemoryPool,name=PS Perm Gen|Perm Gen|CMS Perm Gen|Metaspace Size"/>
+        <bean id="jvmMetaspaceInit" parent="optionalMBean">
+            <constructor-arg value="java.memorypool.metaspace[init]"/>
+            <constructor-arg value="Initial metaspace memory configuration size"/>
+            <constructor-arg value="java.lang:type=MemoryPool,name=Metaspace"/>
             <constructor-arg value="Usage"/>
             <constructor-arg value="init"/>
             <property name="unit" ref="byteUnit"/>
-        </bean -->
+        </bean>
 
-        <!-- bean id="jvmPermGenUsed" parent="monitoredMBean">
-            <constructor-arg value="java.memory.permgen.used"/>
+        <bean id="jvmMetaspaceUsed" parent="optionalMBean">
+            <constructor-arg value="java.memorypool.metaspace[used]"/>
+            <constructor-arg value="Actual memory in use in metaspace"/>
+            <constructor-arg value="java.lang:type=MemoryPool,name=Metaspace"/>
+            <constructor-arg value="Usage"/>
+            <constructor-arg value="used"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean id="jvmMetaspaceCommitted" parent="optionalMBean">
+            <constructor-arg value="java.memorypool.metaspace[committed]"/>
+            <constructor-arg value="Virtual memory size for metaspace pool"/>
+            <constructor-arg value="java.lang:type=MemoryPool,name=Metaspace"/>
+            <constructor-arg value="Usage"/>
+            <constructor-arg value="committed"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean id="jvmMetaspaceMax" parent="optionalMBean">
+            <constructor-arg value="java.memorypool.metaspace[max]"/>
+            <constructor-arg value="Maximum metaspace pool memory size"/>
+            <constructor-arg value="java.lang:type=MemoryPool,name=Metaspace"/>
+            <constructor-arg value="Usage"/>
+            <constructor-arg value="max"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean id="jvmPeakMetaspaceInit" parent="optionalMBean">
+            <constructor-arg value="java.memorypool.peak.metaspace[init]"/>
+            <constructor-arg value="Initial metaspace memory configuration size"/>
+            <constructor-arg value="java.lang:type=MemoryPool,name=Metaspace"/>
+            <constructor-arg value="PeakUsage"/>
+            <constructor-arg value="init"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean id="jvmPeakMetaspaceUsed" parent="optionalMBean">
+            <constructor-arg value="java.memorypool.peak.metaspace[used]"/>
+            <constructor-arg value="Actual memory in use in metaspace"/>
+            <constructor-arg value="java.lang:type=MemoryPool,name=Metaspace"/>
+            <constructor-arg value="PeakUsage"/>
+            <constructor-arg value="used"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean id="jvmPeakMetaspaceCommitted" parent="optionalMBean">
+            <constructor-arg value="java.memorypool.peak.metaspace[committed]"/>
+            <constructor-arg value="Virtual memory size for metaspace pool"/>
+            <constructor-arg value="java.lang:type=MemoryPool,name=Metaspace"/>
+            <constructor-arg value="PeakUsage"/>
+            <constructor-arg value="committed"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean id="jvmPeakMetaspaceMax" parent="optionalMBean">
+            <constructor-arg value="java.memorypool.peak.metaspace[max]"/>
+            <constructor-arg value="Maximum metaspace pool memory size"/>
+            <constructor-arg value="java.lang:type=MemoryPool,name=Metaspace"/>
+            <constructor-arg value="PeakUsage"/>
+            <constructor-arg value="max"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean id="jvmPermGenInit" parent="optionalMBean">
+            <constructor-arg value="java.memorypool.permgen[init]"/>
+            <constructor-arg value="Initial permgen memory configuration size"/>
+            <constructor-arg value="java.lang:type=MemoryPool,name=PS Perm Gen|Perm Gen|CMS Perm Gen"/>
+            <constructor-arg value="Usage"/>
+            <constructor-arg value="init"/>
+            <property name="unit" ref="byteUnit"/>
+        </bean>
+
+        <bean id="jvmPermGenUsed" parent="optionalMBean">
+            <constructor-arg value="java.memorypool.permgen[used]"/>
             <constructor-arg value="Actual memory in use in permgen space"/>
             <constructor-arg value="java.lang:type=MemoryPool,name=PS Perm Gen|Perm Gen|CMS Perm Gen"/>
             <constructor-arg value="Usage"/>
             <constructor-arg value="used"/>
             <property name="unit" ref="byteUnit"/>
-        </bean -->
+        </bean>
 
-        <!-- bean id="jvmPermGenCommitted" parent="monitoredMBean">
-            <constructor-arg value="java.memory.permgen.committed"/>
+        <bean id="jvmPermGenCommitted" parent="optionalMBean">
+            <constructor-arg value="java.memorypool.permgen[committed]"/>
             <constructor-arg value="Virtual memory size for permgen space"/>
             <constructor-arg value="java.lang:type=MemoryPool,name=PS Perm Gen|Perm Gen|CMS Perm Gen"/>
             <constructor-arg value="Usage"/>
             <constructor-arg value="committed"/>
             <property name="unit" ref="byteUnit"/>
-        </bean -->
+        </bean>
 
-        <!-- bean id="jvmPermGenMax" parent="monitoredMBean">
-            <constructor-arg value="java.memory.permgen.max"/>
+        <bean id="jvmPermGenMax" parent="optionalMBean">
+            <constructor-arg value="java.memorypool.permgen[max]"/>
             <constructor-arg value="Maximum permgen memory size"/>
             <constructor-arg value="java.lang:type=MemoryPool,name=PS Perm Gen|Perm Gen|CMS Perm Gen"/>
             <constructor-arg value="Usage"/>
             <constructor-arg value="max"/>
             <property name="unit" ref="byteUnit"/>
-        </bean -->
+        </bean>
 
         <bean id="jvmEdenInit" parent="monitoredMBean">
-            <constructor-arg value="java.memory.eden.init"/>
+            <constructor-arg value="java.memorypool.eden[init]"/>
             <constructor-arg value="Initial Eden memory configuration size"/>
             <constructor-arg value="java.lang:type=MemoryPool,name=PS Eden Space|Eden Space|Par Eden Space"/>
             <constructor-arg value="Usage"/>
@@ -221,7 +296,7 @@
         </bean>
 
         <bean id="jvmEdenUsed" parent="monitoredMBean">
-            <constructor-arg value="java.memory.eden.used"/>
+            <constructor-arg value="java.memorypool.eden[used]"/>
             <constructor-arg value="Actual memory in use in Eden space"/>
             <constructor-arg value="java.lang:type=MemoryPool,name=PS Eden Space|Eden Space|Par Eden Space"/>
             <constructor-arg value="Usage"/>
@@ -230,7 +305,7 @@
         </bean>
 
         <bean id="jvmEdenCommitted" parent="monitoredMBean">
-            <constructor-arg value="java.memory.eden.committed"/>
+            <constructor-arg value="java.memorypool.eden[committed]"/>
             <constructor-arg value="Virtual memory size for Eden space"/>
             <constructor-arg value="java.lang:type=MemoryPool,name=PS Eden Space|Eden Space|Par Eden Space"/>
             <constructor-arg value="Usage"/>
@@ -239,7 +314,7 @@
         </bean>
 
         <bean id="jvmEdenMax" parent="monitoredMBean">
-            <constructor-arg value="java.memory.eden.max"/>
+            <constructor-arg value="java.memorypool.eden[max]"/>
             <constructor-arg value="Maximum Eden memory size"/>
             <constructor-arg value="java.lang:type=MemoryPool,name=PS Eden Space|Eden Space|Par Eden Space"/>
             <constructor-arg value="Usage"/>
@@ -248,7 +323,7 @@
         </bean>
 
         <bean id="jvmSurvivorInit" parent="monitoredMBean">
-            <constructor-arg value="java.memory.survivor.init"/>
+            <constructor-arg value="java.memorypool.survivor[init]"/>
             <constructor-arg value="Initial survivor memory configuration size"/>
             <constructor-arg value="java.lang:type=MemoryPool,name=PS Survivor Space|Survivor Space|Par Survivor Space"/>
             <constructor-arg value="Usage"/>
@@ -257,7 +332,7 @@
         </bean>
 
         <bean id="jvmSurvivorUsed" parent="monitoredMBean">
-            <constructor-arg value="java.memory.survivor.used"/>
+            <constructor-arg value="java.memorypool.survivor[used]"/>
             <constructor-arg value="Actual memory in use in survivor space"/>
             <constructor-arg value="java.lang:type=MemoryPool,name=PS Survivor Space|Survivor Space|Par Survivor Space"/>
             <constructor-arg value="Usage"/>
@@ -266,7 +341,7 @@
         </bean>
 
         <bean id="jvmSurvivorCommitted" parent="monitoredMBean">
-            <constructor-arg value="java.memory.survivor.committed"/>
+            <constructor-arg value="java.memorypool.survivor[committed]"/>
             <constructor-arg value="Virtual memory size for survivor space"/>
             <constructor-arg value="java.lang:type=MemoryPool,name=PS Survivor Space|Survivor Space|Par Survivor Space"/>
             <constructor-arg value="Usage"/>
@@ -275,7 +350,7 @@
         </bean>
 
         <bean id="jvmSurvivorMax" parent="monitoredMBean">
-            <constructor-arg value="java.memory.survivor.max"/>
+            <constructor-arg value="java.memorypool.survivor[max]"/>
             <constructor-arg value="Maximum survivor memory size"/>
             <constructor-arg value="java.lang:type=MemoryPool,name=PS Survivor Space|Survivor Space|Par Survivor Space"/>
             <constructor-arg value="Usage"/>
@@ -284,7 +359,7 @@
         </bean>
 
         <bean id="jvmCodeCacheInit" parent="monitoredMBean">
-            <constructor-arg value="java.memory.codecache.init"/>
+            <constructor-arg value="java.memorypool.codecache[init]"/>
             <constructor-arg value="Initial codecache memory configuration size"/>
             <constructor-arg value="java.lang:type=MemoryPool,name=Code Cache"/>
             <constructor-arg value="Usage"/>
@@ -293,7 +368,7 @@
         </bean>
 
         <bean id="jvmCodeCacheUsed" parent="monitoredMBean">
-            <constructor-arg value="java.memory.codecache.used"/>
+            <constructor-arg value="java.memorypool.codecache[used]"/>
             <constructor-arg value="Actual memory in use in codecache space"/>
             <constructor-arg value="java.lang:type=MemoryPool,name=Code Cache"/>
             <constructor-arg value="Usage"/>
@@ -302,7 +377,7 @@
         </bean>
 
         <bean id="jvmCodeCacheCommitted" parent="monitoredMBean">
-            <constructor-arg value="java.memory.codecache.committed"/>
+            <constructor-arg value="java.memorypool.codecache[committed]"/>
             <constructor-arg value="Virtual memory size for codecache space"/>
             <constructor-arg value="java.lang:type=MemoryPool,name=Code Cache"/>
             <constructor-arg value="Usage"/>
@@ -311,7 +386,7 @@
         </bean>
 
         <bean id="jvmCodeCacheMax" parent="monitoredMBean">
-            <constructor-arg value="java.memory.codecache.max"/>
+            <constructor-arg value="java.memorypool.codecache[max]"/>
             <constructor-arg value="Maximum codecache memory size"/>
             <constructor-arg value="java.lang:type=MemoryPool,name=Code Cache"/>
             <constructor-arg value="Usage"/>
@@ -320,7 +395,7 @@
         </bean>
 
         <bean id="jvmTenuredInit" parent="monitoredMBean">
-            <constructor-arg value="java.memory.tenured.init"/>
+            <constructor-arg value="java.memorypool.tenured[init]"/>
             <constructor-arg value="Initial tenured memory configuration size"/>
             <constructor-arg value="java.lang:type=MemoryPool,name=PS Old Gen|Tenured Gen|CMS Old Gen"/>
             <constructor-arg value="Usage"/>
@@ -329,7 +404,7 @@
         </bean>
 
         <bean id="jvmTenuredUsed" parent="monitoredMBean">
-            <constructor-arg value="java.memory.tenured.used"/>
+            <constructor-arg value="java.memorypool.tenured[used]"/>
             <constructor-arg value="Actual memory in use in tenured space"/>
             <constructor-arg value="java.lang:type=MemoryPool,name=PS Old Gen|Tenured Gen|CMS Old Gen"/>
             <constructor-arg value="Usage"/>
@@ -338,7 +413,7 @@
         </bean>
 
         <bean id="jvmTenuredCommitted" parent="monitoredMBean">
-            <constructor-arg value="java.memory.tenured.committed"/>
+            <constructor-arg value="java.memorypool.tenured[committed]"/>
             <constructor-arg value="Virtual memory size for tenured space"/>
             <constructor-arg value="java.lang:type=MemoryPool,name=PS Old Gen|Tenured Gen|CMS Old Gen"/>
             <constructor-arg value="Usage"/>
@@ -347,7 +422,7 @@
         </bean>
 
         <bean id="jvmTenuredMax" parent="monitoredMBean">
-            <constructor-arg value="java.memory.tenured.max"/>
+            <constructor-arg value="java.memorypool.tenured[max]"/>
             <constructor-arg value="Maximum tenured memory size"/>
             <constructor-arg value="java.lang:type=MemoryPool,name=PS Old Gen|Tenured Gen|CMS Old Gen"/>
             <constructor-arg value="Usage"/>
@@ -435,10 +510,18 @@
                 <ref bean="jvmNonHeapUsed" />
                 <ref bean="jvmNonHeapCommitted" />
                 <ref bean="jvmNonHeapMax" />
-                <!-- ref bean="jvmPermGenInit" / -->
-                <!-- ref bean="jvmPermGenUsed" / -->
-                <!-- ref bean="jvmPermGenCommitted" / -->
-                <!-- ref bean="jvmPermGenMax" / -->
+                <ref bean="jvmMetaspaceInit" />
+                <ref bean="jvmMetaspaceUsed" />
+                <ref bean="jvmMetaspaceCommitted" />
+                <ref bean="jvmMetaspaceMax" />
+                <ref bean="jvmPeakMetaspaceInit" />
+                <ref bean="jvmPeakMetaspaceUsed" />
+                <ref bean="jvmPeakMetaspaceCommitted" />
+                <ref bean="jvmPeakMetaspaceMax" />
+                <ref bean="jvmPermGenInit" />
+                <ref bean="jvmPermGenUsed" />
+                <ref bean="jvmPermGenCommitted" />
+                <ref bean="jvmPermGenMax" />
                 <ref bean="jvmEdenInit" />
                 <ref bean="jvmEdenUsed" />
                 <ref bean="jvmEdenCommitted" />
