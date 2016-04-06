@@ -71,7 +71,7 @@ public class ParfaitAgent {
 
         // Inject all metrics via parfait-spring and parfait-jmx
         try {
-            ApplicationContext context = new ClassPathXmlApplicationContext("monitoring.xml");
+            ApplicationContext context = new ClassPathXmlApplicationContext("java.xml");
             MonitorableRegistry metrics = (MonitorableRegistry)context.getBean("monitorableRegistry");
             PcpMonitorBridge bridge = (PcpMonitorBridge)context.getBean("pcpMonitorBridge");
 

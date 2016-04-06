@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- TODO: JDBC metrics
+    <bean id="dbReceivedBytesCallback" class="net.sourceforge.jtds.jdbc.ParfaitByteCallback">
+        <constructor-arg ref="monitorableRegistry"/>
+        <constructor-arg value="in"/>
+    </bean>
+
+    <bean id="dbSentBytesCallback" class="net.sourceforge.jtds.jdbc.ParfaitByteCallback">
+        <constructor-arg ref="monitorableRegistry"/>
+        <constructor-arg value="out"/>
+    </bean>
+
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="net.sourceforge.jtds.jdbc.ResponseStream.setByteCallback"/>
+        <property name="arguments" ref="dbReceivedBytesCallback"/>
+    </bean>
+
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="net.sourceforge.jtds.jdbc.RequestStream.setByteCallback"/>
+        <property name="arguments" ref="dbSentBytesCallback"/>
+    </bean>
+
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="com.aconex.utilities.db.LoggingDriver.setBytesInCallback"/>
+        <property name="arguments" ref="dbReceivedBytesCallback"/>
+    </bean>
+
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="com.aconex.utilities.db.LoggingDriver.setBytesOutCallback"/>
+        <property name="arguments" ref="dbSentBytesCallback"/>
+    </bean>
+    -->
+
+</beans>

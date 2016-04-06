@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- TODO: CodaHale / DropWizard metrics
+    <bean id="healthCheckRegistry" class="com.codahale.metrics.health.HealthCheckRegistry"/>
+
+    <bean id="healthCheckBeanPostProcessor" class="com.ryantenney.metrics.spring.HealthCheckBeanPostProcessor">
+        <constructor-arg ref="healthCheckRegistry"/>
+    </bean>
+
+    <bean id="threadDeadlockHealthCheck" class="com.codahale.metrics.health.jvm.ThreadDeadlockHealthCheck"/>
+    -->
+
+</beans>

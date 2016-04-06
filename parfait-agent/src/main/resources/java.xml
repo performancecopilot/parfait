@@ -562,46 +562,4 @@
         <constructor-arg type="javax.measure.unit.Unit" ref="millisecondUnit"/>
     </bean>
 
-    <!-- TODO: JDBC metrics
-    <bean id="dbReceivedBytesCallback" class="net.sourceforge.jtds.jdbc.ParfaitByteCallback">
-        <constructor-arg ref="monitorableRegistry"/>
-        <constructor-arg value="in"/>
-    </bean>
-
-    <bean id="dbSentBytesCallback" class="net.sourceforge.jtds.jdbc.ParfaitByteCallback">
-        <constructor-arg ref="monitorableRegistry"/>
-        <constructor-arg value="out"/>
-    </bean>
-
-    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-        <property name="staticMethod" value="net.sourceforge.jtds.jdbc.ResponseStream.setByteCallback"/>
-        <property name="arguments" ref="dbReceivedBytesCallback"/>
-    </bean>
-
-    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-        <property name="staticMethod" value="net.sourceforge.jtds.jdbc.RequestStream.setByteCallback"/>
-        <property name="arguments" ref="dbSentBytesCallback"/>
-    </bean>
-
-    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-        <property name="staticMethod" value="com.aconex.utilities.db.LoggingDriver.setBytesInCallback"/>
-        <property name="arguments" ref="dbReceivedBytesCallback"/>
-    </bean>
-
-    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-        <property name="staticMethod" value="com.aconex.utilities.db.LoggingDriver.setBytesOutCallback"/>
-        <property name="arguments" ref="dbSentBytesCallback"/>
-    </bean>
-    -->
-
-    <!-- TODO: CodaHale metrics
-    <bean id="healthCheckRegistry" class="com.codahale.metrics.health.HealthCheckRegistry"/>
-
-    <bean id="healthCheckBeanPostProcessor" class="com.ryantenney.metrics.spring.HealthCheckBeanPostProcessor">
-        <constructor-arg ref="healthCheckRegistry"/>
-    </bean>
-
-    <bean id="threadDeadlockHealthCheck" class="com.codahale.metrics.health.jvm.ThreadDeadlockHealthCheck"/>
-    -->
-
 </beans>
