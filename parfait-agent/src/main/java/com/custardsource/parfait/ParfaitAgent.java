@@ -15,11 +15,10 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 
 public class ParfaitAgent {
-    private final static Logger logger = LoggerFactory.getLogger(ParfaitAgent.class);
+    private final static Logger logger = Logger.getLogger(ParfaitAgent.class);
     
     public static Map<String, String> getProperties(String agentArguments) {
         Map<String, String> properties = new HashMap<String, String>();
@@ -52,7 +51,7 @@ public class ParfaitAgent {
         String runtimeName = runtimeMxBean.getName();
         String name;
 
-        logger.info("Runtime: {}: {}", runtimeName, runtimeArguments);
+        logger.info(String.format("Runtime: %s: %s", runtimeName, runtimeArguments));
 
         // extract arguments:   name:application[,...]
         Map<String, String> properties = getProperties(args);
@@ -67,7 +66,7 @@ public class ParfaitAgent {
         System.setProperty("parfait.cluster", "42");
         System.setProperty("parfait.interval", "1000");
 
-        logger.info("Starting Parfait agent {} with arguments {}", name, args);
+        logger.info(String.format("Starting Parfait agent %s with arguments %s", name, args));
 
         // Inject all metrics via parfait-spring and parfait-jmx
         try {
