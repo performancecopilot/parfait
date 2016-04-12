@@ -36,11 +36,15 @@ public class ParfaitAgent {
     }
 
     public static String defaultName(String runtime) {
-        String name = "parfait"; // append PID, inferred from runtime
-        String[] pidAndHost = runtime.split("@", 2);
+        String name = System.getProperty("sun.java.command");
 
-        if (pidAndHost.length == 2) {
-            name += pidAndHost[0];
+        if (name == null) {    // fallback to parfaitPID convention
+            name = "parfait";  // append PID, inferred from runtime
+
+            String[] pidAndHost = runtime.split("@", 2);
+            if (pidAndHost.length == 2) {
+                name += pidAndHost[0];
+            }
         }
         return name;
     }
