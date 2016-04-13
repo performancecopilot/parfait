@@ -138,6 +138,7 @@ public class PcpMmvWriter extends BasePcpWriter {
     };
 
     private File file = null;
+    private volatile int processIdentifier = 0;
     private volatile int clusterIdentifier = 0;
     private volatile Set<MmvFlag> flags = DEFAULT_FLAGS; 
     
@@ -206,7 +207,12 @@ public class PcpMmvWriter extends BasePcpWriter {
         Preconditions.checkArgument((clusterIdentifier & 0xFFFFF000)==0, "ClusterIdentifier can only be a 12bit value");
     	this.clusterIdentifier = clusterIdentifier;
     }
-    
+
+    public void setProcessIdentifier(int pid) {
+        Preconditions.checkArgument(pid > 0, "ProcessIdentifier can only be a positive integer");
+        this.processIdentifier = pid;
+    }
+
     public void setFlags(Set<MmvFlag> flags) {
         this.flags = EnumSet.copyOf(flags);
     }
@@ -218,8 +224,8 @@ public class PcpMmvWriter extends BasePcpWriter {
         // Automatically cleanup the file if this is a mapping where we
         // mandate PID checking from the MMV PMDA (MMV_FLAG_PROCESS) and
         // we were able to stash a path name earlier
-        if (this.file != null && this.flags.contains(MmvFlag.MMV_FLAG_PROCESS)) {
-            this.file.deleteOnExit();
+        if (file != null && flags.contains(MmvFlag.MMV_FLAG_PROCESS)) {
+            file.deleteOnExit();
         }
 
         dataFileBuffer.position(0);
@@ -233,7 +239,7 @@ public class PcpMmvWriter extends BasePcpWriter {
         // 2 TOC blocks, 3 if there are instances
         dataFileBuffer.putInt(tocCount());
         dataFileBuffer.putInt(getFlagMask());
-        dataFileBuffer.putInt(getPid());
+        dataFileBuffer.putInt(getProcessIdentifier());
         dataFileBuffer.putInt(clusterIdentifier);
 
         Collection<InstanceDomain> instanceDomains = getInstanceDomains();
@@ -489,11 +495,14 @@ public class PcpMmvWriter extends BasePcpWriter {
     }
 
     /**
-     * @return the PID of the current running Java Process
+     * @return the PID of the current running Java Process, or a proxied PID if requested.
      */
-    private int getPid() {
-        String processIdentifier = ManagementFactory.getRuntimeMXBean().getName();
-        return Integer.valueOf(processIdentifier.split("@")[0]);
+    private int getProcessIdentifier() {
+        if (processIdentifier == 0) {
+            String processName = ManagementFactory.getRuntimeMXBean().getName();
+            processIdentifier = Integer.valueOf(processName.split("@")[0]);
+        }
+        return processIdentifier;
     }
 
     public static void main(String[] args) throws IOException {

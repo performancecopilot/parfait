@@ -42,9 +42,18 @@ public class PcpMmvWriterTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void ensureNegativeNumbersAreTreatedWithAppropriateContempt() {
+    public void ensureNegativeClustersAreTreatedWithAppropriateContempt() {
         pcpMmvWriter.setClusterIdentifier(-1);
+    }
 
+    @Test
+    public void ensureValidProcessIdentifierIsAllowed() {
+        pcpMmvWriter.setProcessIdentifier(23826);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void ensureNegativeProcessesAreTreatedWithAppropriateContempt() {
+        pcpMmvWriter.setProcessIdentifier(-1);
     }
 
     @Test
