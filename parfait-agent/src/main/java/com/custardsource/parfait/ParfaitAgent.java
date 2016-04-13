@@ -10,8 +10,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.custardsource.parfait.DynamicMonitoringView;
-import com.custardsource.parfait.MonitorableRegistry;
-import com.custardsource.parfait.pcp.PcpMonitorBridge;
 import com.custardsource.parfait.dxm.HashingIdentifierSource;
 import com.custardsource.parfait.dxm.IdentifierSource;
 
@@ -131,9 +129,7 @@ public class ParfaitAgent {
         // inject all metrics via parfait-spring and parfait-jmx
         try {
             ApplicationContext context = new ClassPathXmlApplicationContext("java.xml");
-            MonitorableRegistry metrics = (MonitorableRegistry)context.getBean("monitorableRegistry");
-            PcpMonitorBridge bridge = (PcpMonitorBridge)context.getBean("pcpMonitorBridge");
-            DynamicMonitoringView view = new DynamicMonitoringView(metrics, bridge);
+            DynamicMonitoringView view = (DynamicMonitoringView)context.getBean("monitoringView");
             view.start();
         } catch (BeansException e) {
             logger.error("Stopping Parfait agent, cannot setup beans", e);

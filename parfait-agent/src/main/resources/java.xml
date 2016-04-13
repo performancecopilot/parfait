@@ -28,7 +28,8 @@
         </constructor-arg>
     </bean>
 
-    <bean name="mmvPcpBridge" class="com.custardsource.parfait.spring.SelfStartingMonitoringView">
+    <bean name="monitoringView" class="com.custardsource.parfait.DynamicMonitoringView">
+        <constructor-arg ref="monitorableRegistry"/>
         <constructor-arg ref="pcpMonitorBridge"/>
     </bean>
 
