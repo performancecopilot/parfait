@@ -22,7 +22,7 @@ import org.apache.log4j.Logger;
 public class ParfaitAgent {
     private static final Logger logger = Logger.getLogger(ParfaitAgent.class);
 
-    private static final String PARFAIT = "parfait";
+    public static final String PARFAIT = "parfait";
 
     private static final String NAME = "name";
     private static final String CLUSTER = "cluster";
