@@ -137,6 +137,7 @@ public class PcpMmvWriter extends BasePcpWriter {
         }
     };
 
+    private File file = null;
     private volatile int clusterIdentifier = 0;
     private volatile Set<MmvFlag> flags = DEFAULT_FLAGS; 
     
@@ -163,7 +164,7 @@ public class PcpMmvWriter extends BasePcpWriter {
      */
     public PcpMmvWriter(File file, IdentifierSourceSet identifierSources) {
         this(new FileByteBufferFactory(file), identifierSources);
-
+        this.file = file;
     }
 
     public PcpMmvWriter(ByteBufferFactory byteBufferFactory, IdentifierSourceSet identifierSources) {
@@ -198,7 +199,6 @@ public class PcpMmvWriter extends BasePcpWriter {
             tmpDir = new File(pcp.getRoot(), pcpTemp);
         }
         File mmvDir = new File(tmpDir, "mmv");
-
         return new File(mmvDir, name);
     }
 
@@ -210,10 +210,18 @@ public class PcpMmvWriter extends BasePcpWriter {
     public void setFlags(Set<MmvFlag> flags) {
         this.flags = EnumSet.copyOf(flags);
     }
-    
+
     @Override
     protected void populateDataBuffer(ByteBuffer dataFileBuffer, Collection<PcpValueInfo> valueInfos)
             throws IOException {
+
+        // Automatically cleanup the file if this is a mapping where we
+        // mandate PID checking from the MMV PMDA (MMV_FLAG_PROCESS) and
+        // we were able to stash a path name earlier
+        if (this.file != null && this.flags.contains(MmvFlag.MMV_FLAG_PROCESS)) {
+            this.file.deleteOnExit();
+        }
+
         dataFileBuffer.position(0);
         dataFileBuffer.put(TAG);
         dataFileBuffer.putInt(MMV_FORMAT_VERSION);
