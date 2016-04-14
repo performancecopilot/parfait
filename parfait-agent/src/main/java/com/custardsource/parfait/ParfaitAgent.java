@@ -28,9 +28,9 @@ public class ParfaitAgent {
     private static final String CLUSTER = "cluster";
     private static final String INTERVAL = "interval";
 
-    private static final String PARFAIT_NAME = PARFAIT + "." + NAME;
-    private static final String PARFAIT_CLUSTER = PARFAIT + "." + CLUSTER;
-    private static final String PARFAIT_INTERVAL = PARFAIT + "." + INTERVAL;
+    public static final String PARFAIT_NAME = PARFAIT + "." + NAME;
+    public static final String PARFAIT_CLUSTER = PARFAIT + "." + CLUSTER;
+    public static final String PARFAIT_INTERVAL = PARFAIT + "." + INTERVAL;
 
     private static final String DEFAULT_INTERVAL = "1000"; // milliseconds
 
@@ -86,6 +86,11 @@ public class ParfaitAgent {
         String interval = System.getProperty(PARFAIT_INTERVAL);
         if (interval == null) {
             return DEFAULT_INTERVAL;
+        }
+        try {
+            Integer.parseInt(interval);    // safe verification with fallback
+        } catch (NumberFormatException e) {
+             return DEFAULT_INTERVAL;
         }
         return interval;
     }
