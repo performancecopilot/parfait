@@ -3,82 +3,6 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" />
-
-    <bean id="monitorableRegistry" class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
-        <property name="staticField" value="com.custardsource.parfait.MonitorableRegistry.DEFAULT_REGISTRY"/>
-    </bean>
-
-    <bean name="pcpMonitorBridge" class="com.custardsource.parfait.pcp.PcpMonitorBridge">
-        <constructor-arg>
-            <bean id="mmvPcpWriter" class="com.custardsource.parfait.dxm.PcpMmvWriter">
-                <constructor-arg value="${parfait.name}"/>
-                <constructor-arg>
-                    <bean class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
-                        <property name="staticField" value="com.custardsource.parfait.dxm.IdentifierSourceSet.DEFAULT_SET"/>
-                    </bean>
-                </constructor-arg>
-                <property name="flags">
-                    <set value-type="com.custardsource.parfait.dxm.PcpMmvWriter.MmvFlag">
-                        <value>MMV_FLAG_PROCESS</value>
-                    </set>
-                </property>
-                <property name="clusterIdentifier" value="${parfait.cluster}"/>
-            </bean>
-        </constructor-arg>
-    </bean>
-
-    <bean name="monitoringView" class="com.custardsource.parfait.DynamicMonitoringView">
-        <constructor-arg ref="monitorableRegistry"/>
-        <constructor-arg ref="pcpMonitorBridge"/>
-    </bean>
-
-    <bean class="com.custardsource.parfait.MonitoredConstant">
-        <constructor-arg value="java.jvm_version"/>
-        <constructor-arg value="JVM version string"/>
-        <constructor-arg value="${java.runtime.version}"/>
-    </bean>
-
-    <bean name="monitoredMBean" class="com.custardsource.parfait.jmx.MonitoredMBeanAttributeFactory"
-          abstract="true">
-        <property name="monitorableRegistry" ref="monitorableRegistry"/>
-        <property name="updateInterval" value="${parfait.interval}"/>
-    </bean>
-
-    <bean name="optionalMBean" class="com.custardsource.parfait.OptionalMonitoredMBeanRegistrar"
-          abstract="true">
-        <property name="monitorableRegistry" ref="monitorableRegistry"/>
-        <property name="updateInterval" value="${parfait.interval}"/>
-    </bean>
-
-    <bean name="monitoredConstantMBean" class="com.custardsource.parfait.jmx.MonitoredMBeanAttributeFactory"
-          abstract="true">
-        <property name="monitorableRegistry" ref="monitorableRegistry"/>
-        <property name="valueSemantics" value="CONSTANT"/>
-    </bean>
-
-    <bean id="secondUnit" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-        <property name="staticMethod" value="javax.measure.unit.SI.si"/>
-        <property name="arguments">
-            <bean class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
-                <property name="staticField" value="javax.measure.unit.SI.SECOND"/>
-            </bean>
-        </property>
-    </bean>
-
-    <bean id="millisecondUnit" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-        <property name="staticMethod" value="javax.measure.unit.SI.MILLI"/>
-        <property name="arguments">
-            <bean class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
-                <property name="staticField" value="javax.measure.unit.SI.SECOND"/>
-            </bean>
-        </property>
-    </bean>
-
-    <bean id="byteUnit" class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
-        <property name="staticField" value="javax.measure.unit.NonSI.BYTE"/>
-    </bean>
-
     <bean id="jmxServer" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
         <property name="staticMethod" value="org.springframework.jmx.support.JmxUtils.locateMBeanServer" />
     </bean>
@@ -549,18 +473,6 @@
                 <ref bean="jvmClassLoadedTotal" />
             </list>
         </constructor-arg>
-    </bean>
-
-    <bean id="systemTimeMonitor" class="com.custardsource.parfait.PollingMonitoredValue">
-        <constructor-arg value="java.timestamp"/>
-        <constructor-arg value="Current time on server where the application is running"/>
-        <constructor-arg ref="monitorableRegistry"/>
-        <constructor-arg type="int" value="${parfait.interval}"/>
-        <constructor-arg>
-            <bean id="systemTimePoller" class="com.custardsource.parfait.SystemTimePoller"/>
-        </constructor-arg>
-        <constructor-arg type="com.custardsource.parfait.ValueSemantics" value="FREE_RUNNING"/>
-        <constructor-arg type="javax.measure.unit.Unit" ref="millisecondUnit"/>
     </bean>
 
 </beans>

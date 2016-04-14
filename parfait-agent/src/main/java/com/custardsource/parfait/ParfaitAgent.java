@@ -39,7 +39,7 @@ public class ParfaitAgent {
     }
 
     public static String getParfaitName() {
-        return System.getProperty("parfait.name");
+        return System.getProperty(PARFAIT_NAME);
     }
 
     public static String getRuntimeName() {
@@ -92,13 +92,13 @@ public class ParfaitAgent {
 
     public static void setupProperties() {
         String name = getDefaultName(getParfaitName(), getDefaultCommand(), getRuntimeName());
-        System.setProperty("parfait.name", name);
+        System.setProperty(PARFAIT_NAME, name);
 
         String cluster = getDefaultCluster(name);
-        System.setProperty("parfait.cluster", cluster);
+        System.setProperty(PARFAIT_CLUSTER, cluster);
 
         String interval = getDefaultInterval();
-        System.setProperty("parfait.interval", interval);
+        System.setProperty(PARFAIT_INTERVAL, interval);
     }
 
     public static void setupArguments(String arguments) {
@@ -128,7 +128,7 @@ public class ParfaitAgent {
 
         // inject all metrics via parfait-spring and parfait-jmx
         try {
-            ApplicationContext context = new ClassPathXmlApplicationContext("java.xml");
+            ApplicationContext context = new ClassPathXmlApplicationContext("agent.xml");
             DynamicMonitoringView view = (DynamicMonitoringView)context.getBean("monitoringView");
             view.start();
         } catch (BeansException e) {

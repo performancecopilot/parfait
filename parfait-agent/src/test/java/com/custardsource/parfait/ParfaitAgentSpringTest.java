@@ -1,3 +1,5 @@
+package com.custardsource.parfait;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -10,7 +12,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import com.custardsource.parfait.DynamicMonitoringView;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration({ "classpath:test.xml", "classpath:java.xml" })
+@ContextConfiguration({ "classpath:test.xml", "classpath:agent.xml" })
 public class ParfaitAgentSpringTest {
 
     @Autowired
