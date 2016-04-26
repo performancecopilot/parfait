@@ -161,7 +161,7 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean<Monitorabl
     }
 
     @SuppressWarnings("unchecked")
-	protected T getAttributeValue() {
+    protected T getAttributeValue() {
         try {
             if (!Strings.isNullOrEmpty(compositeDataItem)) {
                 CompositeData data = (CompositeData) server.getAttribute(mBeanName, attributeName);
@@ -173,7 +173,7 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean<Monitorabl
             throw new RuntimeException(e);
         }
     }
-    
+
     private String registerBeanName(String beanName) {
         int pos = beanName.lastIndexOf(",name=");
         if (pos > 0) {
