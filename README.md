@@ -6,7 +6,7 @@ Parfait is a performance monitoring library for Java which provides mechanisms f
 
 #Requirements
 
-Parfait requires Java 7.  It has been used heavily with Oracle Java environments; other JVMs have to been tried.
+Parfait requires Java 7.
 
 #Maven Repository
 
@@ -28,7 +28,35 @@ Since release 0.2.0, all binary versions of parfait are synced to the Maven cent
 If you're not using Maven for your project, the JAR files (including source and Javadoc) may be downloaded from the appropriate subdirectory of the repository's parfait folder.
 
 ##About parfait
-parfait is a performance management and monitoring framework for Java 1.6. parfait consists of several modules: a core monitoring subsytem, which defines a series of monitorable values and counters (which can be of any Java type) and some basic operations on these, along with standard interfaces for exporting these values to various 'data sinks' as they change over time. The parfait project defines a few common data sinks for monitoring the current state of these values, exporting them to JMX and SGI's PCP monitoring system. There are also a number of modules built on top of this core system, which enable the collection of metrics from common data sources (such as JDBC drivers and other JMX beans) to provide easy monitoring of existing Java subsystems.
+parfait is a performance management and monitoring framework for Java. parfait consists of several modules: a core monitoring subsytem, which defines a series of monitorable values and counters (which can be of any Java type) and some basic operations on these, along with standard interfaces for exporting these values to various 'data sinks' as they change over time. The parfait project defines a few common data sinks for monitoring the current state of these values, exporting them to JMX and the Performance Co-Pilot (PCP) monitoring system. There are also a number of modules built on top of this core system, which enable the collection of metrics from common data sources (such as JDBC drivers and other JMX beans) to provide easy monitoring of existing Java subsystems.
+
+##Quickstart -javaagent mode
+For an basic deployment, parfait can be inserted into an unmodified application using the Java instrumentation interface. This mode builds on many of the parfait modules described below, internally. It accesses JMX and other metric values available from within the JVM and exports those as PCP Memory Mapped Value (MMV) metrics. This instrumentation mechanism is designed for use in production applications - it is proven, robust and very lightweight.
+
+To build the parfait-agent, the Maven build contains an extra step:
+    $ mvn clean package install
+    $ pushd parfait-agent
+    $ mvn assembly-single
+    $ popd
+
+Install it to a well-known place:
+    $ mkdir lib
+    $ cp parfait-agent/target/parfait-agent-jar-with-dependencies.jar lib/parfait.jar
+    $ export PARFAIT_HOME=`pwd`
+
+To run an application with the parfait agent loaded, a helper script is provided:
+    $ bin/parfait [.sh|.bat] -- MyApplication
+
+In PCP, new "mmv" metrics will then appear automatically for the duration of the instrumented Java application - these metrics can be recorded, charted, used for automated live and historical analysis, and so on, using PCP tools.
+
+    $ pminfo --desc --helptext --fetch  mmv.MyApplication.java.jvm.compilation
+
+    mmv.MyApplication.java.jvm.compilation
+        Data Type: 64-bit int  InDom: PM_INDOM_NULL 0xffffffff
+        Semantics: counter  Units: millisec
+    Help:
+    Time spent in the JVM doing Java bytecode compilation
+        value 489
 
 ##The Layers of parfait
 parfait is, like an ogre, made up of many layers. parfait provides several modules assisting with the various stages of metrics collection and performance monitoring (integration, collection, output), and each module is a separate Maven subproject (and hence, separate .jar artifact). The following diagram illustrates the provided core modules, along with their key responsibilities and some interactions between them:
