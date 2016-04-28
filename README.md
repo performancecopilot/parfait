@@ -25,7 +25,7 @@ To build the standalone *parfait-agent* module, the Maven build contains an extr
 
     $ mvn clean package install
     $ pushd parfait-agent
-    $ mvn assembly-single
+    $ mvn assembly:single
     $ popd
 
 Install to a well-known place:
