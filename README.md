@@ -36,7 +36,7 @@ Install to a well-known place:
 
 To run an application with the *parfait-agent* loaded, a helper script is provided:
 
-    $ bin/parfait [.sh|.bat] -- MyApplication
+    $ ./bin/parfait [.sh|.bat] -- MyApplication
 
 In PCP, new **mmv** metrics will then appear automatically for the duration of the instrumented Java application - these metrics can be recorded, charted, used for automated live and historical analysis, and so on, using PCP tools.
 
