@@ -32,10 +32,14 @@ Install to a well-known place:
 
     $ mkdir lib
     $ cp parfait-agent/target/parfait-agent-jar-with-dependencies.jar lib/parfait.jar
+
+To run an application with the *parfait-agent* loaded:
+
+    $ java -javaagent:./lib/parfait.jar MyApplication
+
+Or, use the helper script provided:
+
     $ export PARFAIT_HOME=`pwd`
-
-To run an application with the *parfait-agent* loaded, a helper script is provided:
-
     $ ./bin/parfait [.sh|.bat] -- MyApplication
 
 In PCP, new **mmv** metrics will then appear automatically for the duration of the instrumented Java application - these metrics can be recorded, charted, used for automated live and historical analysis, and so on, using PCP tools.
