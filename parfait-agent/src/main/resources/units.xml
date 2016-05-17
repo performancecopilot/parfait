@@ -3,26 +3,21 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean id="secondUnit" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-        <property name="staticMethod" value="javax.measure.unit.SI.si"/>
-        <property name="arguments">
-            <bean class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
-                <property name="staticField" value="javax.measure.unit.SI.SECOND"/>
-            </bean>
-        </property>
+    <bean id="secondUnit" class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
+        <property name="staticField" value="tec.units.ri.unit.Units.SECOND"/>
     </bean>
 
     <bean id="millisecondUnit" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-        <property name="staticMethod" value="javax.measure.unit.SI.MILLI"/>
+        <property name="staticMethod" value="tec.units.ri.unit.MetricPrefix.MILLI"/>
         <property name="arguments">
             <bean class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
-                <property name="staticField" value="javax.measure.unit.SI.SECOND"/>
+                <property name="staticField" value="tec.units.ri.unit.Units.SECOND"/>
             </bean>
         </property>
     </bean>
 
     <bean id="byteUnit" class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
-        <property name="staticField" value="javax.measure.unit.NonSI.BYTE"/>
+        <property name="staticField" value="com.custardsource.parfait.unit.NonSI.BYTE"/>
     </bean>
 
 </beans>

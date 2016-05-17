@@ -70,7 +70,7 @@
             <bean id="systemTimePoller" class="com.custardsource.parfait.SystemTimePoller"/>
         </constructor-arg>
         <constructor-arg type="com.custardsource.parfait.ValueSemantics" value="FREE_RUNNING"/>
-        <constructor-arg type="javax.measure.unit.Unit" ref="millisecondUnit"/>
+        <constructor-arg type="javax.measure.Unit" ref="millisecondUnit"/>
     </bean>
 
 </beans>
