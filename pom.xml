@@ -37,9 +37,15 @@
       <spring.version>4.2.5.RELEASE</spring.version>
       <slf4j.version>1.6.1</slf4j.version>
       <log4j.version>1.2.14</log4j.version>
-      <java.major.source.version>1.7</java.major.source.version>
-      <java.major.target.version>1.7</java.major.target.version>
+      <jdk.version>1.7</jdk.version>
+      <project.build.javaVersion>${jdk.version}</project.build.javaVersion>
+      <maven.compile.targetLevel>${jdk.version}</maven.compile.targetLevel>
+      <maven.compile.sourceLevel>${jdk.version}</maven.compile.sourceLevel>
+      <java.major.source.version>${jdk.version}</java.major.source.version>
+      <java.major.target.version>${jdk.version}</java.major.target.version>
       <metrics3.version>0.7.1</metrics3.version>
+      <unit.version>0.9-SNAPSHOT</unit.version>
+      <ri.version>0.9-SNAPSHOT</ri.version>
   </properties>
     <build>
         <plugins>
@@ -105,8 +111,13 @@
           </dependency>
           <dependency>
             <groupId>javax.measure</groupId>
-            <artifactId>jsr-275</artifactId>
-            <version>0.9.1</version>
+            <artifactId>unit-api</artifactId>
+            <version>${unit.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>tec.units</groupId>
+            <artifactId>unit-ri</artifactId>
+            <version>${ri.version}</version>
           </dependency>
           <dependency>
            <groupId>org.slf4j</groupId>
@@ -182,6 +193,5 @@
       <artifactId>log4j</artifactId>
       <optional>true</optional>
     </dependency>
-
   </dependencies>
 </project>

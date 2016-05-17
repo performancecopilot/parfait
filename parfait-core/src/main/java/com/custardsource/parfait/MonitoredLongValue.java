@@ -1,8 +1,9 @@
 package com.custardsource.parfait;
 
-import java.util.concurrent.atomic.AtomicLong;
+import static tec.units.ri.AbstractUnit.ONE;
 
-import javax.measure.unit.Unit;
+import java.util.concurrent.atomic.AtomicLong;
+import javax.measure.Unit;
 
 /**
  * {@link Monitorable} implementation for a free-running Long value.
@@ -10,12 +11,12 @@ import javax.measure.unit.Unit;
 public class MonitoredLongValue extends MonitoredNumeric<AtomicLong> implements Counter {
 	public MonitoredLongValue(String name, String description,
 			MonitorableRegistry registry, Long initialValue) {
-		this(name, description, registry, initialValue, Unit.ONE);
+		this(name, description, registry, initialValue, ONE);
 	}
 
 	public MonitoredLongValue(String name, String description,
 			Long initialValue) {
-		this(name, description, MonitorableRegistry.DEFAULT_REGISTRY, initialValue, Unit.ONE);
+		this(name, description, MonitorableRegistry.DEFAULT_REGISTRY, initialValue, ONE);
 	}
 
     public MonitoredLongValue(String name, String description,

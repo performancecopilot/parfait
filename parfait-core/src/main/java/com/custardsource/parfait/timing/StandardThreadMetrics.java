@@ -1,17 +1,22 @@
 package com.custardsource.parfait.timing;
 
-import com.google.common.collect.ImmutableList;
+import static com.custardsource.parfait.unit.NonSI.BYTE;
+import static tec.units.ri.unit.MetricPrefix.MILLI;
+import static tec.units.ri.unit.MetricPrefix.NANO;
+import static tec.units.ri.unit.Units.SECOND;
+import static tec.units.ri.AbstractUnit.ONE;
 
-import javax.measure.unit.NonSI;
-import javax.measure.unit.SI;
-import javax.measure.unit.Unit;
+import com.google.common.collect.ImmutableList;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.util.Collection;
 
+import javax.measure.quantity.Time;
+import javax.measure.Unit;
+
 public class StandardThreadMetrics {
-    private static final Unit<?> MILLISECONDS = SI.MILLI(SI.SECOND);
-    private static final Unit<?> NANOSECONDS = SI.NANO(SI.SECOND);
+    private static final Unit<Time> MILLISECONDS = MILLI(SECOND);
+    private static final Unit<Time> NANOSECONDS = NANO(SECOND);
 
     public static final ThreadMetric CLOCK_TIME = new AbstractThreadMetric("Elapsed time", NANOSECONDS,
             "time", "Total wall time (in ms) spent executing event") {
@@ -46,7 +51,7 @@ public class StandardThreadMetrics {
         }
     };
 
-    public static final ThreadMetric HEAP_BYTES = new AbstractThreadMetric("Heap Bytes", NonSI.BYTE,
+    public static final ThreadMetric HEAP_BYTES = new AbstractThreadMetric("Heap Bytes", BYTE,
             "heap", "Amount of Heap (in bytes) used during the event") {
         @Override
         public long getValueForThread(Thread t) {
@@ -58,7 +63,8 @@ public class StandardThreadMetrics {
             return 0L;
         }
     };
-    public static final ThreadMetric BLOCKED_COUNT = new ThreadInfoMetric("Blocked count", Unit.ONE,
+
+    public static final ThreadMetric BLOCKED_COUNT = new ThreadInfoMetric("Blocked count", ONE,
             "blocked.count", "Number of times thread entered BLOCKED state during event") {
         @Override
         public long getValue(ThreadInfo threadInfo) {
@@ -74,7 +80,7 @@ public class StandardThreadMetrics {
         }
     };
 
-    public static final ThreadMetric WAITED_COUNT = new ThreadInfoMetric("Wait count", Unit.ONE,
+    public static final ThreadMetric WAITED_COUNT = new ThreadInfoMetric("Wait count", ONE,
             "waited.count",
             "Number of times thread entered WAITING or TIMED_WAITING state during event") {
         @Override

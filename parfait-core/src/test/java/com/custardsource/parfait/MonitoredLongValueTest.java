@@ -2,9 +2,9 @@ package com.custardsource.parfait;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.concurrent.atomic.AtomicLong;
+import static tec.units.ri.AbstractUnit.ONE;
 
-import javax.measure.unit.Unit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.Test;
 
@@ -19,7 +19,7 @@ public class MonitoredLongValueTest {
         assertEquals("AAA", newValue().getName());
         assertEquals("BBB", newValue().getDescription());
         assertEquals(23L, newValue().get().longValue());
-        assertEquals(Unit.ONE, newValue().getUnit());
+        assertEquals(ONE, newValue().getUnit());
         assertEquals(AtomicLong.class, newValue().getType());
     }
 

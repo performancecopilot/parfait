@@ -1,11 +1,9 @@
 package com.custardsource.parfait;
 
 import static org.junit.Assert.assertEquals;
+import static tec.units.ri.AbstractUnit.ONE;
 
 import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.measure.unit.Unit;
-
 import org.junit.Test;
 
 public class MonitoredIntValueTest {
@@ -19,7 +17,7 @@ public class MonitoredIntValueTest {
         assertEquals("AAA", newValue().getName());
         assertEquals("BBB", newValue().getDescription());
         assertEquals(23, newValue().get().intValue());
-        assertEquals(Unit.ONE, newValue().getUnit());
+        assertEquals(ONE, newValue().getUnit());
         assertEquals(AtomicInteger.class, newValue().getType());
     }
 

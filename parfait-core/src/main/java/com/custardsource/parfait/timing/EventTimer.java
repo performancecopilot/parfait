@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.measure.unit.Unit;
+import static tec.units.ri.AbstractUnit.ONE;
+import javax.measure.Unit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,7 +87,7 @@ public class EventTimer {
 
     private EventCounters getCounterSet(String eventGroup) {
         EventMetricCounters invocationCounter = createEventMetricCounters(eventGroup, "count",
-                "Total number of times the event was directly triggered", Unit.ONE);
+                "Total number of times the event was directly triggered", ONE);
         EventCounters counters = new EventCounters(invocationCounter, cleanName(eventGroup));
 
         for (ThreadMetric metric : metricSuite.metrics()) {

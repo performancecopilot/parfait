@@ -1,8 +1,7 @@
 package com.custardsource.parfait;
 
 import static org.junit.Assert.assertEquals;
-
-import javax.measure.unit.SI;
+import static tec.units.ri.unit.Units.FARAD;
 
 import org.junit.Test;
 
@@ -17,11 +16,11 @@ public class MonitoredConstantTest {
         assertEquals("AAA", newConstant().getName());
         assertEquals("BBB", newConstant().getDescription());
         assertEquals(7, newConstant().get().intValue());
-        assertEquals(SI.FARAD, newConstant().getUnit());
+        assertEquals(FARAD, newConstant().getUnit());
         assertEquals(Integer.class, newConstant().getType());
     }
 
     private MonitoredConstant<Integer> newConstant() {
-        return new MonitoredConstant<Integer>("AAA", "BBB", new MonitorableRegistry(), 7, SI.FARAD);
+        return new MonitoredConstant<Integer>("AAA", "BBB", new MonitorableRegistry(), 7, FARAD);
     }
 }

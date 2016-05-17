@@ -1,9 +1,7 @@
 package com.custardsource.parfait;
 
 import static org.junit.Assert.assertEquals;
-
-
-import javax.measure.unit.Unit;
+import static tec.units.ri.AbstractUnit.ONE;
 
 import org.junit.Test;
 
@@ -17,7 +15,7 @@ public class PollingMonitoredValueTest {
 		ManualScheduler scheduler = new ManualScheduler();
 		new PollingMonitoredValue<Integer>("polling.test", "",
 				new MonitorableRegistry(), 275, poller,
-				ValueSemantics.FREE_RUNNING, Unit.ONE, scheduler);
+				ValueSemantics.FREE_RUNNING, ONE, scheduler);
 		assertEquals(1, scheduler.scheduledRates.size());
 		assertEquals(275, scheduler.scheduledRates.values().iterator().next()
 				.intValue());
@@ -31,7 +29,7 @@ public class PollingMonitoredValueTest {
 		ManualScheduler scheduler = new ManualScheduler();
 		PollingMonitoredValue<Integer> p = new PollingMonitoredValue<Integer>(
 				"polling.test", "", registry, 275,
-				poller, ValueSemantics.FREE_RUNNING, Unit.ONE, scheduler);
+				poller, ValueSemantics.FREE_RUNNING, ONE, scheduler);
 		poller.value = 17;
 		assertEquals(0, p.get().intValue());
 		scheduler.runAllScheduledTasks();

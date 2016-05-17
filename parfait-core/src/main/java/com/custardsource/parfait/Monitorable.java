@@ -1,6 +1,6 @@
 package com.custardsource.parfait;
 
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 
 /**
  * <p>
@@ -14,7 +14,7 @@ import javax.measure.unit.Unit;
  * appropriately.
  * </p>
  * <p>
- * Monitors use JSR-275 Unit semantics to define their value scale, however if
+ * Monitors use JSR-363 Unit semantics to define their value scale, however if
  * the output sinks in use do not care about this value, or use it in any
  * meaningful way this may not need to be provided.
  * </p>
@@ -48,11 +48,11 @@ public interface Monitorable<T> {
     String getDescription();
 
     /**
-     * @return the JSR-275 Unit represented by the value of this Monitorable.
+     * @return the JSR-363 Unit represented by the value of this Monitorable.
      *         This may be used to do comparisons and rate-conversions between
      *         metrics which do not share the same scale. Values which do not
-     *         take a unit should use {@link Unit#ONE}; values for which no unit
-     *         is sensible (e.g. String values) may return null.
+     *         take a unit should use {@link AbstractUnit#ONE}; values for which
+     *         no unit is sensible (e.g. String values) may return null.
      */
     Unit<?> getUnit();
 

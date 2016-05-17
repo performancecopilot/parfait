@@ -2,7 +2,7 @@ package com.custardsource.parfait.timing;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 
 public class DummyThreadMetric extends AbstractThreadMetric {
     public static final String METRIC_NAME = "dummy";

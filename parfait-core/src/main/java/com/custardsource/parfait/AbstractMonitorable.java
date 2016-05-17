@@ -3,7 +3,7 @@ package com.custardsource.parfait;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

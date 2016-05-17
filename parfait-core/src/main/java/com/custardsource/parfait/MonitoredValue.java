@@ -1,6 +1,8 @@
 package com.custardsource.parfait;
 
-import javax.measure.unit.Unit;
+import static tec.units.ri.AbstractUnit.ONE;
+
+import javax.measure.Unit;
 
 /**
  * MonitoredValue provides a convenient implementation of {@link Monitorable}
@@ -25,7 +27,7 @@ public class MonitoredValue<T> extends SettableValue<T> {
 
     public MonitoredValue(String name, String description, MonitorableRegistry registry,
             T initialValue) {
-        this(name, description, registry, initialValue, Unit.ONE);
+        this(name, description, registry, initialValue, ONE);
     }
 
     public MonitoredValue(String name, String description, MonitorableRegistry registry,

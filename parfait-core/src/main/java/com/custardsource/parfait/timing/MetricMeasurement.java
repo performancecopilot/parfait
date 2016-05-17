@@ -1,6 +1,7 @@
 package com.custardsource.parfait.timing;
 
-import javax.measure.Measure;
+import tec.units.ri.AbstractQuantity;
+import tec.units.ri.quantity.NumberQuantity;
 
 import com.google.common.base.Preconditions;
 
@@ -51,14 +52,14 @@ class MetricMeasurement {
         endValue = metricSource.getValueForThread(thread);
     }
 
-    public Measure<?> totalValue() {
+    public AbstractQuantity<?> totalValue() {
     	Preconditions.checkState(endValue != null, "Can't measure time until timer is stopped");
-        return Measure.valueOf(endValue - startValue, metricSource.getUnit());
+        return NumberQuantity.of(endValue - startValue, metricSource.getUnit());
     }
 
-    public Measure<?> ownTimeValue() {
+    public AbstractQuantity<?> ownTimeValue() {
     	Preconditions.checkState(endValue != null, "Can't measure time until timer is stopped");
-        return Measure.valueOf(ownValueSoFar, metricSource.getUnit());
+        return NumberQuantity.of(ownValueSoFar, metricSource.getUnit());
     }
 
     public long inProgressValue() {

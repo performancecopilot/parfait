@@ -1,6 +1,6 @@
 package com.custardsource.parfait;
 
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;

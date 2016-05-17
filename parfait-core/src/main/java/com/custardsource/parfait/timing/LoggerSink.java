@@ -3,8 +3,7 @@ package com.custardsource.parfait.timing;
 import java.util.Collection;
 import java.util.Map;
 
-import javax.measure.quantity.Quantity;
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 
 import net.jcip.annotations.ThreadSafe;
 
@@ -59,7 +58,7 @@ public class LoggerSink implements StepMeasurementSink {
     }
 
 
-    public <T extends Quantity> void normalizeUnits(Unit<T> originalUnit, Unit<T> normalizedUnit) {
+    public void normalizeUnits(Unit<?> originalUnit, Unit<?> normalizedUnit) {
         normalizations.put(originalUnit, normalizedUnit);
     }
 }

@@ -2,7 +2,7 @@ package com.custardsource.parfait.timing;
 
 import com.custardsource.parfait.*;
 
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 
 public class CounterPairFactory {
     private final MonitorableRegistry registry;

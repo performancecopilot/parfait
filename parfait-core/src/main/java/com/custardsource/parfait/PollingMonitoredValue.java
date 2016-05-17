@@ -1,11 +1,13 @@
 package com.custardsource.parfait;
 
+import static tec.units.ri.AbstractUnit.ONE;
+
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +52,7 @@ public class PollingMonitoredValue<T> extends SettableValue<T> {
      */
     public PollingMonitoredValue(String name, String description,
             MonitorableRegistry registry, int updateInterval, Supplier<T> poller, ValueSemantics semantics) {
-        this(name, description, registry, updateInterval, poller, semantics, Unit.ONE);
+        this(name, description, registry, updateInterval, poller, semantics, ONE);
     }
 
     /**

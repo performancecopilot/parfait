@@ -1,7 +1,9 @@
 package com.custardsource.parfait;
 
-import javax.measure.unit.Unit;
+import static tec.units.ri.AbstractUnit.ONE;
+
 import java.util.concurrent.atomic.AtomicLong;
+import javax.measure.Unit;
 
 /**
  * A MonitoredCounter is a useful implementation of {@link Monitorable} specifically for
@@ -32,7 +34,7 @@ public class MonitoredCounter extends AbstractMonitorable<Long> implements Count
      * semantics.
      */
     public MonitoredCounter(String name, String description, MonitorableRegistry registry) {
-        this(name, description, registry, Unit.ONE);
+        this(name, description, registry, ONE);
     }
 
     /**

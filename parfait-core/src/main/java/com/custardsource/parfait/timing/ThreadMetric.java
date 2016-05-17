@@ -1,6 +1,6 @@
 package com.custardsource.parfait.timing;
 
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 
 
 public interface ThreadMetric {

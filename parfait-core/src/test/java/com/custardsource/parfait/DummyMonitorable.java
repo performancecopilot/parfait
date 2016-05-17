@@ -1,6 +1,8 @@
 package com.custardsource.parfait;
 
-import javax.measure.unit.Unit;
+import static tec.units.ri.AbstractUnit.ONE;
+
+import javax.measure.Unit;
 
 public class DummyMonitorable implements Monitorable<String> {
     private final String name;
@@ -36,7 +38,7 @@ public class DummyMonitorable implements Monitorable<String> {
 
     @Override
     public Unit<?> getUnit() {
-        return Unit.ONE;
+        return ONE;
     }
 
     @Override

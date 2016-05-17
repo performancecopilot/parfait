@@ -2,9 +2,8 @@ package com.custardsource.parfait;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-
-import javax.measure.unit.NonSI;
-import javax.measure.unit.Unit;
+import static tec.units.ri.AbstractUnit.ONE;
+import static com.custardsource.parfait.unit.NonSI.BYTE;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -18,17 +17,16 @@ public class TimeWindowCounterBuilderTest {
 	@Before
 	public void setUp() {
 		registry = new MonitorableRegistry();
-		template = new MonitoredCounter("disk.writes", "bytes written to disk", registry,
-				NonSI.BYTE);
+		template = new MonitoredCounter("disk.writes", "bytes written to disk", registry, BYTE);
 		builder = new TimeWindowCounterBuilder(registry, TimeWindow.of(1000, 5000, "5s"));
 	}
 
 	@Test
 	public void metricsShouldBeCreatedWithProvidedValues() {
-		builder.build("mails.sent", "emails sent", Unit.ONE);
+		builder.build("mails.sent", "emails sent", ONE);
 		assertTrue(registry.containsMetric("mails.sent.5s"));
 		assertEquals("emails sent [5s]", registry.getMetric("mails.sent.5s").getDescription());
-		assertEquals(Unit.ONE, registry.getMetric("mails.sent.5s").getUnit());
+		assertEquals(ONE, registry.getMetric("mails.sent.5s").getUnit());
 	}
 
 	@Test
@@ -36,8 +34,7 @@ public class TimeWindowCounterBuilderTest {
 		builder.copyFrom(template);
 		assertTrue(registry.containsMetric("disk.writes.5s"));
 		assertEquals("bytes written to disk [5s]", registry.getMetric("disk.writes.5s").getDescription());
-		assertEquals(NonSI.BYTE, registry.getMetric("disk.writes.5s")
-				.getUnit());
+		assertEquals(BYTE, registry.getMetric("disk.writes.5s").getUnit());
 	}
 
 	@Test

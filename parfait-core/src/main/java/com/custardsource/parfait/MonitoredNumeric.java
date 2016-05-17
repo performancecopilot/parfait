@@ -1,6 +1,6 @@
 package com.custardsource.parfait;
 
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 
 /**
  * Base implementation of {@link Monitorable} which deals with numeric values.

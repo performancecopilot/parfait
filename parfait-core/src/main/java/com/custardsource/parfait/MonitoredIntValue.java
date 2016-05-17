@@ -1,8 +1,9 @@
 package com.custardsource.parfait;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import static tec.units.ri.AbstractUnit.ONE;
 
-import javax.measure.unit.Unit;
+import java.util.concurrent.atomic.AtomicInteger;
+import javax.measure.Unit;
 
 /**
  * {@link Monitorable} implementation for a free-running Integer value.
@@ -10,13 +11,12 @@ import javax.measure.unit.Unit;
 public class MonitoredIntValue extends MonitoredNumeric<AtomicInteger> {
 	public MonitoredIntValue(String name, String description,
 			MonitorableRegistry registry, Integer initialValue) {
-		this(name, description, registry, initialValue, Unit.ONE);
+		this(name, description, registry, initialValue, ONE);
 	}
 
 	public MonitoredIntValue(String name, String description,
 			Integer initialValue) {
-        this(name, description, MonitorableRegistry.DEFAULT_REGISTRY,
-                initialValue, Unit.ONE);
+        this(name, description, MonitorableRegistry.DEFAULT_REGISTRY, initialValue, ONE);
 	}
 
     public MonitoredIntValue(String name, String description, MonitorableRegistry registry,

@@ -2,7 +2,7 @@ package com.custardsource.parfait;
 
 import java.util.List;
 
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 
 import net.jcip.annotations.ThreadSafe;
 
