@@ -5,8 +5,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static tec.units.ri.AbstractUnit.ONE;
 
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
@@ -66,7 +67,7 @@ public class PcpMmvWriterTest {
         pcpMmvWriter.start();
         pcpMmvWriter.reset();
         Mockito.reset(customTypeTypeHandler);
-        pcpMmvWriter.addMetric(metricName, Semantics.COUNTER, Unit.ONE, new CustomType());
+        pcpMmvWriter.addMetric(metricName, Semantics.COUNTER, ONE, new CustomType());
         pcpMmvWriter.updateMetric(metricName, new CustomType());
         verify(customTypeTypeHandler, never()).putBytes(any(ByteBuffer.class), any(CustomType.class));
     }

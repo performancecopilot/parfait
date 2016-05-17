@@ -1,11 +1,15 @@
 package com.custardsource.parfait.dxm.semantics;
 
+import static com.custardsource.parfait.unit.NonSI.BIT;
+import static com.custardsource.parfait.unit.NonSI.BYTE;
+import static tec.units.ri.AbstractConverter.IDENTITY;
+import static tec.units.ri.AbstractQuantity.NONE;
+import static tec.units.ri.AbstractUnit.ONE;
+import static tec.units.ri.unit.Units.SECOND;
 
-import javax.measure.converter.UnitConverter;
 import javax.measure.quantity.Dimensionless;
-import javax.measure.unit.NonSI;
-import javax.measure.unit.SI;
-import javax.measure.unit.Unit;
+import javax.measure.UnitConverter;
+import javax.measure.Unit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,11 +61,10 @@ public final class UnitMapping {
             return false;
         }
         Unit<?> divided = left.divide(right);
-        if (!divided.getDimension().equals(javax.measure.unit.Dimension.NONE)) {
+        if (!divided.getDimension().equals(NONE)) {
             return false;
         }
-        return divided.asType(Dimensionless.class).getConverterTo(Unit.ONE).equals(
-                UnitConverter.IDENTITY);
+        return divided.asType(Dimensionless.class).getConverterTo(ONE).equals(IDENTITY);
     }
 
     public static int getDimensions(Unit<?> unit, String name) {
@@ -130,16 +133,13 @@ public final class UnitMapping {
     }
 
     public static void main(String[] args) {
-        System.out.println(UnitMapping.findUnitMapping(NonSI.BYTE));
-        System.out.println(UnitMapping.findUnitMapping(NonSI.BYTE.divide(SI.SECOND)));
-        System.out.println(UnitMapping.findUnitMapping(NonSI.BYTE.times(1024).divide(SI.SECOND)));
-        System.out.println(UnitMapping.findUnitMapping(NonSI.BYTE.times(1024).divide(
-                SI.SECOND.divide(1000))));
-        System.out.println(UnitMapping.findUnitMapping(Unit.ONE.times(1000).divide(SI.SECOND)));
-        System.out.println(UnitMapping.findUnitMapping(Unit.ONE.times(1000).divide(
-                SI.SECOND.divide(1000))));
-        System.out.println(UnitMapping.findUnitMapping(Unit.ONE.times(500).divide(
-                SI.SECOND.divide(2))));
-        System.out.println(UnitMapping.findUnitMapping(Unit.ONE.times(50).divide(SI.BIT)));
+        System.out.println(UnitMapping.findUnitMapping(BYTE));
+        System.out.println(UnitMapping.findUnitMapping(BYTE.divide(SECOND)));
+        System.out.println(UnitMapping.findUnitMapping(BYTE.multiply(1024).divide(SECOND)));
+        System.out.println(UnitMapping.findUnitMapping(BYTE.multiply(1024).divide(SECOND.divide(1000))));
+        System.out.println(UnitMapping.findUnitMapping(ONE.multiply(1000).divide(SECOND)));
+        System.out.println(UnitMapping.findUnitMapping(ONE.multiply(1000).divide(SECOND.divide(1000))));
+        System.out.println(UnitMapping.findUnitMapping(ONE.multiply(500).divide(SECOND.divide(2))));
+        System.out.println(UnitMapping.findUnitMapping(ONE.multiply(50).divide(BIT)));
     }
 }

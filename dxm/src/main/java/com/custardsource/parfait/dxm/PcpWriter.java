@@ -3,7 +3,7 @@ package com.custardsource.parfait.dxm;
 import com.custardsource.parfait.dxm.semantics.Semantics;
 import com.custardsource.parfait.dxm.types.TypeHandler;
 
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 

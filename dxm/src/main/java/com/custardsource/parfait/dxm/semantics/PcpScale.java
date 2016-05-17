@@ -1,35 +1,38 @@
 package com.custardsource.parfait.dxm.semantics;
 
-import javax.measure.quantity.DataAmount;
+import static tec.units.ri.AbstractUnit.ONE;
+import tec.units.ri.unit.Units;
+
+import com.custardsource.parfait.quantity.Information;
+import com.custardsource.parfait.unit.NonSI;
+
 import javax.measure.quantity.Dimensionless;
-import javax.measure.quantity.Duration;
-import javax.measure.quantity.Quantity;
-import javax.measure.unit.NonSI;
-import javax.measure.unit.SI;
-import javax.measure.unit.Unit;
+import javax.measure.quantity.Time;
+import javax.measure.Quantity;
+import javax.measure.Unit;
 
 interface PcpScale<T extends Quantity> extends UnitValued {
-    public Unit<T> getUnit();
+    public Unit<?> getUnit();
 
-    static enum SpaceScale implements PcpScale<DataAmount> {
+    static enum SpaceScale implements PcpScale<Information> {
         BYTE(0, NonSI.BYTE),
-        KILOBYTE(1, NonSI.BYTE.times(1L << 10)),
-        MEGABYTE(2, NonSI.BYTE.times(1L << 20)),
-        GIGABYTE(3, NonSI.BYTE.times(1L << 30)),
-        TERABYTE(4, NonSI.BYTE.times(1L << 40)),
-        PETABYTE(5, NonSI.BYTE.times(1L << 50)),
-        EXABYTE(6, NonSI.BYTE.times(1L << 60));
+        KILOBYTE(1, NonSI.BYTE.multiply(1L << 10)),
+        MEGABYTE(2, NonSI.BYTE.multiply(1L << 20)),
+        GIGABYTE(3, NonSI.BYTE.multiply(1L << 30)),
+        TERABYTE(4, NonSI.BYTE.multiply(1L << 40)),
+        PETABYTE(5, NonSI.BYTE.multiply(1L << 50)),
+        EXABYTE(6, NonSI.BYTE.multiply(1L << 60));
 
         private final int pmUnitsValue;
-        private final Unit<DataAmount> unit;
+        private final Unit<Information> unit;
 
-        private SpaceScale(int pmUnitsValue, Unit<DataAmount> unit) {
+        private SpaceScale(int pmUnitsValue, Unit<Information> unit) {
             this.pmUnitsValue = pmUnitsValue;
             this.unit = unit;
         }
 
         @Override
-        public Unit<DataAmount> getUnit() {
+        public Unit<Information> getUnit() {
             return unit;
         }
 
@@ -39,24 +42,24 @@ interface PcpScale<T extends Quantity> extends UnitValued {
         }
     }
 
-    static enum TimeScale implements PcpScale<Duration> {
-        NANOSECOND(0, SI.SECOND.divide(1000000000)),
-        MICROSECOND(1, SI.SECOND.divide(1000000)),
-        MILLISECOND(2, SI.SECOND.divide(1000)),
-        SECOND(3, SI.SECOND),
-        MINUTE(4, NonSI.MINUTE),
-        HOUR(5, NonSI.HOUR);
+    static enum TimeScale implements PcpScale<Time> {
+        NANOSECOND(0, Units.SECOND.divide(1000000000)),
+        MICROSECOND(1, Units.SECOND.divide(1000000)),
+        MILLISECOND(2, Units.SECOND.divide(1000)),
+        SECOND(3, Units.SECOND),
+        MINUTE(4, Units.MINUTE),
+        HOUR(5, Units.HOUR);
 
         private final int pmUnitsValue;
-        private final Unit<Duration> unit;
+        private final Unit<Time> unit;
 
-        private TimeScale(int pmUnitsValue, Unit<Duration> unit) {
+        private TimeScale(int pmUnitsValue, Unit<Time> unit) {
             this.pmUnitsValue = pmUnitsValue;
             this.unit = unit;
         }
 
         @Override
-        public Unit<Duration> getUnit() {
+        public Unit<Time> getUnit() {
             return unit;
         }
 
@@ -67,11 +70,11 @@ interface PcpScale<T extends Quantity> extends UnitValued {
     }
 
     static enum UnitScale implements PcpScale<Dimensionless> {
-        UNIT(0, Unit.ONE),
-        THOUSAND(3, Unit.ONE.times(1000)),
-        MILLION(6, Unit.ONE.times(1000000)),
-        BILLION(9, Unit.ONE.times(1000000000)),
-        TRILLION(12, Unit.ONE.times(1000000000000L));
+        UNIT(0, ONE),
+        THOUSAND(3, ONE.multiply(1000)),
+        MILLION(6, ONE.multiply(1000000)),
+        BILLION(9, ONE.multiply(1000000000)),
+        TRILLION(12, ONE.multiply(1000000000000L));
 
         private final int pmUnitsValue;
         private final Unit<Dimensionless> unit;

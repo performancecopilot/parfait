@@ -1,5 +1,12 @@
 package com.custardsource.parfait.dxm;
 
+import static com.custardsource.parfait.unit.NonSI.BYTE;
+import static tec.units.ri.unit.MetricPrefix.KILO;
+import static tec.units.ri.unit.Units.HERTZ;
+import static tec.units.ri.unit.Units.HOUR;
+import static tec.units.ri.unit.Units.SECOND;
+import static tec.units.ri.AbstractUnit.ONE;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -13,9 +20,7 @@ import java.util.GregorianCalendar;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.measure.unit.NonSI;
-import javax.measure.unit.SI;
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 
 import com.custardsource.parfait.dxm.semantics.Semantics;
 import com.custardsource.parfait.dxm.semantics.UnitMapping;
@@ -49,10 +54,8 @@ import com.google.common.base.Preconditions;
  * This class currently has a few important limitations:
  * </p>
  * <ul>
- * <li>Process ID is obtained in a Sun HotSpot-JVM specific way (likely to work on other JVMs but
- * not guaranteed)</li>
- * <li>Receiving agent must be using MMV agent version 2.8.10 or later (version 1 of the MMV on-disk
- * format)</li>
+ * <li>Process ID is obtained in a HotSpot-JVM specific way (may work on other JVMs, not known)</li>
+ * <li>Receiving agent must be using MMV agent from pcp-2.8.10 or later (v1 MMV on-disk format)</li>
  * </ul>
  * 
  * @author Cowan
@@ -461,8 +464,6 @@ public class PcpMmvWriter extends BasePcpWriter {
         return INSTANCE_NAME_LIMIT;
     }
 
-    // TODO there's lots of synchronization points we need to properly think out here, including the PcpMonitorBridge
-
     @Override
     protected synchronized void initialiseOffsets() {
         int nextOffset = HEADER_LENGTH + (TOC_LENGTH * tocCount());
@@ -518,7 +519,7 @@ public class PcpMmvWriter extends BasePcpWriter {
 
         // Automatically uses default int handler
         bridge.addMetric(MetricName.parse("sheep[baabaablack].bagsfull.count"), Semantics.COUNTER,
-                Unit.ONE.times(1000), 3);
+                ONE.multiply(1000), 3);
 
         // Automatically uses default boolean-to-int handler
         bridge.addMetric(MetricName.parse("sheep[baabaablack].bagsfull.haveany"),
@@ -527,12 +528,12 @@ public class PcpMmvWriter extends BasePcpWriter {
                 null, new AtomicBoolean(false));
 
         // Automatically uses default long handler
-        bridge.addMetric(MetricName.parse("sheep[insomniac].jumps"), Semantics.COUNTER, Unit.ONE,
+        bridge.addMetric(MetricName.parse("sheep[insomniac].jumps"), Semantics.COUNTER, ONE,
                 12345678901234L);
 
         // Automatically uses default double handler
         bridge.addMetric(MetricName.parse("sheep[limpy].legs.available"), Semantics.DISCRETE,
-                Unit.ONE, 0.75);
+                ONE, 0.75);
 
         // Uses this class' custom String handler
         bridge.addMetric(MetricName.parse("sheep[limpy].jumpitem"), Semantics.DISCRETE, null,
@@ -561,16 +562,14 @@ public class PcpMmvWriter extends BasePcpWriter {
                 new GregorianCalendar(1990, 1, 1, 12, 34, 56).getTime());
 
         // Uses units
-        bridge.addMetric(MetricName.parse("cow.launch.velocity"), Semantics.INSTANT, NonSI.MILE
-                .divide(SI.SECOND), new Date());
-        bridge.addMetric(MetricName.parse("cow.bytes.total"), Semantics.COUNTER, NonSI.BYTE,
-                10000001);
-        bridge.addMetric(MetricName.parse("cow.bytes.rate"), Semantics.INSTANT, NonSI.BYTE.times(
-                1024).divide(SI.SECOND), new Date());
-        bridge.addMetric(MetricName.parse("cow.bytes.chewtime"), Semantics.INSTANT, NonSI.HOUR
-                .divide(NonSI.BYTE), 7);
-        bridge.addMetric(MetricName.parse("cow.bytes.jawmotion"), Semantics.INSTANT, SI
-                .KILO(SI.HERTZ), 0.5);
+        bridge.addMetric(MetricName.parse("cow.bytes.total"), Semantics.COUNTER,
+                BYTE, 10000001);
+        bridge.addMetric(MetricName.parse("cow.bytes.rate"), Semantics.INSTANT,
+                BYTE.multiply(1024).divide(SECOND), new Date());
+        bridge.addMetric(MetricName.parse("cow.bytes.chewtime"), Semantics.INSTANT,
+                HOUR.divide(BYTE), 7);
+        bridge.addMetric(MetricName.parse("cow.bytes.jawmotion"), Semantics.INSTANT,
+                KILO(HERTZ), 0.5);
 
         // Set up some help text
         bridge.setInstanceDomainHelpText(

@@ -2,7 +2,7 @@ package com.custardsource.parfait.dxm;
 
 import static com.google.common.collect.Maps.newConcurrentMap;
 
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -25,10 +25,9 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
 public abstract class BasePcpWriter implements PcpWriter {
-	// TODO only include in-use indoms/instances/metrics (/strings?) in the header
-	private final Store<PcpMetricInfo> metricInfoStore;
+    private final Store<PcpMetricInfo> metricInfoStore;
     private final Store<InstanceDomain> instanceDomainStore;
-	
+
     private final Map<MetricName, PcpValueInfo> metricData = Maps.newConcurrentMap();
     private final Map<Class<?>, TypeHandler<?>> typeHandlers = new ConcurrentHashMap<Class<?>, TypeHandler<?>>(
             DefaultTypeHandlers.getDefaultMappings());

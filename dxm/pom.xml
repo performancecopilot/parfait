@@ -5,36 +5,33 @@
   <version>0.3.8-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>parfait DXM</name>
-  <description>Java implementation of the PCP MMV (memory-mapped values) PMDA format, allowing extremely simple passing of Java values across to the PCP system</description>
+  <description>Java implementation of the PCP MMV (Memory-Mapped Values) format, offering extremely efficient real time communication between the JVM and PCP</description>
   <parent>
     <groupId>com.custardsource</groupId>
     <artifactId>parfait</artifactId>
     <version>0.3.8-SNAPSHOT</version>
   </parent>
   <dependencies>
-<!--
     <dependency>
-      <groupId>commons-lang</groupId>
-      <artifactId>commons-lang</artifactId>
-      <version>2.4</version>
+      <groupId>com.custardsource.parfait</groupId>
+      <artifactId>parfait-core</artifactId>
+      <version>${project.version}</version>
     </dependency>
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-      <version>1.4</version>
-    </dependency>
--->
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
     </dependency>
-  	<dependency>
-  		<groupId>net.jcip</groupId>
-  		<artifactId>jcip-annotations</artifactId>
-  	</dependency>
+    <dependency>
+  	<groupId>net.jcip</groupId>
+  	<artifactId>jcip-annotations</artifactId>
+    </dependency>
     <dependency>
       <groupId>javax.measure</groupId>
       <artifactId>unit-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>tec.units</groupId>
+      <artifactId>unit-ri</artifactId>
     </dependency>
     <dependency>
     	<groupId>commons-lang</groupId>
@@ -50,7 +47,31 @@
         <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <!-- Additional repositories -->
+  <!-- Helps to resolve Parent POM -->
   <repositories>
+    <repository>
+      <id>jcenter</id>
+      <name>JCenter</name>
+      <url>http://jcenter.bintray.com</url>
+    </repository>
+    <repository>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <id>bintray-release</id>
+      <name>libs-release</name>
+      <url>http://oss.jfrog.org/artifactory/libs-release</url>
+    </repository>
+    <repository>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <id>bintray-snapshot</id>
+      <name>libs-snapshot</name>
+      <url>http://oss.jfrog.org/artifactory/libs-snapshot</url>
+    </repository>
     <repository>
       <id>java.net</id>
       <url>http://download.java.net/maven/2/</url>

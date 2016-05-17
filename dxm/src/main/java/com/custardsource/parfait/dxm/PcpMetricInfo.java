@@ -1,6 +1,6 @@
 package com.custardsource.parfait.dxm;
 
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 
 import com.custardsource.parfait.dxm.semantics.Semantics;
 import com.custardsource.parfait.dxm.types.TypeHandler;
