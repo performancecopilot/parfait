@@ -1,5 +1,7 @@
 package com.custardsource.parfait.dropwizard.metricadapters;
 
+import static tec.units.ri.AbstractUnit.ONE;
+
 import com.codahale.metrics.Metered;
 import com.custardsource.parfait.Monitorable;
 import com.custardsource.parfait.ValueSemantics;
@@ -7,7 +9,7 @@ import com.custardsource.parfait.dropwizard.MetricAdapter;
 import com.custardsource.parfait.dropwizard.NonSelfRegisteringSettableValue;
 import com.google.common.collect.Sets;
 
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 import java.util.Set;
 
 import static com.codahale.metrics.MetricRegistry.name;
@@ -23,11 +25,11 @@ public class MeteredAdapter implements MetricAdapter {
 
     public MeteredAdapter(Metered metered, String name, String description) {
         this.metered = metered;
-        this.fifteenMinuteRate = new NonSelfRegisteringSettableValue<>(name(name, "fifteen_minute_rate"), description + " - Fifteen minute rate", Unit.ONE, metered.getFifteenMinuteRate(), ValueSemantics.FREE_RUNNING);
-        this.fiveMinuteRate = new NonSelfRegisteringSettableValue<>(name(name, "five_minute_rate"), description + " - Five minute rate", Unit.ONE, metered.getFiveMinuteRate(), ValueSemantics.FREE_RUNNING);
-        this.oneMinuteRate = new NonSelfRegisteringSettableValue<>(name(name, "one_minute_rate"), description + " - One minute rate", Unit.ONE, metered.getOneMinuteRate(), ValueSemantics.FREE_RUNNING);
-        this.meanRate = new NonSelfRegisteringSettableValue<>(name(name, "mean_rate"), description + " - Mean rate", Unit.ONE, metered.getMeanRate(), ValueSemantics.FREE_RUNNING);
-        this.count = new NonSelfRegisteringSettableValue<>(name(name, "count"), description + " - Count", Unit.ONE, metered.getCount(), ValueSemantics.MONOTONICALLY_INCREASING);
+        this.fifteenMinuteRate = new NonSelfRegisteringSettableValue<>(name(name, "fifteen_minute_rate"), description + " - Fifteen minute rate", ONE, metered.getFifteenMinuteRate(), ValueSemantics.FREE_RUNNING);
+        this.fiveMinuteRate = new NonSelfRegisteringSettableValue<>(name(name, "five_minute_rate"), description + " - Five minute rate", ONE, metered.getFiveMinuteRate(), ValueSemantics.FREE_RUNNING);
+        this.oneMinuteRate = new NonSelfRegisteringSettableValue<>(name(name, "one_minute_rate"), description + " - One minute rate", ONE, metered.getOneMinuteRate(), ValueSemantics.FREE_RUNNING);
+        this.meanRate = new NonSelfRegisteringSettableValue<>(name(name, "mean_rate"), description + " - Mean rate", ONE, metered.getMeanRate(), ValueSemantics.FREE_RUNNING);
+        this.count = new NonSelfRegisteringSettableValue<>(name(name, "count"), description + " - Count", ONE, metered.getCount(), ValueSemantics.MONOTONICALLY_INCREASING);
     }
 
     @Override

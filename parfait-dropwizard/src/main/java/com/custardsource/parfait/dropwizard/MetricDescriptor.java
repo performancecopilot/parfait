@@ -1,6 +1,6 @@
 package com.custardsource.parfait.dropwizard;
 
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 
 import com.custardsource.parfait.ValueSemantics;
 
@@ -12,7 +12,7 @@ public interface MetricDescriptor {
     /**
      * The unit of the metric
      *
-     * @return The JSR-275 unit
+     * @return The JSR-363 unit
      */
     Unit getUnit();
 

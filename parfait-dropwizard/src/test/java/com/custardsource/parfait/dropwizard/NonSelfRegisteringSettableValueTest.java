@@ -1,5 +1,6 @@
 package com.custardsource.parfait.dropwizard;
 
+import static tec.units.ri.AbstractUnit.ONE;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -7,7 +8,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import javax.measure.quantity.Dimensionless;
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 
 import com.custardsource.parfait.Monitor;
 import com.custardsource.parfait.ValueSemantics;
@@ -22,7 +23,7 @@ public class NonSelfRegisteringSettableValueTest {
 
     private static final String NAME = "name";
     private static final String DESCRIPTION = "description";
-    private static final Unit<Dimensionless> UNIT = Unit.ONE;
+    private static final Unit<Dimensionless> UNIT = ONE;
     private static final int INITIAL_VALUE = 12345;
     private static final int NEW_VALUE = 789;
     private static final ValueSemantics VALUE_SEMANTICS = ValueSemantics.CONSTANT;

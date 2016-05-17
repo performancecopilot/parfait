@@ -1,6 +1,6 @@
 package com.custardsource.parfait.dropwizard.metricadapters;
 
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 import java.util.Set;
 
 import com.custardsource.parfait.dropwizard.MetricAdapter;

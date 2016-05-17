@@ -1,10 +1,12 @@
 package com.custardsource.parfait.dropwizard.metricadapters;
 
+import static tec.units.ri.AbstractUnit.ONE;
+
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 
 import com.custardsource.parfait.dropwizard.MetricAdapter;
 import com.codahale.metrics.Counting;
@@ -51,7 +53,7 @@ public class CountingAdapterTest {
 
     @Test
     public void shouldReturnOneAsUnitOfMeasurement() {
-        assertThat(getFirstMonitorable(metricAdapter).getUnit(), Matchers.<Unit>is(Unit.ONE));
+        assertThat(getFirstMonitorable(metricAdapter).getUnit(), Matchers.<Unit>is(ONE));
     }
 
     @Test

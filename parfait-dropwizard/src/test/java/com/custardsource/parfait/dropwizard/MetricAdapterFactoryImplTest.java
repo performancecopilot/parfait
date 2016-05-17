@@ -1,5 +1,8 @@
 package com.custardsource.parfait.dropwizard;
 
+import static tec.units.ri.AbstractUnit.ONE;
+import static tec.units.ri.unit.Units.GRAY;
+
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
@@ -9,8 +12,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import javax.measure.unit.SI;
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 
 import com.custardsource.parfait.dropwizard.metricadapters.CountingAdapter;
 import com.custardsource.parfait.dropwizard.metricadapters.GaugeAdapter;
@@ -70,7 +72,7 @@ public class MetricAdapterFactoryImplTest {
         when(timer.getSnapshot()).thenReturn(snapshot);
         metricAdapterFactory = new MetricAdapterFactoryImpl(metricDescriptorLookup, metricNameTranslator);
 
-        when(mockDescriptor.getUnit()).thenReturn(SI.GRAY);
+        when(mockDescriptor.getUnit()).thenReturn(GRAY);
         when(mockDescriptor.getDescription()).thenReturn(DESCRIPTION);
         when(mockDescriptor.getSemantics()).thenReturn(ValueSemantics.FREE_RUNNING);
 
@@ -122,7 +124,7 @@ public class MetricAdapterFactoryImplTest {
 
     @Test
     public void shouldSpecifyOneAsUnitOfMeasurementInReturnedCounterAdapter() {
-        assertThat(getFirstMonitorable(metricAdapterFactory.createMetricAdapterFor(NAME, counter)).getUnit(), Matchers.<Unit>is(Unit.ONE));
+        assertThat(getFirstMonitorable(metricAdapterFactory.createMetricAdapterFor(NAME, counter)).getUnit(), Matchers.<Unit>is(ONE));
     }
 
     @Test
@@ -156,7 +158,7 @@ public class MetricAdapterFactoryImplTest {
 
     @Test
     public void shouldUseUnitFromMetricDescriptorInGaugeAdapter() {
-        assertThat(getFirstMonitorable(metricAdapterFactory.createMetricAdapterFor(NAME, gauge)).getUnit(), Matchers.<Unit>is(SI.GRAY));
+        assertThat(getFirstMonitorable(metricAdapterFactory.createMetricAdapterFor(NAME, gauge)).getUnit(), Matchers.<Unit>is(GRAY));
     }
 
     //
@@ -180,11 +182,11 @@ public class MetricAdapterFactoryImplTest {
 
     @Test
     public void shouldUseUnitFromMetricDescriptorInHistogramAdapter() {
-        assertThat(getMonitorableByName(TRANSLATED_NAME + ".mean", metricAdapterFactory.createMetricAdapterFor(NAME, histogram)).getUnit(), Matchers.<Unit>is(SI.GRAY));
-        assertThat(getMonitorableByName(TRANSLATED_NAME + ".median", metricAdapterFactory.createMetricAdapterFor(NAME, histogram)).getUnit(), Matchers.<Unit>is(SI.GRAY));
-        assertThat(getMonitorableByName(TRANSLATED_NAME + ".max", metricAdapterFactory.createMetricAdapterFor(NAME, histogram)).getUnit(), Matchers.<Unit>is(SI.GRAY));
-        assertThat(getMonitorableByName(TRANSLATED_NAME + ".min", metricAdapterFactory.createMetricAdapterFor(NAME, histogram)).getUnit(), Matchers.<Unit>is(SI.GRAY));
-        assertThat(getMonitorableByName(TRANSLATED_NAME + ".stddev", metricAdapterFactory.createMetricAdapterFor(NAME, histogram)).getUnit(), Matchers.<Unit>is(SI.GRAY));
+        assertThat(getMonitorableByName(TRANSLATED_NAME + ".mean", metricAdapterFactory.createMetricAdapterFor(NAME, histogram)).getUnit(), Matchers.<Unit>is(GRAY));
+        assertThat(getMonitorableByName(TRANSLATED_NAME + ".median", metricAdapterFactory.createMetricAdapterFor(NAME, histogram)).getUnit(), Matchers.<Unit>is(GRAY));
+        assertThat(getMonitorableByName(TRANSLATED_NAME + ".max", metricAdapterFactory.createMetricAdapterFor(NAME, histogram)).getUnit(), Matchers.<Unit>is(GRAY));
+        assertThat(getMonitorableByName(TRANSLATED_NAME + ".min", metricAdapterFactory.createMetricAdapterFor(NAME, histogram)).getUnit(), Matchers.<Unit>is(GRAY));
+        assertThat(getMonitorableByName(TRANSLATED_NAME + ".stddev", metricAdapterFactory.createMetricAdapterFor(NAME, histogram)).getUnit(), Matchers.<Unit>is(GRAY));
     }
 
     //

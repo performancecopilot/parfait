@@ -1,6 +1,7 @@
 package com.custardsource.parfait.dropwizard.metricadapters;
 
-import javax.measure.unit.Unit;
+import static tec.units.ri.AbstractUnit.ONE;
+
 import java.util.Set;
 
 import com.custardsource.parfait.dropwizard.MetricAdapter;
@@ -17,7 +18,7 @@ public class CountingAdapter implements MetricAdapter {
 
     public CountingAdapter(Counting counter, String name, String description, ValueSemantics valueSemantics) {
         this.counter = counter;
-        this.monitoredValue = new NonSelfRegisteringSettableValue<>(name, description, Unit.ONE, counter.getCount(), valueSemantics);
+        this.monitoredValue = new NonSelfRegisteringSettableValue<>(name, description, ONE, counter.getCount(), valueSemantics);
     }
 
     @Override

@@ -1,11 +1,13 @@
 package com.custardsource.parfait.dropwizard.metricadapters;
 
+import static tec.units.ri.unit.MetricPrefix.NANO;
+import static tec.units.ri.unit.Units.SECOND;
+
 import com.codahale.metrics.Timer;
 import com.custardsource.parfait.Monitorable;
 import com.custardsource.parfait.dropwizard.MetricAdapter;
 import com.google.common.collect.Sets;
 
-import javax.measure.unit.SI;
 import java.util.Set;
 
 public class TimerAdapter implements MetricAdapter {
@@ -15,7 +17,7 @@ public class TimerAdapter implements MetricAdapter {
 
     public TimerAdapter(Timer timer, String name, String description) {
         meteredAdapter = new MeteredAdapter(timer, name, description);
-        samplingAdapter = new SamplingAdapter(timer, name, description, SI.NANO(SI.SECOND));
+        samplingAdapter = new SamplingAdapter(timer, name, description, NANO(SECOND));
     }
 
     @Override

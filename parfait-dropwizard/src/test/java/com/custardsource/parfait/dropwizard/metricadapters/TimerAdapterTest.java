@@ -1,13 +1,15 @@
 package com.custardsource.parfait.dropwizard.metricadapters;
 
+import static tec.units.ri.unit.MetricPrefix.NANO;
+import static tec.units.ri.unit.Units.SECOND;
+
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
-import javax.measure.quantity.Duration;
-import javax.measure.unit.SI;
-import javax.measure.unit.Unit;
+import javax.measure.quantity.Time;
+import javax.measure.Unit;
 import java.util.Map;
 
 import com.custardsource.parfait.dropwizard.MetricAdapter;
@@ -41,7 +43,7 @@ public class TimerAdapterTest {
     private static final double INITIAL_MEDIAN = 9.9;
     private static final double INITIAL_STDDEV = 10.10;
 
-    private static final Unit<Duration> NANOSECOND = SI.NANO(SI.SECOND);
+    private static final Unit<Time> NANOSECOND = NANO(SECOND);
     private static final String FIFTEEN_MINUTE_RATE = "fifteen_minute_rate";
     private static final String FIVE_MINUTE_RATE = "five_minute_rate";
     private static final String ONE_MINUTE_RATE = "one_minute_rate";

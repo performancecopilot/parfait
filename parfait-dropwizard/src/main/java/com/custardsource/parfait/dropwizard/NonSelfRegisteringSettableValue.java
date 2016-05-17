@@ -1,6 +1,6 @@
 package com.custardsource.parfait.dropwizard;
 
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 
 import com.custardsource.parfait.AbstractMonitorable;
 import com.custardsource.parfait.ValueSemantics;

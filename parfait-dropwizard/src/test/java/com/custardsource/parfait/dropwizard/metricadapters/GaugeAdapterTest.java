@@ -1,11 +1,13 @@
 package com.custardsource.parfait.dropwizard.metricadapters;
 
+import static tec.units.ri.AbstractUnit.ONE;
+
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 import javax.measure.quantity.Dimensionless;
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 
 import com.custardsource.parfait.dropwizard.MetricAdapter;
 import com.codahale.metrics.Gauge;
@@ -23,7 +25,7 @@ public class GaugeAdapterTest {
 
     private static final String NAME = "NAME";
     private static final String DESCRIPTION = "DESCRIPTION";
-    private static final Unit<Dimensionless> UNIT = Unit.ONE;
+    private static final Unit<Dimensionless> UNIT = ONE;
     private static final ValueSemantics VALUE_SEMANTICS = ValueSemantics.FREE_RUNNING;
     private static final int INITIAL_VALUE = 123215431;
 

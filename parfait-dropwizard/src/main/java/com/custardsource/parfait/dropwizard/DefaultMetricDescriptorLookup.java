@@ -1,9 +1,11 @@
 package com.custardsource.parfait.dropwizard;
 
+import static tec.units.ri.AbstractUnit.ONE;
+
 import com.custardsource.parfait.ValueSemantics;
 
 import javax.measure.quantity.Dimensionless;
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 
 public class DefaultMetricDescriptorLookup implements MetricDescriptorLookup {
 
@@ -12,7 +14,7 @@ public class DefaultMetricDescriptorLookup implements MetricDescriptorLookup {
         return new MetricDescriptor() {
             @Override
             public Unit<Dimensionless> getUnit() {
-                return Unit.ONE;
+                return ONE;
             }
 
             @Override

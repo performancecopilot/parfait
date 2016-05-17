@@ -1,8 +1,9 @@
 package com.custardsource.parfait.dropwizard.metricadapters;
 
 import static com.codahale.metrics.MetricRegistry.name;
+import static tec.units.ri.AbstractUnit.ONE;
 
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 import java.util.Set;
 
 import com.codahale.metrics.Histogram;
@@ -22,7 +23,7 @@ public class HistogramAdapter implements MetricAdapter {
     }
 
     public HistogramAdapter(Histogram histogram, String name, String description) {
-        this(histogram, name, description, Unit.ONE);
+        this(histogram, name, description, ONE);
     }
 
     @Override

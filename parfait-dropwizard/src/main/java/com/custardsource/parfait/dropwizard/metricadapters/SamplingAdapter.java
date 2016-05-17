@@ -1,8 +1,9 @@
 package com.custardsource.parfait.dropwizard.metricadapters;
 
 import static com.codahale.metrics.MetricRegistry.name;
+import static tec.units.ri.AbstractUnit.ONE;
 
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 import java.util.Set;
 
 import com.codahale.metrics.Sampling;
@@ -33,7 +34,7 @@ public class SamplingAdapter implements MetricAdapter {
     }
 
     public SamplingAdapter(Sampling samplingMetric, String name, String description) {
-        this(samplingMetric, name, description, Unit.ONE);
+        this(samplingMetric, name, description, ONE);
     }
 
     @Override
