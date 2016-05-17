@@ -1,5 +1,9 @@
 package com.custardsource.parfait.jdbc;
 
+import static tec.units.ri.unit.MetricPrefix.MILLI;
+import static tec.units.ri.unit.Units.SECOND;
+import static tec.units.ri.AbstractUnit.ONE;
+
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -12,8 +16,7 @@ import java.sql.Statement;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
-import javax.measure.unit.SI;
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 import javax.sql.DataSource;
 
 import com.custardsource.parfait.timing.ThreadMetric;
@@ -30,9 +33,9 @@ public class ParfaitDataSource implements DataSource {
 
 	public ParfaitDataSource(DataSource wrapped) {
 		this.wrapped = wrapped;
-		this.counterMetric = newThreadMetric("Database call count", Unit.ONE, "db.count",
+		this.counterMetric = newThreadMetric("Database call count", ONE, "db.count",
                 "Number of database calls made during event", executionCounts);
-		this.timeMetric = newThreadMetric("Database execution time", SI.MILLI(SI.SECOND), "db.time",
+		this.timeMetric = newThreadMetric("Database execution time", MILLI(SECOND), "db.time",
                "Time spent in database calls during event", executionTimes);
 	}
 

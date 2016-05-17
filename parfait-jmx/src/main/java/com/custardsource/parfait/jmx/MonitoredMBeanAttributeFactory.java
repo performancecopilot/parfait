@@ -1,5 +1,7 @@
 package com.custardsource.parfait.jmx;
 
+import static tec.units.ri.AbstractUnit.ONE;
+
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
@@ -11,7 +13,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import javax.management.openmbean.CompositeData;
-import javax.measure.unit.Unit;
+import javax.measure.Unit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +62,7 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean<Monitorabl
 
     private int updateInterval = DO_NOT_UPDATE_VALUE;
 
-    private Unit<?> unit = Unit.ONE;
+    private Unit<?> unit = ONE;
     
     private ValueSemantics semantics = ValueSemantics.FREE_RUNNING;
 
