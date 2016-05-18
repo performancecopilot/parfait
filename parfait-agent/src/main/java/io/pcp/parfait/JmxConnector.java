@@ -1,11 +1,11 @@
-package com.custardsource.parfait;
+package io.pcp.parfait;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.custardsource.parfait.DynamicMonitoringView;
+import io.pcp.parfait.DynamicMonitoringView;
 
 //
 // JmxConnector class - a Parfait Proxy for JMX.

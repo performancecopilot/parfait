@@ -1,4 +1,4 @@
-package com.custardsource.parfait;
+package io.pcp.parfait;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.custardsource.parfait.dxm.HashingIdentifierSource;
-import com.custardsource.parfait.dxm.IdentifierSource;
+import io.pcp.parfait.dxm.HashingIdentifierSource;
+import io.pcp.parfait.dxm.IdentifierSource;
 
 import org.apache.log4j.Logger;
 

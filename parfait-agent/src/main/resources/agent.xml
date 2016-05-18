@@ -6,20 +6,20 @@
     <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" />
 
     <bean id="monitorableRegistry" class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
-        <property name="staticField" value="com.custardsource.parfait.MonitorableRegistry.DEFAULT_REGISTRY"/>
+        <property name="staticField" value="io.pcp.parfait.MonitorableRegistry.DEFAULT_REGISTRY"/>
     </bean>
 
-    <bean name="pcpMonitorBridge" class="com.custardsource.parfait.pcp.PcpMonitorBridge">
+    <bean name="pcpMonitorBridge" class="io.pcp.parfait.pcp.PcpMonitorBridge">
         <constructor-arg>
-            <bean id="mmvPcpWriter" class="com.custardsource.parfait.dxm.PcpMmvWriter">
+            <bean id="mmvPcpWriter" class="io.pcp.parfait.dxm.PcpMmvWriter">
                 <constructor-arg value="${parfait.name}"/>
                 <constructor-arg>
                     <bean class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
-                        <property name="staticField" value="com.custardsource.parfait.dxm.IdentifierSourceSet.DEFAULT_SET"/>
+                        <property name="staticField" value="io.pcp.parfait.dxm.IdentifierSourceSet.DEFAULT_SET"/>
                     </bean>
                 </constructor-arg>
                 <property name="flags">
-                    <set value-type="com.custardsource.parfait.dxm.PcpMmvWriter.MmvFlag">
+                    <set value-type="io.pcp.parfait.dxm.PcpMmvWriter.MmvFlag">
                         <value>MMV_FLAG_PROCESS</value>
                     </set>
                 </property>
@@ -28,24 +28,24 @@
         </constructor-arg>
     </bean>
 
-    <bean name="monitoringView" class="com.custardsource.parfait.DynamicMonitoringView">
+    <bean name="monitoringView" class="io.pcp.parfait.DynamicMonitoringView">
         <constructor-arg ref="monitorableRegistry"/>
         <constructor-arg ref="pcpMonitorBridge"/>
     </bean>
 
-    <bean name="monitoredMBean" class="com.custardsource.parfait.jmx.MonitoredMBeanAttributeFactory"
+    <bean name="monitoredMBean" class="io.pcp.parfait.jmx.MonitoredMBeanAttributeFactory"
           abstract="true">
         <property name="monitorableRegistry" ref="monitorableRegistry"/>
         <property name="updateInterval" value="${parfait.interval}"/>
     </bean>
 
-    <bean name="optionalMBean" class="com.custardsource.parfait.OptionalMonitoredMBeanRegistrar"
+    <bean name="optionalMBean" class="io.pcp.parfait.OptionalMonitoredMBeanRegistrar"
           abstract="true">
         <property name="monitorableRegistry" ref="monitorableRegistry"/>
         <property name="updateInterval" value="${parfait.interval}"/>
     </bean>
 
-    <bean name="monitoredConstantMBean" class="com.custardsource.parfait.jmx.MonitoredMBeanAttributeFactory"
+    <bean name="monitoredConstantMBean" class="io.pcp.parfait.jmx.MonitoredMBeanAttributeFactory"
           abstract="true">
         <property name="monitorableRegistry" ref="monitorableRegistry"/>
         <property name="valueSemantics" value="CONSTANT"/>
@@ -53,7 +53,7 @@
 
     <import resource="units.xml" />
 
-    <bean class="com.custardsource.parfait.MonitoredConstant">
+    <bean class="io.pcp.parfait.MonitoredConstant">
         <constructor-arg value="java.jvm_version"/>
         <constructor-arg value="JVM version string"/>
         <constructor-arg value="${java.runtime.version}"/>
@@ -61,15 +61,15 @@
 
     <import resource="javabeans.xml" />
 
-    <bean id="systemTimeMonitor" class="com.custardsource.parfait.PollingMonitoredValue">
+    <bean id="systemTimeMonitor" class="io.pcp.parfait.PollingMonitoredValue">
         <constructor-arg value="java.timestamp"/>
         <constructor-arg value="Current time on server where the application is running"/>
         <constructor-arg ref="monitorableRegistry"/>
         <constructor-arg type="int" value="${parfait.interval}"/>
         <constructor-arg>
-            <bean id="systemTimePoller" class="com.custardsource.parfait.SystemTimePoller"/>
+            <bean id="systemTimePoller" class="io.pcp.parfait.SystemTimePoller"/>
         </constructor-arg>
-        <constructor-arg type="com.custardsource.parfait.ValueSemantics" value="FREE_RUNNING"/>
+        <constructor-arg type="io.pcp.parfait.ValueSemantics" value="FREE_RUNNING"/>
         <constructor-arg type="javax.measure.Unit" ref="millisecondUnit"/>
     </bean>
 

@@ -1,6 +1,6 @@
-package com.custardsource.parfait;
+package io.pcp.parfait;
 
-import com.custardsource.parfait.DynamicMonitoringView;
+import io.pcp.parfait.DynamicMonitoringView;
 import java.lang.instrument.Instrumentation;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;

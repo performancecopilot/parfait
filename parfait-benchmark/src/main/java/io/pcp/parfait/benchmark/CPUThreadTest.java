@@ -1,7 +1,7 @@
-package com.custardsource.parfait.benchmark;
+package io.pcp.parfait.benchmark;
 
-import static com.custardsource.parfait.benchmark.BlockedMetricHelper.computeTotalBlockedCount;
-import static com.custardsource.parfait.benchmark.BlockedMetricHelper.computeTotalBlockedTime;
+import static io.pcp.parfait.benchmark.BlockedMetricHelper.computeTotalBlockedCount;
+import static io.pcp.parfait.benchmark.BlockedMetricHelper.computeTotalBlockedTime;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.System.currentTimeMillis;
 

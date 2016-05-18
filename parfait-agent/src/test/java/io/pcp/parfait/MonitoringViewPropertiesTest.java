@@ -1,4 +1,4 @@
-package com.custardsource.parfait;
+package io.pcp.parfait;
 
 import org.junit.After;
 import org.junit.Before;

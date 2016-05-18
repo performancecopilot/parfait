@@ -1,4 +1,4 @@
-package com.custardsource.parfait.benchmark;
+package io.pcp.parfait.benchmark;
 
 import java.util.List;
 

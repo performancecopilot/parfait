@@ -1,12 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>com.custardsource</groupId>
+    <groupId>io.pcp</groupId>
     <artifactId>parfait</artifactId>
     <version>0.3.8-SNAPSHOT</version>
   </parent>
 
-  <groupId>com.custardsource.agentparfait</groupId>
+  <groupId>io.pcp.agentparfait</groupId>
   <artifactId>parfait-agent</artifactId>
   <packaging>jar</packaging>
   <name>parfait-agent</name>
@@ -60,27 +60,27 @@
   </build>
   <dependencies>
     <dependency>
-      <groupId>com.custardsource.parfait</groupId>
+      <groupId>io.pcp.parfait</groupId>
       <artifactId>dxm</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.custardsource.parfait</groupId>
+      <groupId>io.pcp.parfait</groupId>
       <artifactId>parfait-core</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.custardsource.parfait</groupId>
+      <groupId>io.pcp.parfait</groupId>
       <artifactId>parfait-pcp</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.custardsource.parfait</groupId>
+      <groupId>io.pcp.parfait</groupId>
       <artifactId>parfait-jmx</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.custardsource.parfait</groupId>
+      <groupId>io.pcp.parfait</groupId>
       <artifactId>parfait-spring</artifactId>
       <version>${project.version}</version>
     </dependency>

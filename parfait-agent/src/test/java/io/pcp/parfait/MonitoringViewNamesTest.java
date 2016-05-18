@@ -1,4 +1,4 @@
-package com.custardsource.parfait;
+package io.pcp.parfait;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

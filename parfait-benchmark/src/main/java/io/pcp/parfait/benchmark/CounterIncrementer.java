@@ -1,9 +1,9 @@
-package com.custardsource.parfait.benchmark;
+package io.pcp.parfait.benchmark;
 
 import java.lang.management.ManagementFactory;
 import java.util.List;
 
-import com.custardsource.parfait.MonitoredCounter;
+import io.pcp.parfait.MonitoredCounter;
 
 class CounterIncrementer implements Runnable{
 

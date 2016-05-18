@@ -1,4 +1,4 @@
-package com.custardsource.parfait;
+package io.pcp.parfait;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.custardsource.parfait.DynamicMonitoringView;
+import io.pcp.parfait.DynamicMonitoringView;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({ "classpath:test.xml", "classpath:agent.xml" })
@@ -20,6 +20,6 @@ public class ParfaitAgentSpringTest {
 
     @Test
     public void testParfaitAgentSpringBeanWiring() {
-        assertEquals("class com.custardsource.parfait.DynamicMonitoringView", this.monitoringView.getClass().toString());
+        assertEquals("class io.pcp.parfait.DynamicMonitoringView", this.monitoringView.getClass().toString());
     }
 }

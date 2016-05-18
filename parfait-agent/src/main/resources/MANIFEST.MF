@@ -1,1 +1,1 @@
-premain-Class: com.custardsource.parfait.ParfaitAgent
+premain-Class: io.pcp.parfait.ParfaitAgent

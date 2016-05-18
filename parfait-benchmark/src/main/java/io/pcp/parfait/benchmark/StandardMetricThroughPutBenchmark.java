@@ -1,7 +1,7 @@
-package com.custardsource.parfait.benchmark;
+package io.pcp.parfait.benchmark;
 
-import static com.custardsource.parfait.benchmark.BlockedMetricHelper.computeTotalBlockedCount;
-import static com.custardsource.parfait.benchmark.BlockedMetricHelper.computeTotalBlockedTime;
+import static io.pcp.parfait.benchmark.BlockedMetricHelper.computeTotalBlockedCount;
+import static io.pcp.parfait.benchmark.BlockedMetricHelper.computeTotalBlockedTime;
 import static com.google.common.collect.Lists.newArrayList;
 
 import java.lang.management.ManagementFactory;
@@ -13,15 +13,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import com.custardsource.parfait.MonitorableRegistry;
-import com.custardsource.parfait.MonitoredCounter;
-import com.custardsource.parfait.dxm.IdentifierSourceSet;
-import com.custardsource.parfait.dxm.PcpMmvWriter;
-import com.custardsource.parfait.pcp.EmptyTextSource;
-import com.custardsource.parfait.pcp.MetricDescriptionTextSource;
-import com.custardsource.parfait.pcp.MetricNameMapper;
-import com.custardsource.parfait.pcp.PcpMonitorBridge;
-import com.custardsource.parfait.spring.SelfStartingMonitoringView;
+import io.pcp.parfait.MonitorableRegistry;
+import io.pcp.parfait.MonitoredCounter;
+import io.pcp.parfait.dxm.IdentifierSourceSet;
+import io.pcp.parfait.dxm.PcpMmvWriter;
+import io.pcp.parfait.pcp.EmptyTextSource;
+import io.pcp.parfait.pcp.MetricDescriptionTextSource;
+import io.pcp.parfait.pcp.MetricNameMapper;
+import io.pcp.parfait.pcp.PcpMonitorBridge;
+import io.pcp.parfait.spring.SelfStartingMonitoringView;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
