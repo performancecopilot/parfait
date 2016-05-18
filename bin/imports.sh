@@ -12,8 +12,8 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 # Lesser General Public License for more details.
 #
-# Convert specified files (or recurse directories) and convert
-# java imports of com.custardsource.parfait to io.pcp.parfait.
+# Convert specified files (and/or recurse directories) and convert
+# all com.custardsource.parfait references to io.pcp.parfait.
 #
 
 old="com.custardsource.parfait"
@@ -27,7 +27,6 @@ convert()
         sum1=`sum $file`
         sed -i \
             -e "s/^import $old/import $new/g" \
-            -e "s/^package $old/package $new/g" \
             $file
         sum2=`sum $file`
         if [ "$sum1" != "$sum2" ]

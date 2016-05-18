@@ -138,7 +138,7 @@ All binary versions of *parfait* are synced to the Maven central repository. If 
       <dependencies>
         ...
         <dependency>
-          <groupId>com.custardsource.parfait</groupId>
+          <groupId>io.pcp.parfait</groupId>
           <artifactId>parfait-core</artifactId>
           <version>0.3.0.RC1</version>
         </dependency>

@@ -16,7 +16,7 @@ You need to have access to OSS Sonatype repo to perform some manual actions duri
 
 The best place to start is to [read this Overview guide](http://central.sonatype.org/pages/ossrh-guide.html).
 
-It appears the account to be created _may_ need to be linked with access to the `com.custardsource` project when Paul Cowan original set this project up way back when.  You may need to either refer to the original issue [https://issues.sonatype.org/browse/OSSRH-576], however my recommendation is to create a new Issue and add myself (`psmith@aconex.com`) as a watcher.  
+It appears the account to be created _may_ need to be linked with access to the `io.pcp` project.  Create a new Sonatype JIRA Issue and add myself (`psmith@aconex.com`) as a watcher.  
 
 gpg
 ---
@@ -80,4 +80,4 @@ Once you have all the above components setup, the actual release process involve
   2. The next step is outlined well here: [http://central.sonatype.org/pages/releasing-the-deployment.html]
 
 
-One the `Release` action is performed you & others in the OSS Sonatype group for this project will receive an email from Nexus indicating the promotion is complete.  Once you receive this, the new version should be referencable in any POM.
+Once the `Release` action is performed you & others in the OSS Sonatype group for this project will receive an email from Nexus indicating the promotion is complete.  Once you receive this, the new version should be referencable in any POM.
