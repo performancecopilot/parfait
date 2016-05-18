@@ -1,26 +1,26 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <artifactId>parfait</artifactId>
-    <groupId>com.custardsource</groupId>
+    <groupId>io.pcp</groupId>
     <version>0.3.8-SNAPSHOT</version>
   </parent>
   <properties>
     <cxf.version>2.2.3</cxf.version>
   </properties>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.custardsource.parfait</groupId>
+  <groupId>io.pcp.parfait</groupId>
   <artifactId>parfait-cxf</artifactId>
   <name>parfait-cxf</name>
   <version>0.3.8-SNAPSHOT</version>
   <description>Library for performance monitoring of Apache CXF web services</description>
   <dependencies>
     <dependency>
-      <groupId>com.custardsource.parfait</groupId>
+      <groupId>io.pcp.parfait</groupId>
       <artifactId>parfait-core</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.custardsource.parfait</groupId>
+      <groupId>io.pcp.parfait</groupId>
       <artifactId>parfait-spring</artifactId>
       <version>${project.version}</version>
       <scope>test</scope>

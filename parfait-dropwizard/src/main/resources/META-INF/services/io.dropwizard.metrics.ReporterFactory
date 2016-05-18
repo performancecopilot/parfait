@@ -1,1 +1,1 @@
-com.custardsource.parfait.dropwizard.ParfaitReporterFactory
+io.pcp.parfait.dropwizard.ParfaitReporterFactory

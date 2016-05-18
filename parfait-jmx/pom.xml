@@ -1,19 +1,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.custardsource.parfait</groupId>
+  <groupId>io.pcp.parfait</groupId>
   <artifactId>parfait-jmx</artifactId>
   <version>0.3.8-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>parfait-jmx</name>
   <description>Library to allow Parfait to import metric values from, and export results to, JMX</description>
   <parent>
-    <groupId>com.custardsource</groupId>
+    <groupId>io.pcp</groupId>
     <artifactId>parfait</artifactId>
     <version>0.3.8-SNAPSHOT</version>
   </parent>
   <dependencies>
     <dependency>
-      <groupId>com.custardsource.parfait</groupId>
+      <groupId>io.pcp.parfait</groupId>
       <artifactId>parfait-core</artifactId>
       <version>${project.version}</version>
     </dependency>

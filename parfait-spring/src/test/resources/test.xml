@@ -5,13 +5,13 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
 
 
-    <bean id="registry" class="com.custardsource.parfait.MonitorableRegistry"/>
+    <bean id="registry" class="io.pcp.parfait.MonitorableRegistry"/>
 
-    <bean id="threadMetricSuite" class="com.custardsource.parfait.timing.ThreadMetricSuite"
+    <bean id="threadMetricSuite" class="io.pcp.parfait.timing.ThreadMetricSuite"
           factory-method="withDefaultMetrics">
     </bean>
 
-    <bean id="eventTimer" class="com.custardsource.parfait.timing.EventTimer">
+    <bean id="eventTimer" class="io.pcp.parfait.timing.EventTimer">
         <constructor-arg value="xx"/>
         <constructor-arg ref="registry" />
         <constructor-arg ref="threadMetricSuite">
@@ -19,24 +19,24 @@
         <constructor-arg value="true"/>
         <constructor-arg value="true"/>
     </bean>
-    <bean id="profiler" class="com.custardsource.parfait.spring.MonitoringAspect">
+    <bean id="profiler" class="io.pcp.parfait.spring.MonitoringAspect">
         <constructor-arg ref="eventTimer" />
     </bean>
 
-    <bean id="notifier" class="com.custardsource.parfait.spring.AdviceNotifier">
+    <bean id="notifier" class="io.pcp.parfait.spring.AdviceNotifier">
         <constructor-arg ref="profiler"/>
     </bean>
 
     <aop:config>
         <aop:aspect ref="profiler">
             <aop:pointcut id="profiledMethods"
-                          expression="@within(com.custardsource.parfait.spring.Profiled) &amp;&amp; @annotation(com.custardsource.parfait.spring.Profiled)"/>
+                          expression="@within(io.pcp.parfait.spring.Profiled) &amp;&amp; @annotation(io.pcp.parfait.spring.Profiled)"/>
             <aop:around pointcut-ref="profiledMethods" method="profileMethod"/>
         </aop:aspect>
     </aop:config>
 
-    <bean id="test" class="com.custardsource.parfait.spring.DelayingBean"/>
-    <bean id="other" class="com.custardsource.parfait.spring.DelayingBean"/>
+    <bean id="test" class="io.pcp.parfait.spring.DelayingBean"/>
+    <bean id="other" class="io.pcp.parfait.spring.DelayingBean"/>
 
     <bean id="beanWithNoMeta" class="java.util.concurrent.atomic.AtomicInteger"/>
     <bean id="beanWithMetaFoo" class="java.util.concurrent.atomic.AtomicInteger">
