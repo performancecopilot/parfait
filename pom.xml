@@ -304,11 +304,36 @@
   </dependencies>
   <repositories>
     <repository>
+      <id>java.net</id>
+      <url>http://download.java.net/maven/2/</url>
+    </repository>
+    <repository>
       <id>sonatype-nexus-snapshots</id>
       <name>Sonatype Nexus Snapshots</name>
       <url>http://oss.sonatype.org/content/repositories/snapshots</url>
       <releases><enabled>false</enabled></releases>
       <snapshots><enabled>true</enabled></snapshots>
+    </repository>
+    <repository>
+      <id>jcenter</id>
+      <name>JCenter</name>
+      <url>http://jcenter.bintray.com</url>
+    </repository>
+    <repository>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <id>bintray-release</id>
+      <name>libs-release</name>
+      <url>http://oss.jfrog.org/artifactory/libs-release</url>
+    </repository>
+    <repository>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+      <id>bintray-snapshot</id>
+      <name>libs-snapshot</name>
+      <url>http://oss.jfrog.org/artifactory/libs-snapshot</url>
     </repository>
   </repositories>
   <distributionManagement>
