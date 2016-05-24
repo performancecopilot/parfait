@@ -1,12 +1,7 @@
 package io.pcp.parfait;
 
 import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import io.pcp.parfait.dxm.HashingIdentifierSource;
 import io.pcp.parfait.dxm.IdentifierSource;

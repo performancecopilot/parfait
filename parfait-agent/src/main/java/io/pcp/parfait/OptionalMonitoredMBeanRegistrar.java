@@ -1,6 +1,5 @@
 package io.pcp.parfait;
 
-import javax.management.MalformedObjectNameException;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
