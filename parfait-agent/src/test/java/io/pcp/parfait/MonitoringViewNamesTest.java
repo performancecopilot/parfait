@@ -3,6 +3,7 @@ package io.pcp.parfait;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -19,7 +20,7 @@ public class MonitoringViewNamesTest {
         assertEquals(pidAndHost.length, 2);
 
         int pid = Integer.parseInt(pidAndHost[0]);
-        assertEquals(pidAndHost.length, 2);
+        assertTrue(pid > 0);
     }
 
     @Test
