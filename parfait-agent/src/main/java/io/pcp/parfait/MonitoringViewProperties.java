@@ -19,12 +19,28 @@ public class MonitoringViewProperties {
 
     private static final String DEFAULT_INTERVAL = "1000"; // milliseconds
 
+    public static String getCommandBasename(String command) {
+        // trim away arguments, produce a generally sanitized basename
+        if (command != null && command.length() > 0) {
+            int index;
+
+            if (Character.isLetter(command.charAt(0)) == false)
+                return null;
+            for (index = 0; index < command.length(); index++) {
+                if (Character.isLetterOrDigit(command.charAt(index)) == false)
+                    break;
+            }
+           return command.substring(0, index);
+        }
+        return null;
+    }
+
     public static String getDefaultCommand() {
-        return System.getProperty("sun.java.command");
+        return getCommandBasename(System.getProperty("sun.java.command"));
     }
 
     public static String getParfaitName() {
-        return System.getProperty(PARFAIT_NAME);
+        return getCommandBasename(System.getProperty(PARFAIT_NAME));
     }
 
     public static String getRuntimeName() {

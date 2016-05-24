@@ -24,6 +24,17 @@ public class MonitoringViewNamesTest {
     }
 
     @Test
+    public void checkCommandBasenameExtraction() {
+        assertEquals(MonitoringViewProperties.getCommandBasename(null), null);
+        assertEquals(MonitoringViewProperties.getCommandBasename(""), null);
+        assertEquals(MonitoringViewProperties.getCommandBasename("123"), null);
+        assertEquals(MonitoringViewProperties.getCommandBasename("abc"), "abc");
+        assertEquals(MonitoringViewProperties.getCommandBasename("abc1"), "abc1");
+        assertEquals(MonitoringViewProperties.getCommandBasename("abc 123"), "abc");
+        assertEquals(MonitoringViewProperties.getCommandBasename("#!?@"), null);
+    }
+
+    @Test
     public void checkProcessIdentifierExtraction() {
         assertEquals(MonitoringViewProperties.getFallbackName(""), MonitoringViewProperties.PARFAIT);
         assertEquals(MonitoringViewProperties.getFallbackName("12345"), MonitoringViewProperties.PARFAIT);
