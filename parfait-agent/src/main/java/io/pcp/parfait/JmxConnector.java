@@ -2,7 +2,6 @@ package io.pcp.parfait;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import io.pcp.parfait.DynamicMonitoringView;
@@ -39,12 +38,14 @@ public class JmxConnector {
         logger.debug(String.format("Starting Parfait proxy %s", name));
 
         // inject all metrics via parfait-spring and parfait-jmx
+        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("proxy.xml");
         try {
-            ApplicationContext context = new ClassPathXmlApplicationContext("proxy.xml"); // TODO
             DynamicMonitoringView view = (DynamicMonitoringView)context.getBean("monitoringView");
             view.start();
         } catch (BeansException e) {
             logger.error("Stopping Parfait proxy, cannot setup beans", e);
+        } finally {
+            context.close();
         }
     }
 }

@@ -3,10 +3,8 @@ package io.pcp.parfait;
 import io.pcp.parfait.DynamicMonitoringView;
 import java.lang.instrument.Instrumentation;
 import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class ParfaitAgent {
@@ -37,12 +35,14 @@ public class ParfaitAgent {
         logger.debug(String.format("Starting Parfait agent %s", name));
 
         // inject all metrics via parfait-spring and parfait-jmx
+        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("agent.xml");
         try {
-            ApplicationContext context = new ClassPathXmlApplicationContext("agent.xml");
             DynamicMonitoringView view = (DynamicMonitoringView)context.getBean("monitoringView");
             view.start();
         } catch (BeansException e) {
             logger.error("Stopping Parfait agent, cannot setup beans", e);
+        } finally {
+            context.close();
         }
     }
 }
