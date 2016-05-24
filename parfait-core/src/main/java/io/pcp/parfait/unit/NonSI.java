@@ -31,15 +31,12 @@ import static tec.units.ri.AbstractUnit.ONE;
 import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.quantity.Frequency;
-import javax.measure.quantity.Time;
 
 import io.pcp.parfait.quantity.Information;
 import io.pcp.parfait.quantity.InformationRate;
 
 import tec.units.ri.AbstractSystemOfUnits;
 import tec.units.ri.AbstractUnit;
-import tec.units.ri.function.LogConverter;
-import tec.units.ri.function.RationalConverter;
 import tec.units.ri.unit.AlternateUnit;
 import tec.units.ri.unit.ProductUnit;
 

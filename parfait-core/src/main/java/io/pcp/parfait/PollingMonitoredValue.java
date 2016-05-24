@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 
@@ -90,7 +90,7 @@ public class PollingMonitoredValue<T> extends SettableValue<T> {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this).add("name", getName()).add("description", getDescription()).add("poller", poller).toString();
+        return MoreObjects.toStringHelper(this).add("name", getName()).add("description", getDescription()).add("poller", poller).toString();
     }
 
 

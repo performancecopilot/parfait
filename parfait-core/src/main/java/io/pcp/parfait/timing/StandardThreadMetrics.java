@@ -53,7 +53,8 @@ public class StandardThreadMetrics {
 
     public static final ThreadMetric HEAP_BYTES = new AbstractThreadMetric("Heap Bytes", BYTE,
             "heap", "Amount of Heap (in bytes) used during the event") {
-        @Override
+        @SuppressWarnings("restriction")
+		@Override
         public long getValueForThread(Thread t) {
             java.lang.management.ThreadMXBean javaLangThreadMXBean = ManagementFactory.getThreadMXBean();
             if (javaLangThreadMXBean instanceof com.sun.management.ThreadMXBean) {

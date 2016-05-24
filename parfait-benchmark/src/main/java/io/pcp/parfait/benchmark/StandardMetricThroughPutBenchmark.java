@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import io.pcp.parfait.DynamicMonitoringView;
 import io.pcp.parfait.MonitorableRegistry;
 import io.pcp.parfait.MonitoredCounter;
 import io.pcp.parfait.dxm.IdentifierSourceSet;
@@ -21,7 +22,6 @@ import io.pcp.parfait.pcp.EmptyTextSource;
 import io.pcp.parfait.pcp.MetricDescriptionTextSource;
 import io.pcp.parfait.pcp.MetricNameMapper;
 import io.pcp.parfait.pcp.PcpMonitorBridge;
-import io.pcp.parfait.spring.SelfStartingMonitoringView;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
@@ -61,7 +61,7 @@ public class StandardMetricThroughPutBenchmark {
 
         final PcpMonitorBridge pcpMonitorBridge = new PcpMonitorBridge(mmvWriter, MetricNameMapper.PASSTHROUGH_MAPPER, new MetricDescriptionTextSource(), new EmptyTextSource());
 
-        SelfStartingMonitoringView selfStartingMonitoringView = new SelfStartingMonitoringView(monitorableRegistry, pcpMonitorBridge, 2000);
+        DynamicMonitoringView selfStartingMonitoringView = new DynamicMonitoringView(monitorableRegistry, pcpMonitorBridge, 2000);
 
         if (startPcp) {
             selfStartingMonitoringView.start();
@@ -150,8 +150,6 @@ public class StandardMetricThroughPutBenchmark {
         new StandardMetricThroughPutBenchmark(numThreads, numCounters, iterations, true, true).runBenchmark();
         new StandardMetricThroughPutBenchmark(numThreads, numCounters, iterations, true, false).runBenchmark();
         new StandardMetricThroughPutBenchmark(numThreads, numCounters, iterations, false, false).runBenchmark();
-
-
     }
 
 }

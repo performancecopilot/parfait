@@ -67,6 +67,7 @@ public class MonitorableRegistry {
      * is thrown.
      *
      */
+    @SuppressWarnings("unchecked")
     public synchronized <T> T registerOrReuse(Monitorable<T> monitorable) {
         String name = monitorable.getName();
         if (monitorables.containsKey(name)) {
@@ -76,8 +77,7 @@ public class MonitorableRegistry {
             } else {
                 throw new IllegalArgumentException(String.format("Cannot reuse the same name %s for a monitorable with different Semantics or Unit: requested=%s, existing=%s", name, monitorable, existingMonitorableWithSameName));
             }
-
-        }else {
+        } else {
             monitorables.put(name, monitorable);
             notifyListenersOfNewMonitorable(monitorable);
             return (T) monitorable;
@@ -140,13 +140,13 @@ public class MonitorableRegistry {
     }
 
     @VisibleForTesting
-	boolean containsMetric(String name) {
-		return monitorables.containsKey(name);
-	}
+    boolean containsMetric(String name) {
+        return monitorables.containsKey(name);
+    }
 
     @VisibleForTesting
-	Monitorable<?> getMetric(String name) {
-		return monitorables.get(name);
-	}
+    Monitorable<?> getMetric(String name) {
+        return monitorables.get(name);
+    }
 
 }

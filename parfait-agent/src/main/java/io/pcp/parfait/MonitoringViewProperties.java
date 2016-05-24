@@ -6,11 +6,7 @@ import java.util.Collections;
 import io.pcp.parfait.dxm.HashingIdentifierSource;
 import io.pcp.parfait.dxm.IdentifierSource;
 
-import org.apache.log4j.Logger;
-
 public class MonitoringViewProperties {
-    private static final Logger logger = Logger.getLogger(MonitoringViewProperties.class);
-
     public static final String PARFAIT = "parfait";
 
     private static final String NAME = "name";
