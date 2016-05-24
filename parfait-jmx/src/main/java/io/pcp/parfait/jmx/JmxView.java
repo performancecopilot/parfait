@@ -3,7 +3,7 @@ package io.pcp.parfait.jmx;
 import io.pcp.parfait.Monitor;
 import io.pcp.parfait.Monitorable;
 import io.pcp.parfait.MonitoringView;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
@@ -67,7 +67,7 @@ public class JmxView implements MonitoringView {
 
             for (Monitorable<?> monitorable : monitorables) {
                 jmxMonitoredNames[index] = monitorable.getName();
-                descriptions[index] = Objects.firstNonNull(monitorable.getDescription(),
+                descriptions[index] = MoreObjects.firstNonNull(monitorable.getDescription(),
                         "(unknown)");
                 types[index] = getJmxType(monitorable.getType());
                 jmxArrayIndexMap.put(monitorable.getName(), index);
