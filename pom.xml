@@ -90,8 +90,8 @@
     <java.major.source.version>${jdk.version}</java.major.source.version>
     <java.major.target.version>${jdk.version}</java.major.target.version>
     <metrics3.version>0.7.1</metrics3.version>
-    <unit.version>0.9-SNAPSHOT</unit.version>
-    <ri.version>0.9-SNAPSHOT</ri.version>
+    <unit.version>0.8</unit.version>
+    <ri.version>0.8</ri.version>
   </properties>
 
     <build>
@@ -303,10 +303,6 @@
     </dependency>
   </dependencies>
   <repositories>
-    <repository>
-      <id>java.net</id>
-      <url>http://download.java.net/maven/2/</url>
-    </repository>
     <repository>
       <id>sonatype-nexus-snapshots</id>
       <name>Sonatype Nexus Snapshots</name>
