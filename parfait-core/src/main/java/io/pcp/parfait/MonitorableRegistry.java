@@ -24,7 +24,7 @@ public class MonitorableRegistry {
     private static final ConcurrentMap<String, MonitorableRegistry> NAMED_INSTANCES = new ConcurrentHashMap<String, MonitorableRegistry>();
 
     /**
-     * A single central registry which can be used my non-Registry-aware
+     * A single central registry which can be used by non-Registry-aware
      * Monitorables. This is very limiting in terms of system flexibility and an
      * explicit {@link MonitorableRegistry} should be used instead.
      */
