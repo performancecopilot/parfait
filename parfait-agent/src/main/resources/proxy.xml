@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer" />
+
+    <bean id="monitorableRegistry" class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
+        <property name="staticField" value="io.pcp.parfait.MonitorableRegistry.DEFAULT_REGISTRY"/>
+    </bean>
+
+    <bean name="pcpMonitorBridge" class="io.pcp.parfait.pcp.PcpMonitorBridge">
+        <constructor-arg>
+            <bean id="mmvPcpWriter" class="io.pcp.parfait.dxm.PcpMmvWriter">
+                <constructor-arg value="${parfait.name}"/>
+                <constructor-arg>
+                    <bean class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
+                        <property name="staticField" value="io.pcp.parfait.dxm.IdentifierSourceSet.DEFAULT_SET"/>
+                    </bean>
+                </constructor-arg>
+                <property name="flags">
+                    <set value-type="io.pcp.parfait.dxm.PcpMmvWriter.MmvFlag">
+                        <value>MMV_FLAG_PROCESS</value>
+                    </set>
+                </property>
+                <property name="clusterIdentifier" value="${parfait.cluster}"/>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean name="monitoringView" class="io.pcp.parfait.DynamicMonitoringView">
+        <constructor-arg ref="monitorableRegistry"/>
+        <constructor-arg ref="pcpMonitorBridge"/>
+    </bean>
+
+    <bean id="jmxServer" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="org.springframework.jmx.support.JmxUtils.locateMBeanServer" />
+    </bean>
+
+    <bean name="monitoredMBean" class="io.pcp.parfait.jmx.MonitoredMBeanAttributeFactory" abstract="true">
+        <property name="monitorableRegistry" ref="monitorableRegistry"/>
+        <property name="updateInterval" value="${parfait.interval}"/>
+    </bean>
+
+    <bean name="optionalMBean" class="io.pcp.parfait.OptionalMonitoredMBeanRegistrar" abstract="true">
+        <property name="monitorableRegistry" ref="monitorableRegistry"/>
+        <property name="updateInterval" value="${parfait.interval}"/>
+    </bean>
+
+    <bean name="monitoredConstantMBean" class="io.pcp.parfait.jmx.MonitoredMBeanAttributeFactory" abstract="true">
+        <property name="monitorableRegistry" ref="monitorableRegistry"/>
+        <property name="valueSemantics" value="CONSTANT"/>
+    </bean>
+
+    <import resource="units.xml" />
+    <import resource="javabeans.xml" />
+
+</beans>

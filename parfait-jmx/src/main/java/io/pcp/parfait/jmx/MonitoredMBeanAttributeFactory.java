@@ -2,13 +2,15 @@ package io.pcp.parfait.jmx;
 
 import static tec.units.ri.AbstractUnit.ONE;
 
+import java.io.IOException;
+
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanException;
 import javax.management.MBeanInfo;
-import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
@@ -37,7 +39,6 @@ import com.google.common.base.Supplier;
  * Support is provided for monitoring simple attributes and also the data items of attributes that
  * are of type {@link CompositeData}.
  */
-// TODO - use a builder pattern here, construction of this class is getting very unwieldy
 public class MonitoredMBeanAttributeFactory<T> implements FactoryBean<Monitorable<T>> {
 
     public static final Logger LOG = LoggerFactory.getLogger(MonitoredMBeanAttributeFactory.class.getName());
@@ -47,8 +48,6 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean<Monitorabl
      * for tracking attributes which will never change in value.
      */    
     public static final int DO_NOT_UPDATE_VALUE = -1;
-
-    private final MBeanServer server = JmxUtils.locateMBeanServer();
 
     private final String name;
 
@@ -60,6 +59,8 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean<Monitorabl
 
     private final String compositeDataItem;
 
+    private MBeanServerConnection server;
+
     private int updateInterval = DO_NOT_UPDATE_VALUE;
 
     private Unit<?> unit = ONE;
@@ -70,22 +71,32 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean<Monitorabl
 
     public MonitoredMBeanAttributeFactory(String name, String description,
             String mBeanName, String attributeName) {
-        this(name, description, mBeanName, attributeName, null);
+        this(name, description, mBeanName, attributeName, null,
+                JmxUtils.locateMBeanServer());
     }
 
     public MonitoredMBeanAttributeFactory(String name, String description,
             String mBeanName, String attributeName, String compositeDataItem) {
+        this(name, description, mBeanName, attributeName, compositeDataItem,
+                JmxUtils.locateMBeanServer());
+    }
+    
+    public MonitoredMBeanAttributeFactory(String name, String description,
+            String mBeanName, String attributeName, String compositeDataItem,
+            MBeanServerConnection server) {
         this.name = name;
+        this.server = server;
         this.description = description;
-        String beanName = registerBeanName(mBeanName);
+        this.attributeName = attributeName;
+        this.compositeDataItem = compositeDataItem;
+
+        String beanName = registerBeanName(server, mBeanName);
         try {
             this.mBeanName = new ObjectName(beanName);
         } catch (Exception e) {
             throw new RuntimeException("Unexpected exception mBeanName name [" + mBeanName
                     + "]", e);
         }
-        this.attributeName = attributeName;
-        this.compositeDataItem = compositeDataItem;
     }
 
     public void setMonitorableRegistry(MonitorableRegistry registry) {
@@ -105,7 +116,7 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean<Monitorabl
     }
     
     public Monitorable<T> getObject() throws InstanceNotFoundException, IntrospectionException,
-            ReflectionException, AttributeNotFoundException, MBeanException {
+            ReflectionException, AttributeNotFoundException, MBeanException, IOException {
 
         MBeanInfo beanInfo = server.getMBeanInfo(mBeanName);
 
@@ -176,7 +187,7 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean<Monitorabl
         }
     }
 
-    private String registerBeanName(String beanName) {
+    private String registerBeanName(MBeanServerConnection server, String beanName) {
         int pos = beanName.lastIndexOf(",name=");
         if (pos > 0) {
             String baseString = beanName.substring(0, pos);
@@ -193,8 +204,10 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean<Monitorabl
                 catch (MalformedObjectNameException mone) {
                     throw new RuntimeException("Unexpected exception mBeanName name [" + beanName
                             + "]", mone);
-                    
-                }
+                } catch (IOException ioe) {
+                    throw new RuntimeException("Unexpected IO error, mBeanName name [" + beanName
+                            + "]", ioe);
+				}
             }
         }
         return beanName;
