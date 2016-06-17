@@ -3,7 +3,7 @@ package io.pcp.parfait;
 import com.google.common.base.Supplier;
 
 /**
- * An implementation of {@link Poller} to get the System time.
+ * An implementation of {@link Supplier} to get the System time.
  */
 public class SystemTimePoller implements Supplier<Long> {
 

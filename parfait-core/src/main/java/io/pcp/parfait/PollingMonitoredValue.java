@@ -19,7 +19,7 @@ import com.google.common.base.Supplier;
 
 /**
  * Monitors the value returned by calls at the provided interval to the provided
- * {@link Poller}.
+ * {@link Supplier}.
  */
 public class PollingMonitoredValue<T> extends SettableValue<T> {
     private static final Logger LOG = LoggerFactory.getLogger("parfait.polling");

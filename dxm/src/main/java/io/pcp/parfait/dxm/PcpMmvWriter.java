@@ -42,7 +42,7 @@ import com.google.common.base.Preconditions;
  * Standard lifecycle for this class is:
  * <ul>
  * <li>create the PcpMmvFile
- * <li>{@link #addMetric(MetricName, Object)} for every metric which will be monitored by the file
+ * <li>{@link #addMetric(MetricName, Semantics, Unit, Object)} for every metric which will be monitored by the file
  * <li>{@link #start()} to write out the file ready for the MMV agent to read
  * <li>{@link #updateMetric(MetricName, Object)} metrics as new values come to hand
  * </ul>
