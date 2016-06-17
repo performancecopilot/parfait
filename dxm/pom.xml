@@ -2,14 +2,14 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.pcp.parfait</groupId>
   <artifactId>dxm</artifactId>
-  <version>0.3.8-SNAPSHOT</version>
+  <version>0.4.0.RC1</version>
   <packaging>jar</packaging>
   <name>parfait DXM</name>
   <description>Java implementation of the PCP MMV (Memory-Mapped Values) format, offering extremely efficient real time communication between the JVM and PCP</description>
   <parent>
     <groupId>io.pcp</groupId>
     <artifactId>parfait</artifactId>
-    <version>0.3.8-SNAPSHOT</version>
+    <version>0.4.0.RC1</version>
   </parent>
   <dependencies>
     <dependency>
