@@ -51,8 +51,9 @@ public interface Monitorable<T> {
      * @return the JSR-363 Unit represented by the value of this Monitorable.
      *         This may be used to do comparisons and rate-conversions between
      *         metrics which do not share the same scale. Values which do not
-     *         take a unit should use {@link AbstractUnit#ONE}; values for which
-     *         no unit is sensible (e.g. String values) may return null.
+     *         take a unit should use {@link tec.units.ri.AbstractUnit#ONE};
+     *         values for which no unit is sensible (e.g. String values) may
+     *         return null.
      */
     Unit<?> getUnit();
 
@@ -64,28 +65,29 @@ public interface Monitorable<T> {
     ValueSemantics getSemantics();
 
     /**
-     * The type of the value returned by the {@link #get()} method.
+     * @return the type of the value returned by the {@link #get()} method.
      */
     Class<T> getType();
 
     /**
-     * <p>
-     * The current value of this Monitorable.
-     * </p>
-     * <p>
      * This method should never block and must return as quickly as possible.
-     * </p>
+     *
+     * @return the current value of this Monitorable.
      */
     T get();
 
     /**
      * Attaches the provided Monitor. Once attached the Monitor will be notified
      * whenever the value of this Monitorable changes.
+     *
+     * @param m the Monitor to attach.
      */
     void attachMonitor(Monitor m);
 
     /**
      * Removed the provided Monitor from the list of attached Monitors.
+     *
+     * @param m the Monitor to remove.
      */
     void removeMonitor(Monitor m);
 }

@@ -20,12 +20,16 @@ public interface MonitoringView {
      *
      * It is expected that this view tracks its own start/stop state, and that clients
      * of this implementation should correctly call {@link #stopMonitoring(java.util.Collection)}  before recalling startMonitoring.
+     *
+     * @param monitorables the Collection of metrics to start monitoring
      */
     void startMonitoring(Collection<Monitorable<?>> monitorables);
 
     /**
      * Stops monitoring updates on the Monitorables in the provided registry, any
      * updates to any of the monitorables passed in will no longer be tracked by this View
+     *
+     * @param monitorables the Collection of metrics to stop monitoring
      */
     void stopMonitoring(Collection<Monitorable<?>> monitorables);
 

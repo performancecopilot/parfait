@@ -76,7 +76,7 @@ public class NonSI extends AbstractSystemOfUnits implements Nameable {
 		new AlternateUnit<Information>(ONE, "bit"), Information.class);
 
 	/**
-	 * A unit of data amount equal to <code>8 {@link SI#BIT}</code> (BinarY
+	 * A unit of data amount equal to <code>8 {@link NonSI#BIT}</code> (BinarY
 	 * TErm, standard name <code>byte</code>).
 	 */
 	public static final Unit<Information> BYTE = addUnit(BIT.multiply(8));

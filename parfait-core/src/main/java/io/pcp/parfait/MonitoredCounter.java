@@ -15,7 +15,6 @@ import javax.measure.Unit;
  * In Parfait terms, a counter is a value that increments over time due to an event. An example of a counter might
  * the number of JMS messages sent or Garbage collections completed. Note that this class explicitly provides an atomic increment
  * operation only. Values must not decrement or be set to an arbitrary value.
- * <p>
  */
 public class MonitoredCounter extends AbstractMonitorable<Long> implements Counter {
     private final AtomicLong value = new AtomicLong(0L);
