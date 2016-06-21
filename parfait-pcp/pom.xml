@@ -2,14 +2,14 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.pcp.parfait</groupId>
   <artifactId>parfait-pcp</artifactId>
-  <version>0.4.0-SNAPSHOT</version>
+  <version>0.4.0.RC4</version>
   <packaging>jar</packaging>
   <name>parfait-pcp</name>
   <description>Bridge between Parfait-collected metrics and the DXM PCP Bridge to enable monitoring of Java applications via PCP</description>
   <parent>
     <groupId>io.pcp</groupId>
     <artifactId>parfait</artifactId>
-    <version>0.4.0-SNAPSHOT</version>
+    <version>0.4.0.RC4</version>
   </parent>
   <dependencies>
     <dependency>
