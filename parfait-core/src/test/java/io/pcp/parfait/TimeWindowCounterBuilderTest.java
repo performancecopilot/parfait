@@ -3,7 +3,7 @@ package io.pcp.parfait;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static tec.units.ri.AbstractUnit.ONE;
-import static io.pcp.parfait.unit.NonSI.BYTE;
+import static systems.uom.unicode.CLDR.BYTE;
 
 import org.junit.Before;
 import org.junit.Test;

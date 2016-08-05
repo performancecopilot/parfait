@@ -28,7 +28,7 @@
       <name>BSD</name>
       <url>https://opensource.org/licenses/BSD-3-Clause</url>
       <distribution>repo</distribution>
-      <comments>Information class, NonSI units from unitsofmeasurement.github.io</comments>
+      <comments>Information class, Unicode/CLDR units from unitsofmeasurement.github.io</comments>
     </license>
   </licenses>
   <developers>
@@ -90,8 +90,9 @@
     <java.major.source.version>${jdk.version}</java.major.source.version>
     <java.major.target.version>${jdk.version}</java.major.target.version>
     <metrics3.version>0.7.1</metrics3.version>
-    <unit.version>0.8</unit.version>
-    <ri.version>0.8</ri.version>
+    <unit.version>0.9</unit.version>
+    <unit.ri.version>0.9</unit.ri.version>
+    <unit.systems.version>0.3</unit.systems.version>
   </properties>
 
     <build>
@@ -227,7 +228,17 @@
           <dependency>
             <groupId>tec.units</groupId>
             <artifactId>unit-ri</artifactId>
-            <version>${ri.version}</version>
+            <version>${unit.ri.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>systems.uom</groupId>
+            <artifactId>systems-quantity</artifactId>
+            <version>${unit.systems.version}</version>
+          </dependency>
+          <dependency>
+            <groupId>systems.uom</groupId>
+            <artifactId>systems-unicode</artifactId>
+            <version>${unit.systems.version}</version>
           </dependency>
           <dependency>
            <groupId>org.slf4j</groupId>

@@ -1,6 +1,6 @@
 package io.pcp.parfait.timing;
 
-import static io.pcp.parfait.unit.NonSI.BYTE;
+import static systems.uom.unicode.CLDR.BYTE;
 import static tec.units.ri.unit.MetricPrefix.MILLI;
 import static tec.units.ri.unit.MetricPrefix.NANO;
 import static tec.units.ri.unit.Units.SECOND;

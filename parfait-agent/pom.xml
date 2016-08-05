@@ -70,6 +70,10 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+       <groupId>systems.uom</groupId>
+       <artifactId>systems-unicode</artifactId>
+    </dependency>
+    <dependency>
       <groupId>io.pcp.parfait</groupId>
       <artifactId>parfait-pcp</artifactId>
       <version>${project.version}</version>

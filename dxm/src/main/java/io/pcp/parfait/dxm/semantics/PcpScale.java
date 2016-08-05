@@ -1,10 +1,11 @@
 package io.pcp.parfait.dxm.semantics;
 
 import static tec.units.ri.AbstractUnit.ONE;
+
 import tec.units.ri.unit.Units;
 
-import io.pcp.parfait.quantity.Information;
-import io.pcp.parfait.unit.NonSI;
+import systems.uom.quantity.Information;
+import systems.uom.unicode.CLDR;
 
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Time;
@@ -15,13 +16,13 @@ interface PcpScale<T extends Quantity> extends UnitValued {
     public Unit<?> getUnit();
 
     static enum SpaceScale implements PcpScale<Information> {
-        BYTE(0, NonSI.BYTE),
-        KILOBYTE(1, NonSI.BYTE.multiply(1L << 10)),
-        MEGABYTE(2, NonSI.BYTE.multiply(1L << 20)),
-        GIGABYTE(3, NonSI.BYTE.multiply(1L << 30)),
-        TERABYTE(4, NonSI.BYTE.multiply(1L << 40)),
-        PETABYTE(5, NonSI.BYTE.multiply(1L << 50)),
-        EXABYTE(6, NonSI.BYTE.multiply(1L << 60));
+        BYTE(0, CLDR.BYTE),
+        KILOBYTE(1, CLDR.BYTE.multiply(1L << 10)),
+        MEGABYTE(2, CLDR.BYTE.multiply(1L << 20)),
+        GIGABYTE(3, CLDR.BYTE.multiply(1L << 30)),
+        TERABYTE(4, CLDR.BYTE.multiply(1L << 40)),
+        PETABYTE(5, CLDR.BYTE.multiply(1L << 50)),
+        EXABYTE(6, CLDR.BYTE.multiply(1L << 60));
 
         private final int pmUnitsValue;
         private final Unit<Information> unit;

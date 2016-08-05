@@ -1,8 +1,8 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>io.pcp.parfait</groupId>
-  <artifactId>dxm</artifactId>
-  <version>0.4.1-SNAPSHOT</version>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>io.pcp.parfait</groupId>
+	<artifactId>dxm</artifactId>
   <packaging>jar</packaging>
   <name>parfait DXM</name>
   <description>Java implementation of the PCP MMV (Memory-Mapped Values) format, offering extremely efficient real time communication between the JVM and PCP</description>
@@ -32,6 +32,14 @@
     <dependency>
       <groupId>tec.units</groupId>
       <artifactId>unit-ri</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>systems.uom</groupId>
+        <artifactId>systems-quantity</artifactId>
+    </dependency>
+    <dependency>
+        <groupId>systems.uom</groupId>
+        <artifactId>systems-unicode</artifactId>
     </dependency>
     <dependency>
     	<groupId>commons-lang</groupId>
