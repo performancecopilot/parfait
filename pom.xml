@@ -24,12 +24,6 @@
       <distribution>repo</distribution>
       <comments>A business-friendly OSS license</comments>
     </license>
-    <license>
-      <name>BSD</name>
-      <url>https://opensource.org/licenses/BSD-3-Clause</url>
-      <distribution>repo</distribution>
-      <comments>Information class, Unicode/CLDR units from unitsofmeasurement.github.io</comments>
-    </license>
   </licenses>
   <developers>
     <developer>
