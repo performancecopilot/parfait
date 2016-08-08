@@ -5,6 +5,8 @@ target
 .metadata
 .settings
 .classpath
+release.properties
+*.releaseBackup
 *.class
 *.iml
 *.swp
