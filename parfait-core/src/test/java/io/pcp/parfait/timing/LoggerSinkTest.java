@@ -18,10 +18,7 @@ public class LoggerSinkTest extends TestCase {
         LoggerSink sink = new LoggerSink();
         sink.normalizeUnits(HERTZ, MEGA(HERTZ));
         String result = sink.buildSingleMetricResult(measurement);
-//
         assertEquals("dummy: own 1000.000001 MHz, total 1000.000001 MHz", result);
-//  This is the correct string to expect, anyway:
-//      assertEquals("dummy: own 1000.000001 MHz, total 1000.000001 MHz", result);
     }
 
     private MetricMeasurement getUnitMeasurement(Unit<?> unit, int amount) {
