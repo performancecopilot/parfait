@@ -17,7 +17,7 @@
     </bean>
 
     <bean id="byteUnit" class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
-        <property name="staticField" value="io.pcp.parfait.unit.NonSI.BYTE"/>
+        <property name="staticField" value="systems.uom.unicode.CLDR.BYTE"/>
     </bean>
 
 </beans>

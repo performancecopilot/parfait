@@ -1,14 +1,13 @@
 package io.pcp.parfait.dxm.semantics;
 
-import static io.pcp.parfait.unit.NonSI.BIT;
-import static io.pcp.parfait.unit.NonSI.BYTE;
+import static systems.uom.unicode.CLDR.BIT;
+import static systems.uom.unicode.CLDR.BYTE;
 import static tec.units.ri.AbstractConverter.IDENTITY;
 import static tec.units.ri.AbstractQuantity.NONE;
 import static tec.units.ri.AbstractUnit.ONE;
 import static tec.units.ri.unit.Units.SECOND;
 
 import javax.measure.quantity.Dimensionless;
-import javax.measure.UnitConverter;
 import javax.measure.Unit;
 
 import org.slf4j.Logger;

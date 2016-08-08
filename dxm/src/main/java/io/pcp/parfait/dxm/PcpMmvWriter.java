@@ -1,6 +1,6 @@
 package io.pcp.parfait.dxm;
 
-import static io.pcp.parfait.unit.NonSI.BYTE;
+import static systems.uom.unicode.CLDR.BYTE;
 import static tec.units.ri.unit.MetricPrefix.KILO;
 import static tec.units.ri.unit.Units.HERTZ;
 import static tec.units.ri.unit.Units.HOUR;
