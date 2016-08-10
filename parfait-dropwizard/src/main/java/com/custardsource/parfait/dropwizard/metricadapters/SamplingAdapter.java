@@ -21,11 +21,23 @@ public class SamplingAdapter implements MetricAdapter {
     private final NonSelfRegisteringSettableValue<Double> median;
     private final NonSelfRegisteringSettableValue<Long> min;
     private final NonSelfRegisteringSettableValue<Double> stddev;
+    private final NonSelfRegisteringSettableValue<Double> seventyFifthPercentile;
+    private final NonSelfRegisteringSettableValue<Double> ninetyFifthPercentile;
+    private final NonSelfRegisteringSettableValue<Double> ninetyEighthPercentile;
+    private final NonSelfRegisteringSettableValue<Double> ninetyNinthPercentile;
+    private final NonSelfRegisteringSettableValue<Double> threeNinesPercentile;
+
 
     public SamplingAdapter(Sampling samplingMetric, String name, String description, Unit<?> unit) {
         this.samplingMetric = samplingMetric;
         Snapshot snapshot = samplingMetric.getSnapshot();
         this.mean = new NonSelfRegisteringSettableValue<>(name(name, "mean"), description + " - Mean", unit, snapshot.getMean(), ValueSemantics.FREE_RUNNING);
+        this.seventyFifthPercentile = new NonSelfRegisteringSettableValue<>(name(name, "seventyfifth"), description + " - 75th Percentile of recent data", unit, snapshot.get75thPercentile(), ValueSemantics.FREE_RUNNING);
+        this.ninetyFifthPercentile = new NonSelfRegisteringSettableValue<>(name(name, "ninetyfifth"), description + " - 95th Percentile of recent data", unit, snapshot.get95thPercentile(), ValueSemantics.FREE_RUNNING);
+        this.ninetyEighthPercentile = new NonSelfRegisteringSettableValue<>(name(name, "ninetyeighth"), description + " - 98th Percentile of recent data", unit, snapshot.get98thPercentile(), ValueSemantics.FREE_RUNNING);
+        this.ninetyNinthPercentile = new NonSelfRegisteringSettableValue<>(name(name, "ninetynineth"), description + " - 99th Percentile of recent data", unit, snapshot.get99thPercentile(), ValueSemantics.FREE_RUNNING);
+        this.threeNinesPercentile = new NonSelfRegisteringSettableValue<>(name(name, "threenines"), description + " - 99.9th Percentile of recent data", unit, snapshot.get999thPercentile(), ValueSemantics.FREE_RUNNING);
+
         this.median = new NonSelfRegisteringSettableValue<>(name(name, "median"), description + " - Median", unit, snapshot.getMedian(), ValueSemantics.FREE_RUNNING);
         this.max = new NonSelfRegisteringSettableValue<>(name(name, "max"), description + " - Maximum", unit, snapshot.getMax(), ValueSemantics.MONOTONICALLY_INCREASING);
         this.min = new NonSelfRegisteringSettableValue<>(name(name, "min"), description + " - Minimum", unit, snapshot.getMin(), ValueSemantics.FREE_RUNNING);
@@ -38,7 +50,7 @@ public class SamplingAdapter implements MetricAdapter {
 
     @Override
     public Set<Monitorable> getMonitorables() {
-        return Sets.<Monitorable>newHashSet(mean, median, max, min, stddev);
+        return Sets.<Monitorable>newHashSet(mean, median, max, min, stddev, seventyFifthPercentile, ninetyFifthPercentile, ninetyEighthPercentile, ninetyNinthPercentile, threeNinesPercentile);
     }
 
     @Override
@@ -49,5 +61,10 @@ public class SamplingAdapter implements MetricAdapter {
         max.set(snapshot.getMax());
         min.set(snapshot.getMin());
         stddev.set(snapshot.getStdDev());
+        seventyFifthPercentile.set(snapshot.get75thPercentile());
+        ninetyFifthPercentile.set(snapshot.get95thPercentile());
+        ninetyEighthPercentile.set(snapshot.get98thPercentile());
+        ninetyNinthPercentile.set(snapshot.get99thPercentile());
+        threeNinesPercentile.set(snapshot.get999thPercentile());
     }
 }
