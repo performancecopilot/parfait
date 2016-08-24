@@ -2,14 +2,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.custardsource.parfait</groupId>
     <artifactId>parfait-benchmark</artifactId>
-    <version>0.3.8-SNAPSHOT</version>
+    <version>0.3.8</version>
     <packaging>jar</packaging>
     <name>parfait-benchmark</name>
     <description>Benchmarking tools to test various changes to pcp</description>
     <parent>
         <groupId>com.custardsource</groupId>
         <artifactId>parfait</artifactId>
-        <version>0.3.8-SNAPSHOT</version>
+        <version>0.3.8</version>
     </parent>
 
     <build>
