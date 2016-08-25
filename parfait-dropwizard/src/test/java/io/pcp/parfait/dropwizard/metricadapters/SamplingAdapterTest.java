@@ -30,12 +30,24 @@ public class SamplingAdapterTest {
     private static final String MEAN = "mean";
     private static final String MEDIAN = "median";
     private static final String STDDEV = "stddev";
+    private static final String SEVENTY_FIFTH = "seventyfifth";
+    private static final String NINETY_FIFTH = "ninetyfifth";
+    private static final String NINETY_EIGHTH = "ninetyeighth";
+    private static final String NINETY_NINETH = "ninetynineth";
+    private static final String THREE_NINES = "threenines";
+
 
     private static final long INITIAL_MAX = 11l;
     private static final long INITIAL_MIN = 22l;
     private static final Double INITIAL_MEDIAN = 12.34;
     private static final Double INITIAL_STDDEV = 56.78;
     private static final Double INITIAL_MEAN = 90.12;
+    private static final Double INITIAL_75th = 75.75;
+    private static final Double INITIAL_95th = 95.95;
+    private static final Double INITIAL_98th = 98.98;
+    private static final Double INITIAL_99th = 99.99;
+    private static final Double INITIAL_THREE_NINES = 999.999;
+
     private SamplingAdapter adapter;
 
     @Mock
@@ -51,6 +63,13 @@ public class SamplingAdapterTest {
         when(snapshot.getMedian()).thenReturn(INITIAL_MEDIAN);
         when(snapshot.getStdDev()).thenReturn(INITIAL_STDDEV);
         when(snapshot.getMean()).thenReturn(INITIAL_MEAN);
+
+        when(snapshot.get75thPercentile()).thenReturn(INITIAL_75th);
+        when(snapshot.get95thPercentile()).thenReturn(INITIAL_95th);
+        when(snapshot.get98thPercentile()).thenReturn(INITIAL_98th);
+        when(snapshot.get99thPercentile()).thenReturn(INITIAL_99th);
+        when(snapshot.get999thPercentile()).thenReturn(INITIAL_THREE_NINES);
+
         adapter = new SamplingAdapter(samplingMetric, NAME, DESCRIPTION);
     }
 
@@ -109,6 +128,52 @@ public class SamplingAdapterTest {
     }
 
     @Test
+    public void shouldPublish75thPercentileMetric() {
+        final Monitorable<Double> seventyFifthMetric = extractMonitorables(adapter).get(SEVENTY_FIFTH);
+        assertThat(seventyFifthMetric, notNullValue());
+        assertThat(seventyFifthMetric.getDescription(), is(DESCRIPTION + " - 75th Percentile of recent data"));
+        assertThat(seventyFifthMetric.getSemantics(), is(ValueSemantics.FREE_RUNNING));
+        assertThat(seventyFifthMetric.get(), is(INITIAL_75th));
+    }
+
+    @Test
+    public void shouldPublish95thPercentileMetric() {
+        final Monitorable<Double> ninetyFifthMetric = extractMonitorables(adapter).get(NINETY_FIFTH);
+        assertThat(ninetyFifthMetric, notNullValue());
+        assertThat(ninetyFifthMetric.getDescription(), is(DESCRIPTION + " - 95th Percentile of recent data"));
+        assertThat(ninetyFifthMetric.getSemantics(), is(ValueSemantics.FREE_RUNNING));
+        assertThat(ninetyFifthMetric.get(), is(INITIAL_95th));
+    }
+
+    @Test
+    public void shouldPublish98thPercentileMetric() {
+        final Monitorable<Double> ninetyEigthMetric = extractMonitorables(adapter).get(NINETY_EIGHTH);
+        assertThat(ninetyEigthMetric, notNullValue());
+        assertThat(ninetyEigthMetric.getDescription(), is(DESCRIPTION + " - 98th Percentile of recent data"));
+        assertThat(ninetyEigthMetric.getSemantics(), is(ValueSemantics.FREE_RUNNING));
+        assertThat(ninetyEigthMetric.get(), is(INITIAL_98th));
+    }
+
+    @Test
+    public void shouldPublish99thPercentileMetric() {
+        final Monitorable<Double> ninetyNinthMetric = extractMonitorables(adapter).get(NINETY_NINETH);
+        assertThat(ninetyNinthMetric, notNullValue());
+        assertThat(ninetyNinthMetric.getDescription(), is(DESCRIPTION + " - 99th Percentile of recent data"));
+        assertThat(ninetyNinthMetric.getSemantics(), is(ValueSemantics.FREE_RUNNING));
+        assertThat(ninetyNinthMetric.get(), is(INITIAL_99th));
+    }
+
+    @Test
+    public void shouldPublish999thPercentileMetric() {
+        final Monitorable<Double> threeNinesMetric = extractMonitorables(adapter).get(THREE_NINES);
+        assertThat(threeNinesMetric, notNullValue());
+        assertThat(threeNinesMetric.getDescription(), is(DESCRIPTION + " - 99.9th Percentile of recent data"));
+        assertThat(threeNinesMetric.getSemantics(), is(ValueSemantics.FREE_RUNNING));
+        assertThat(threeNinesMetric.get(), is(INITIAL_THREE_NINES));
+    }
+
+
+    @Test
     public void shouldUpdateMinMetric() {
         long newMin = INITIAL_MIN - 5;
         when(snapshot.getMin()).thenReturn(newMin);
@@ -147,4 +212,45 @@ public class SamplingAdapterTest {
         adapter.updateMonitorables();
         assertThat(extractMonitorables(adapter).get(STDDEV).get(), Matchers.<Object>is(newStdDev));
     }
+
+    @Test
+    public void shouldUpdate75thMetric() {
+        double new75thMetric = INITIAL_75th + 5;
+        when(snapshot.get75thPercentile()).thenReturn(new75thMetric);
+        adapter.updateMonitorables();
+        assertThat(extractMonitorables(adapter).get(SEVENTY_FIFTH).get(), Matchers.<Object>is(new75thMetric));
+    }
+
+    @Test
+    public void shouldUpdate95thMetric() {
+        double new95thMetric = INITIAL_95th + 5;
+        when(snapshot.get95thPercentile()).thenReturn(new95thMetric);
+        adapter.updateMonitorables();
+        assertThat(extractMonitorables(adapter).get(NINETY_FIFTH).get(), Matchers.<Object>is(new95thMetric));
+    }
+
+    @Test
+    public void shouldUpdate98thMetric() {
+        double new98thMetric = INITIAL_98th + 5;
+        when(snapshot.get98thPercentile()).thenReturn(new98thMetric);
+        adapter.updateMonitorables();
+        assertThat(extractMonitorables(adapter).get(NINETY_EIGHTH).get(), Matchers.<Object>is(new98thMetric));
+    }
+
+    @Test
+    public void shouldUpdate99thMetric() {
+        double new99thMetric = INITIAL_99th + 5;
+        when(snapshot.get99thPercentile()).thenReturn(new99thMetric);
+        adapter.updateMonitorables();
+        assertThat(extractMonitorables(adapter).get(NINETY_NINETH).get(), Matchers.<Object>is(new99thMetric));
+    }
+
+    @Test
+    public void shouldUpdate999thMetric() {
+        double new999thMetric = INITIAL_THREE_NINES + 5;
+        when(snapshot.get999thPercentile()).thenReturn(new999thMetric);
+        adapter.updateMonitorables();
+        assertThat(extractMonitorables(adapter).get(THREE_NINES).get(), Matchers.<Object>is(new999thMetric));
+    }
+
 }
