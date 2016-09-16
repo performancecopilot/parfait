@@ -49,7 +49,7 @@ public interface ThreadValue<T> {
 
     public static class WeakReferenceThreadMap<T> implements ThreadValue<T> {
 
-        protected final LoadingCache<Thread, T> loadingCache = CacheBuilder.newBuilder().build(new CacheLoader<Thread, T>() {
+        protected final LoadingCache<Thread, T> loadingCache = CacheBuilder.newBuilder().weakKeys().build(new CacheLoader<Thread, T>() {
             @Override
             public T load(Thread thread) throws Exception {
                 return initialValue();
