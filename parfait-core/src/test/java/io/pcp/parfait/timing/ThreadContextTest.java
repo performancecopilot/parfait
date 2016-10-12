@@ -70,12 +70,12 @@ public class ThreadContextTest extends TestCase {
         assertNull("get() after clear should return null", context.get(testKey));
     }
 
-    public void testClearRemovesMDCValue(){
+    public void testClearRemovesMDCValue() {
 
         ThreadContext log4jThreadContext = ThreadContext.newMDCEnabledContext();
 
         Hashtable mdcContext = MDC.getContext();
-        assertNull(mdcContext);
+        assertTrue(mdcContext == null || mdcContext.isEmpty());
 
         final String testKey = "painter";
         log4jThreadContext.put(testKey, 7);
@@ -83,11 +83,10 @@ public class ThreadContextTest extends TestCase {
         mdcContext = MDC.getContext();
         assertEquals(1, mdcContext.size());
 
-
-        log4jThreadContext.clear();
-
+        mdcContext.clear();
         assertEquals(0, mdcContext.size());
 
+        log4jThreadContext.clear();
         assertNull("get() after clear should return null", log4jThreadContext.get(testKey));
     }
 }
