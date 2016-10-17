@@ -8,6 +8,8 @@ reporters:
     frequency: 10s
     includes:
      - io.dropwizard
+    excludes:
+     -
     replacements:
       "org.eclipse.jetty.util.thread.": ""
       "io.dropwizard.jetty.MutableServletContextHandler": "MSCH"
