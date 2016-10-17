@@ -83,7 +83,7 @@
     <maven.compile.sourceLevel>${jdk.version}</maven.compile.sourceLevel>
     <java.major.source.version>${jdk.version}</java.major.source.version>
     <java.major.target.version>${jdk.version}</java.major.target.version>
-    <metrics3.version>0.7.1</metrics3.version>
+    <metrics3.version>1.0.2</metrics3.version>
     <unit.version>1.0</unit.version>
     <unit.ri.version>1.0</unit.ri.version>
     <unit.systems.version>0.5</unit.systems.version>
