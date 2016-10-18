@@ -31,6 +31,7 @@
     <bean name="monitoringView" class="io.pcp.parfait.DynamicMonitoringView">
         <constructor-arg ref="monitorableRegistry"/>
         <constructor-arg ref="pcpMonitorBridge"/>
+        <constructor-arg value="${parfait.startup}"/>
     </bean>
 
     <bean name="monitoredMBean" class="io.pcp.parfait.jmx.MonitoredMBeanAttributeFactory"

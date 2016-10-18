@@ -19,7 +19,7 @@
 usage()
 {
 cat <<EOF
-usage: parfait [-n name] [-i interval] [-c cluster] [--] javaargs
+usage: parfait [-n name] [-i interval] [-c cluster] [-s startup] [--] javaargs
 
   -n use the string which follows as the program name exported
      via PCP memory mapped value (MMV) metrics.  mmv.<name> in
@@ -30,7 +30,11 @@ usage: parfait [-n name] [-i interval] [-c cluster] [--] javaargs
 
   -i use numeric interval as the delta upon which JMX values will
      be reevaluated for exporting as memory mapped values (1 sec,
-     by default)
+     by default).  Specified in milliseconds.
+
+  -s allow a max startup time in which JMX values are still being
+     created, before exporting as memory mapped values (5 seconds
+     by default).  Specified in milliseconds.
 
   -- optional separator to distinguish trailing arguments
 
@@ -71,6 +75,7 @@ AGENT_OPTS=""
 PARFAIT_NAME=
 PARFAIT_INTERVAL=
 PARFAIT_CLUSTER=
+PARFAIT_STARTUP=
 
 while [ $# -ge 1 -a "${1#-*}" != "$1" ]
 do
@@ -84,6 +89,10 @@ do
         shift;
     elif [ "$1" == "-c" -a $# -ge 2 ]; then
         PARFAIT_CLUSTER=$2
+        shift;
+        shift;
+    elif [ "$1" == "-s" -a $# -ge 2 ]; then
+        PARFAIT_STARTUP=$2
         shift;
         shift;
     elif [ "$1" == "--" ]; then
@@ -103,6 +112,9 @@ if [ "$PARFAIT_CLUSTER" != "" ]; then
 fi
 if [ "$PARFAIT_INTERVAL" != "" ]; then
     AGENT_OPTS="${AGENT_OPTS},interval:${PARFAIT_INTERVAL}"
+fi
+if [ "$PARFAIT_STARTUP" != "" ]; then
+    AGENT_OPTS="${AGENT_OPTS},startup:${PARFAIT_STARTUP}"
 fi
 
 AGENT_ARGUMENT=${AGENT_PREFIX}=${AGENT_OPTS}

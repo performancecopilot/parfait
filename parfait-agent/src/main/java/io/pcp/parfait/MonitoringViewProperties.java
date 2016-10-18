@@ -3,6 +3,7 @@ package io.pcp.parfait;
 import java.lang.management.ManagementFactory;
 import java.util.Collections;
 
+import io.pcp.parfait.DynamicMonitoringView;
 import io.pcp.parfait.dxm.HashingIdentifierSource;
 import io.pcp.parfait.dxm.IdentifierSource;
 
@@ -12,10 +13,12 @@ public class MonitoringViewProperties {
     private static final String NAME = "name";
     private static final String CLUSTER = "cluster";
     private static final String INTERVAL = "interval";
+    private static final String STARTUP = "startup";
 
     public static final String PARFAIT_NAME = PARFAIT + "." + NAME;
     public static final String PARFAIT_CLUSTER = PARFAIT + "." + CLUSTER;
     public static final String PARFAIT_INTERVAL = PARFAIT + "." + INTERVAL;
+    public static final String PARFAIT_STARTUP = PARFAIT + "." + STARTUP;
 
     private static final String DEFAULT_INTERVAL = "1000"; // milliseconds
 
@@ -96,6 +99,19 @@ public class MonitoringViewProperties {
         return interval;
     }
 
+    public static String getDefaultStartup() {
+        String startup = System.getProperty(PARFAIT_STARTUP);
+        if (startup == null) {
+            return Long.toString(DynamicMonitoringView.defaultQuietPeriod());
+        }
+        try {
+            Long.parseLong(startup);    // safe verification with fallback
+        } catch (NumberFormatException e) {
+            return Long.toString(DynamicMonitoringView.defaultQuietPeriod());
+        }
+        return startup;
+    }
+
     public static void setupProperties() {
         String name = getDefaultName(getParfaitName(), getDefaultCommand(), getRuntimeName());
         System.setProperty(PARFAIT_NAME, name);
@@ -105,5 +121,8 @@ public class MonitoringViewProperties {
 
         String interval = getDefaultInterval();
         System.setProperty(PARFAIT_INTERVAL, interval);
+
+        String startup = getDefaultStartup();
+        System.setProperty(PARFAIT_STARTUP, startup);
     }
 }

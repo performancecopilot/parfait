@@ -11,6 +11,7 @@ public class ParfaitAgentArgumentsTest {
     private String originalNameValue;
     private String originalClusterValue;
     private String originalIntervalValue;
+    private String originalStartupValue;
 
     @Before
     public void setup() {
@@ -18,6 +19,7 @@ public class ParfaitAgentArgumentsTest {
         originalNameValue = System.setProperty(MonitoringViewProperties.PARFAIT_NAME, "true");
         originalClusterValue = System.setProperty(MonitoringViewProperties.PARFAIT_CLUSTER, "true");
         originalIntervalValue = System.setProperty(MonitoringViewProperties.PARFAIT_INTERVAL, "true");
+        originalStartupValue = System.setProperty(MonitoringViewProperties.PARFAIT_STARTUP, "true");
     }
 
     private void reset(String name, String value) {
@@ -33,6 +35,7 @@ public class ParfaitAgentArgumentsTest {
         reset(MonitoringViewProperties.PARFAIT_NAME, originalNameValue);
         reset(MonitoringViewProperties.PARFAIT_CLUSTER, originalClusterValue);
         reset(MonitoringViewProperties.PARFAIT_INTERVAL, originalIntervalValue);
+        reset(MonitoringViewProperties.PARFAIT_STARTUP, originalStartupValue);
     }
 
     @Test
@@ -56,5 +59,12 @@ public class ParfaitAgentArgumentsTest {
         assertEquals("20", System.getProperty(MonitoringViewProperties.PARFAIT_INTERVAL));
         System.clearProperty(MonitoringViewProperties.PARFAIT_INTERVAL);
         System.clearProperty(MonitoringViewProperties.PARFAIT_NAME);
+    }
+
+    @Test
+    public void checkArgumentStartup() {
+        ParfaitAgent.setupArguments("startup:12345");
+        assertEquals("12345", System.getProperty(MonitoringViewProperties.PARFAIT_STARTUP));
+        System.clearProperty(MonitoringViewProperties.PARFAIT_STARTUP);
     }
 }

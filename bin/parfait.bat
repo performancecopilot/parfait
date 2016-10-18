@@ -16,7 +16,7 @@
 @rem Simple batch file to start a java program with the parfait-agent
 @rem jar injected
 @rem
-@rem usage: parfait [-n name] [-i interval] [-c cluster] [--] javaargs
+@rem usage: parfait [-n name] [-i interval] [-c cluster] [-s startup] [--] javaargs
 @rem 
 @rem -n use the string which follows as the program name exported
 @rem    via PCP memory mapped value (MMV) metrics.  mmv.<name> in
@@ -25,9 +25,13 @@
 @rem -c use the numeric cluster identifier for PCP/MMV metric IDs
 @rem    (default is to build a hash identifier using progam name)
 @rem 
-@rem -i use numeric interval as the delta upon which JMX values will
-@rem    be reevaluated for exporting as memory mapped values (1 sec,
-@rem    by default)
+@rem -i use numeric interval as the delta upon which JMX values are
+@rem    reevaluated for exporting as memory mapped values (1 second
+@rem    by default).  Specified in milliseconds.
+@rem
+@rem -s allow a max startup time in which JMX values are still being
+@rem    created, before exporting as memory mapped values (5 seconds
+@rem    by default).  Specified in milliseconds.
 @rem 
 @rem -- optional separator to distinguish trailing arguments
 @rem 
@@ -53,6 +57,7 @@ set AGENT_OPTS=
 set PARFAIT_NAME=
 set PARFAIT_CLUSTER=
 set PARFAIT_INTERVAL=
+set PARFAIT_STARTUP=
 
 @rem ===================================================================================
 @rem start parse args section.
@@ -69,6 +74,7 @@ if not "%ARG:~0,1%" == "-" goto endArgsLoop
 if "%ARG%" == "-n" if not "%~2" == "" goto setName
 if "%ARG%" == "-c" if not "%~2" == "" goto setCluster
 if "%ARG%" == "-i" if not "%~2" == "" goto setInterval
+if "%ARG%" == "-s" if not "%~2" == "" goto setStartup
 if "%ARG%" == "--"                    goto breakArgsLoop
 
 @rem unrecognised option -- must be start of javaargs
@@ -85,6 +91,10 @@ goto shift2AndToNext
 
 :setInterval
 set PARFAIT_INTERVAL=%~2
+goto shift2AndToNext
+
+:setStartup
+set PARFAIT_STARTUP=%~2
 goto shift2AndToNext
 
 :breakArgsLoop
@@ -124,6 +134,7 @@ set AGENT_ARGUMENT=%AGENT_PREFIX%=%AGENT_OPTS%
 if not "%PARFAIT_NAME%" == "" set AGENT_OPTS=%AGENT_OPTS%,name:%PARFAIT_NAME%
 if not "%PARFAIT_CLUSTER%" == "" set AGENT_OPTS=%AGENT_OPTS%,cluster:%PARFAIT_CLUSTER%
 if not "%PARFAIT_INTERVAL%" == "" set AGENT_OPTS=%AGENT_OPTS%,interval:%PARFAIT_INTERVAL%
+if not "%PARFAIT_STARTUP%" == "" set AGENT_OPTS=%AGENT_OPTS%,startup:%PARFAIT_STARTUP%
 
 @rem ===================================================================================
 
@@ -140,7 +151,7 @@ exit /b
 @rem Usage
 @rem ---------------------------------------------------------------------------------------
 :showUsage
-echo usage: parfait [-n name] [-i interval] [-c cluster] [--] javaargs
+echo usage: parfait [-n name] [-i interval] [-c cluster] [-s startup] [--] javaargs
 echo.
 echo   -n use the string which follows as the program name exported
 echo      via PCP memory mapped value (MMV) metrics.  mmv.[name] in
@@ -151,7 +162,11 @@ echo      (default is to build a hash identifier using progam name)
 echo.
 echo   -i use numeric interval as the delta upon which JMX values are
 echo      reevaluated for exporting as memory mapped values (1 second
-echo      by default)
+echo      by default).  Specified in milliseconds.
+echo.
+echo   -s allow a max startup time in which JMX values are still being
+echo      created, before exporting as memory mapped values (5 seconds
+echo      by default).  Specified in milliseconds.
 echo.
 echo   --  optional separator to distinguish trailing arguments
 echo.
