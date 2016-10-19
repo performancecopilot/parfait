@@ -6,6 +6,7 @@ import org.junit.runner.RunWith;
 import static org.junit.Assert.assertEquals;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -13,6 +14,7 @@ import io.pcp.parfait.DynamicMonitoringView;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration({ "classpath:test.xml", "classpath:agent.xml" })
+@ActiveProfiles("local")
 public class ParfaitAgentSpringTest {
 
     @Autowired

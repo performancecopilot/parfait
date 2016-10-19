@@ -46,7 +46,7 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean<Monitorabl
     /**
      * May be passed as the update interval to indicate that no updates are required. This is useful
      * for tracking attributes which will never change in value.
-     */    
+     */
     public static final int DO_NOT_UPDATE_VALUE = -1;
 
     private final String name;

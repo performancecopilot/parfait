@@ -3,46 +3,106 @@ package io.pcp.parfait;
 import io.pcp.parfait.DynamicMonitoringView;
 import java.lang.instrument.Instrumentation;
 import java.lang.management.ManagementFactory;
+import java.net.ConnectException;
+import java.util.Arrays;
 import org.apache.log4j.Logger;
 import org.springframework.beans.BeansException;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.context.support.GenericXmlApplicationContext;
 
 public class ParfaitAgent {
     private static final Logger logger = Logger.getLogger(ParfaitAgent.class);
 
-    public static void setupArguments(String arguments) {
-        for (String propertyAndValue: arguments.split(",")) {
-            String[] tokens = propertyAndValue.split(":", 2);
-            if (tokens.length == 2) {
-                String name = MonitoringViewProperties.PARFAIT + "." + tokens[0];
-                String value = tokens[1];
-                System.setProperty(name, value);
-            }
+    // find the root cause of an exception, for nested BeansException case
+    public static Throwable getCause(Throwable e) {
+        Throwable cause = null; 
+        Throwable result = e;
+        while (null != (cause = result.getCause()) && (result != cause)) {
+            result = cause;
+        }
+        return result;
+    }
+
+    // extract properties from arguments, properties files, or intuition
+    public static void setupProperties(String propertyAndValue, String separator) {
+        String[] tokens = propertyAndValue.split(separator, 2);
+        if (tokens.length == 2) {
+            String name = MonitoringViewProperties.PARFAIT + "." + tokens[0];
+            String value = tokens[1];
+            System.setProperty(name, value);
         }
     }
 
-    public static void premain(String arguments, Instrumentation instrumentation) {
-        String runtimeName = ManagementFactory.getRuntimeMXBean().getName();
-        logger.debug(String.format("Agent runtime: %s [%s]", runtimeName, arguments));
-
-        // extract properties from arguments, properties files, or intuition
-        MonitoringViewProperties.setupProperties();
-        if (arguments != null) {
-            setupArguments(arguments);
-        }
-
-        String name = System.getProperty(MonitoringViewProperties.PARFAIT_NAME);
-        logger.debug(String.format("Starting Parfait agent %s", name));
-
-        // inject all metrics via parfait-spring and parfait-jmx
-        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("agent.xml");
+    public static void startLocal() {
+        GenericXmlApplicationContext context = new GenericXmlApplicationContext();
+        context.getEnvironment().setActiveProfiles("local");
+        context.load("classpath:agent.xml");
         try {
-            DynamicMonitoringView view = (DynamicMonitoringView)context.getBean("monitoringView");
+            DynamicMonitoringView view;
+            view = (DynamicMonitoringView)context.getBean("monitoringView");
             view.start();
         } catch (BeansException e) {
             logger.error("Stopping Parfait agent, cannot setup beans", e);
         } finally {
             context.close();
         }
+    }
+
+    public static void setupPreMainArguments(String arguments) {
+        for (String propertyAndValue: arguments.split(",")) {
+            setupProperties(propertyAndValue, ":");
+        }
+    }
+
+    public static void premain(String arguments, Instrumentation instruments) {
+        MonitoringViewProperties.setupProperties();
+        if (arguments != null) {
+            setupPreMainArguments(arguments);
+        }
+        String name = System.getProperty(MonitoringViewProperties.PARFAIT_NAME);
+        logger.info(String.format("Starting Parfait agent [%s]", name));
+        startLocal();
+    }
+
+    public static void startProxy(String jmx) {
+        DynamicMonitoringView view;
+        GenericXmlApplicationContext context = new GenericXmlApplicationContext();
+        context.getEnvironment().setActiveProfiles("proxy");
+        try {
+            context.load("classpath:agent.xml");
+            context.refresh();
+            view = (DynamicMonitoringView)context.getBean("monitoringView");
+            view.start();
+            Thread.currentThread().join();    // pause the main proxy thread
+        } catch (Exception e) {
+            String m = "Stopping Parfait proxy";  // pretty-print some errors
+            if (getCause(e) instanceof ConnectException) {
+                logger.error(String.format("%s, cannot connect to %s", m, jmx));
+            } else if (e instanceof BeansException) {
+                logger.error(String.format("%s, cannot setup beans", m), e);
+            } else if (e instanceof InterruptedException) {
+                logger.error(String.format("%s, interrupted", m));
+            } else {
+                logger.error(m, e);
+            }
+        } finally {
+            context.close();
+        }
+    }
+
+    public static void setupMainArguments(String[] arguments) {
+        for (String propertyAndValue: arguments) {
+            if (propertyAndValue.startsWith("-"))
+                propertyAndValue = propertyAndValue.substring(1);
+            setupProperties(propertyAndValue, "=");
+        }
+    }
+
+    public static void main(String[] arguments) {
+        MonitoringViewProperties.setupProperties();
+        setupMainArguments(arguments);
+        String name = System.getProperty(MonitoringViewProperties.PARFAIT_NAME);
+        String c = System.getProperty(MonitoringViewProperties.PARFAIT_CONNECT);
+        logger.info(String.format("Starting Parfait proxy [%s %s]", name, c));
+        startProxy(c);
     }
 }

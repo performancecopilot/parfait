@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans profile="local"
+       xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="jmxServer" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="org.springframework.jmx.support.JmxUtils.locateMBeanServer" />
+    </bean>
+
+    <bean class="io.pcp.parfait.MonitoredConstant">
+        <constructor-arg value="java.jvm_version"/>
+        <constructor-arg value="JVM version string"/>
+        <constructor-arg value="${java.runtime.version}"/>
+    </bean>
+
+    <bean id="systemTimeMonitor" class="io.pcp.parfait.PollingMonitoredValue">
+        <constructor-arg value="java.timestamp"/>
+        <constructor-arg value="Current time on server where the application is running"/>
+        <constructor-arg ref="monitorableRegistry"/>
+        <constructor-arg type="int" value="${parfait.interval}"/>
+        <constructor-arg>
+            <bean id="systemTimePoller" class="io.pcp.parfait.SystemTimePoller"/>
+        </constructor-arg>
+        <constructor-arg type="io.pcp.parfait.ValueSemantics" value="FREE_RUNNING"/>
+        <constructor-arg type="javax.measure.Unit" ref="millisecondUnit"/>
+    </bean>
+
+    <!--
+    <import resource="jdbc.xml" />
+    <import resource="dropwizard.xml" />
+    -->
+
+</beans>

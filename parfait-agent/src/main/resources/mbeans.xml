@@ -3,7 +3,27 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <!-- this list is to force Spring to access the actual beans from the following factories -->
+    <bean name="monitoredMBean" class="io.pcp.parfait.jmx.MonitoredMBeanAttributeFactory"
+          abstract="true">
+        <constructor-arg name="server" ref="jmxServer"/>
+        <property name="monitorableRegistry" ref="monitorableRegistry"/>
+        <property name="updateInterval" value="${parfait.interval}"/>
+    </bean>
+
+    <bean name="optionalMBean" class="io.pcp.parfait.OptionalMonitoredMBeanRegistrar"
+          abstract="true">
+        <constructor-arg name="server" ref="jmxServer"/>
+        <property name="monitorableRegistry" ref="monitorableRegistry"/>
+        <property name="updateInterval" value="${parfait.interval}"/>
+    </bean>
+
+    <bean name="constantMBean" class="io.pcp.parfait.jmx.MonitoredMBeanAttributeFactory"
+          abstract="true">
+        <constructor-arg name="server" ref="jmxServer"/>
+        <property name="monitorableRegistry" ref="monitorableRegistry"/>
+        <property name="valueSemantics" value="CONSTANT"/>
+    </bean>
+
     <!-- util:list id="monitoredMBeans" -->
         <!-- java.lang:type=Runtime monitors -->
 
@@ -12,14 +32,16 @@
             <constructor-arg value="Application uptime (msec)"/>
             <constructor-arg value="java.lang:type=Runtime"/>
             <constructor-arg value="Uptime"/>
+            <constructor-arg value="" name="compositeDataItem"/>
             <property name="unit" ref="millisecondUnit"/>
         </bean>
 
-        <bean id="jvmRuntimeName" parent="monitoredConstantMBean">
+        <bean id="jvmRuntimeName" parent="constantMBean">
             <constructor-arg value="java.runtime_name"/>
             <constructor-arg value="An internal Java process identifier"/>
             <constructor-arg value="java.lang:type=Runtime"/>
             <constructor-arg value="Name"/>
+            <constructor-arg value="" name="compositeDataItem"/>
             <property name="unit">
                 <null/>
             </property>
@@ -356,6 +378,7 @@
             <constructor-arg value="Count of JVM full garbage collections"/>
             <constructor-arg value="java.lang:type=GarbageCollector,name=MarkSweepCompact|PS MarkSweep|ConcurrentMarkSweep"/>
             <constructor-arg value="CollectionCount"/>
+            <constructor-arg value="" name="compositeDataItem"/>
             <property name="valueSemantics" value="MONOTONICALLY_INCREASING"/>
         </bean>
 
@@ -364,6 +387,7 @@
             <constructor-arg value="Time spent performing full garbage collections"/>
             <constructor-arg value="java.lang:type=GarbageCollector,name=MarkSweepCompact|PS MarkSweep|ConcurrentMarkSweep"/>
             <constructor-arg value="CollectionTime"/>
+            <constructor-arg value="" name="compositeDataItem"/>
             <property name="unit" ref="millisecondUnit"/>
             <property name="valueSemantics" value="MONOTONICALLY_INCREASING"/>
         </bean>
@@ -373,6 +397,7 @@
             <constructor-arg value="Count of JVM minor garbage collections"/>
             <constructor-arg value="java.lang:type=GarbageCollector,name=Copy|PS Scavenge|ParNew"/>
             <constructor-arg value="CollectionCount"/>
+            <constructor-arg value="" name="compositeDataItem"/>
             <property name="valueSemantics" value="MONOTONICALLY_INCREASING"/>
         </bean>
 
@@ -381,6 +406,7 @@
             <constructor-arg value="Time spent performing minor garbage collections"/>
             <constructor-arg value="java.lang:type=GarbageCollector,name=Copy|PS Scavenge|ParNew"/>
             <constructor-arg value="CollectionTime"/>
+            <constructor-arg value="" name="compositeDataItem"/>
             <property name="unit" ref="millisecondUnit"/>
             <property name="valueSemantics" value="MONOTONICALLY_INCREASING"/>
         </bean>
@@ -390,6 +416,7 @@
             <constructor-arg value="Time spent in the JVM doing Java bytecode compilation"/>
             <constructor-arg value="java.lang:type=Compilation"/>
             <constructor-arg value="TotalCompilationTime"/>
+            <constructor-arg value="" name="compositeDataItem"/>
             <property name="unit" ref="millisecondUnit"/>
             <property name="valueSemantics" value="MONOTONICALLY_INCREASING"/>
         </bean>
@@ -399,6 +426,7 @@
             <constructor-arg value="Number of classes currently loaded in memory by the classloader"/>
             <constructor-arg value="java.lang:type=ClassLoading"/>
             <constructor-arg value="LoadedClassCount"/>
+            <constructor-arg value="" name="compositeDataItem"/>
         </bean>
 
         <bean id="jvmClassUnloadedTotal" parent="monitoredMBean">
@@ -406,6 +434,7 @@
             <constructor-arg value="Number of classes unloaded from memory by the classloader"/>
             <constructor-arg value="java.lang:type=ClassLoading"/>
             <constructor-arg value="UnloadedClassCount"/>
+            <constructor-arg value="" name="compositeDataItem"/>
             <property name="valueSemantics" value="MONOTONICALLY_INCREASING"/>
         </bean>
 
@@ -414,6 +443,7 @@
             <constructor-arg value="Total number of classes loaded by the classloader"/>
             <constructor-arg value="java.lang:type=ClassLoading"/>
             <constructor-arg value="TotalLoadedClassCount"/>
+            <constructor-arg value="" name="compositeDataItem"/>
             <property name="valueSemantics" value="MONOTONICALLY_INCREASING"/>
         </bean>
 

@@ -40,21 +40,21 @@ public class ParfaitAgentArgumentsTest {
 
     @Test
     public void checkArgumentName() {
-        ParfaitAgent.setupArguments("name:TestApp");
+        ParfaitAgent.setupPreMainArguments("name:TestApp");
         assertEquals(System.getProperty(MonitoringViewProperties.PARFAIT_NAME), "TestApp");
         System.clearProperty(MonitoringViewProperties.PARFAIT_NAME);
     }
 
     @Test
     public void checkArgumentCluster() {
-        ParfaitAgent.setupArguments("cluster:123");
+        ParfaitAgent.setupPreMainArguments("cluster:123");
         assertEquals("123", System.getProperty(MonitoringViewProperties.PARFAIT_CLUSTER));
         System.clearProperty(MonitoringViewProperties.PARFAIT_CLUSTER);
     }
 
     @Test
     public void checkArgumentNameAndInterval() {
-        ParfaitAgent.setupArguments("name:Frodo,interval:20");
+        ParfaitAgent.setupPreMainArguments("name:Frodo,interval:20");
         assertEquals("Frodo", System.getProperty(MonitoringViewProperties.PARFAIT_NAME));
         assertEquals("20", System.getProperty(MonitoringViewProperties.PARFAIT_INTERVAL));
         System.clearProperty(MonitoringViewProperties.PARFAIT_INTERVAL);
@@ -63,7 +63,7 @@ public class ParfaitAgentArgumentsTest {
 
     @Test
     public void checkArgumentStartup() {
-        ParfaitAgent.setupArguments("startup:12345");
+        ParfaitAgent.setupPreMainArguments("startup:12345");
         assertEquals("12345", System.getProperty(MonitoringViewProperties.PARFAIT_STARTUP));
         System.clearProperty(MonitoringViewProperties.PARFAIT_STARTUP);
     }

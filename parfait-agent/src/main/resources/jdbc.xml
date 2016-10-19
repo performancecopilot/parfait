@@ -3,7 +3,6 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <!-- TODO: JDBC metrics
     <bean id="dbReceivedBytesCallback" class="net.sourceforge.jtds.jdbc.ParfaitByteCallback">
         <constructor-arg ref="monitorableRegistry"/>
         <constructor-arg value="in"/>
@@ -33,6 +32,5 @@
         <property name="staticMethod" value="com.aconex.utilities.db.LoggingDriver.setBytesOutCallback"/>
         <property name="arguments" ref="dbSentBytesCallback"/>
     </bean>
-    -->
 
 </beans>

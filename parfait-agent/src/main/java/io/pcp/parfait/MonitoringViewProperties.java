@@ -14,13 +14,16 @@ public class MonitoringViewProperties {
     private static final String CLUSTER = "cluster";
     private static final String INTERVAL = "interval";
     private static final String STARTUP = "startup";
+    private static final String CONNECT = "connect";
 
     public static final String PARFAIT_NAME = PARFAIT + "." + NAME;
     public static final String PARFAIT_CLUSTER = PARFAIT + "." + CLUSTER;
     public static final String PARFAIT_INTERVAL = PARFAIT + "." + INTERVAL;
     public static final String PARFAIT_STARTUP = PARFAIT + "." + STARTUP;
+    public static final String PARFAIT_CONNECT = PARFAIT + "." + CONNECT;
 
     private static final String DEFAULT_INTERVAL = "1000"; // milliseconds
+    private static final String DEFAULT_CONNECT = "localhost:9875";
 
     public static String getCommandBasename(String command) {
         // trim away arguments, produce a generally sanitized basename
@@ -112,6 +115,14 @@ public class MonitoringViewProperties {
         return startup;
     }
 
+    public static String getDefaultConnection() {
+        String connect = System.getProperty(PARFAIT_CONNECT);
+        if (connect == null || connect.isEmpty()) {
+            return DEFAULT_CONNECT;
+        }
+        return connect;
+    }
+
     public static void setupProperties() {
         String name = getDefaultName(getParfaitName(), getDefaultCommand(), getRuntimeName());
         System.setProperty(PARFAIT_NAME, name);
@@ -124,5 +135,8 @@ public class MonitoringViewProperties {
 
         String startup = getDefaultStartup();
         System.setProperty(PARFAIT_STARTUP, startup);
+
+        String connect = getDefaultConnection();
+        System.setProperty(PARFAIT_CONNECT, connect);
     }
 }
