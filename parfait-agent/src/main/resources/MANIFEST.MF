@@ -1,2 +1,0 @@
-premain-Class: io.pcp.parfait.ParfaitAgent
-Main-Class: io.pcp.parfait.ParfaitAgent
