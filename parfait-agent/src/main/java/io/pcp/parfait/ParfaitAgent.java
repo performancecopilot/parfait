@@ -32,12 +32,23 @@ public class ParfaitAgent {
         }
     }
 
-    public static void startLocal() {
-        GenericXmlApplicationContext context = new GenericXmlApplicationContext();
-        context.getEnvironment().setActiveProfiles("local");
+    public static void loadContextProfile(GenericXmlApplicationContext context, String profile) {
+        context.getEnvironment().setActiveProfiles(profile);
         context.load("classpath:agent.xml");
         try {
-            DynamicMonitoringView view;
+            context.load("file:/usr/share/parfait/*.xml");
+        } catch (Exception e) {
+            logger.trace("Cannot setup beans from /usr/share/parfait", e);
+        } 
+        context.refresh();
+    }
+
+    public static void startLocal() {
+        GenericXmlApplicationContext context = new GenericXmlApplicationContext();
+        DynamicMonitoringView view;
+
+        try {
+            loadContextProfile(context, "local");
             view = (DynamicMonitoringView)context.getBean("monitoringView");
             view.start();
         } catch (BeansException e) {
@@ -66,10 +77,9 @@ public class ParfaitAgent {
     public static void startProxy(String jmx) {
         DynamicMonitoringView view;
         GenericXmlApplicationContext context = new GenericXmlApplicationContext();
-        context.getEnvironment().setActiveProfiles("proxy");
+
         try {
-            context.load("classpath:agent.xml");
-            context.refresh();
+            loadContextProfile(context, "proxy");
             view = (DynamicMonitoringView)context.getBean("monitoringView");
             view.start();
             Thread.currentThread().join();    // pause the main proxy thread

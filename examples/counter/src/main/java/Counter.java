@@ -5,7 +5,7 @@ public class Counter implements Runnable {
     private int time = 1000;
 
     Counter () {
-        counter = new MonitoredCounter("test.counter", "A simple Counter");
+        counter = new MonitoredCounter("example.counter", "A simple Counter that increments once per second");
     }
 
     public void run () {

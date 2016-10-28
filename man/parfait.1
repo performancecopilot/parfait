@@ -1,0 +1,179 @@
+'\"macro stdmacro
+.\"
+.\" Copyright (c) 2016 Red Hat.
+.\" 
+.TH PARFAIT 1 "PCP" "Performance Co-Pilot"
+.SH NAME
+\f3parfait\f1 \- Java instrumentation for Performance Co-Pilot (PCP)
+.SH SYNOPSIS
+\f3parfait\f1
+[\f3\-n\f1/\f3\-\-name\f1 \f2name\f1]
+[\f3\-c\f1/\f3\-\-cluster\f1 \f2id\f1]
+[\f3\-i\f1/\f3\-\-interval\f1 \f2msec\f1]
+[\f3\-j\f1/\f3\-\-jmxserer\f1 \f2host:port\f1]
+[\f3\-s\f1/\f3\-\-startup\f1 \f2delay\f1]
+[\f3\-\-\f1]
+[\f2javaargs\f1 ...]
+.SH DESCRIPTION
+The
+.B parfait
+script provides instrumentation for unmodified Java applications.
+It is a front end to the Parfait APIs which developers can use to
+extensively instrument Java applications.
+.PP
+.B parfait
+is thus limited to exposing performance metrics that it can find
+indirectly, such as via JMX.
+In order to be exported to the Memory Mapped Values PMDA (see
+.BR pmdammv (1)
+for details) these metrics must be categorised with PCP metadata.
+This is performed by the
+.I parfait.jar
+used by
+.BR parfait .
+Additional JMX managed beans can be added to the default set through
+the creation of Spring XML configuration files defining the metadata.
+.PP
+There are two forms of instrumentation available from the
+.B parfait
+script \- direct instrumentation (agent mode) or via a JMX server
+(proxy mode).
+See the ``EXAMPLES'' section below for an example invocation for
+each mode.
+.PP
+The command line options available are:
+.TP 5
+\fB\-n\fP/\fB\-\-name\fP
+The
+.I name
+argument specifies the
+.I mmv.*
+metric subtree name in the
+.BR PMNS (5)
+that will be used to identify this application.
+.TP
+\fB\-c\fP/\fB\-\-cluster\fP
+The performance metric identifier
+.I cluster
+number to be used to identify this application.
+A value of zero is the default, and causes the MMV PMDA to simply
+use the next available number.
+.TP
+\fB\-i\fP/\fB\-\-interval\fP
+Delay between sampling (JMX values in particular) to refresh the
+values exported to PCP.
+.TP
+\fB\-j\fP/\fB\-\-jmxserver\fP
+Connect to the JMX server listening on the specified
+.IR hostname:port
+as the source of JMX metrics.
+This option allows proxying of metrics from a separate process,
+instead of the default javaagent mode of operation.
+.SH EXAMPLES
+The following examples can be installed via the parfait-examples
+package.
+The affects of each example invocation below can be seen using any
+PCP client tool, such as
+.P
+.ft CW
+.nf
+.in +0.5i
+pminfo \-f mmv
+pmprobe \-v mmv
+pmdumptext
+pmchart
+pmie
+[... and many others.]
+.in
+.fi
+.ft 1
+.P
+The default mode of operation involves directly running the Java
+process to be instrumented with a javaagent:
+.P
+.ft CW
+.nf
+.in +0.5i
+java -Dparfait.name=sleep
+    -javaagent:/usr/share/java/parfait/parfait.jar
+    -jar /usr/share/java/parfait/sleep.jar Main
+[...] PCP monitoring bridge started [PCP_TMP_DIR/mmv/sleep]]]
+G'day World!
+.in
+.fi
+.ft 1
+.P
+The alternative is the proxy mode, where an already running Java
+process is instrumented using its JMX server.
+To start the Java application such that a JMX server is exposed,
+use the following options:
+.P
+.ft CW
+.nf
+.in +0.5i
+java
+    -Dcom.sun.management.jmxremote
+    -Dcom.sun.management.jmxremote.port=9875
+    -Dcom.sun.management.jmxremote.local.only=false
+    -Dcom.sun.management.jmxremote.authenticate=false
+    -Dcom.sun.management.jmxremote.ssl=false
+    -jar /usr/share/java/parfait/sleep.jar Main
+G'day World!
+.in
+.fi
+.ft 1
+.P
+The JMX server is then allowing access from instrumentation by
+.BR parfait ,
+which can be invoked as follows:
+.P
+.ft CW
+.nf
+.in +0.5i
+java -Dparfait.name=sleep
+    -jar /usr/share/java/parfait/parfait.jar
+    -connect=localhost:9875
+[...] PCP monitoring bridge started [PCP_TMP_DIR/mmv/sleep]]]
+.in
+.fi
+.ft 1
+.P
+.SH FILES
+.PD 0
+.TP 10
+.BI $PCP_TMP_DIR/mmv/ *
+default local of memory mapped values files created by
+.BR parfait .
+.TP 10
+.BI $PCP_SHARE_DIR/java/parfait/ *.xml
+Spring bean XML configuration files defining additional metrics.
+.PD
+.SH "PCP ENVIRONMENT"
+Environment variables with the prefix
+.B PCP_
+are used to parameterize the file and directory names
+used by PCP.
+On each installation, the file
+.I /etc/pcp.conf
+contains the local values for these variables.
+The
+.B $PCP_CONF
+variable may be used to specify an alternative
+configuration file,
+as described in
+.BR pcp.conf (5).
+.SH SEE ALSO
+.BR PCPIntro (1),
+.BR pmcd (1),
+.BR pmchart (1),
+.BR pmdammv (1),
+.BR pmdumptext (1),
+.BR pmprobe (1),
+.BR pminfo (1),
+.BR pmie (1),
+.BR PMAPI (3),
+.BR PMWEBAPI (3),
+.BR pcp.conf (5),
+.BR pcp.env (5)
+and
+.BR PMNS (5).

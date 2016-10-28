@@ -6,10 +6,13 @@
     </Console>
 </Appenders>
 <Loggers>
-    <Logger name="io.pcp.parfait.ParfaitAgent" level="trace">
+    <Logger name="io.pcp.parfait" level="error">
         <AppenderRef ref="Console"/>
     </Logger>
-    <Root level="trace">
+    <Logger name="io.pcp.parfait.ParfaitAgent" level="error">
+        <AppenderRef ref="Console"/>
+    </Logger>
+    <Root level="error">
         <AppenderRef ref="Console"/>
     </Root>
 </Loggers>

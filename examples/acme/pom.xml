@@ -1,0 +1,61 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>io.pcp</groupId>
+    <artifactId>parfait</artifactId>
+    <version>0.4.1-SNAPSHOT</version>
+  </parent>
+
+  <groupId>io.pcp.parfaitexamples</groupId>
+  <artifactId>example-acme</artifactId>
+  <packaging>jar</packaging>
+  <name>parfait Acme example</name>
+  <description>Instrumented Java application using Parfait APIs</description>
+  <build>
+    <finalName>example-acme</finalName>
+    <plugins>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifestFile>src/main/resources/META-INF/MANIFEST.MF</manifestFile>
+          </archive>
+          <fileSets>
+            <fileSet>
+              <outputDirectory>/</outputDirectory>
+              <useDefaultExcludes>true</useDefaultExcludes>
+              <includes>
+                <include>src/main/**</include>
+              </includes>
+            </fileSet>
+          </fileSets>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+  <dependencies>
+    <dependency>
+      <groupId>io.pcp.parfait</groupId>
+      <artifactId>parfait-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>io.pcp.parfait</groupId>
+      <artifactId>dxm</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+</project>

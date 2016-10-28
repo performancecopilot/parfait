@@ -60,6 +60,7 @@
   <modules>
     <module>parfait-core</module>
     <module>dxm</module>
+    <module>examples</module>
     <module>parfait-pcp</module>
     <module>parfait-io</module>
     <module>parfait-jmx</module>
