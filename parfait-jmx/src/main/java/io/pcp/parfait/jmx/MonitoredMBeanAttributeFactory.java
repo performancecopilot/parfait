@@ -197,7 +197,7 @@ public class MonitoredMBeanAttributeFactory<T> implements FactoryBean<Monitorabl
                     String returnValue = baseString+",name="+name;
                     ObjectName objectName = new ObjectName(returnValue);
                     if (server.isRegistered(objectName)) {
-                        LOG.info(this.name + " registered as " + returnValue);
+                        LOG.trace(this.name + " registered as " + returnValue);
                         return returnValue;
                     }
                 }
