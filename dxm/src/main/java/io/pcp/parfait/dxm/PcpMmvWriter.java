@@ -1,5 +1,6 @@
 package io.pcp.parfait.dxm;
 
+import static com.google.common.collect.Maps.newConcurrentMap;
 import static systems.uom.unicode.CLDR.BYTE;
 import static tec.units.ri.unit.MetricPrefix.KILO;
 import static tec.units.ri.unit.Units.HERTZ;
@@ -12,16 +13,22 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.GregorianCalendar;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.measure.Unit;
 
+import com.google.common.collect.Maps;
 import io.pcp.parfait.dxm.semantics.Semantics;
 import io.pcp.parfait.dxm.semantics.UnitMapping;
 import io.pcp.parfait.dxm.types.AbstractTypeHandler;
@@ -29,6 +36,9 @@ import io.pcp.parfait.dxm.types.DefaultTypeHandlers;
 import io.pcp.parfait.dxm.types.MmvMetricType;
 import io.pcp.parfait.dxm.types.TypeHandler;
 import com.google.common.base.Preconditions;
+import net.jcip.annotations.GuardedBy;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 
 /**
  * <p>
@@ -60,7 +70,7 @@ import com.google.common.base.Preconditions;
  * 
  * @author Cowan
  */
-public class PcpMmvWriter extends BasePcpWriter {
+public class PcpMmvWriter implements PcpWriter {
     private static enum TocType {
         INSTANCE_DOMAINS(1),
         INSTANCES(2),
@@ -90,7 +100,7 @@ public class PcpMmvWriter extends BasePcpWriter {
         }
     }
     
-    public static final Set<MmvFlag> DEFAULT_FLAGS = Collections.unmodifiableSet(EnumSet.of(
+    private static final Set<MmvFlag> DEFAULT_FLAGS = Collections.unmodifiableSet(EnumSet.of(
             MmvFlag.MMV_FLAG_NOPREFIX, MmvFlag.MMV_FLAG_PROCESS));
 
     /**
@@ -98,13 +108,13 @@ public class PcpMmvWriter extends BasePcpWriter {
      * relative to {@link #PCP_CHARSET} (it's a measure of the maximum number of bytes, not the Java
      * String length)
      */
-    public static final int METRIC_NAME_LIMIT = 63;
+    private static final int METRIC_NAME_LIMIT = 63;
     /**
      * The maximum length of an instance name able to be exported to the MMV agent. Note that this
      * is relative to {@link #PCP_CHARSET} (it's a measure of the maximum number of bytes, not the
      * Java String length)
      */
-    public static final int INSTANCE_NAME_LIMIT = 63;
+    private static final int INSTANCE_NAME_LIMIT = 63;
 
     private static final int HEADER_LENGTH = 40;
     private static final int TOC_LENGTH = 16;
@@ -118,7 +128,7 @@ public class PcpMmvWriter extends BasePcpWriter {
     /**
      * The charset used for PCP metrics names and String values.
      */
-    public static final Charset PCP_CHARSET = Charset.forName("US-ASCII");
+    private static final Charset PCP_CHARSET = Charset.forName("US-ASCII");
     private static final byte[] TAG = "MMV\0".getBytes(PCP_CHARSET);
     private static final int MMV_FORMAT_VERSION = 1;
 
@@ -139,6 +149,21 @@ public class PcpMmvWriter extends BasePcpWriter {
             buffer.put((byte) 0);
         }
     };
+
+    private final ByteBufferFactory byteBufferFactory;
+    private final Store<PcpMetricInfo> metricInfoStore;
+    private final Store<InstanceDomain> instanceDomainStore;
+    private final Map<MetricName, PcpValueInfo> metricData = Maps.newConcurrentMap();
+    private final Map<Class<?>, TypeHandler<?>> typeHandlers = new ConcurrentHashMap<Class<?>, TypeHandler<?>>(
+            DefaultTypeHandlers.getDefaultMappings());
+    private final Collection<PcpString> stringInfo = new CopyOnWriteArrayList<PcpString>();
+    private volatile boolean started = false;
+    private volatile boolean usePerMetricLock = true;
+    private final Map<PcpValueInfo,ByteBuffer> perMetricByteBuffers = newConcurrentMap();
+    private final Object globalLock = new Object();
+    @GuardedBy("itself")
+    private volatile ByteBuffer dataFileBuffer = null;
+
 
     private File file = null;
     private volatile int processIdentifier = 0;
@@ -172,7 +197,10 @@ public class PcpMmvWriter extends BasePcpWriter {
     }
 
     public PcpMmvWriter(ByteBufferFactory byteBufferFactory, IdentifierSourceSet identifierSources) {
-        super(byteBufferFactory, identifierSources);
+        this.byteBufferFactory = byteBufferFactory;
+        this.metricInfoStore = new MetricInfoStore(identifierSources);
+        this.instanceDomainStore = new InstanceDomainStore(identifierSources);
+
         registerType(String.class, MMV_STRING_HANDLER);
     }
 
@@ -206,6 +234,103 @@ public class PcpMmvWriter extends BasePcpWriter {
         return new File(mmvDir, name);
     }
 
+    public final void addMetric(MetricName name, Semantics semantics, Unit<?> unit, Object initialValue) {
+        TypeHandler<?> handler = typeHandlers.get(initialValue.getClass());
+        if (handler == null) {
+            throw new IllegalArgumentException("No default handler registered for type "
+                    + initialValue.getClass());
+        }
+        addMetricInfo(name, semantics, unit, initialValue, handler);
+
+    }
+
+    public final <T> void addMetric(MetricName name, Semantics semantics, Unit<?> unit, T initialValue, TypeHandler<T> pcpType) {
+        if (pcpType == null) {
+            throw new IllegalArgumentException("PCP Type handler must not be null");
+        }
+        addMetricInfo(name, semantics, unit, initialValue, pcpType);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see io.pcp.parfait.pcp.PcpWriter#registerType(java.lang.Class,
+     * io.pcp.parfait.pcp.types.TypeHandler)
+     */
+    public final <T> void registerType(Class<T> runtimeClass, TypeHandler<T> handler) {
+        if (started) {
+            // Can't add any more metrics anyway; harmless
+            return;
+        }
+        typeHandlers.put(runtimeClass, handler);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see io.pcp.parfait.pcp.PcpWriter#updateMetric(java.lang.String, java.lang.Object)
+     */
+    public final void updateMetric(MetricName name, Object value) {
+        if (!started) {
+            return;
+        }
+        PcpValueInfo info = metricData.get(name);
+        if (info == null) {
+            throw new IllegalArgumentException("Metric " + name
+                    + " was not added before initialising the writer");
+        }
+        updateValue(info, value);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see io.pcp.parfait.pcp.PcpWriter#start()
+     */
+    public final void start() throws IOException {
+        initialiseOffsets();
+
+        dataFileBuffer = byteBufferFactory.build(getBufferLength());
+        synchronized (globalLock) {
+            populateDataBuffer(dataFileBuffer, metricData.values());
+            preparePerMetricBufferSlices();
+        }
+
+        started = true;
+    }
+
+    @Override
+    public void reset() {
+        started = false;
+        metricData.clear();
+    }
+
+    @Override
+    public final void setInstanceDomainHelpText(String instanceDomain, String shortHelpText, String longHelpText) {
+        InstanceDomain domain = getInstanceDomain(instanceDomain);
+        domain.setHelpText(createPcpString(shortHelpText), createPcpString(longHelpText));
+    }
+
+    @Override
+    public final void setMetricHelpText(String metricName, String shortHelpText, String longHelpText) {
+        PcpMetricInfo info = getMetricInfo(metricName);
+        if (!info.hasHelpText()) {
+            info.setHelpText(createPcpString(shortHelpText), createPcpString(longHelpText));
+        }
+    }
+
+    private void preparePerMetricBufferSlices() {
+        for (PcpValueInfo info : metricData.values()) {
+            TypeHandler<?> rawHandler = info.getTypeHandler();
+            int bufferPosition = rawHandler.requiresLargeStorage() ? info.getLargeValue()
+                    .getOffset() : info.getOffset();
+            // need to position the original buffer first, as the sliced buffer starts from there
+            dataFileBuffer.position(bufferPosition);
+            ByteBuffer metricByteBufferSlice = dataFileBuffer.slice();
+            metricByteBufferSlice.limit(rawHandler.getDataLength());
+            perMetricByteBuffers.put(info, metricByteBufferSlice);
+            metricByteBufferSlice.order(dataFileBuffer.order());
+        }
+    }
+
+
     public void setClusterIdentifier(int clusterIdentifier) {
         Preconditions.checkArgument((clusterIdentifier & 0xFFFFF000)==0, "ClusterIdentifier can only be a 12bit value");
     	this.clusterIdentifier = clusterIdentifier;
@@ -216,12 +341,120 @@ public class PcpMmvWriter extends BasePcpWriter {
         this.processIdentifier = pid;
     }
 
+    public void setPerMetricLock(boolean usePerMetricLock) {
+        Preconditions.checkState(!started, "Cannot change use of perMetricLock when started");
+        this.usePerMetricLock = usePerMetricLock;
+    }
+
     public void setFlags(Set<MmvFlag> flags) {
         this.flags = EnumSet.copyOf(flags);
     }
 
-    @Override
-    protected void populateDataBuffer(ByteBuffer dataFileBuffer, Collection<PcpValueInfo> valueInfos)
+    private synchronized void addMetricInfo(MetricName name, Semantics semantics, Unit<?> unit,
+                                            Object initialValue, TypeHandler<?> pcpType) {
+        if (metricData.containsKey(name)) {
+            throw new IllegalArgumentException("Metric " + name
+                    + " has already been added to writer");
+        }
+        if (name.getMetric().getBytes(getCharset()).length > getMetricNameLimit()) {
+            throw new IllegalArgumentException("Cannot add metric " + name
+                    + "; name exceeds length limit");
+        }
+        if (name.hasInstance()
+                && name.getInstance().getBytes(getCharset()).length > getInstanceNameLimit()) {
+            throw new IllegalArgumentException("Cannot add metric " + name
+                    + "; instance name is too long");
+        }
+        PcpMetricInfo metricInfo = getMetricInfo(name.getMetric());
+        InstanceDomain domain = null;
+        Instance instance = null;
+
+        if (name.hasInstance()) {
+            domain = getInstanceDomain(name.getInstanceDomainTag());
+            instance = domain.getInstance(name.getInstance());
+            metricInfo.setInstanceDomain(domain);
+        }
+        metricInfo.setTypeHandler(pcpType);
+        metricInfo.setUnit(unit);
+        metricInfo.setSemantics(semantics);
+
+        PcpValueInfo info = new PcpValueInfo(name, metricInfo, instance, initialValue, this);
+        metricData.put(name, info);
+    }
+
+    private PcpMetricInfo getMetricInfo(String name) {
+        return metricInfoStore.byName(name);
+    }
+
+    private InstanceDomain getInstanceDomain(String name) {
+        return instanceDomainStore.byName(name);
+    }
+
+    private Collection<PcpMetricInfo> getMetricInfos() {
+        return metricInfoStore.all();
+    }
+
+
+
+    private Collection<InstanceDomain> getInstanceDomains() {
+        return instanceDomainStore.all();
+    }
+
+    private Collection<Instance> getInstances() {
+        Collection<Instance> instances = new ArrayList<Instance>();
+        for (InstanceDomain domain : instanceDomainStore.all()) {
+            instances.addAll(domain.getInstances());
+        }
+        return instances;
+    }
+
+    private Collection<PcpValueInfo> getValueInfos() {
+        return metricData.values();
+    }
+
+    private Collection<PcpString> getStrings() {
+        return stringInfo;
+    }
+
+    PcpString createPcpString(String text) {
+        if (text == null) {
+            return null;
+        }
+        PcpString string = new PcpString(text);
+        stringInfo.add(string);
+        return string;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void updateValue(PcpValueInfo info, Object value) {
+        @SuppressWarnings("rawtypes")
+        TypeHandler rawHandler = info.getTypeHandler();
+
+        if (usePerMetricLock) {
+            writeValueWithLockPerMetric(info, value, rawHandler);
+        } else {
+            writeValueWithGlobalLock(info, value, rawHandler);
+        }
+    }
+
+    private void writeValueWithLockPerMetric(PcpValueInfo info, Object value, TypeHandler rawHandler) {
+        ByteBuffer perMetricByteBuffer = perMetricByteBuffers.get(info);
+        synchronized (perMetricByteBuffer) {
+            perMetricByteBuffer.position(0);
+            rawHandler.putBytes(perMetricByteBuffer, value);
+        }
+
+    }
+
+    private void writeValueWithGlobalLock(PcpValueInfo info, Object value, TypeHandler rawHandler) {
+        synchronized (globalLock) {
+            dataFileBuffer.position(rawHandler.requiresLargeStorage() ? info.getLargeValue()
+                    .getOffset() : info.getOffset());
+            rawHandler.putBytes(dataFileBuffer, value);
+        }
+    }
+
+    private void populateDataBuffer(ByteBuffer dataFileBuffer, Collection<PcpValueInfo> valueInfos)
             throws IOException {
 
         // Automatically cleanup the file if this is a mapping where we
@@ -325,8 +558,7 @@ public class PcpMmvWriter extends BasePcpWriter {
         dataFileBuffer.put((byte) 0);
     }
 
-    @Override
-    protected int getBufferLength() {
+    private int getBufferLength() {
         int instanceDomainCount = getInstanceDomains().size();
         int metricCount = getMetricInfos().size();
         int instanceCount = getInstances().size();
@@ -396,7 +628,7 @@ public class PcpMmvWriter extends BasePcpWriter {
      * 
      * @param dataFileBuffer
      *            ByteBuffer positioned at the correct offset in the file for the block
-     * @param value
+     * @param info
      *            the PcpValueInfo to be written to the file
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -445,27 +677,23 @@ public class PcpMmvWriter extends BasePcpWriter {
      *            the 0-based index of the TOC block to be written
      * @return the file offset used to store that TOC block (32-bit regardless of architecture)
      */
-    private final int getTocOffset(int tocIndex) {
+    private int getTocOffset(int tocIndex) {
         return HEADER_LENGTH + (tocIndex * TOC_LENGTH);
     }
 
-    @Override
-    protected Charset getCharset() {
+    private Charset getCharset() {
         return PCP_CHARSET;
     }
 
-    @Override
-    protected int getMetricNameLimit() {
+    private int getMetricNameLimit() {
         return METRIC_NAME_LIMIT;
     }
 
-    @Override
-    protected int getInstanceNameLimit() {
+    private int getInstanceNameLimit() {
         return INSTANCE_NAME_LIMIT;
     }
 
-    @Override
-    protected synchronized void initialiseOffsets() {
+    private synchronized void initialiseOffsets() {
         int nextOffset = HEADER_LENGTH + (TOC_LENGTH * tocCount());
 
         nextOffset = initializeOffsets(getInstanceDomains(), nextOffset, INSTANCE_DOMAIN_LENGTH);
@@ -589,4 +817,66 @@ public class PcpMmvWriter extends BasePcpWriter {
         bridge.updateMetric(MetricName.parse("sheep[limpy].jumpitem"), "Honda Civic");
         // Values will be reflected in the agent immediately
     }
+
+    private static final class MetricInfoStore extends Store<PcpMetricInfo> {
+        MetricInfoStore(IdentifierSourceSet identifierSources) {
+            super(identifierSources.metricSource());
+        }
+
+        @Override
+        protected PcpMetricInfo newInstance(String name, Set<Integer> usedIds) {
+            return new PcpMetricInfo(name, identifierSource.calculateId(name, usedIds));
+        }
+    }
+
+    private static final class InstanceDomainStore extends Store<InstanceDomain> {
+        private final IdentifierSourceSet identifierSources;
+
+        InstanceDomainStore(IdentifierSourceSet identifierSources) {
+            super(identifierSources.instanceDomainSource());
+            this.identifierSources = identifierSources;
+        }
+
+        @Override
+        protected InstanceDomain newInstance(String name, Set<Integer> usedIds) {
+            return new InstanceDomain(name, identifierSource.calculateId(name, usedIds), identifierSources);
+        }
+
+    }
+
+    static abstract class Store<T extends PcpId> {
+        private final Map<String, T> byName = new LinkedHashMap<String, T>();
+        private final Map<Integer, T> byId = new LinkedHashMap<Integer, T>();
+        final IdentifierSource identifierSource;
+
+        Store(IdentifierSource source) {
+            this.identifierSource = source;
+        }
+
+        synchronized T byName(String name) {
+            T value = byName.get(name);
+            if (value == null) {
+                value = newInstance(name, byId.keySet());
+                byName.put(name, value);
+                byId.put(value.getId(), value);
+            }
+            return value;
+        }
+
+        synchronized Collection<T> all() {
+            return byName.values();
+        }
+
+        protected abstract T newInstance(String name, Set<Integer> usedIds);
+
+        synchronized int size() {
+            return byName.size();
+        }
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("byteBufferFactory", this.byteBufferFactory).toString();
+    }
+
 }

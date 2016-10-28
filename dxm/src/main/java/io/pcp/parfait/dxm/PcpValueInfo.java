@@ -14,7 +14,7 @@ public final class PcpValueInfo implements PcpOffset {
 	private int offset;
 
     PcpValueInfo(MetricName metricName, PcpMetricInfo metricInfo, Instance instance, 
-    		Object initialValue, BasePcpWriter basePcpWriter) {
+    		Object initialValue, PcpMmvWriter basePcpWriter) {
         this.metricName = metricName;
         this.metricInfo = metricInfo;
         this.instance = instance;

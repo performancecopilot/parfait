@@ -3,7 +3,7 @@ package io.pcp.parfait.dxm;
 import java.util.Collection;
 import java.util.Set;
 
-import io.pcp.parfait.dxm.BasePcpWriter.Store;
+import io.pcp.parfait.dxm.PcpMmvWriter.Store;
 
 class InstanceDomain implements PcpId, PcpOffset {
     private final String name;
