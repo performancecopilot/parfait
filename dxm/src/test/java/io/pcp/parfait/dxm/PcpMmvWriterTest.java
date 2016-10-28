@@ -1,13 +1,12 @@
 package io.pcp.parfait.dxm;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static tec.units.ri.AbstractUnit.ONE;
 
-import javax.measure.Unit;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
@@ -85,7 +84,7 @@ public class PcpMmvWriterTest {
         pcpMmvWriter.setPerMetricLock(true);
     }
 
-    class CustomType {}
+    private class CustomType {}
 
 }
 
