@@ -1,11 +1,12 @@
 package io.pcp.parfait.dxm;
 
+import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Set;
 
 import io.pcp.parfait.dxm.PcpMmvWriter.Store;
 
-class InstanceDomain implements PcpId, PcpOffset {
+class InstanceDomain implements PcpId, PcpOffset, MmvWritable {
     private final String name;
     private final int id;
     private int offset;
@@ -40,11 +41,11 @@ class InstanceDomain implements PcpId, PcpOffset {
         this.offset = offset;
     }
     
-    int getInstanceCount() {
+    private int getInstanceCount() {
         return instanceStore.size();
     }
 
-    int getFirstInstanceOffset() {
+    private int getFirstInstanceOffset() {
         return instanceStore.all().iterator().next().getOffset();
     }
 
@@ -58,16 +59,33 @@ class InstanceDomain implements PcpId, PcpOffset {
         
     }
 
-    PcpString getShortHelpText() {
-        return shortHelpText;
+    @Override
+    public void writeToMmv(ByteBuffer byteBuffer) {
+        byteBuffer.position(offset);
+        writeInstanceDomainSection(byteBuffer);
+        for (Instance instance : getInstances()) {
+            instance.writeToMmv(byteBuffer);
+        }
     }
 
-    PcpString getLongHelpText() {
-        return longHelpText;
+    private void writeInstanceDomainSection(ByteBuffer dataFileBuffer) {
+        dataFileBuffer.putInt(id);
+        dataFileBuffer.putInt(getInstanceCount());
+        dataFileBuffer.putLong(getFirstInstanceOffset());
+        dataFileBuffer.putLong(getStringOffset(shortHelpText));
+        dataFileBuffer.putLong(getStringOffset(longHelpText));
     }
-    
-	private class InstanceStore extends Store<Instance> {
-        public InstanceStore(IdentifierSourceSet identifierSources) {
+
+
+    private long getStringOffset(PcpString text) {
+        if (text == null) {
+            return 0;
+        }
+        return text.getOffset();
+    }
+
+    private class InstanceStore extends Store<Instance> {
+        InstanceStore(IdentifierSourceSet identifierSources) {
             super(identifierSources.instanceSource(name));
         }
 

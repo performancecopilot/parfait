@@ -513,11 +513,7 @@ public class PcpMmvWriter implements PcpWriter {
         }
 
         for (InstanceDomain instanceDomain : instanceDomains) {
-            dataFileBuffer.position(instanceDomain.getOffset());
-            writeInstanceDomainSection(dataFileBuffer, instanceDomain);
-            for (Instance instance : instanceDomain.getInstances()) {
-                instance.writeToMmv(dataFileBuffer);
-            }
+            instanceDomain.writeToMmv(dataFileBuffer);
         }
 
         for (PcpMetricInfo info : metrics) {
@@ -575,22 +571,6 @@ public class PcpMmvWriter implements PcpWriter {
         dataFileBuffer.putInt(tocType.identifier);
         dataFileBuffer.putInt(entryCount);
         dataFileBuffer.putLong(firstEntryOffset);
-    }
-
-
-    private void writeInstanceDomainSection(ByteBuffer dataFileBuffer, InstanceDomain instanceDomain) {
-        dataFileBuffer.putInt(instanceDomain.getId());
-        dataFileBuffer.putInt(instanceDomain.getInstanceCount());
-        dataFileBuffer.putLong(instanceDomain.getFirstInstanceOffset());
-        dataFileBuffer.putLong(getStringOffset(instanceDomain.getShortHelpText()));
-        dataFileBuffer.putLong(getStringOffset(instanceDomain.getLongHelpText()));
-    }
-
-    private long getStringOffset(PcpString text) {
-        if (text == null) {
-            return 0;
-        }
-        return text.getOffset();
     }
 
     /**
