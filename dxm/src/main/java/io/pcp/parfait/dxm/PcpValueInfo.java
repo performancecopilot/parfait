@@ -5,7 +5,12 @@ package io.pcp.parfait.dxm;
 
 import io.pcp.parfait.dxm.types.TypeHandler;
 
-public final class PcpValueInfo implements PcpOffset {
+import java.nio.ByteBuffer;
+
+import static io.pcp.parfait.dxm.PcpMmvWriter.DATA_VALUE_LENGTH;
+import static io.pcp.parfait.dxm.PcpMmvWriter.STRING_BLOCK_LENGTH;
+
+public final class PcpValueInfo implements PcpOffset,MmvWritable {
 	private final MetricName metricName;
 	private final Object initialValue;
 	private final PcpMetricInfo metricInfo;
@@ -44,20 +49,45 @@ public final class PcpValueInfo implements PcpOffset {
         return metricInfo.getTypeHandler();
     }
 
-    public Object getInitialValue() {
+    private Object getInitialValue() {
         return initialValue;
     }
 
-    int getInstanceOffset() {
+    private int getInstanceOffset() {
         return instance == null ? 0 : instance.getOffset();
     }
 
-    int getDescriptorOffset() {
+    private int getDescriptorOffset() {
         return metricInfo.getOffset();
     }
     
     PcpString getLargeValue() {
         return largeValue;
     }
+
+    @Override
+    public void writeToMmv(ByteBuffer byteBuffer) {
+        byteBuffer.position(offset);
+        writeValueSection(byteBuffer);
+
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private void writeValueSection(ByteBuffer dataFileBuffer) {
+        int originalPosition = dataFileBuffer.position();
+        TypeHandler rawHandler = getTypeHandler();
+        if (rawHandler.requiresLargeStorage()) {
+            // API requires the length here but it's currently unused -- write out the maximum
+            // possible length
+            dataFileBuffer.putLong(STRING_BLOCK_LENGTH - 1);
+            dataFileBuffer.putLong(getLargeValue().getOffset());
+            dataFileBuffer.position(getLargeValue().getOffset());
+        }
+        rawHandler.putBytes(dataFileBuffer, getInitialValue());
+        dataFileBuffer.position(originalPosition + DATA_VALUE_LENGTH);
+        dataFileBuffer.putLong(getDescriptorOffset());
+        dataFileBuffer.putLong(getInstanceOffset());
+    }
+
 
 }

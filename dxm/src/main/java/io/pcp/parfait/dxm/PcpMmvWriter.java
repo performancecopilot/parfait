@@ -132,7 +132,7 @@ public class PcpMmvWriter implements PcpWriter {
     private static final byte[] TAG = "MMV\0".getBytes(PCP_CHARSET);
     private static final int MMV_FORMAT_VERSION = 1;
 
-    private static final int DATA_VALUE_LENGTH = 16;
+    static final int DATA_VALUE_LENGTH = 16;
 
     private static final TypeHandler<String> MMV_STRING_HANDLER = new AbstractTypeHandler<String>(
             MmvMetricType.STRING, STRING_BLOCK_LENGTH) {
@@ -529,8 +529,7 @@ public class PcpMmvWriter implements PcpWriter {
         }
 
         for (PcpValueInfo info : valueInfos) {
-            dataFileBuffer.position(info.getOffset());
-            writeValueSection(dataFileBuffer, info);
+            info.writeToMmv(dataFileBuffer);
         }
 
         for (PcpString string : strings) {
@@ -615,30 +614,6 @@ public class PcpMmvWriter implements PcpWriter {
         dataFileBuffer.putLong(getStringOffset(info.getLongHelpText()));
     }
 
-    /**
-     * Writes the value block for an individual metric to the file.
-     * 
-     * @param dataFileBuffer
-     *            ByteBuffer positioned at the correct offset in the file for the block
-     * @param info
-     *            the PcpValueInfo to be written to the file
-     */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private void writeValueSection(ByteBuffer dataFileBuffer, PcpValueInfo info) {
-        int originalPosition = dataFileBuffer.position();
-        TypeHandler rawHandler = info.getTypeHandler();
-        if (rawHandler.requiresLargeStorage()) {
-            // API requires the length here but it's currently unused -- write out the maximum
-            // possible length
-            dataFileBuffer.putLong(STRING_BLOCK_LENGTH - 1);
-            dataFileBuffer.putLong(info.getLargeValue().getOffset());
-            dataFileBuffer.position(info.getLargeValue().getOffset());
-        }
-        rawHandler.putBytes(dataFileBuffer, info.getInitialValue());
-        dataFileBuffer.position(originalPosition + DATA_VALUE_LENGTH);
-        dataFileBuffer.putLong(info.getDescriptorOffset());
-        dataFileBuffer.putLong(info.getInstanceOffset());
-    }
 
     private void writeInstanceSection(ByteBuffer dataFileBuffer, Instance instance) {
         dataFileBuffer.putLong(instance.getInstanceDomain().getOffset());
