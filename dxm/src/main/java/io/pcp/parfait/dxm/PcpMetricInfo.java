@@ -1,11 +1,18 @@
 package io.pcp.parfait.dxm;
 
-import javax.measure.Unit;
-
 import io.pcp.parfait.dxm.semantics.Semantics;
+import io.pcp.parfait.dxm.semantics.UnitMapping;
 import io.pcp.parfait.dxm.types.TypeHandler;
 
-final class PcpMetricInfo implements PcpId, PcpOffset {
+import javax.measure.Unit;
+import java.nio.ByteBuffer;
+
+import static io.pcp.parfait.dxm.PcpMmvWriter.METRIC_NAME_LIMIT;
+import static io.pcp.parfait.dxm.PcpMmvWriter.PCP_CHARSET;
+
+final class PcpMetricInfo implements PcpId, PcpOffset, MmvWritable {
+    private static final int DEFAULT_INSTANCE_DOMAIN_ID = -1;
+
     private final String metricName;
     private final int id;
 
@@ -36,10 +43,6 @@ final class PcpMetricInfo implements PcpId, PcpOffset {
         this.offset = offset;
     }
 
-    String getMetricName() {
-        return metricName;
-    }
-
     TypeHandler<?> getTypeHandler() {
         return typeHandler;
     }
@@ -54,10 +57,6 @@ final class PcpMetricInfo implements PcpId, PcpOffset {
 
     }
 
-    InstanceDomain getInstanceDomain() {
-        return domain;
-    }
-
     void setInstanceDomain(InstanceDomain domain) {
         if (this.domain != null && !this.domain.equals(domain)) {
             throw new IllegalArgumentException(
@@ -65,14 +64,6 @@ final class PcpMetricInfo implements PcpId, PcpOffset {
                             + " (old=" + this.domain + ", new=" + domain + ")");
         }
         this.domain = domain;
-    }
-
-    PcpString getShortHelpText() {
-        return shortHelpText;
-    }
-
-    PcpString getLongHelpText() {
-        return longHelpText;
     }
 
     void setHelpText(PcpString shortHelpText, PcpString longHelpText) {
@@ -106,7 +97,40 @@ final class PcpMetricInfo implements PcpId, PcpOffset {
         return semantics == null ? Semantics.NO_SEMANTICS : semantics;
     }
 
-    public boolean hasHelpText() {
+    boolean hasHelpText() {
         return (shortHelpText != null || longHelpText != null);
-    }    
+    }
+
+    @Override
+    public void writeToMmv(ByteBuffer byteBuffer) {
+        byteBuffer.position(offset);
+
+        int originalPosition = byteBuffer.position();
+
+        byteBuffer.put(metricName.getBytes(PCP_CHARSET));
+        byteBuffer.put((byte) 0);
+        byteBuffer.position(originalPosition + METRIC_NAME_LIMIT + 1);
+        byteBuffer.putInt(getId());
+        byteBuffer.putInt(typeHandler.getMetricType().getIdentifier());
+        byteBuffer.putInt(getSemantics().getPcpValue());
+        byteBuffer.putInt(UnitMapping.getDimensions(getUnit(), metricName));
+        if (domain != null) {
+            byteBuffer.putInt(domain.getId());
+        } else {
+            byteBuffer.putInt(DEFAULT_INSTANCE_DOMAIN_ID);
+        }
+        // Just padding
+        byteBuffer.putInt(0);
+        byteBuffer.putLong(getStringOffset(shortHelpText));
+        byteBuffer.putLong(getStringOffset(longHelpText));
+
+    }
+
+    private long getStringOffset(PcpString text) {
+        if (text == null) {
+            return 0;
+        }
+        return text.getOffset();
+    }
+
 }

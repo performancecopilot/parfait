@@ -30,7 +30,6 @@ import javax.measure.Unit;
 
 import com.google.common.collect.Maps;
 import io.pcp.parfait.dxm.semantics.Semantics;
-import io.pcp.parfait.dxm.semantics.UnitMapping;
 import io.pcp.parfait.dxm.types.AbstractTypeHandler;
 import io.pcp.parfait.dxm.types.DefaultTypeHandlers;
 import io.pcp.parfait.dxm.types.MmvMetricType;
@@ -108,7 +107,7 @@ public class PcpMmvWriter implements PcpWriter {
      * relative to {@link #PCP_CHARSET} (it's a measure of the maximum number of bytes, not the Java
      * String length)
      */
-    private static final int METRIC_NAME_LIMIT = 63;
+    static final int METRIC_NAME_LIMIT = 63;
     /**
      * The maximum length of an instance name able to be exported to the MMV agent. Note that this
      * is relative to {@link #PCP_CHARSET} (it's a measure of the maximum number of bytes, not the
@@ -120,7 +119,6 @@ public class PcpMmvWriter implements PcpWriter {
     private static final int TOC_LENGTH = 16;
     private static final int METRIC_LENGTH = 104;
     private static final int VALUE_LENGTH = 32;
-    private static final int DEFAULT_INSTANCE_DOMAIN_ID = -1;
     private static final int INSTANCE_LENGTH = 80;
     private static final int INSTANCE_DOMAIN_LENGTH = 32;
     static final int STRING_BLOCK_LENGTH = 256;
@@ -524,8 +522,7 @@ public class PcpMmvWriter implements PcpWriter {
         }
 
         for (PcpMetricInfo info : metrics) {
-            dataFileBuffer.position(info.getOffset());
-            writeMetricsSection(dataFileBuffer, info, info.getTypeHandler().getMetricType());
+            info.writeToMmv(dataFileBuffer);
         }
 
         for (PcpValueInfo info : valueInfos) {
@@ -580,40 +577,6 @@ public class PcpMmvWriter implements PcpWriter {
         dataFileBuffer.putInt(entryCount);
         dataFileBuffer.putLong(firstEntryOffset);
     }
-
-    /**
-     * Writes the descriptor block for an individual metric to the file.
-     * 
-     * @param dataFileBuffer
-     *            ByteBuffer positioned at the correct offset in the file for the block
-     * @param info
-     *            the info of the metric (name must be &le; {@link #METRIC_NAME_LIMIT} characters,
-     *            and must be convertible to {@link #PCP_CHARSET})
-     * @param metricType
-     *            the type of the metric
-     */
-    private void writeMetricsSection(ByteBuffer dataFileBuffer, PcpMetricInfo info,
-            MmvMetricType metricType) {
-        int originalPosition = dataFileBuffer.position();
-
-        dataFileBuffer.put(info.getMetricName().getBytes(PCP_CHARSET));
-        dataFileBuffer.put((byte) 0);
-        dataFileBuffer.position(originalPosition + METRIC_NAME_LIMIT + 1);
-        dataFileBuffer.putInt(info.getId());
-        dataFileBuffer.putInt(metricType.getIdentifier());
-        dataFileBuffer.putInt(info.getSemantics().getPcpValue());
-        dataFileBuffer.putInt(UnitMapping.getDimensions(info.getUnit(), info.getMetricName()));
-        if (info.getInstanceDomain() != null) {
-            dataFileBuffer.putInt(info.getInstanceDomain().getId());
-        } else {
-            dataFileBuffer.putInt(DEFAULT_INSTANCE_DOMAIN_ID);
-        }
-        // Just padding
-        dataFileBuffer.putInt(0);
-        dataFileBuffer.putLong(getStringOffset(info.getShortHelpText()));
-        dataFileBuffer.putLong(getStringOffset(info.getLongHelpText()));
-    }
-
 
     private void writeInstanceSection(ByteBuffer dataFileBuffer, Instance instance) {
         dataFileBuffer.putLong(instance.getInstanceDomain().getOffset());
