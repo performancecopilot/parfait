@@ -4,7 +4,14 @@
 package io.pcp.parfait.dxm;
 
 
-final class PcpString implements PcpOffset {
+import com.google.common.base.Preconditions;
+
+import java.nio.ByteBuffer;
+
+import static io.pcp.parfait.dxm.PcpMmvWriter.PCP_CHARSET;
+import static io.pcp.parfait.dxm.PcpMmvWriter.STRING_BLOCK_LENGTH;
+
+final class PcpString implements PcpOffset,MmvWritable {
     private final String initialValue;
     private int offset;
     
@@ -25,4 +32,15 @@ final class PcpString implements PcpOffset {
     String getInitialValue() {
         return initialValue;
     }
+
+    @Override
+    public void writeToMmv(ByteBuffer byteBuffer) {
+        byteBuffer.position(offset);
+        byte[] bytes = initialValue.getBytes(PCP_CHARSET);
+        Preconditions.checkArgument(bytes.length < STRING_BLOCK_LENGTH);
+        byteBuffer.put(bytes);
+        byteBuffer.put((byte) 0);
+
+    }
+
 }

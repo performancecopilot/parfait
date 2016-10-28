@@ -123,12 +123,12 @@ public class PcpMmvWriter implements PcpWriter {
     private static final int DEFAULT_INSTANCE_DOMAIN_ID = -1;
     private static final int INSTANCE_LENGTH = 80;
     private static final int INSTANCE_DOMAIN_LENGTH = 32;
-    private static final int STRING_BLOCK_LENGTH = 256;
+    static final int STRING_BLOCK_LENGTH = 256;
 
     /**
      * The charset used for PCP metrics names and String values.
      */
-    private static final Charset PCP_CHARSET = Charset.forName("US-ASCII");
+    static final Charset PCP_CHARSET = Charset.forName("US-ASCII");
     private static final byte[] TAG = "MMV\0".getBytes(PCP_CHARSET);
     private static final int MMV_FORMAT_VERSION = 1;
 
@@ -534,8 +534,7 @@ public class PcpMmvWriter implements PcpWriter {
         }
 
         for (PcpString string : strings) {
-            dataFileBuffer.position(string.getOffset());
-            writeStringSection(dataFileBuffer, string.getInitialValue());
+            string.writeToMmv(dataFileBuffer);
         }
 
         // Once it's set up, let the agent know
@@ -549,13 +548,6 @@ public class PcpMmvWriter implements PcpWriter {
             flagMask |= flag.bitmask;
         }
         return flagMask;
-    }
-
-    private void writeStringSection(ByteBuffer dataFileBuffer, String value) {
-    	byte[] bytes = value.getBytes(PCP_CHARSET);
-    	Preconditions.checkArgument(bytes.length < STRING_BLOCK_LENGTH);
-        dataFileBuffer.put(bytes);
-        dataFileBuffer.put((byte) 0);
     }
 
     private int getBufferLength() {
