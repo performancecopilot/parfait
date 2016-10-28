@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
 
 import static io.pcp.parfait.dxm.PcpMmvWriter.PCP_CHARSET;
 
-final class Instance implements PcpId, PcpOffset, MmvWritable {
+abstract class Instance implements PcpId, PcpOffset, MmvWritable {
     private final String name;
     private final int id;
     private final InstanceDomain instanceDomain;
