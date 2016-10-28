@@ -2,8 +2,9 @@ package io.pcp.parfait.dxm;
 
 import java.nio.ByteBuffer;
 
-public interface MmvWritable {
+interface MmvWritable {
 
+    int getOffset();
     void writeToMmv(ByteBuffer byteBuffer);
 
 }

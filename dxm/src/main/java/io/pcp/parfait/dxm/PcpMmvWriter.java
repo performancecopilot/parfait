@@ -476,10 +476,10 @@ public class PcpMmvWriter implements PcpWriter {
         dataFileBuffer.putInt(getProcessIdentifier());
         dataFileBuffer.putInt(clusterIdentifier);
 
-        Collection<InstanceDomain> instanceDomains = getInstanceDomains();
-        Collection<Instance> instances = getInstances();
-        Collection<PcpMetricInfo> metrics = getMetricInfos();
-        Collection<PcpString> strings = getStrings();
+        Collection<? extends MmvWritable> instanceDomains = getInstanceDomains();
+        Collection<? extends MmvWritable> instances = getInstances();
+        Collection<? extends MmvWritable> metrics = getMetricInfos();
+        Collection<? extends MmvWritable> strings = getStrings();
 
         int tocBlockIndex = 0;
 
@@ -512,19 +512,19 @@ public class PcpMmvWriter implements PcpWriter {
                     strings.iterator().next().getOffset());
         }
 
-        for (InstanceDomain instanceDomain : instanceDomains) {
+        for (MmvWritable instanceDomain : instanceDomains) {
             instanceDomain.writeToMmv(dataFileBuffer);
         }
 
-        for (PcpMetricInfo info : metrics) {
+        for (MmvWritable info : metrics) {
             info.writeToMmv(dataFileBuffer);
         }
 
-        for (PcpValueInfo info : valueInfos) {
+        for (MmvWritable info : valueInfos) {
             info.writeToMmv(dataFileBuffer);
         }
 
-        for (PcpString string : strings) {
+        for (MmvWritable string : strings) {
             string.writeToMmv(dataFileBuffer);
         }
 
