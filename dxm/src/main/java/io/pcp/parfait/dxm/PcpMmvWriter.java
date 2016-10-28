@@ -196,7 +196,7 @@ public class PcpMmvWriter implements PcpWriter {
 
     public PcpMmvWriter(ByteBufferFactory byteBufferFactory, IdentifierSourceSet identifierSources) {
         this.byteBufferFactory = byteBufferFactory;
-        this.metricInfoStore = new MetricInfoStore(identifierSources);
+        this.metricInfoStore = new MetricInfoStoreV1(identifierSources);
         this.instanceDomainStore = new InstanceDomainStore(identifierSources);
 
         registerType(String.class, MMV_STRING_HANDLER);
@@ -721,14 +721,14 @@ public class PcpMmvWriter implements PcpWriter {
         // Values will be reflected in the agent immediately
     }
 
-    private static final class MetricInfoStore extends Store<PcpMetricInfo> {
-        MetricInfoStore(IdentifierSourceSet identifierSources) {
+    private static final class MetricInfoStoreV1 extends Store<PcpMetricInfo> {
+        MetricInfoStoreV1(IdentifierSourceSet identifierSources) {
             super(identifierSources.metricSource());
         }
 
         @Override
         protected PcpMetricInfo newInstance(String name, Set<Integer> usedIds) {
-            return new PcpMetricInfo(name, identifierSource.calculateId(name, usedIds));
+            return new PcpMetricInfoV1(name, identifierSource.calculateId(name, usedIds));
         }
     }
 

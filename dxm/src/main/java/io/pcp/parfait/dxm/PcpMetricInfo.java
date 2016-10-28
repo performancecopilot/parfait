@@ -10,7 +10,7 @@ import java.nio.ByteBuffer;
 import static io.pcp.parfait.dxm.PcpMmvWriter.METRIC_NAME_LIMIT;
 import static io.pcp.parfait.dxm.PcpMmvWriter.PCP_CHARSET;
 
-final class PcpMetricInfo implements PcpId, PcpOffset, MmvWritable {
+abstract class PcpMetricInfo implements PcpId, PcpOffset, MmvWritable {
     private static final int DEFAULT_INSTANCE_DOMAIN_ID = -1;
 
     private final String metricName;
