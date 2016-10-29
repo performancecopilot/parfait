@@ -17,7 +17,7 @@ class InstanceDomain implements PcpId, PcpOffset, MmvWritable {
     InstanceDomain(String name, int id, IdentifierSourceSet instanceStores) {
         this.name = name;
         this.id = id;
-        this.instanceStore = new InstanceStoreV1(instanceStores);
+        this.instanceStore = new InstanceStoreV1(instanceStores, name, this);
     }
 
     Instance getInstance(String name) {
@@ -84,15 +84,17 @@ class InstanceDomain implements PcpId, PcpOffset, MmvWritable {
         return text.getOffset();
     }
 
-    private class InstanceStoreV1 extends Store<Instance> {
-        InstanceStoreV1(IdentifierSourceSet identifierSources) {
+    private static class InstanceStoreV1 extends Store<Instance> {
+        private InstanceDomain instanceDomain;
+
+        InstanceStoreV1(IdentifierSourceSet identifierSources, String name, InstanceDomain instanceDomain) {
             super(identifierSources.instanceSource(name));
+            this.instanceDomain = instanceDomain;
         }
 
         @Override
         protected Instance newInstance(String name, Set<Integer> usedIds) {
-            return new InstanceV1(InstanceDomain.this, name, identifierSource.calculateId(name,
-                    usedIds));
+            return new InstanceV1(instanceDomain, name, identifierSource.calculateId(name, usedIds));
         }
 
 	}
