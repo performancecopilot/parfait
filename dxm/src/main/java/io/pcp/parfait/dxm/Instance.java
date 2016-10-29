@@ -6,13 +6,11 @@ package io.pcp.parfait.dxm;
 
 import java.nio.ByteBuffer;
 
-import static io.pcp.parfait.dxm.PcpMmvWriter.PCP_CHARSET;
-
 abstract class Instance implements PcpId, PcpOffset, MmvWritable {
-    private final String name;
-    private final int id;
-    private final InstanceDomain instanceDomain;
-    private int offset;
+    protected final String name;
+    protected final int id;
+    protected final InstanceDomain instanceDomain;
+    protected int offset;
 
     Instance(InstanceDomain domain, String name, int id) {
         this.instanceDomain = domain;
@@ -41,12 +39,6 @@ abstract class Instance implements PcpId, PcpOffset, MmvWritable {
     }
 
     @Override
-    public void writeToMmv(ByteBuffer byteBuffer) {
-        byteBuffer.position(offset);
-        byteBuffer.putLong(instanceDomain.getOffset());
-        byteBuffer.putInt(0);
-        byteBuffer.putInt(id);
-        byteBuffer.put(name.getBytes(PCP_CHARSET));
-    }
+    public abstract void writeToMmv(ByteBuffer byteBuffer);
 
 }
