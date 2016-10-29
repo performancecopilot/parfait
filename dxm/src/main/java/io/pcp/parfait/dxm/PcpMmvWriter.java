@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.measure.Unit;
 
 import com.google.common.collect.Maps;
+import io.pcp.parfait.dxm.PcpMetricInfoV1.MetricInfoStoreV1;
 import io.pcp.parfait.dxm.semantics.Semantics;
 import io.pcp.parfait.dxm.types.AbstractTypeHandler;
 import io.pcp.parfait.dxm.types.DefaultTypeHandlers;
@@ -719,17 +720,6 @@ public class PcpMmvWriter implements PcpWriter {
         // The fence broke! Need something new to jump over
         bridge.updateMetric(MetricName.parse("sheep[limpy].jumpitem"), "Honda Civic");
         // Values will be reflected in the agent immediately
-    }
-
-    private static final class MetricInfoStoreV1 extends Store<PcpMetricInfo> {
-        MetricInfoStoreV1(IdentifierSourceSet identifierSources) {
-            super(identifierSources.metricSource());
-        }
-
-        @Override
-        protected PcpMetricInfo newInstance(String name, Set<Integer> usedIds) {
-            return new PcpMetricInfoV1(name, identifierSource.calculateId(name, usedIds));
-        }
     }
 
     private static final class InstanceDomainStore extends Store<InstanceDomain> {
