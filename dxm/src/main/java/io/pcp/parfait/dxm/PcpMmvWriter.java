@@ -199,7 +199,7 @@ public class PcpMmvWriter implements PcpWriter {
     public PcpMmvWriter(ByteBufferFactory byteBufferFactory, IdentifierSourceSet identifierSources) {
         this.byteBufferFactory = byteBufferFactory;
         this.metricInfoStore = new MetricInfoStoreV1(identifierSources);
-        this.instanceDomainStore = new InstanceDomainStore(identifierSources);
+        this.instanceDomainStore = new InstanceDomainStore(identifierSources, new InstanceStoreFactoryV1(identifierSources));
 
         registerType(String.class, MMV_STRING_HANDLER);
     }

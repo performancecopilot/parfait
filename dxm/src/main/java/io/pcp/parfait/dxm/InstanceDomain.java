@@ -1,11 +1,10 @@
 package io.pcp.parfait.dxm;
 
+import io.pcp.parfait.dxm.PcpMmvWriter.Store;
+
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Set;
-
-import io.pcp.parfait.dxm.InstanceV1.InstanceStoreV1;
-import io.pcp.parfait.dxm.PcpMmvWriter.Store;
 
 class InstanceDomain implements PcpId, PcpOffset, MmvWritable {
     private final String name;
@@ -15,10 +14,10 @@ class InstanceDomain implements PcpId, PcpOffset, MmvWritable {
     private PcpString shortHelpText;
     private PcpString longHelpText;
 
-    InstanceDomain(String name, int id, IdentifierSourceSet instanceStores) {
+    InstanceDomain(String name, int id, InstanceStoreFactory instanceStoreFactory) {
         this.name = name;
         this.id = id;
-        this.instanceStore = new InstanceStoreV1(instanceStores, name, this);
+        this.instanceStore = instanceStoreFactory.createNewInstanceStore(name, this);
     }
 
     Instance getInstance(String name) {
@@ -86,16 +85,16 @@ class InstanceDomain implements PcpId, PcpOffset, MmvWritable {
     }
 
     static final class InstanceDomainStore extends Store<InstanceDomain> {
-        private final IdentifierSourceSet identifierSources;
+        private InstanceStoreFactory instanceStoreFactory;
 
-        InstanceDomainStore(IdentifierSourceSet identifierSources) {
+        InstanceDomainStore(IdentifierSourceSet identifierSources, InstanceStoreFactory instanceStoreFactory) {
             super(identifierSources.instanceDomainSource());
-            this.identifierSources = identifierSources;
+            this.instanceStoreFactory = instanceStoreFactory;
         }
 
         @Override
         protected InstanceDomain newInstance(String name, Set<Integer> usedIds) {
-            return new InstanceDomain(name, identifierSource.calculateId(name, usedIds), identifierSources);
+            return new InstanceDomain(name, identifierSource.calculateId(name, usedIds), instanceStoreFactory);
         }
 
     }
