@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Set;
 
+import io.pcp.parfait.dxm.InstanceV1.InstanceStoreV1;
 import io.pcp.parfait.dxm.PcpMmvWriter.Store;
 
 class InstanceDomain implements PcpId, PcpOffset, MmvWritable {
@@ -83,21 +84,6 @@ class InstanceDomain implements PcpId, PcpOffset, MmvWritable {
         }
         return text.getOffset();
     }
-
-    private static class InstanceStoreV1 extends Store<Instance> {
-        private InstanceDomain instanceDomain;
-
-        InstanceStoreV1(IdentifierSourceSet identifierSources, String name, InstanceDomain instanceDomain) {
-            super(identifierSources.instanceSource(name));
-            this.instanceDomain = instanceDomain;
-        }
-
-        @Override
-        protected Instance newInstance(String name, Set<Integer> usedIds) {
-            return new InstanceV1(instanceDomain, name, identifierSource.calculateId(name, usedIds));
-        }
-
-	}
 
     static final class InstanceDomainStore extends Store<InstanceDomain> {
         private final IdentifierSourceSet identifierSources;
