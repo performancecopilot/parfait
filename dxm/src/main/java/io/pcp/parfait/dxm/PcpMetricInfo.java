@@ -1,26 +1,22 @@
 package io.pcp.parfait.dxm;
 
 import io.pcp.parfait.dxm.semantics.Semantics;
-import io.pcp.parfait.dxm.semantics.UnitMapping;
 import io.pcp.parfait.dxm.types.TypeHandler;
 
 import javax.measure.Unit;
 import java.nio.ByteBuffer;
 
-import static io.pcp.parfait.dxm.PcpMmvWriter.METRIC_NAME_LIMIT;
-import static io.pcp.parfait.dxm.PcpMmvWriter.PCP_CHARSET;
-
 abstract class PcpMetricInfo implements PcpId, PcpOffset, MmvWritable {
-    private static final int DEFAULT_INSTANCE_DOMAIN_ID = -1;
+    static final int DEFAULT_INSTANCE_DOMAIN_ID = -1;
 
-    private final String metricName;
+    protected final String metricName;
     private final int id;
 
-    private InstanceDomain domain;
-    private TypeHandler<?> typeHandler;
-    private int offset;
-    private PcpString shortHelpText;
-    private PcpString longHelpText;
+    protected InstanceDomain domain;
+    protected TypeHandler<?> typeHandler;
+    protected int offset;
+    protected PcpString shortHelpText;
+    protected PcpString longHelpText;
     private Unit<?> unit;
     private Semantics semantics;
 
@@ -29,25 +25,25 @@ abstract class PcpMetricInfo implements PcpId, PcpOffset, MmvWritable {
         this.id = id;
     }
 
-    public int getId() {
+    public final int getId() {
         return id;
     }
 
     @Override
-    public int getOffset() {
+    public final int getOffset() {
         return offset;
     }
 
     @Override
-    public void setOffset(int offset) {
+    public final void setOffset(int offset) {
         this.offset = offset;
     }
 
-    TypeHandler<?> getTypeHandler() {
+    final TypeHandler<?> getTypeHandler() {
         return typeHandler;
     }
 
-    void setTypeHandler(TypeHandler<?> typeHandler) {
+    final void setTypeHandler(TypeHandler<?> typeHandler) {
         if (this.typeHandler == null || this.typeHandler.equals(typeHandler)) {
             this.typeHandler = typeHandler;
         } else {
@@ -57,7 +53,7 @@ abstract class PcpMetricInfo implements PcpId, PcpOffset, MmvWritable {
 
     }
 
-    void setInstanceDomain(InstanceDomain domain) {
+    final void setInstanceDomain(InstanceDomain domain) {
         if (this.domain != null && !this.domain.equals(domain)) {
             throw new IllegalArgumentException(
                     "Two different instance domains cannot be set for metric " + metricName
@@ -66,12 +62,12 @@ abstract class PcpMetricInfo implements PcpId, PcpOffset, MmvWritable {
         this.domain = domain;
     }
 
-    void setHelpText(PcpString shortHelpText, PcpString longHelpText) {
+    final void setHelpText(PcpString shortHelpText, PcpString longHelpText) {
         this.shortHelpText = shortHelpText;
         this.longHelpText = longHelpText;
     }
 
-    public void setUnit(Unit<?> unit) {
+    final public void setUnit(Unit<?> unit) {
         if (this.unit != null && !this.unit.equals(unit)) {
             throw new IllegalArgumentException(
                     "Two different units cannot be set for metric " + metricName
@@ -80,11 +76,11 @@ abstract class PcpMetricInfo implements PcpId, PcpOffset, MmvWritable {
         this.unit = unit;
     }
 
-    public Unit<?> getUnit() {
+    final public Unit<?> getUnit() {
         return unit;
     }
-    
-    public void setSemantics(Semantics semantics) {
+
+    final public void setSemantics(Semantics semantics) {
         if (this.semantics != null && semantics != this.semantics) {
             throw new IllegalArgumentException(
                     "Two different semantics cannot be set for metric " + metricName
@@ -93,40 +89,18 @@ abstract class PcpMetricInfo implements PcpId, PcpOffset, MmvWritable {
         this.semantics = semantics;
     }
 
-    public Semantics getSemantics() {
+    final public Semantics getSemantics() {
         return semantics == null ? Semantics.NO_SEMANTICS : semantics;
     }
 
-    boolean hasHelpText() {
+    final boolean hasHelpText() {
         return (shortHelpText != null || longHelpText != null);
     }
 
     @Override
-    public void writeToMmv(ByteBuffer byteBuffer) {
-        byteBuffer.position(offset);
+    public abstract void writeToMmv(ByteBuffer byteBuffer);
 
-        int originalPosition = byteBuffer.position();
-
-        byteBuffer.put(metricName.getBytes(PCP_CHARSET));
-        byteBuffer.put((byte) 0);
-        byteBuffer.position(originalPosition + METRIC_NAME_LIMIT + 1);
-        byteBuffer.putInt(getId());
-        byteBuffer.putInt(typeHandler.getMetricType().getIdentifier());
-        byteBuffer.putInt(getSemantics().getPcpValue());
-        byteBuffer.putInt(UnitMapping.getDimensions(getUnit(), metricName));
-        if (domain != null) {
-            byteBuffer.putInt(domain.getId());
-        } else {
-            byteBuffer.putInt(DEFAULT_INSTANCE_DOMAIN_ID);
-        }
-        // Just padding
-        byteBuffer.putInt(0);
-        byteBuffer.putLong(getStringOffset(shortHelpText));
-        byteBuffer.putLong(getStringOffset(longHelpText));
-
-    }
-
-    private long getStringOffset(PcpString text) {
+    final protected long getStringOffset(PcpString text) {
         if (text == null) {
             return 0;
         }
