@@ -96,4 +96,19 @@ class InstanceDomain implements PcpId, PcpOffset, MmvWritable {
         }
 
 	}
+
+    static final class InstanceDomainStore extends Store<InstanceDomain> {
+        private final IdentifierSourceSet identifierSources;
+
+        InstanceDomainStore(IdentifierSourceSet identifierSources) {
+            super(identifierSources.instanceDomainSource());
+            this.identifierSources = identifierSources;
+        }
+
+        @Override
+        protected InstanceDomain newInstance(String name, Set<Integer> usedIds) {
+            return new InstanceDomain(name, identifierSource.calculateId(name, usedIds), identifierSources);
+        }
+
+    }
 }
