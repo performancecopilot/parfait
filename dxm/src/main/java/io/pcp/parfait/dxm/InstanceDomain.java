@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.Set;
 
 class InstanceDomain implements PcpId, PcpOffset, MmvWritable {
+    private static final int INSTANCE_DOMAIN_LENGTH = 32;
+
     private final String name;
     private final int id;
     private int offset;
@@ -40,7 +42,12 @@ class InstanceDomain implements PcpId, PcpOffset, MmvWritable {
     public void setOffset(int offset) {
         this.offset = offset;
     }
-    
+
+    @Override
+    public int byteSize() {
+        return INSTANCE_DOMAIN_LENGTH;
+    }
+
     private int getInstanceCount() {
         return instanceStore.size();
     }

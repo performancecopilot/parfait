@@ -8,6 +8,9 @@ import java.util.Set;
 import static io.pcp.parfait.dxm.PcpMmvWriter.PCP_CHARSET;
 
 final class InstanceV1 extends Instance {
+
+    private static final int INSTANCE_LENGTH = 80;
+
     InstanceV1(InstanceDomain domain, String name, int id) {
         super(domain, name, id);
     }
@@ -19,6 +22,11 @@ final class InstanceV1 extends Instance {
         byteBuffer.putInt(0);
         byteBuffer.putInt(id);
         byteBuffer.put(name.getBytes(PCP_CHARSET));
+    }
+
+    @Override
+    public int byteSize() {
+        return INSTANCE_LENGTH;
     }
 
     static class InstanceStoreV1 extends Store<Instance> {

@@ -18,6 +18,11 @@ class PcpMetricInfoV2 extends PcpMetricInfo {
         throw new RuntimeException("Not implemented");
     }
 
+    @Override
+    public int byteSize() {
+        throw new RuntimeException("Not implemented");
+    }
+
     static final class MetricInfoStoreV2 extends Store<PcpMetricInfo> {
         private PcpMmvWriter pcpMmvWriter;
 

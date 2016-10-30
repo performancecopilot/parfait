@@ -11,6 +11,8 @@ import static io.pcp.parfait.dxm.PcpMmvWriter.PCP_CHARSET;
 
 final class PcpMetricInfoV1 extends PcpMetricInfo {
 
+    private static final int METRIC_LENGTH = 104;
+
     private PcpMetricInfoV1(String metricName, int id) {
         super(metricName, id);
     }
@@ -38,6 +40,11 @@ final class PcpMetricInfoV1 extends PcpMetricInfo {
         byteBuffer.putLong(getStringOffset(shortHelpText));
         byteBuffer.putLong(getStringOffset(longHelpText));
 
+    }
+
+    @Override
+    public int byteSize() {
+        return METRIC_LENGTH;
     }
 
     static final class MetricInfoStoreV1 extends Store<PcpMetricInfo> {

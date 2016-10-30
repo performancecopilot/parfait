@@ -19,6 +19,11 @@ class InstanceV2 extends Instance {
         throw new RuntimeException("Not implemented");
     }
 
+    @Override
+    public int byteSize() {
+        throw new RuntimeException("Not implemented");
+    }
+
     static class InstanceStoreV2 extends Store<Instance> {
         private InstanceDomain instanceDomain;
         private PcpMmvWriter pcpMmvWriter;

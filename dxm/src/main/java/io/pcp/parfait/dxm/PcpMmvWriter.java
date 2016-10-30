@@ -1,6 +1,7 @@
 package io.pcp.parfait.dxm;
 
 import static com.google.common.collect.Maps.newConcurrentMap;
+import static io.pcp.parfait.dxm.PcpString.STRING_BLOCK_LENGTH;
 import static systems.uom.unicode.CLDR.BYTE;
 import static tec.units.ri.unit.MetricPrefix.KILO;
 import static tec.units.ri.unit.Units.HERTZ;
@@ -119,11 +120,6 @@ public class PcpMmvWriter implements PcpWriter {
 
     private static final int HEADER_LENGTH = 40;
     private static final int TOC_LENGTH = 16;
-    private static final int METRIC_LENGTH = 104;
-    private static final int VALUE_LENGTH = 32;
-    private static final int INSTANCE_LENGTH = 80;
-    private static final int INSTANCE_DOMAIN_LENGTH = 32;
-    static final int STRING_BLOCK_LENGTH = 256;
 
     /**
      * The charset used for PCP metrics names and String values.
@@ -544,16 +540,20 @@ public class PcpMmvWriter implements PcpWriter {
     }
 
     private int getBufferLength() {
-        int instanceDomainCount = getInstanceDomains().size();
-        int metricCount = getMetricInfos().size();
-        int instanceCount = getInstances().size();
-        int valueCount = getValueInfos().size();
-        int tocCount = tocCount();
-        int stringCount = getStrings().size();
-        return HEADER_LENGTH + (TOC_LENGTH * tocCount)
-                + (INSTANCE_DOMAIN_LENGTH * instanceDomainCount)
-                + (INSTANCE_LENGTH * instanceCount) + (METRIC_LENGTH * metricCount)
-                + (VALUE_LENGTH * valueCount) + (STRING_BLOCK_LENGTH * stringCount);
+        return HEADER_LENGTH + (TOC_LENGTH * tocCount())
+                + getByteSizeTotalFor(getInstanceDomains())
+                + getByteSizeTotalFor(getInstances())
+                + getByteSizeTotalFor(getMetricInfos())
+                + getByteSizeTotalFor(getValueInfos())
+                + getByteSizeTotalFor(getStrings());
+    }
+
+    private int getByteSizeTotalFor(Collection<? extends PcpOffset> offsettables) {
+        int bytes = 0;
+        for(PcpOffset offsetable : offsettables) {
+            bytes += offsetable.byteSize();
+        }
+        return bytes;
     }
 
     /**
@@ -601,18 +601,17 @@ public class PcpMmvWriter implements PcpWriter {
     private synchronized void initialiseOffsets() {
         int nextOffset = HEADER_LENGTH + (TOC_LENGTH * tocCount());
 
-        nextOffset = initializeOffsets(getInstanceDomains(), nextOffset, INSTANCE_DOMAIN_LENGTH);
-        nextOffset = initializeOffsets(getInstances(), nextOffset, INSTANCE_LENGTH);
-        nextOffset = initializeOffsets(getMetricInfos(), nextOffset, METRIC_LENGTH);
-        nextOffset = initializeOffsets(getValueInfos(), nextOffset, VALUE_LENGTH);
-        initializeOffsets(getStrings(), nextOffset, STRING_BLOCK_LENGTH);
+        nextOffset = initializeOffsets(getInstanceDomains(), nextOffset);
+        nextOffset = initializeOffsets(getInstances(), nextOffset);
+        nextOffset = initializeOffsets(getMetricInfos(), nextOffset);
+        nextOffset = initializeOffsets(getValueInfos(), nextOffset);
+        initializeOffsets(getStrings(), nextOffset);
     }
 
-	private int initializeOffsets(Collection<? extends PcpOffset> offsettables,
-			int nextOffset, int blockLength) {
+	private int initializeOffsets(Collection<? extends PcpOffset> offsettables, int nextOffset) {
         for (PcpOffset offsettable : offsettables) {
             offsettable.setOffset(nextOffset);
-            nextOffset += blockLength;
+            nextOffset += offsettable.byteSize();
         }
         return nextOffset;
     }

@@ -8,9 +8,12 @@ import io.pcp.parfait.dxm.types.TypeHandler;
 import java.nio.ByteBuffer;
 
 import static io.pcp.parfait.dxm.PcpMmvWriter.DATA_VALUE_LENGTH;
-import static io.pcp.parfait.dxm.PcpMmvWriter.STRING_BLOCK_LENGTH;
+import static io.pcp.parfait.dxm.PcpString.STRING_BLOCK_LENGTH;
 
 public final class PcpValueInfo implements PcpOffset,MmvWritable {
+
+    private static final int VALUE_LENGTH = 32;
+
 	private final MetricName metricName;
 	private final Object initialValue;
 	private final PcpMetricInfo metricInfo;
@@ -43,6 +46,11 @@ public final class PcpValueInfo implements PcpOffset,MmvWritable {
     @Override
     public void setOffset(int offset) {
         this.offset = offset;
+    }
+
+    @Override
+    public int byteSize() {
+        return VALUE_LENGTH;
     }
 
     public TypeHandler<?> getTypeHandler() {

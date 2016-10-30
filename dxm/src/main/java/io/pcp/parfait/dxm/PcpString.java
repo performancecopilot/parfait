@@ -9,9 +9,11 @@ import com.google.common.base.Preconditions;
 import java.nio.ByteBuffer;
 
 import static io.pcp.parfait.dxm.PcpMmvWriter.PCP_CHARSET;
-import static io.pcp.parfait.dxm.PcpMmvWriter.STRING_BLOCK_LENGTH;
 
 final class PcpString implements PcpOffset,MmvWritable {
+
+    static final int STRING_BLOCK_LENGTH = 256;
+
     private final String initialValue;
     private int offset;
     
@@ -27,6 +29,11 @@ final class PcpString implements PcpOffset,MmvWritable {
     @Override
     public void setOffset(int offset) {
         this.offset = offset;
+    }
+
+    @Override
+    public int byteSize() {
+        return STRING_BLOCK_LENGTH;
     }
 
     String getInitialValue() {

@@ -1,9 +1,9 @@
 package io.pcp.parfait.dxm;
 
 import io.pcp.parfait.dxm.PcpMetricInfoV2.MetricInfoStoreV2;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
-import org.unitils.reflectionassert.ReflectionAssert;
 
 import java.nio.ByteBuffer;
 
@@ -14,11 +14,21 @@ import static org.unitils.reflectionassert.ReflectionAssert.assertReflectionEqua
 
 public class PcpMetricInfoV2Test {
 
+    private PcpMetricInfoV2 pcpMetricInfoV2;
+
+    @Before
+    public void setUp() throws Exception {
+        pcpMetricInfoV2 = new PcpMetricInfoV2("name", 1, mock(PcpString.class));
+    }
+
     @Test(expected = RuntimeException.class)
     public void writeToMmvShouldRaiseAnErrorAsItIsNotImplementedYet() {
-        PcpMetricInfoV2 pcpMetricInfoV2 = new PcpMetricInfoV2("name", 1, mock(PcpString.class));
-
         pcpMetricInfoV2.writeToMmv(mock(ByteBuffer.class));
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void byteSizeShouldRaiseAnErrorAsItIsNotImplementedYet() {
+        pcpMetricInfoV2.byteSize();
     }
 
     @Test

@@ -1,6 +1,7 @@
 package io.pcp.parfait.dxm;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -19,6 +20,9 @@ import org.mockito.Mockito;
 
 public class PcpMmvWriterTest {
 
+    private static final String SOME_METRIC_NAME = "some.metric";
+    private static final String INSTANCE_DOMAIN_NAME = "some";
+    private static final int EXPECTED_LENGTH = 1016;
     private PcpMmvWriter pcpMmvWriter;
 
     @Before
@@ -59,7 +63,7 @@ public class PcpMmvWriterTest {
     @Test
     @SuppressWarnings("unchecked")
     public void ensureUpdatesAreIgnoredAfterResetIsCalled() throws IOException {
-        MetricName metricName = MetricName.parse("some.metric");
+        MetricName metricName = MetricName.parse(SOME_METRIC_NAME);
         TypeHandler<CustomType> customTypeTypeHandler = mock(TypeHandler.class);
         when(customTypeTypeHandler.getMetricType()).thenReturn(MmvMetricType.DOUBLE);
         pcpMmvWriter.registerType(CustomType.class, customTypeTypeHandler);
@@ -82,6 +86,28 @@ public class PcpMmvWriterTest {
         pcpMmvWriter.start();
         pcpMmvWriter.reset();
         pcpMmvWriter.setPerMetricLock(true);
+    }
+
+    @Test
+    public void shouldBuildAByteBufferOfTheCorrectLength() throws IOException {
+        ByteBufferFactory byteBufferFactory = mock(ByteBufferFactory.class);
+        ByteBuffer byteBuffer = mock(ByteBuffer.class);
+        IdentifierSourceSet identifierSourceSet = mock(IdentifierSourceSet.class);
+
+        when(identifierSourceSet.metricSource()).thenReturn(mock(IdentifierSource.class));
+        when(identifierSourceSet.instanceDomainSource()).thenReturn(mock(IdentifierSource.class));
+        when(identifierSourceSet.instanceSource(INSTANCE_DOMAIN_NAME)).thenReturn(mock(IdentifierSource.class));
+        when(byteBufferFactory.build(anyInt())).thenReturn(byteBuffer);
+        when(byteBuffer.slice()).thenReturn(mock(ByteBuffer.class));
+
+        PcpMmvWriter pcpMmvWriter = new PcpMmvWriter(byteBufferFactory, identifierSourceSet);
+        pcpMmvWriter.addMetric(MetricName.parse(SOME_METRIC_NAME), Semantics.COUNTER, null, 1);
+        pcpMmvWriter.addMetric(MetricName.parse("some[myinst].other_metric"), Semantics.COUNTER, null, 2);
+        pcpMmvWriter.setMetricHelpText(SOME_METRIC_NAME, "Short help", "Long help");
+
+        pcpMmvWriter.start();
+
+        verify(byteBufferFactory).build(EXPECTED_LENGTH);
     }
 
     private class CustomType {}
