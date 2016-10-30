@@ -105,18 +105,6 @@ public class PcpMmvWriter implements PcpWriter {
     private static final Set<MmvFlag> DEFAULT_FLAGS = Collections.unmodifiableSet(EnumSet.of(
             MmvFlag.MMV_FLAG_NOPREFIX, MmvFlag.MMV_FLAG_PROCESS));
 
-    /**
-     * The maximum length of a metric name able to be exported to the MMV agent. Note that this is
-     * relative to {@link #PCP_CHARSET} (it's a measure of the maximum number of bytes, not the Java
-     * String length)
-     */
-    static final int METRIC_NAME_LIMIT = 63;
-    /**
-     * The maximum length of an instance name able to be exported to the MMV agent. Note that this
-     * is relative to {@link #PCP_CHARSET} (it's a measure of the maximum number of bytes, not the
-     * Java String length)
-     */
-    private static final int INSTANCE_NAME_LIMIT = 63;
 
     private static final int HEADER_LENGTH = 40;
     private static final int TOC_LENGTH = 16;
@@ -149,6 +137,7 @@ public class PcpMmvWriter implements PcpWriter {
     private final ByteBufferFactory byteBufferFactory;
     private final Store<PcpMetricInfo> metricInfoStore;
     private final Store<InstanceDomain> instanceDomainStore;
+    private final MetricNameValidator metricNameValidator;
     private final Map<MetricName, PcpValueInfo> metricData = Maps.newConcurrentMap();
     private final Map<Class<?>, TypeHandler<?>> typeHandlers = new ConcurrentHashMap<Class<?>, TypeHandler<?>>(
             DefaultTypeHandlers.getDefaultMappings());
@@ -196,6 +185,7 @@ public class PcpMmvWriter implements PcpWriter {
         this.byteBufferFactory = byteBufferFactory;
         this.metricInfoStore = new MetricInfoStoreV1(identifierSources);
         this.instanceDomainStore = new InstanceDomainStore(identifierSources, new InstanceStoreFactoryV1(identifierSources));
+        this.metricNameValidator = new MmvV1MetricNameValidator();
 
         registerType(String.class, MMV_STRING_HANDLER);
     }
@@ -352,15 +342,7 @@ public class PcpMmvWriter implements PcpWriter {
             throw new IllegalArgumentException("Metric " + name
                     + " has already been added to writer");
         }
-        if (name.getMetric().getBytes(getCharset()).length > getMetricNameLimit()) {
-            throw new IllegalArgumentException("Cannot add metric " + name
-                    + "; name exceeds length limit");
-        }
-        if (name.hasInstance()
-                && name.getInstance().getBytes(getCharset()).length > getInstanceNameLimit()) {
-            throw new IllegalArgumentException("Cannot add metric " + name
-                    + "; instance name is too long");
-        }
+        metricNameValidator.validateNameConstraints(name);
         PcpMetricInfo metricInfo = getMetricInfo(name.getMetric());
         InstanceDomain domain = null;
         Instance instance = null;
@@ -584,18 +566,6 @@ public class PcpMmvWriter implements PcpWriter {
      */
     private int getTocOffset(int tocIndex) {
         return HEADER_LENGTH + (tocIndex * TOC_LENGTH);
-    }
-
-    private Charset getCharset() {
-        return PCP_CHARSET;
-    }
-
-    private int getMetricNameLimit() {
-        return METRIC_NAME_LIMIT;
-    }
-
-    private int getInstanceNameLimit() {
-        return INSTANCE_NAME_LIMIT;
     }
 
     private synchronized void initialiseOffsets() {
