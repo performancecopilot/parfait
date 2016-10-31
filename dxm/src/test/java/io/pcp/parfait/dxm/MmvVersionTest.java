@@ -14,6 +14,8 @@ import static org.unitils.reflectionassert.ReflectionAssert.assertReflectionEqua
 public class MmvVersionTest {
 
     private static final int VERSION_1 = 1;
+    private static final int MMV1_NAME_LIMIT = 63;
+    private static final int MMV1_DOMAIN_LIMIT = 63;
 
     @Test
     public void mmvVersion1_shouldReturnTheCorrectVersion() {
@@ -45,7 +47,7 @@ public class MmvVersionTest {
     @Test
     public void mmvVersion1_shouldCreateAVersion1MetricValidator() {
         MetricNameValidator actual = MMV_VERSION1.createMetricNameValidator();
-        MetricNameValidator expected = new MmvV1MetricNameValidator();
+        MetricNameValidator expected = new MetricNameValidator(MMV1_NAME_LIMIT, MMV1_DOMAIN_LIMIT);
 
         assertReflectionEquals(expected, actual);
     }

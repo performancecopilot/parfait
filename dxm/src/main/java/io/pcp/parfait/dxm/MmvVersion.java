@@ -2,6 +2,9 @@ package io.pcp.parfait.dxm;
 
 import io.pcp.parfait.dxm.PcpMmvWriter.Store;
 
+import static io.pcp.parfait.dxm.InstanceV1.INSTANCE_NAME_LIMIT;
+import static io.pcp.parfait.dxm.PcpMetricInfoV1.METRIC_NAME_LIMIT;
+
 public enum MmvVersion {
     MMV_VERSION1(1, new MmvVersion1Factory());
 
@@ -50,7 +53,7 @@ public enum MmvVersion {
 
         @Override
         public MetricNameValidator createMetricNameValidator() {
-            return new MmvV1MetricNameValidator();
+            return new MetricNameValidator(METRIC_NAME_LIMIT, INSTANCE_NAME_LIMIT);
         }
     }
 }

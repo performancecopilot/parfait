@@ -9,6 +9,12 @@ import static io.pcp.parfait.dxm.PcpMmvWriter.PCP_CHARSET;
 
 final class InstanceV1 extends Instance {
 
+    /**
+     * The maximum length of an instance name able to be exported to the MMV agent. Note that this
+     * is relative to PCP_CHARSET (it's a measure of the maximum number of bytes, not the
+     * Java String length)
+     */
+    static final int INSTANCE_NAME_LIMIT = 63;
     private static final int INSTANCE_LENGTH = 80;
 
     InstanceV1(InstanceDomain domain, String name, int id) {
