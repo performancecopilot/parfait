@@ -1,6 +1,7 @@
 package io.pcp.parfait.dxm;
 
 import static com.google.common.collect.Maps.newConcurrentMap;
+import static io.pcp.parfait.dxm.MmvVersion.MMV_VERSION1;
 import static io.pcp.parfait.dxm.PcpString.STRING_BLOCK_LENGTH;
 import static systems.uom.unicode.CLDR.BYTE;
 import static tec.units.ri.unit.MetricPrefix.KILO;
@@ -30,8 +31,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.measure.Unit;
 
 import com.google.common.collect.Maps;
-import io.pcp.parfait.dxm.InstanceDomain.InstanceDomainStore;
-import io.pcp.parfait.dxm.PcpMetricInfoV1.MetricInfoStoreV1;
 import io.pcp.parfait.dxm.semantics.Semantics;
 import io.pcp.parfait.dxm.types.AbstractTypeHandler;
 import io.pcp.parfait.dxm.types.DefaultTypeHandlers;
@@ -114,7 +113,6 @@ public class PcpMmvWriter implements PcpWriter {
      */
     static final Charset PCP_CHARSET = Charset.forName("US-ASCII");
     private static final byte[] TAG = "MMV\0".getBytes(PCP_CHARSET);
-    private static final int MMV_FORMAT_VERSION = 1;
 
     static final int DATA_VALUE_LENGTH = 16;
 
@@ -137,6 +135,7 @@ public class PcpMmvWriter implements PcpWriter {
     private final ByteBufferFactory byteBufferFactory;
     private final Store<PcpMetricInfo> metricInfoStore;
     private final Store<InstanceDomain> instanceDomainStore;
+    private final MmvVersion mmvVersion;
     private final MetricNameValidator metricNameValidator;
     private final Map<MetricName, PcpValueInfo> metricData = Maps.newConcurrentMap();
     private final Map<Class<?>, TypeHandler<?>> typeHandlers = new ConcurrentHashMap<Class<?>, TypeHandler<?>>(
@@ -182,10 +181,15 @@ public class PcpMmvWriter implements PcpWriter {
     }
 
     public PcpMmvWriter(ByteBufferFactory byteBufferFactory, IdentifierSourceSet identifierSources) {
+        this(byteBufferFactory, identifierSources, MMV_VERSION1);
+    }
+
+    public PcpMmvWriter(ByteBufferFactory byteBufferFactory, IdentifierSourceSet identifierSources, MmvVersion mmvVersion) {
         this.byteBufferFactory = byteBufferFactory;
-        this.metricInfoStore = new MetricInfoStoreV1(identifierSources);
-        this.instanceDomainStore = new InstanceDomainStore(identifierSources, new InstanceStoreFactoryV1(identifierSources));
-        this.metricNameValidator = new MmvV1MetricNameValidator();
+        this.metricInfoStore = mmvVersion.createMetricInfoStore(identifierSources);
+        this.instanceDomainStore = mmvVersion.createInstanceDomainStore(identifierSources);
+        this.mmvVersion = mmvVersion;
+        this.metricNameValidator = mmvVersion.createMetricNameValidator();
 
         registerType(String.class, MMV_STRING_HANDLER);
     }
@@ -444,7 +448,7 @@ public class PcpMmvWriter implements PcpWriter {
 
         dataFileBuffer.position(0);
         dataFileBuffer.put(TAG);
-        dataFileBuffer.putInt(MMV_FORMAT_VERSION);
+        dataFileBuffer.putInt(mmvVersion.getVersion());
         long generation = System.currentTimeMillis() / 1000;
         dataFileBuffer.putLong(generation);
         int gen2Offset = dataFileBuffer.position();

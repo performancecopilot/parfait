@@ -110,6 +110,35 @@ public class PcpMmvWriterTest {
         verify(byteBufferFactory).build(EXPECTED_LENGTH);
     }
 
+    @Test
+    public void shouldCreateAMetricNameValidatorWhenConstructed() {
+        MmvVersion mmvVersion = mock(MmvVersion.class);
+
+        new PcpMmvWriter(mock(ByteBufferFactory.class), mock(IdentifierSourceSet.class), mmvVersion);
+
+        verify(mmvVersion).createMetricNameValidator();
+    }
+
+    @Test
+    public void shouldCreateAMetricInfoStoreWhenConstructed() {
+        MmvVersion mmvVersion = mock(MmvVersion.class);
+        IdentifierSourceSet identifierSourceSet = mock(IdentifierSourceSet.class);
+
+        new PcpMmvWriter(mock(ByteBufferFactory.class), identifierSourceSet, mmvVersion);
+
+        verify(mmvVersion).createMetricInfoStore(identifierSourceSet);
+    }
+
+    @Test
+    public void shouldCreateAnInstanceDomainStoreWhenConstructed() {
+        MmvVersion mmvVersion = mock(MmvVersion.class);
+        IdentifierSourceSet identifierSourceSet = mock(IdentifierSourceSet.class);
+
+        new PcpMmvWriter(mock(ByteBufferFactory.class), identifierSourceSet, mmvVersion);
+
+        verify(mmvVersion).createInstanceDomainStore(identifierSourceSet);
+    }
+
     private class CustomType {}
 
 }
