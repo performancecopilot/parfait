@@ -7,6 +7,7 @@ import java.util.Set;
 
 class InstanceV2 extends Instance {
 
+    private static final int INSTANCE_LENGTH = 24;
     private PcpString nameAsString;
 
     InstanceV2(InstanceDomain domain, String name, int id, PcpString nameAsString) {
@@ -16,12 +17,23 @@ class InstanceV2 extends Instance {
 
     @Override
     public void writeToMmv(ByteBuffer byteBuffer) {
-        throw new RuntimeException("Not implemented");
+        byteBuffer.position(offset);
+        byteBuffer.putLong(instanceDomain.getOffset());
+        byteBuffer.putInt(0);
+        byteBuffer.putInt(id);
+        byteBuffer.putLong(getStringOffset(nameAsString));
+    }
+
+    private long getStringOffset(PcpString text) {
+        if (text == null) {
+            return 0;
+        }
+        return text.getOffset();
     }
 
     @Override
     public int byteSize() {
-        throw new RuntimeException("Not implemented");
+        return INSTANCE_LENGTH;
     }
 
     static class InstanceStoreV2 extends Store<Instance> {
