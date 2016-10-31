@@ -2,6 +2,7 @@ package io.pcp.parfait.dxm;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -126,7 +127,7 @@ public class PcpMmvWriterTest {
 
         new PcpMmvWriter(mock(ByteBufferFactory.class), identifierSourceSet, mmvVersion);
 
-        verify(mmvVersion).createMetricInfoStore(identifierSourceSet);
+        verify(mmvVersion).createMetricInfoStore(eq(identifierSourceSet), any(PcpMmvWriter.class));
     }
 
     @Test
@@ -136,7 +137,7 @@ public class PcpMmvWriterTest {
 
         new PcpMmvWriter(mock(ByteBufferFactory.class), identifierSourceSet, mmvVersion);
 
-        verify(mmvVersion).createInstanceDomainStore(identifierSourceSet);
+        verify(mmvVersion).createInstanceDomainStore(eq(identifierSourceSet), any(PcpMmvWriter.class));
     }
 
     private class CustomType {}

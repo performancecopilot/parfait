@@ -3,6 +3,7 @@ package io.pcp.parfait.dxm;
 import static com.google.common.collect.Maps.newConcurrentMap;
 import static io.pcp.parfait.dxm.MmvVersion.MMV_VERSION1;
 import static io.pcp.parfait.dxm.PcpString.STRING_BLOCK_LENGTH;
+import static io.pcp.parfait.dxm.PcpString.STRING_BLOCK_LIMIT;
 import static systems.uom.unicode.CLDR.BYTE;
 import static tec.units.ri.unit.MetricPrefix.KILO;
 import static tec.units.ri.unit.Units.HERTZ;
@@ -126,7 +127,7 @@ public class PcpMmvWriter implements PcpWriter {
         @Override
         public void putBytes(ByteBuffer buffer, String value) {
             byte[] bytes = value.getBytes(PCP_CHARSET);
-            int length = Math.min(bytes.length, STRING_BLOCK_LENGTH - 1);
+            int length = Math.min(bytes.length, STRING_BLOCK_LIMIT);
             buffer.put(bytes, 0, length);
             buffer.put((byte) 0);
         }
@@ -186,8 +187,8 @@ public class PcpMmvWriter implements PcpWriter {
 
     public PcpMmvWriter(ByteBufferFactory byteBufferFactory, IdentifierSourceSet identifierSources, MmvVersion mmvVersion) {
         this.byteBufferFactory = byteBufferFactory;
-        this.metricInfoStore = mmvVersion.createMetricInfoStore(identifierSources);
-        this.instanceDomainStore = mmvVersion.createInstanceDomainStore(identifierSources);
+        this.metricInfoStore = mmvVersion.createMetricInfoStore(identifierSources, this);
+        this.instanceDomainStore = mmvVersion.createInstanceDomainStore(identifierSources, this);
         this.mmvVersion = mmvVersion;
         this.metricNameValidator = mmvVersion.createMetricNameValidator();
 

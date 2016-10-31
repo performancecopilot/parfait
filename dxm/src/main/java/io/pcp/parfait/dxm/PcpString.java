@@ -13,6 +13,7 @@ import static io.pcp.parfait.dxm.PcpMmvWriter.PCP_CHARSET;
 final class PcpString implements PcpOffset,MmvWritable {
 
     static final int STRING_BLOCK_LENGTH = 256;
+    static final int STRING_BLOCK_LIMIT = STRING_BLOCK_LENGTH - 1;
 
     private final String initialValue;
     private int offset;

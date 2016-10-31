@@ -8,7 +8,7 @@ import io.pcp.parfait.dxm.types.TypeHandler;
 import java.nio.ByteBuffer;
 
 import static io.pcp.parfait.dxm.PcpMmvWriter.DATA_VALUE_LENGTH;
-import static io.pcp.parfait.dxm.PcpString.STRING_BLOCK_LENGTH;
+import static io.pcp.parfait.dxm.PcpString.STRING_BLOCK_LIMIT;
 
 public final class PcpValueInfo implements PcpOffset,MmvWritable {
 
@@ -87,7 +87,7 @@ public final class PcpValueInfo implements PcpOffset,MmvWritable {
         if (rawHandler.requiresLargeStorage()) {
             // API requires the length here but it's currently unused -- write out the maximum
             // possible length
-            dataFileBuffer.putLong(STRING_BLOCK_LENGTH - 1);
+            dataFileBuffer.putLong(STRING_BLOCK_LIMIT);
             dataFileBuffer.putLong(getLargeValue().getOffset());
             dataFileBuffer.position(getLargeValue().getOffset());
         }
