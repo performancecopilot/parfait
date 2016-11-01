@@ -169,7 +169,7 @@ public class PcpMmvWriter implements PcpWriter {
     /**
      * Creates a new PcpMmvWriter writing to the underlying file, which will be created + opened as a
      * memory-mapped file. Uses the provided architecture to determine whether to write 32- or
-     * 64-bit longs for some key header fields.
+     * 64-bit longs for some key header fields. Defaults to {@link MmvVersion#MMV_VERSION1} format
      * 
      * @param file
      *            the file to map
@@ -177,7 +177,23 @@ public class PcpMmvWriter implements PcpWriter {
      *            the sources to use for coming up with identifiers for new metrics etc.
      */
     public PcpMmvWriter(File file, IdentifierSourceSet identifierSources) {
-        this(new FileByteBufferFactory(file), identifierSources);
+        this(file, identifierSources, MMV_VERSION1);
+    }
+
+    /**
+     * Creates a new PcpMmvWriter writing to the underlying file, which will be created + opened as a
+     * memory-mapped file. Uses the provided architecture to determine whether to write 32- or
+     * 64-bit longs for some key header fields.
+     *
+     * @param file
+     *            the file to map
+     * @param identifierSources
+     *            the sources to use for coming up with identifiers for new metrics etc.
+     * @param mmvVersion
+     *            the MMV version format to use
+     */
+    public PcpMmvWriter(File file, IdentifierSourceSet identifierSources, MmvVersion mmvVersion) {
+        this(new FileByteBufferFactory(file), identifierSources, mmvVersion);
         this.file = file;
     }
 
@@ -199,6 +215,7 @@ public class PcpMmvWriter implements PcpWriter {
      * Creates a new PcpMmvWriter writing to the underlying file, which will be created + opened as a
      * memory-mapped file.  This is the constructor most people should use, unless you have a really
      * good reason not to.  It automatically handles all (incl. cross-platform) file location issues.
+     * It will default to {@link MmvVersion#MMV_VERSION1} format
      * 
      * @param name
      *            logical name of instrumented subsystem (e.g. "hadoop")
@@ -206,7 +223,23 @@ public class PcpMmvWriter implements PcpWriter {
      *            the sources to use for coming up with identifiers for new metrics etc.
      */
     public PcpMmvWriter(String name, IdentifierSourceSet identifierSources) {
-        this(mmvFileFromName(name), identifierSources);
+        this(mmvFileFromName(name), identifierSources, MMV_VERSION1);
+    }
+
+    /**
+     * Creates a new PcpMmvWriter writing to the underlying file, which will be created + opened as a
+     * memory-mapped file.  This is the constructor most people should use, unless you have a really
+     * good reason not to.  It automatically handles all (incl. cross-platform) file location issues.
+     *
+     * @param name
+     *            logical name of instrumented subsystem (e.g. "hadoop")
+     * @param identifierSources
+     *            the sources to use for coming up with identifiers for new metrics etc.
+     * @param mmvVersion
+     *            the MMV version format to use
+     */
+    public PcpMmvWriter(String name, IdentifierSourceSet identifierSources, MmvVersion mmvVersion) {
+        this(mmvFileFromName(name), identifierSources, mmvVersion);
     }
 
     private static File mmvFileFromName(String name) {
