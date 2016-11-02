@@ -11,11 +11,11 @@ public enum MmvVersion {
     MMV_VERSION2(2, new MmvVersion2Factory());
 
     private final int version;
-    private final MmvVersionFactory mmvVersion1Factory;
+    private final MmvVersionFactory mmvVersionFactory;
 
-    MmvVersion(int version, MmvVersionFactory mmvVersion1Factory) {
+    MmvVersion(int version, MmvVersionFactory mmvVersionFactory) {
         this.version = version;
-        this.mmvVersion1Factory = mmvVersion1Factory;
+        this.mmvVersionFactory = mmvVersionFactory;
     }
 
     int getVersion() {
@@ -23,15 +23,15 @@ public enum MmvVersion {
     }
 
     Store<PcpMetricInfo> createMetricInfoStore(IdentifierSourceSet identifierSourceSet, PcpMmvWriter pcpMmvWriter) {
-        return mmvVersion1Factory.createMetricInfoStore(identifierSourceSet, pcpMmvWriter);
+        return mmvVersionFactory.createMetricInfoStore(identifierSourceSet, pcpMmvWriter);
     }
 
     Store<InstanceDomain> createInstanceDomainStore(IdentifierSourceSet identifierSourceSet, PcpMmvWriter pcpMmvWriter) {
-        return mmvVersion1Factory.createInstanceDomainStore(identifierSourceSet, pcpMmvWriter);
+        return mmvVersionFactory.createInstanceDomainStore(identifierSourceSet, pcpMmvWriter);
     }
 
     MetricNameValidator createMetricNameValidator() {
-        return mmvVersion1Factory.createMetricNameValidator();
+        return mmvVersionFactory.createMetricNameValidator();
     }
 
     interface MmvVersionFactory {
