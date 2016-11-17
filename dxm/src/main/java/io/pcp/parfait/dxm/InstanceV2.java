@@ -6,7 +6,7 @@ import io.pcp.parfait.dxm.PcpString.PcpStringStore;
 import java.nio.ByteBuffer;
 import java.util.Set;
 
-class InstanceV2 extends Instance {
+final class InstanceV2 extends Instance {
 
     private static final int INSTANCE_LENGTH = 24;
     private PcpString nameAsString;

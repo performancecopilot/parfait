@@ -7,7 +7,7 @@ import io.pcp.parfait.dxm.semantics.UnitMapping;
 import java.nio.ByteBuffer;
 import java.util.Set;
 
-class PcpMetricInfoV2 extends PcpMetricInfo {
+final class PcpMetricInfoV2 extends PcpMetricInfo {
     private static final int METRIC_LENGTH = 48;
     private PcpString nameAsPcpString;
 
