@@ -3,6 +3,7 @@
  */
 package io.pcp.parfait.dxm;
 
+import io.pcp.parfait.dxm.PcpString.PcpStringStore;
 import io.pcp.parfait.dxm.types.TypeHandler;
 
 import java.nio.ByteBuffer;
@@ -22,13 +23,13 @@ public final class PcpValueInfo implements PcpOffset,MmvWritable {
 	private int offset;
 
     PcpValueInfo(MetricName metricName, PcpMetricInfo metricInfo, Instance instance, 
-    		Object initialValue, PcpMmvWriter basePcpWriter) {
+    		Object initialValue, PcpStringStore stringStore) {
         this.metricName = metricName;
         this.metricInfo = metricInfo;
         this.instance = instance;
         this.initialValue = initialValue;
         if (metricInfo.getTypeHandler().requiresLargeStorage()) {
-            this.largeValue = basePcpWriter.createPcpString(initialValue.toString()); 
+            this.largeValue = stringStore.createPcpString(initialValue.toString());
         } else {
             this.largeValue = null;
         }

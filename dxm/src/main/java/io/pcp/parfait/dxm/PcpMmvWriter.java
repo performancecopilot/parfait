@@ -26,12 +26,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.measure.Unit;
 
 import com.google.common.collect.Maps;
+import io.pcp.parfait.dxm.PcpString.PcpStringStore;
 import io.pcp.parfait.dxm.semantics.Semantics;
 import io.pcp.parfait.dxm.types.AbstractTypeHandler;
 import io.pcp.parfait.dxm.types.DefaultTypeHandlers;
@@ -141,7 +141,7 @@ public class PcpMmvWriter implements PcpWriter {
     private final Map<MetricName, PcpValueInfo> metricData = Maps.newConcurrentMap();
     private final Map<Class<?>, TypeHandler<?>> typeHandlers = new ConcurrentHashMap<Class<?>, TypeHandler<?>>(
             DefaultTypeHandlers.getDefaultMappings());
-    private final Collection<PcpString> stringInfo = new CopyOnWriteArrayList<PcpString>();
+    private final PcpStringStore stringStore = new PcpStringStore();
     private volatile boolean started = false;
     private volatile boolean usePerMetricLock = true;
     private final Map<PcpValueInfo,ByteBuffer> perMetricByteBuffers = newConcurrentMap();
@@ -203,8 +203,8 @@ public class PcpMmvWriter implements PcpWriter {
 
     public PcpMmvWriter(ByteBufferFactory byteBufferFactory, IdentifierSourceSet identifierSources, MmvVersion mmvVersion) {
         this.byteBufferFactory = byteBufferFactory;
-        this.metricInfoStore = mmvVersion.createMetricInfoStore(identifierSources, this);
-        this.instanceDomainStore = mmvVersion.createInstanceDomainStore(identifierSources, this);
+        this.metricInfoStore = mmvVersion.createMetricInfoStore(identifierSources, stringStore);
+        this.instanceDomainStore = mmvVersion.createInstanceDomainStore(identifierSources, stringStore);
         this.mmvVersion = mmvVersion;
         this.metricNameValidator = mmvVersion.createMetricNameValidator();
 
@@ -329,14 +329,14 @@ public class PcpMmvWriter implements PcpWriter {
     @Override
     public final void setInstanceDomainHelpText(String instanceDomain, String shortHelpText, String longHelpText) {
         InstanceDomain domain = getInstanceDomain(instanceDomain);
-        domain.setHelpText(createPcpString(shortHelpText), createPcpString(longHelpText));
+        domain.setHelpText(stringStore.createPcpString(shortHelpText), stringStore.createPcpString(longHelpText));
     }
 
     @Override
     public final void setMetricHelpText(String metricName, String shortHelpText, String longHelpText) {
         PcpMetricInfo info = getMetricInfo(metricName);
         if (!info.hasHelpText()) {
-            info.setHelpText(createPcpString(shortHelpText), createPcpString(longHelpText));
+            info.setHelpText(stringStore.createPcpString(shortHelpText), stringStore.createPcpString(longHelpText));
         }
     }
 
@@ -394,7 +394,7 @@ public class PcpMmvWriter implements PcpWriter {
         metricInfo.setUnit(unit);
         metricInfo.setSemantics(semantics);
 
-        PcpValueInfo info = new PcpValueInfo(name, metricInfo, instance, initialValue, this);
+        PcpValueInfo info = new PcpValueInfo(name, metricInfo, instance, initialValue,  stringStore);
         metricData.put(name, info);
     }
 
@@ -429,16 +429,7 @@ public class PcpMmvWriter implements PcpWriter {
     }
 
     private Collection<PcpString> getStrings() {
-        return stringInfo;
-    }
-
-    PcpString createPcpString(String text) {
-        if (text == null) {
-            return null;
-        }
-        PcpString string = new PcpString(text);
-        stringInfo.add(string);
-        return string;
+        return stringStore.getStrings();
     }
 
     @SuppressWarnings("unchecked")

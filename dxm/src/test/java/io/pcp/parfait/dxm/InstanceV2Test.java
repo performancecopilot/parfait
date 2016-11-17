@@ -1,5 +1,6 @@
 package io.pcp.parfait.dxm;
 
+import io.pcp.parfait.dxm.PcpString.PcpStringStore;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InOrder;
@@ -72,15 +73,15 @@ public class InstanceV2Test {
         IdentifierSourceSet identifierSourceSet = mock(IdentifierSourceSet.class);
         IdentifierSource identifierSource = mock(IdentifierSource.class);
         InstanceDomain instanceDomain = mock(InstanceDomain.class);
-        PcpMmvWriter pcpMmvWriter = mock(PcpMmvWriter.class);
+        PcpStringStore stringStore = mock(PcpStringStore.class);
         PcpString pcpString = mock(PcpString.class);
 
         when(identifierSourceSet.instanceSource(INSTANCE_NAME)).thenReturn(identifierSource);
         when(identifierSource.calculateId(eq(INSTANCE_NAME), ArgumentMatchers.<Integer>anySet())).thenReturn(123);
-        when(pcpMmvWriter.createPcpString(INSTANCE_NAME)).thenReturn(pcpString);
+        when(stringStore.createPcpString(INSTANCE_NAME)).thenReturn(pcpString);
 
         InstanceV2.InstanceStoreV2 instanceStore = new InstanceV2.InstanceStoreV2(identifierSourceSet, INSTANCE_NAME,
-                instanceDomain, pcpMmvWriter);
+                instanceDomain, stringStore);
 
         Instance actual = instanceStore.byName(INSTANCE_NAME);
 

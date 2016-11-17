@@ -1,6 +1,7 @@
 package io.pcp.parfait.dxm;
 
 import io.pcp.parfait.dxm.PcpMmvWriter.Store;
+import io.pcp.parfait.dxm.PcpString.PcpStringStore;
 import io.pcp.parfait.dxm.semantics.Semantics;
 import io.pcp.parfait.dxm.types.MmvMetricType;
 import io.pcp.parfait.dxm.types.TypeHandler;
@@ -53,8 +54,8 @@ public class PcpMmvWriterTest {
     public void setUp() throws IOException {
         MockitoAnnotations.initMocks(this);
         when(mmvVersion.createMetricNameValidator()).thenReturn(metricNameValidator);
-        when(mmvVersion.createInstanceDomainStore(eq(identifierSourceSet), any(PcpMmvWriter.class))).thenReturn(instanceDomainStore);
-        when(mmvVersion.createMetricInfoStore(eq(identifierSourceSet), any(PcpMmvWriter.class))).thenReturn(metricInfoStore);
+        when(mmvVersion.createInstanceDomainStore(eq(identifierSourceSet), any(PcpStringStore.class))).thenReturn(instanceDomainStore);
+        when(mmvVersion.createMetricInfoStore(eq(identifierSourceSet), any(PcpStringStore.class))).thenReturn(metricInfoStore);
 
         when(byteBufferFactory.build(anyInt())).thenReturn(byteBuffer);
 
@@ -167,7 +168,7 @@ public class PcpMmvWriterTest {
 
         new PcpMmvWriter(mock(ByteBufferFactory.class), identifierSourceSet, mmvVersion);
 
-        verify(mmvVersion).createMetricInfoStore(eq(identifierSourceSet), any(PcpMmvWriter.class));
+        verify(mmvVersion).createMetricInfoStore(eq(identifierSourceSet), any(PcpStringStore.class));
     }
 
     @Test
@@ -177,7 +178,7 @@ public class PcpMmvWriterTest {
 
         new PcpMmvWriter(mock(ByteBufferFactory.class), identifierSourceSet, mmvVersion);
 
-        verify(mmvVersion).createInstanceDomainStore(eq(identifierSourceSet), any(PcpMmvWriter.class));
+        verify(mmvVersion).createInstanceDomainStore(eq(identifierSourceSet), any(PcpStringStore.class));
     }
 
     private class CustomType {}

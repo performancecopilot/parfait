@@ -1,6 +1,7 @@
 package io.pcp.parfait.dxm;
 
 import io.pcp.parfait.dxm.PcpMmvWriter.Store;
+import io.pcp.parfait.dxm.PcpString.PcpStringStore;
 import io.pcp.parfait.dxm.semantics.UnitMapping;
 
 import java.nio.ByteBuffer;
@@ -41,16 +42,16 @@ class PcpMetricInfoV2 extends PcpMetricInfo {
     }
 
     static final class MetricInfoStoreV2 extends Store<PcpMetricInfo> {
-        private PcpMmvWriter pcpMmvWriter;
+        private PcpStringStore stringStore;
 
-        MetricInfoStoreV2(IdentifierSourceSet identifierSources, PcpMmvWriter pcpMmvWriter) {
+        MetricInfoStoreV2(IdentifierSourceSet identifierSources, PcpStringStore stringStore) {
             super(identifierSources.metricSource());
-            this.pcpMmvWriter = pcpMmvWriter;
+            this.stringStore = stringStore;
         }
 
         @Override
         protected PcpMetricInfo newInstance(String name, Set<Integer> usedIds) {
-            return new PcpMetricInfoV2(name, identifierSource.calculateId(name, usedIds), pcpMmvWriter.createPcpString(name));
+            return new PcpMetricInfoV2(name, identifierSource.calculateId(name, usedIds), stringStore.createPcpString(name));
         }
     }
 }

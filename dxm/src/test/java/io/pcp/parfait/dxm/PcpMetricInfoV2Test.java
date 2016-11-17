@@ -1,6 +1,7 @@
 package io.pcp.parfait.dxm;
 
 import io.pcp.parfait.dxm.PcpMetricInfoV2.MetricInfoStoreV2;
+import io.pcp.parfait.dxm.PcpString.PcpStringStore;
 import io.pcp.parfait.dxm.semantics.Semantics;
 import io.pcp.parfait.dxm.types.MmvMetricType;
 import io.pcp.parfait.dxm.types.TypeHandler;
@@ -104,15 +105,15 @@ public class PcpMetricInfoV2Test {
     @Test
     public void metricInfoStoreShouldCreateANewPcpMetricInfoV2() {
         IdentifierSourceSet identifierSourceSet = mock(IdentifierSourceSet.class);
-        PcpMmvWriter pcpMmvWriter = mock(PcpMmvWriter.class);
+        PcpStringStore stringStore = mock(PcpStringStore.class);
         PcpString pcpString = mock(PcpString.class);
         IdentifierSource identifierSource = mock(IdentifierSource.class);
 
         when(identifierSourceSet.metricSource()).thenReturn(identifierSource);
         when(identifierSource.calculateId(eq("my.metric"), ArgumentMatchers.<Integer>anySet())).thenReturn(123);
-        when(pcpMmvWriter.createPcpString("my.metric")).thenReturn(pcpString);
+        when(stringStore.createPcpString("my.metric")).thenReturn(pcpString);
 
-        MetricInfoStoreV2 metricInfoStoreV2 = new MetricInfoStoreV2(identifierSourceSet, pcpMmvWriter);
+        MetricInfoStoreV2 metricInfoStoreV2 = new MetricInfoStoreV2(identifierSourceSet, stringStore);
 
         PcpMetricInfo actual = metricInfoStoreV2.byName("my.metric");
 

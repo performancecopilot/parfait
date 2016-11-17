@@ -4,6 +4,7 @@ import io.pcp.parfait.dxm.InstanceDomain.InstanceDomainStore;
 import io.pcp.parfait.dxm.PcpMetricInfoV1.MetricInfoStoreV1;
 import io.pcp.parfait.dxm.PcpMetricInfoV2.MetricInfoStoreV2;
 import io.pcp.parfait.dxm.PcpMmvWriter.Store;
+import io.pcp.parfait.dxm.PcpString.PcpStringStore;
 import org.junit.Test;
 
 import static io.pcp.parfait.dxm.MmvVersion.MMV_VERSION1;
@@ -65,10 +66,10 @@ public class MmvVersionTest {
     @Test
     public void mmvVersion2_shouldCreateAVersion1MetricStore() {
         IdentifierSourceSet identifierSourceSet = mock(IdentifierSourceSet.class);
-        PcpMmvWriter pcpMmvWriter = mock(PcpMmvWriter.class);
+        PcpStringStore stringStore = mock(PcpStringStore.class);
 
-        Store<PcpMetricInfo> actual = MMV_VERSION2.createMetricInfoStore(identifierSourceSet, pcpMmvWriter);
-        Store<PcpMetricInfo> expected = new MetricInfoStoreV2(identifierSourceSet, pcpMmvWriter);
+        Store<PcpMetricInfo> actual = MMV_VERSION2.createMetricInfoStore(identifierSourceSet, stringStore);
+        Store<PcpMetricInfo> expected = new MetricInfoStoreV2(identifierSourceSet, stringStore);
 
         assertReflectionEquals(expected, actual);
     }
@@ -76,11 +77,11 @@ public class MmvVersionTest {
     @Test
     public void mmvVersion2_shouldCreateAnInstanceDomainStoreWithVersion2InstanceStoreFactory() {
         IdentifierSourceSet identifierSourceSet = mock(IdentifierSourceSet.class);
-        PcpMmvWriter pcpMmvWriter = mock(PcpMmvWriter.class);
+        PcpStringStore stringStore = mock(PcpStringStore.class);
 
-        Store<InstanceDomain> actual = MMV_VERSION2.createInstanceDomainStore(identifierSourceSet, pcpMmvWriter);
+        Store<InstanceDomain> actual = MMV_VERSION2.createInstanceDomainStore(identifierSourceSet, stringStore);
         Store<InstanceDomain> expected = new InstanceDomainStore(
-                identifierSourceSet, new InstanceStoreFactoryV2(identifierSourceSet, pcpMmvWriter)
+                identifierSourceSet, new InstanceStoreFactoryV2(identifierSourceSet, stringStore)
         );
 
         assertReflectionEquals(expected, actual);

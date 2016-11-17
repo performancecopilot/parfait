@@ -1,6 +1,7 @@
 package io.pcp.parfait.dxm;
 
 import io.pcp.parfait.dxm.PcpMmvWriter.Store;
+import io.pcp.parfait.dxm.PcpString.PcpStringStore;
 
 import java.nio.ByteBuffer;
 import java.util.Set;
@@ -38,17 +39,17 @@ class InstanceV2 extends Instance {
 
     static class InstanceStoreV2 extends Store<Instance> {
         private InstanceDomain instanceDomain;
-        private PcpMmvWriter pcpMmvWriter;
+        private PcpStringStore stringStore;
 
-        InstanceStoreV2(IdentifierSourceSet identifierSources, String name, InstanceDomain instanceDomain, PcpMmvWriter pcpMmvWriter) {
+        InstanceStoreV2(IdentifierSourceSet identifierSources, String name, InstanceDomain instanceDomain, PcpStringStore stringStore) {
             super(identifierSources.instanceSource(name));
             this.instanceDomain = instanceDomain;
-            this.pcpMmvWriter = pcpMmvWriter;
+            this.stringStore = stringStore;
         }
 
         @Override
         protected Instance newInstance(String name, Set<Integer> usedIds) {
-            return new InstanceV2(instanceDomain, name, identifierSource.calculateId(name, usedIds), pcpMmvWriter.createPcpString(name));
+            return new InstanceV2(instanceDomain, name, identifierSource.calculateId(name, usedIds), stringStore.createPcpString(name));
         }
     }
 }
