@@ -11,7 +11,7 @@ final class InstanceV1 extends Instance {
 
     /**
      * The maximum length of an instance name able to be exported to the MMV agent. Note that this
-     * is relative to PCP_CHARSET (it's a measure of the maximum number of bytes, not the
+     * is relative to {@link PcpMmvWriter#PCP_CHARSET} (it's a measure of the maximum number of bytes, not the
      * Java String length)
      */
     static final int INSTANCE_NAME_LIMIT = 63;

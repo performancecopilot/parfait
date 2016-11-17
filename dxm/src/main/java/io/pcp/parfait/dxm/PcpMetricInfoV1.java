@@ -11,7 +11,7 @@ import static io.pcp.parfait.dxm.PcpMmvWriter.PCP_CHARSET;
 final class PcpMetricInfoV1 extends PcpMetricInfo {
     /**
      * The maximum length of a metric name able to be exported to the MMV agent. Note that this is
-     * relative to PCP_CHARSET (it's a measure of the maximum number of bytes, not the Java
+     * relative to {@link PcpMmvWriter#PCP_CHARSET} (it's a measure of the maximum number of bytes, not the Java
      * String length)
      */
     static final int METRIC_NAME_LIMIT = 63;
