@@ -64,7 +64,7 @@ public class MmvVersionTest {
     }
 
     @Test
-    public void mmvVersion2_shouldCreateAVersion1MetricStore() {
+    public void mmvVersion2_shouldCreateAVersion2MetricStore() {
         IdentifierSourceSet identifierSourceSet = mock(IdentifierSourceSet.class);
         PcpStringStore stringStore = mock(PcpStringStore.class);
 
