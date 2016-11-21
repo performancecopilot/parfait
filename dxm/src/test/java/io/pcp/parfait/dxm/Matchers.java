@@ -1,7 +1,7 @@
 package io.pcp.parfait.dxm;
 
-import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
+import org.hamcrest.TypeSafeMatcher;
 import org.unitils.reflectionassert.ReflectionComparator;
 import org.unitils.reflectionassert.ReflectionComparatorMode;
 import org.unitils.reflectionassert.difference.Difference;
@@ -11,7 +11,7 @@ import static org.unitils.reflectionassert.ReflectionComparatorFactory.createRef
 
 public class Matchers {
 
-    static class ReflectiveMatcher extends BaseMatcher<Object> {
+    static class ReflectiveMatcher extends TypeSafeMatcher<Object> {
 
         private final Object expected;
         private Difference difference;
@@ -21,7 +21,7 @@ public class Matchers {
         }
 
         @Override
-        public boolean matches(Object actual) {
+        protected boolean matchesSafely(Object actual) {
             ReflectionComparator refectionComparator = createRefectionComparator(ReflectionComparatorMode.LENIENT_ORDER);
             difference = refectionComparator.getDifference(expected, actual);
             return refectionComparator.isEqual(expected, actual);
