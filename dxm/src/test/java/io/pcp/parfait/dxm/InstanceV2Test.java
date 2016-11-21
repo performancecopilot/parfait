@@ -39,10 +39,23 @@ public class InstanceV2Test {
 
         instanceV2.writeToMmv(byteBuffer);
 
+        /*
+         * As defined in mmv(5), this is the format of the v2 Instance data structure.
+         *
+         * |-------------------------------------|
+         * |     4 bytes      |      4 bytes     |
+         * |-------------------------------------|
+         * |        indom section offset         |
+         * |-------------------------------------|
+         * |      padding     | external inst id |
+         * |-------------------------------------|
+         * |   external inst name string offset  |
+         * |-------------------------------------|
+         */
         byte[] expected = {
-            0,  0,  0,  0,  0,  0,  0, 40,
-            0,  0,  0,  0,  0,  0,  0, 123,
-            0,  0,  0,  0,  0,  0,  0,  30,
+            0,  0,  0,  0,  0,  0,  0, 40,      /* indom section offset */
+            0,  0,  0,  0,  0,  0,  0, 123,     /* padding, external inst id */
+            0,  0,  0,  0,  0,  0,  0,  30,     /* external inst name string offset */
         };
 
         assertArrayEquals(expected, byteBuffer.array());
