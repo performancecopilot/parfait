@@ -75,7 +75,7 @@ public class InstanceV2Test {
     }
 
     @Test
-    public void byteSizeShouldRaiseAnErrorAsItIsNotImplementedYet() {
+    public void byteSizeShouldReturnTheSizeOfTheOnDiskFormat() {
         InstanceV2 instanceV2 = new InstanceV2(mock(InstanceDomain.class), INSTANCE_NAME, INSTANCE_DOMAIN_ID, mock(PcpString.class));
 
         assertThat(instanceV2.byteSize(), is(EXPECTED_BYTE_SIZE));
