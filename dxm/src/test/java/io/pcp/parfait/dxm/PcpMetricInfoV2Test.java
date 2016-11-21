@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.unitils.reflectionassert.ReflectionAssert.assertReflectionEquals;
+import static tec.units.ri.unit.Units.HOUR;
 
 public class PcpMetricInfoV2Test {
 
@@ -45,7 +46,7 @@ public class PcpMetricInfoV2Test {
     }
 
     @Test
-    public void writeToMmvWriteToTheByteBuffer() {
+    public void writeToMmvWritesACorrectlyStructuredMetricsV2Record() {
         ByteBuffer byteBuffer = ByteBuffer.allocate(48);
         TypeHandler<Object> typeHandler = mock(TypeHandler.class);
         MmvMetricType mmvMetricType = mock(MmvMetricType.class);
@@ -64,16 +65,37 @@ public class PcpMetricInfoV2Test {
         pcpMetricInfoV2.setTypeHandler(typeHandler);
         pcpMetricInfoV2.setHelpText(shortHelpPcpString, longHelpPcpString);
         pcpMetricInfoV2.setSemantics(semantics);
+        pcpMetricInfoV2.setUnit(HOUR);
+
 
         pcpMetricInfoV2.writeToMmv(byteBuffer);
 
+        /*
+         * As defined in mmv(5), this is the format of the v2 Metrics data structure.
+         *
+         * |-----------------------------------|
+         * |     4 bytes     |     4 bytes     |
+         * |-----------------------------------|
+         * |         name string offset        |
+         * |-----------------------------------|
+         * |    item id      |  metric type    |
+         * |-----------------------------------|
+         * |    semantics    |   dimensions    |
+         * |-----------------------------------|
+         * |     indom id    |     padding     |
+         * |-----------------------------------|
+         * |   short help text string offset   |
+         * |-----------------------------------|
+         * |   long help text string offset    |
+         * |-----------------------------------|
+         */
         byte[] expectedBytes = {
-            0,  0,  0,  0,  0,  0,  0,  10,
-            0,  0,  0,  1,  0,  0,  3,  -115,
-            0,  0,  0,  32,  0,  0,  0,  0,
-            -1, -1, -1, -1, 0,  0,  0,  0,
-            0,  0,  0,  0,  0,  0,  0,  11,
-            0,  0,  0,  0,  0,  0,  0,  12,
+            0,  0,  0,  0,  0,  0,  0,  10,     /* name string offset */
+            0,  0,  0,  1,  0,  0,  3,  -115,   /* item id, metric type */
+            0,  0,  0,  32,  1,  0,  80,  0,    /* semantics, dimensions */
+            -1, -1, -1, -1, 0,  0,  0,  0,      /* indom id, padding */
+            0,  0,  0,  0,  0,  0,  0,  11,     /* short help text string offset */
+            0,  0,  0,  0,  0,  0,  0,  12,     /* long help text string offset */
         };
 
         assertArrayEquals(expectedBytes, byteBuffer.array());
