@@ -36,9 +36,9 @@ public class ParfaitAgent {
         context.getEnvironment().setActiveProfiles(profile);
         context.load("classpath:agent.xml");
         try {
-            context.load("file:/usr/share/parfait/*.xml");
+            context.load("file:/etc/parfait/*.xml");
         } catch (Exception e) {
-            logger.trace("Cannot setup beans from /usr/share/parfait", e);
+            logger.trace("Cannot setup beans from /etc/parfait", e);
         } 
         context.refresh();
     }

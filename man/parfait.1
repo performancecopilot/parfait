@@ -10,7 +10,7 @@
 [\f3\-n\f1/\f3\-\-name\f1 \f2name\f1]
 [\f3\-c\f1/\f3\-\-cluster\f1 \f2id\f1]
 [\f3\-i\f1/\f3\-\-interval\f1 \f2msec\f1]
-[\f3\-j\f1/\f3\-\-jmxserer\f1 \f2host:port\f1]
+[\f3\-j\f1/\f3\-\-jmxserver\f1/\f3\-\-connect\f1 \f2host:port\f1]
 [\f3\-s\f1/\f3\-\-startup\f1 \f2delay\f1]
 [\f3\-\-\f1]
 [\f2javaargs\f1 ...]
@@ -62,9 +62,10 @@ use the next available number.
 \fB\-i\fP/\fB\-\-interval\fP
 Delay between sampling (JMX values in particular) to refresh the
 values exported to PCP, in milliseconds.
-The default value is 1000 (1 second).
+The default value is 1000 (1 second) and the minimum allowed value
+is 250 milliseconds.
 .TP
-\fB\-j\fP/\fB\-\-jmxserver\fP
+\fB\-j\fP/\fB\-\-jmxserver\fP/\fB\-\-connect\fP
 Connect to the JMX server listening on the specified
 .IR hostname:port
 as the source of JMX metrics.
@@ -120,7 +121,7 @@ use the following options:
 java
     -Dcom.sun.management.jmxremote
     -Dcom.sun.management.jmxremote.port=9875
-    -Dcom.sun.management.jmxremote.local.only=false
+    -Dcom.sun.management.jmxremote.local.only=true
     -Dcom.sun.management.jmxremote.authenticate=false
     -Dcom.sun.management.jmxremote.ssl=false
     -jar /usr/share/java/parfait/sleep.jar Main
@@ -151,7 +152,7 @@ java -Dparfait.name=sleep
 default local of memory mapped values files created by
 .BR parfait .
 .TP 10
-.BI /usr/share/parfait/ *.xml
+.BI /etc/parfait/ *.xml
 Spring bean XML configuration files defining additional metrics.
 Refer to the Spring documentation and the parfait-agent resources
 at
