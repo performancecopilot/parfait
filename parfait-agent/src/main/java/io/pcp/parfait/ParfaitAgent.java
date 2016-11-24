@@ -32,7 +32,7 @@ public class ParfaitAgent {
         }
     }
 
-    public static void loadContextProfile(GenericXmlApplicationContext context, String profile) {
+    private static void loadContextProfile(GenericXmlApplicationContext context, String profile) {
         context.getEnvironment().setActiveProfiles(profile);
         context.load("classpath:agent.xml");
         try {

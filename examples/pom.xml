@@ -14,9 +14,6 @@
   <modules>
     <module>acme</module>
     <module>sleep</module>
-    <!--
-    <module>spring</module>
-    -->
     <module>counter</module>
   </modules>
 </project>

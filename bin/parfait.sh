@@ -28,17 +28,17 @@ Options:
      use the string which follows as the program name exported
      via PCP memory mapped value (MMV) metrics.  mmv.<name> in
      the performance metric name space (PMNS).  Overrides the
-     \${parfait.name} Java system property.
+     parfait.name Java system property.
 
   -c/--cluster N
      Use the numeric cluster identifier for PCP/MMV metric IDs
      (default is to build a hash identifier using progam name).
-     Overrides the \${parfait.cluster} Java system property.
+     Overrides the parfait.cluster Java system property.
 
   -i/--interval N
      Use numeric interval as the delta upon which JMX values will
      be reevaluated for exporting as memory mapped values (1 sec,
-     by default).  Overrides the \${parfait.interval} Java system
+     by default).  Overrides the parfait.interval Java system
      property.  Specified in milliseconds.
 
   -j/--jmxserver HOSTNAME:PORT
@@ -46,13 +46,13 @@ Options:
      JMX mbean exporting enabled.  This runs parfait-agent in a
      "proxying" mode where values for managed JMX beans from an
      external process are monitored.  This setting overrides the
-     \${parfait.connect} Java system property which has a default
+     parfait.connect Java system property which has a default
      value of localhost:9875.
 
   -s/--startup N
      Allow a max startup time in which JMX values are still being
      created, before exporting as memory mapped values (5 seconds
-     by default).  Overrides the \${parfait.startup} Java system
+     by default).  Overrides the parfait.startup Java system
      property.  Specified in milliseconds.
 
   -h/--help
@@ -114,25 +114,25 @@ do
         PARFAIT_INTERVAL=$2
         shift;
         shift;
-    elif [ "$1" == "-c" -o "$1" = "--cluster" ]; then
+    elif [ "$1" = "-c" -o "$1" = "--cluster" ]; then
         [ $# -ge 2 ] || usage
         PARFAIT_CLUSTER=$2
         shift;
         shift;
-    elif [ "$1" == "-s" -o "$1" = "--startup" ]; then
+    elif [ "$1" = "-s" -o "$1" = "--startup" ]; then
         [ $# -ge 2 ] || usage
         PARFAIT_STARTUP=$2
         shift;
         shift;
-    elif [ "$1" == "-j" -o "$1" = "--jmxserver" -o "$1" = "--connect" ]; then
+    elif [ "$1" = "-j" -o "$1" = "--jmxserver" -o "$1" = "--connect" ]; then
         [ $# -ge 2 ] || usage
         PARFAIT_CONNECT=$2
         JVMMODE="proxy"
         shift;
         shift;
-    elif [ "$1" == "-h" -o "$1" == "--help" ]; then
+    elif [ "$1" = "-h" -o "$1" = "--help" ]; then
         usage
-    elif [ "$1" == "--" ]; then
+    elif [ "$1" = "--" ]; then
         shift;
         break;
     else

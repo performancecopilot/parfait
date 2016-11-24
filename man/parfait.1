@@ -38,7 +38,7 @@ There are two forms of instrumentation available from the
 .B parfait
 script \- direct instrumentation (agent mode) or via a JMX server
 (proxy mode).
-See the ``EXAMPLES'' section below for an example invocation for
+See the EXAMPLES section below for an example invocation for
 each mode.
 .PP
 The command line options available are:
@@ -61,7 +61,8 @@ use the next available number.
 .TP
 \fB\-i\fP/\fB\-\-interval\fP
 Delay between sampling (JMX values in particular) to refresh the
-values exported to PCP.
+values exported to PCP, in milliseconds.
+The default value is 1000 (1 second).
 .TP
 \fB\-j\fP/\fB\-\-jmxserver\fP
 Connect to the JMX server listening on the specified
@@ -69,6 +70,11 @@ Connect to the JMX server listening on the specified
 as the source of JMX metrics.
 This option allows proxying of metrics from a separate process,
 instead of the default javaagent mode of operation.
+.TP
+\fB\-s\fP/\fB\-\-startup\fP
+Maximum startup time in which JMX values are still being created,
+before exporting as memory mapped values, in milliseconds.
+The default value is 5000 (5 seconds).
 .SH EXAMPLES
 The following examples can be installed via the parfait-examples
 package.
@@ -145,8 +151,12 @@ java -Dparfait.name=sleep
 default local of memory mapped values files created by
 .BR parfait .
 .TP 10
-.BI $PCP_SHARE_DIR/java/parfait/ *.xml
+.BI /usr/share/parfait/ *.xml
 Spring bean XML configuration files defining additional metrics.
+Refer to the Spring documentation and the parfait-agent resources
+at
+.I https://github.com/performancecopilot/parfait
+for further details.
 .PD
 .SH "PCP ENVIRONMENT"
 Environment variables with the prefix
