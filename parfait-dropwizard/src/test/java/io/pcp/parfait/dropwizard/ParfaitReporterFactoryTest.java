@@ -2,7 +2,7 @@ package io.pcp.parfait.dropwizard;
 
 import com.codahale.metrics.MetricRegistry;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.dropwizard.configuration.ConfigurationFactory;
+import io.dropwizard.configuration.YamlConfigurationFactory;
 import io.dropwizard.jackson.Jackson;
 import io.dropwizard.metrics.ConsoleReporterFactory;
 import io.dropwizard.metrics.CsvReporterFactory;
@@ -24,8 +24,8 @@ import static org.junit.Assert.assertNotNull;
 public class ParfaitReporterFactoryTest {
 
     private final ObjectMapper objectMapper = Jackson.newObjectMapper();
-    private final ConfigurationFactory<MetricsFactory> factory =
-            new ConfigurationFactory<>(MetricsFactory.class,
+    private final YamlConfigurationFactory<MetricsFactory> factory =
+            new YamlConfigurationFactory<>(MetricsFactory.class,
                     Validation.buildDefaultValidatorFactory().getValidator(),
                     objectMapper, "dw");
 
