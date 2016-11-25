@@ -6,7 +6,7 @@ Parfait is a performance monitoring library for Java which extracts metrics and 
 
 # Requirements
 
-Parfait requires Java 7.
+Parfait requires Java 8.
 
 # About parfait
 
