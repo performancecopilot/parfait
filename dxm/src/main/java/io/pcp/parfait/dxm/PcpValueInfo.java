@@ -3,9 +3,18 @@
  */
 package io.pcp.parfait.dxm;
 
+import io.pcp.parfait.dxm.PcpString.PcpStringStore;
 import io.pcp.parfait.dxm.types.TypeHandler;
 
-public final class PcpValueInfo implements PcpOffset {
+import java.nio.ByteBuffer;
+
+import static io.pcp.parfait.dxm.PcpMmvWriter.DATA_VALUE_LENGTH;
+import static io.pcp.parfait.dxm.PcpString.STRING_BLOCK_LIMIT;
+
+public final class PcpValueInfo implements PcpOffset,MmvWritable {
+
+    private static final int VALUE_LENGTH = 32;
+
 	private final MetricName metricName;
 	private final Object initialValue;
 	private final PcpMetricInfo metricInfo;
@@ -14,13 +23,13 @@ public final class PcpValueInfo implements PcpOffset {
 	private int offset;
 
     PcpValueInfo(MetricName metricName, PcpMetricInfo metricInfo, Instance instance, 
-    		Object initialValue, BasePcpWriter basePcpWriter) {
+    		Object initialValue, PcpStringStore stringStore) {
         this.metricName = metricName;
         this.metricInfo = metricInfo;
         this.instance = instance;
         this.initialValue = initialValue;
         if (metricInfo.getTypeHandler().requiresLargeStorage()) {
-            this.largeValue = basePcpWriter.createPcpString(initialValue.toString()); 
+            this.largeValue = stringStore.createPcpString(initialValue.toString());
         } else {
             this.largeValue = null;
         }
@@ -40,24 +49,54 @@ public final class PcpValueInfo implements PcpOffset {
         this.offset = offset;
     }
 
+    @Override
+    public int byteSize() {
+        return VALUE_LENGTH;
+    }
+
     public TypeHandler<?> getTypeHandler() {
         return metricInfo.getTypeHandler();
     }
 
-    public Object getInitialValue() {
+    private Object getInitialValue() {
         return initialValue;
     }
 
-    int getInstanceOffset() {
+    private int getInstanceOffset() {
         return instance == null ? 0 : instance.getOffset();
     }
 
-    int getDescriptorOffset() {
+    private int getDescriptorOffset() {
         return metricInfo.getOffset();
     }
     
     PcpString getLargeValue() {
         return largeValue;
     }
+
+    @Override
+    public void writeToMmv(ByteBuffer byteBuffer) {
+        byteBuffer.position(offset);
+        writeValueSection(byteBuffer);
+
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private void writeValueSection(ByteBuffer dataFileBuffer) {
+        int originalPosition = dataFileBuffer.position();
+        TypeHandler rawHandler = getTypeHandler();
+        if (rawHandler.requiresLargeStorage()) {
+            // API requires the length here but it's currently unused -- write out the maximum
+            // possible length
+            dataFileBuffer.putLong(STRING_BLOCK_LIMIT);
+            dataFileBuffer.putLong(getLargeValue().getOffset());
+            dataFileBuffer.position(getLargeValue().getOffset());
+        }
+        rawHandler.putBytes(dataFileBuffer, getInitialValue());
+        dataFileBuffer.position(originalPosition + DATA_VALUE_LENGTH);
+        dataFileBuffer.putLong(getDescriptorOffset());
+        dataFileBuffer.putLong(getInstanceOffset());
+    }
+
 
 }

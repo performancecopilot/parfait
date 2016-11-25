@@ -1,19 +1,22 @@
 package io.pcp.parfait.dxm;
 
-import javax.measure.Unit;
-
 import io.pcp.parfait.dxm.semantics.Semantics;
 import io.pcp.parfait.dxm.types.TypeHandler;
 
-final class PcpMetricInfo implements PcpId, PcpOffset {
-    private final String metricName;
+import javax.measure.Unit;
+import java.nio.ByteBuffer;
+
+abstract class PcpMetricInfo implements PcpId, PcpOffset, MmvWritable {
+    static final int DEFAULT_INSTANCE_DOMAIN_ID = -1;
+
+    protected final String metricName;
     private final int id;
 
-    private InstanceDomain domain;
-    private TypeHandler<?> typeHandler;
-    private int offset;
-    private PcpString shortHelpText;
-    private PcpString longHelpText;
+    protected InstanceDomain domain;
+    protected TypeHandler<?> typeHandler;
+    protected int offset;
+    protected PcpString shortHelpText;
+    protected PcpString longHelpText;
     private Unit<?> unit;
     private Semantics semantics;
 
@@ -22,29 +25,25 @@ final class PcpMetricInfo implements PcpId, PcpOffset {
         this.id = id;
     }
 
-    public int getId() {
+    public final int getId() {
         return id;
     }
 
     @Override
-    public int getOffset() {
+    public final int getOffset() {
         return offset;
     }
 
     @Override
-    public void setOffset(int offset) {
+    public final void setOffset(int offset) {
         this.offset = offset;
     }
 
-    String getMetricName() {
-        return metricName;
-    }
-
-    TypeHandler<?> getTypeHandler() {
+    final TypeHandler<?> getTypeHandler() {
         return typeHandler;
     }
 
-    void setTypeHandler(TypeHandler<?> typeHandler) {
+    final void setTypeHandler(TypeHandler<?> typeHandler) {
         if (this.typeHandler == null || this.typeHandler.equals(typeHandler)) {
             this.typeHandler = typeHandler;
         } else {
@@ -54,11 +53,7 @@ final class PcpMetricInfo implements PcpId, PcpOffset {
 
     }
 
-    InstanceDomain getInstanceDomain() {
-        return domain;
-    }
-
-    void setInstanceDomain(InstanceDomain domain) {
+    final void setInstanceDomain(InstanceDomain domain) {
         if (this.domain != null && !this.domain.equals(domain)) {
             throw new IllegalArgumentException(
                     "Two different instance domains cannot be set for metric " + metricName
@@ -67,20 +62,12 @@ final class PcpMetricInfo implements PcpId, PcpOffset {
         this.domain = domain;
     }
 
-    PcpString getShortHelpText() {
-        return shortHelpText;
-    }
-
-    PcpString getLongHelpText() {
-        return longHelpText;
-    }
-
-    void setHelpText(PcpString shortHelpText, PcpString longHelpText) {
+    final void setHelpText(PcpString shortHelpText, PcpString longHelpText) {
         this.shortHelpText = shortHelpText;
         this.longHelpText = longHelpText;
     }
 
-    public void setUnit(Unit<?> unit) {
+    final public void setUnit(Unit<?> unit) {
         if (this.unit != null && !this.unit.equals(unit)) {
             throw new IllegalArgumentException(
                     "Two different units cannot be set for metric " + metricName
@@ -89,11 +76,11 @@ final class PcpMetricInfo implements PcpId, PcpOffset {
         this.unit = unit;
     }
 
-    public Unit<?> getUnit() {
+    final public Unit<?> getUnit() {
         return unit;
     }
-    
-    public void setSemantics(Semantics semantics) {
+
+    final public void setSemantics(Semantics semantics) {
         if (this.semantics != null && semantics != this.semantics) {
             throw new IllegalArgumentException(
                     "Two different semantics cannot be set for metric " + metricName
@@ -102,11 +89,22 @@ final class PcpMetricInfo implements PcpId, PcpOffset {
         this.semantics = semantics;
     }
 
-    public Semantics getSemantics() {
+    final public Semantics getSemantics() {
         return semantics == null ? Semantics.NO_SEMANTICS : semantics;
     }
 
-    public boolean hasHelpText() {
+    final boolean hasHelpText() {
         return (shortHelpText != null || longHelpText != null);
-    }    
+    }
+
+    @Override
+    public abstract void writeToMmv(ByteBuffer byteBuffer);
+
+    final protected long getStringOffset(PcpString text) {
+        if (text == null) {
+            return 0;
+        }
+        return text.getOffset();
+    }
+
 }
