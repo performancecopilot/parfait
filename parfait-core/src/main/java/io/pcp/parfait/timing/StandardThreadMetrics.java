@@ -1,10 +1,10 @@
 package io.pcp.parfait.timing;
 
 import static systems.uom.unicode.CLDR.BYTE;
-import static tec.units.ri.unit.MetricPrefix.MILLI;
-import static tec.units.ri.unit.MetricPrefix.NANO;
-import static tec.units.ri.unit.Units.SECOND;
-import static tec.units.ri.AbstractUnit.ONE;
+import static tec.uom.se.unit.MetricPrefix.MILLI;
+import static tec.uom.se.unit.MetricPrefix.NANO;
+import static tec.uom.se.unit.Units.SECOND;
+import static tec.uom.se.AbstractUnit.ONE;
 
 import com.google.common.collect.ImmutableList;
 import java.lang.management.ManagementFactory;

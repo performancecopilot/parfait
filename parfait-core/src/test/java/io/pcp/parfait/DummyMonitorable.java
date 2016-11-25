@@ -1,6 +1,6 @@
 package io.pcp.parfait;
 
-import static tec.units.ri.AbstractUnit.ONE;
+import static tec.uom.se.AbstractUnit.ONE;
 
 import javax.measure.Unit;
 

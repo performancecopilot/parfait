@@ -1,6 +1,6 @@
 package io.pcp.parfait.dropwizard.metricadapters;
 
-import static tec.units.ri.AbstractUnit.ONE;
+import static tec.uom.se.AbstractUnit.ONE;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;

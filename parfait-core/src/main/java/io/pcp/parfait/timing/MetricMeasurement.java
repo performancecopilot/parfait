@@ -1,7 +1,7 @@
 package io.pcp.parfait.timing;
 
-import tec.units.ri.AbstractQuantity;
-import tec.units.ri.quantity.NumberQuantity;
+import tec.uom.se.AbstractQuantity;
+import tec.uom.se.quantity.NumberQuantity;
 
 import com.google.common.base.Preconditions;
 

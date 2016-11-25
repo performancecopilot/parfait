@@ -30,8 +30,8 @@
       <artifactId>unit-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>tec.units</groupId>
-      <artifactId>unit-ri</artifactId>
+      <groupId>tec.uom</groupId>
+      <artifactId>uom-se</artifactId>
     </dependency>
     <dependency>
         <groupId>systems.uom</groupId>

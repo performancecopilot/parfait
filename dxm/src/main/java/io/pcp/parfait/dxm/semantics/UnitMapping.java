@@ -2,10 +2,10 @@ package io.pcp.parfait.dxm.semantics;
 
 import static systems.uom.unicode.CLDR.BIT;
 import static systems.uom.unicode.CLDR.BYTE;
-import static tec.units.ri.AbstractConverter.IDENTITY;
-import static tec.units.ri.AbstractQuantity.NONE;
-import static tec.units.ri.AbstractUnit.ONE;
-import static tec.units.ri.unit.Units.SECOND;
+import static tec.uom.se.AbstractConverter.IDENTITY;
+import static tec.uom.se.AbstractQuantity.NONE;
+import static tec.uom.se.AbstractUnit.ONE;
+import static tec.uom.se.unit.Units.SECOND;
 
 import javax.measure.quantity.Dimensionless;
 import javax.measure.Unit;

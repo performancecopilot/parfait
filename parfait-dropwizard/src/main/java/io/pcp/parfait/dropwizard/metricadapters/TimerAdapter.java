@@ -1,7 +1,7 @@
 package io.pcp.parfait.dropwizard.metricadapters;
 
-import static tec.units.ri.unit.MetricPrefix.NANO;
-import static tec.units.ri.unit.Units.SECOND;
+import static tec.uom.se.unit.MetricPrefix.NANO;
+import static tec.uom.se.unit.Units.SECOND;
 
 import com.codahale.metrics.Timer;
 import io.pcp.parfait.Monitorable;

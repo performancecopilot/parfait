@@ -1,8 +1,8 @@
 package io.pcp.parfait.dxm.semantics;
 
-import static tec.units.ri.AbstractUnit.ONE;
+import static tec.uom.se.AbstractUnit.ONE;
 
-import tec.units.ri.unit.Units;
+import tec.uom.se.unit.Units;
 
 import systems.uom.quantity.Information;
 import systems.uom.unicode.CLDR;

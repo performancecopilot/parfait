@@ -4,14 +4,14 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <bean id="secondUnit" class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
-        <property name="staticField" value="tec.units.ri.unit.Units.SECOND"/>
+        <property name="staticField" value="tec.uom.se.unit.Units.SECOND"/>
     </bean>
 
     <bean id="millisecondUnit" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
-        <property name="staticMethod" value="tec.units.ri.unit.MetricPrefix.MILLI"/>
+        <property name="staticMethod" value="tec.uom.se.unit.MetricPrefix.MILLI"/>
         <property name="arguments">
             <bean class="org.springframework.beans.factory.config.FieldRetrievingFactoryBean">
-                <property name="staticField" value="tec.units.ri.unit.Units.SECOND"/>
+                <property name="staticField" value="tec.uom.se.unit.Units.SECOND"/>
             </bean>
         </property>
     </bean>

@@ -1,8 +1,8 @@
 package io.pcp.parfait.jdbc;
 
-import static tec.units.ri.unit.MetricPrefix.MILLI;
-import static tec.units.ri.unit.Units.SECOND;
-import static tec.units.ri.AbstractUnit.ONE;
+import static tec.uom.se.unit.MetricPrefix.MILLI;
+import static tec.uom.se.unit.Units.SECOND;
+import static tec.uom.se.AbstractUnit.ONE;
 
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationHandler;

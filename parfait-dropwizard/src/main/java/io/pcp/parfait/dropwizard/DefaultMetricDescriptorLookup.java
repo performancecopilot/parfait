@@ -1,6 +1,6 @@
 package io.pcp.parfait.dropwizard;
 
-import static tec.units.ri.AbstractUnit.ONE;
+import static tec.uom.se.AbstractUnit.ONE;
 
 import io.pcp.parfait.ValueSemantics;
 

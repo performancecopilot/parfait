@@ -5,11 +5,11 @@ import static io.pcp.parfait.dxm.MmvVersion.MMV_VERSION1;
 import static io.pcp.parfait.dxm.PcpString.STRING_BLOCK_LENGTH;
 import static io.pcp.parfait.dxm.PcpString.STRING_BLOCK_LIMIT;
 import static systems.uom.unicode.CLDR.BYTE;
-import static tec.units.ri.unit.MetricPrefix.KILO;
-import static tec.units.ri.unit.Units.HERTZ;
-import static tec.units.ri.unit.Units.HOUR;
-import static tec.units.ri.unit.Units.SECOND;
-import static tec.units.ri.AbstractUnit.ONE;
+import static tec.uom.se.unit.MetricPrefix.KILO;
+import static tec.uom.se.unit.Units.HERTZ;
+import static tec.uom.se.unit.Units.HOUR;
+import static tec.uom.se.unit.Units.SECOND;
+import static tec.uom.se.AbstractUnit.ONE;
 
 import java.io.File;
 import java.io.IOException;

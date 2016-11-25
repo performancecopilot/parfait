@@ -86,7 +86,7 @@
     <java.major.target.version>${jdk.version}</java.major.target.version>
     <metrics3.version>0.7.1</metrics3.version>
     <unit.version>1.0</unit.version>
-    <unit.ri.version>1.0</unit.ri.version>
+    <unit.se.version>1.0.1</unit.se.version>
     <unit.systems.version>0.5</unit.systems.version>
   </properties>
 
@@ -249,9 +249,9 @@
             <version>${unit.version}</version>
           </dependency>
           <dependency>
-            <groupId>tec.units</groupId>
-            <artifactId>unit-ri</artifactId>
-            <version>${unit.ri.version}</version>
+            <groupId>tec.uom</groupId>
+            <artifactId>uom-se</artifactId>
+            <version>${unit.se.version}</version>
           </dependency>
           <dependency>
             <groupId>systems.uom</groupId>

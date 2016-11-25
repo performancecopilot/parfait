@@ -1,7 +1,7 @@
 package io.pcp.parfait.dropwizard.metricadapters;
 
 import static com.codahale.metrics.MetricRegistry.name;
-import static tec.units.ri.AbstractUnit.ONE;
+import static tec.uom.se.AbstractUnit.ONE;
 
 import javax.measure.Unit;
 import java.util.Set;

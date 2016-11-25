@@ -1,8 +1,8 @@
 import io.pcp.parfait.MonitoredCounter;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static tec.units.ri.unit.MetricPrefix.MILLI;
-import static tec.units.ri.unit.Units.SECOND;
+import static tec.uom.se.unit.MetricPrefix.MILLI;
+import static tec.uom.se.unit.Units.SECOND;
 
 public class ProductBuilder extends Thread {
     private MonitoredCounter completed;

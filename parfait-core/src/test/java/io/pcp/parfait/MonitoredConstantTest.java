@@ -1,7 +1,7 @@
 package io.pcp.parfait;
 
 import static org.junit.Assert.assertEquals;
-import static tec.units.ri.unit.Units.FARAD;
+import static tec.uom.se.unit.Units.FARAD;
 
 import org.junit.Test;
 

@@ -1,7 +1,7 @@
 package io.pcp.parfait.dropwizard;
 
-import static tec.units.ri.AbstractUnit.ONE;
-import static tec.units.ri.unit.Units.GRAY;
+import static tec.uom.se.AbstractUnit.ONE;
+import static tec.uom.se.unit.Units.GRAY;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.Matchers.is;
