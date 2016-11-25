@@ -1,11 +1,14 @@
 package io.pcp.parfait.dxm;
 
+import io.pcp.parfait.dxm.PcpMmvWriter.Store;
+
+import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Set;
 
-import io.pcp.parfait.dxm.BasePcpWriter.Store;
+class InstanceDomain implements PcpId, PcpOffset, MmvWritable {
+    private static final int INSTANCE_DOMAIN_LENGTH = 32;
 
-class InstanceDomain implements PcpId, PcpOffset {
     private final String name;
     private final int id;
     private int offset;
@@ -13,10 +16,10 @@ class InstanceDomain implements PcpId, PcpOffset {
     private PcpString shortHelpText;
     private PcpString longHelpText;
 
-    InstanceDomain(String name, int id, IdentifierSourceSet instanceStores) {
+    InstanceDomain(String name, int id, InstanceStoreFactory instanceStoreFactory) {
         this.name = name;
         this.id = id;
-        this.instanceStore = new InstanceStore(instanceStores);
+        this.instanceStore = instanceStoreFactory.createNewInstanceStore(name, this);
     }
 
     Instance getInstance(String name) {
@@ -39,12 +42,17 @@ class InstanceDomain implements PcpId, PcpOffset {
     public void setOffset(int offset) {
         this.offset = offset;
     }
-    
-    int getInstanceCount() {
+
+    @Override
+    public int byteSize() {
+        return INSTANCE_DOMAIN_LENGTH;
+    }
+
+    private int getInstanceCount() {
         return instanceStore.size();
     }
 
-    int getFirstInstanceOffset() {
+    private int getFirstInstanceOffset() {
         return instanceStore.all().iterator().next().getOffset();
     }
 
@@ -58,24 +66,43 @@ class InstanceDomain implements PcpId, PcpOffset {
         
     }
 
-    PcpString getShortHelpText() {
-        return shortHelpText;
+    @Override
+    public void writeToMmv(ByteBuffer byteBuffer) {
+        byteBuffer.position(offset);
+        writeInstanceDomainSection(byteBuffer);
+        for (Instance instance : getInstances()) {
+            instance.writeToMmv(byteBuffer);
+        }
     }
 
-    PcpString getLongHelpText() {
-        return longHelpText;
+    private void writeInstanceDomainSection(ByteBuffer dataFileBuffer) {
+        dataFileBuffer.putInt(id);
+        dataFileBuffer.putInt(getInstanceCount());
+        dataFileBuffer.putLong(getFirstInstanceOffset());
+        dataFileBuffer.putLong(getStringOffset(shortHelpText));
+        dataFileBuffer.putLong(getStringOffset(longHelpText));
     }
-    
-	private class InstanceStore extends Store<Instance> {
-        public InstanceStore(IdentifierSourceSet identifierSources) {
-            super(identifierSources.instanceSource(name));
+
+
+    private long getStringOffset(PcpString text) {
+        if (text == null) {
+            return 0;
+        }
+        return text.getOffset();
+    }
+
+    static final class InstanceDomainStore extends Store<InstanceDomain> {
+        private InstanceStoreFactory instanceStoreFactory;
+
+        InstanceDomainStore(IdentifierSourceSet identifierSources, InstanceStoreFactory instanceStoreFactory) {
+            super(identifierSources.instanceDomainSource());
+            this.instanceStoreFactory = instanceStoreFactory;
         }
 
         @Override
-        protected Instance newInstance(String name, Set<Integer> usedIds) {
-            return new Instance(InstanceDomain.this, name, identifierSource.calculateId(name,
-                    usedIds));
+        protected InstanceDomain newInstance(String name, Set<Integer> usedIds) {
+            return new InstanceDomain(name, identifierSource.calculateId(name, usedIds), instanceStoreFactory);
         }
 
-	}
+    }
 }

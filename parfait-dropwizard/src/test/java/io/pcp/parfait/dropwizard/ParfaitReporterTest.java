@@ -1,8 +1,8 @@
 package io.pcp.parfait.dropwizard;
 
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -37,7 +37,7 @@ public class ParfaitReporterTest {
     private static final String HISTOGRAM_METRIC = "histogramMetric";
     private static final String COUNTER_METRIC = "counterMetric";
     private static final String GAUGE_METRIC = "gaugeMetric";
-    public static final String METRIC_NAME_PREFIX = "bim.codahale";
+    private static final String METRIC_NAME_PREFIX = "bim.codahale";
 
     private ParfaitReporter parfaitReporter;
     @Mock

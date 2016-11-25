@@ -4,7 +4,19 @@
 package io.pcp.parfait.dxm;
 
 
-final class PcpString implements PcpOffset {
+import com.google.common.base.Preconditions;
+
+import java.nio.ByteBuffer;
+import java.util.Collection;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+import static io.pcp.parfait.dxm.PcpMmvWriter.PCP_CHARSET;
+
+final class PcpString implements PcpOffset,MmvWritable {
+
+    static final int STRING_BLOCK_LENGTH = 256;
+    static final int STRING_BLOCK_LIMIT = STRING_BLOCK_LENGTH - 1;
+
     private final String initialValue;
     private int offset;
     
@@ -22,7 +34,37 @@ final class PcpString implements PcpOffset {
         this.offset = offset;
     }
 
-    String getInitialValue() {
-        return initialValue;
+    @Override
+    public int byteSize() {
+        return STRING_BLOCK_LENGTH;
     }
+
+    @Override
+    public void writeToMmv(ByteBuffer byteBuffer) {
+        byteBuffer.position(offset);
+        byte[] bytes = initialValue.getBytes(PCP_CHARSET);
+        Preconditions.checkArgument(bytes.length < STRING_BLOCK_LENGTH);
+        byteBuffer.put(bytes);
+        byteBuffer.put((byte) 0);
+
+    }
+
+    static class PcpStringStore {
+        private final Collection<PcpString> stringInfo = new CopyOnWriteArrayList<PcpString>();
+
+        PcpString createPcpString(String text) {
+            if (text == null) {
+                return null;
+            }
+            PcpString string = new PcpString(text);
+            stringInfo.add(string);
+            return string;
+        }
+
+        Collection<PcpString> getStrings() {
+            return stringInfo;
+        }
+
+    }
+
 }

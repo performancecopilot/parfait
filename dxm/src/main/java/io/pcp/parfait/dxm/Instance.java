@@ -1,14 +1,16 @@
 /**
- * 
+ *
  */
 package io.pcp.parfait.dxm;
 
 
-final class Instance implements PcpId, PcpOffset {
-    private final String name;
-    private final int id;
-    private final InstanceDomain instanceDomain;
-    private int offset;
+import java.nio.ByteBuffer;
+
+abstract class Instance implements PcpId, PcpOffset, MmvWritable {
+    protected final String name;
+    protected final int id;
+    protected final InstanceDomain instanceDomain;
+    protected int offset;
 
     Instance(InstanceDomain domain, String name, int id) {
         this.instanceDomain = domain;
@@ -36,11 +38,7 @@ final class Instance implements PcpId, PcpOffset {
         return id;
     }
 
-    String getName() {
-        return name;
-    }
+    @Override
+    public abstract void writeToMmv(ByteBuffer byteBuffer);
 
-    InstanceDomain getInstanceDomain() {
-        return instanceDomain;
-    }
 }

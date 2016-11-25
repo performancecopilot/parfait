@@ -1,5 +1,9 @@
 package io.pcp.parfait.dxm;
 
+import static com.google.common.collect.Maps.newConcurrentMap;
+import static io.pcp.parfait.dxm.MmvVersion.MMV_VERSION1;
+import static io.pcp.parfait.dxm.PcpString.STRING_BLOCK_LENGTH;
+import static io.pcp.parfait.dxm.PcpString.STRING_BLOCK_LIMIT;
 import static systems.uom.unicode.CLDR.BYTE;
 import static tec.units.ri.unit.MetricPrefix.KILO;
 import static tec.units.ri.unit.Units.HERTZ;
@@ -12,23 +16,31 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.GregorianCalendar;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.measure.Unit;
 
+import com.google.common.collect.Maps;
+import io.pcp.parfait.dxm.PcpString.PcpStringStore;
 import io.pcp.parfait.dxm.semantics.Semantics;
-import io.pcp.parfait.dxm.semantics.UnitMapping;
 import io.pcp.parfait.dxm.types.AbstractTypeHandler;
 import io.pcp.parfait.dxm.types.DefaultTypeHandlers;
 import io.pcp.parfait.dxm.types.MmvMetricType;
 import io.pcp.parfait.dxm.types.TypeHandler;
 import com.google.common.base.Preconditions;
+import net.jcip.annotations.GuardedBy;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 
 /**
  * <p>
@@ -60,7 +72,7 @@ import com.google.common.base.Preconditions;
  * 
  * @author Cowan
  */
-public class PcpMmvWriter extends BasePcpWriter {
+public class PcpMmvWriter implements PcpWriter {
     private static enum TocType {
         INSTANCE_DOMAINS(1),
         INSTANCES(2),
@@ -90,39 +102,20 @@ public class PcpMmvWriter extends BasePcpWriter {
         }
     }
     
-    public static final Set<MmvFlag> DEFAULT_FLAGS = Collections.unmodifiableSet(EnumSet.of(
+    private static final Set<MmvFlag> DEFAULT_FLAGS = Collections.unmodifiableSet(EnumSet.of(
             MmvFlag.MMV_FLAG_NOPREFIX, MmvFlag.MMV_FLAG_PROCESS));
 
-    /**
-     * The maximum length of a metric name able to be exported to the MMV agent. Note that this is
-     * relative to {@link #PCP_CHARSET} (it's a measure of the maximum number of bytes, not the Java
-     * String length)
-     */
-    public static final int METRIC_NAME_LIMIT = 63;
-    /**
-     * The maximum length of an instance name able to be exported to the MMV agent. Note that this
-     * is relative to {@link #PCP_CHARSET} (it's a measure of the maximum number of bytes, not the
-     * Java String length)
-     */
-    public static final int INSTANCE_NAME_LIMIT = 63;
 
     private static final int HEADER_LENGTH = 40;
     private static final int TOC_LENGTH = 16;
-    private static final int METRIC_LENGTH = 104;
-    private static final int VALUE_LENGTH = 32;
-    private static final int DEFAULT_INSTANCE_DOMAIN_ID = -1;
-    private static final int INSTANCE_LENGTH = 80;
-    private static final int INSTANCE_DOMAIN_LENGTH = 32;
-    private static final int STRING_BLOCK_LENGTH = 256;
 
     /**
      * The charset used for PCP metrics names and String values.
      */
-    public static final Charset PCP_CHARSET = Charset.forName("US-ASCII");
+    static final Charset PCP_CHARSET = Charset.forName("US-ASCII");
     private static final byte[] TAG = "MMV\0".getBytes(PCP_CHARSET);
-    private static final int MMV_FORMAT_VERSION = 1;
 
-    private static final int DATA_VALUE_LENGTH = 16;
+    static final int DATA_VALUE_LENGTH = 16;
 
     private static final TypeHandler<String> MMV_STRING_HANDLER = new AbstractTypeHandler<String>(
             MmvMetricType.STRING, STRING_BLOCK_LENGTH) {
@@ -134,11 +127,28 @@ public class PcpMmvWriter extends BasePcpWriter {
         @Override
         public void putBytes(ByteBuffer buffer, String value) {
             byte[] bytes = value.getBytes(PCP_CHARSET);
-            int length = Math.min(bytes.length, STRING_BLOCK_LENGTH - 1);
+            int length = Math.min(bytes.length, STRING_BLOCK_LIMIT);
             buffer.put(bytes, 0, length);
             buffer.put((byte) 0);
         }
     };
+
+    private final ByteBufferFactory byteBufferFactory;
+    private final Store<PcpMetricInfo> metricInfoStore;
+    private final Store<InstanceDomain> instanceDomainStore;
+    private final MmvVersion mmvVersion;
+    private final MetricNameValidator metricNameValidator;
+    private final Map<MetricName, PcpValueInfo> metricData = Maps.newConcurrentMap();
+    private final Map<Class<?>, TypeHandler<?>> typeHandlers = new ConcurrentHashMap<Class<?>, TypeHandler<?>>(
+            DefaultTypeHandlers.getDefaultMappings());
+    private final PcpStringStore stringStore = new PcpStringStore();
+    private volatile boolean started = false;
+    private volatile boolean usePerMetricLock = true;
+    private final Map<PcpValueInfo,ByteBuffer> perMetricByteBuffers = newConcurrentMap();
+    private final Object globalLock = new Object();
+    @GuardedBy("itself")
+    private volatile ByteBuffer dataFileBuffer = null;
+
 
     private File file = null;
     private volatile int processIdentifier = 0;
@@ -159,7 +169,7 @@ public class PcpMmvWriter extends BasePcpWriter {
     /**
      * Creates a new PcpMmvWriter writing to the underlying file, which will be created + opened as a
      * memory-mapped file. Uses the provided architecture to determine whether to write 32- or
-     * 64-bit longs for some key header fields.
+     * 64-bit longs for some key header fields. Defaults to {@link MmvVersion#MMV_VERSION1} format
      * 
      * @param file
      *            the file to map
@@ -167,12 +177,37 @@ public class PcpMmvWriter extends BasePcpWriter {
      *            the sources to use for coming up with identifiers for new metrics etc.
      */
     public PcpMmvWriter(File file, IdentifierSourceSet identifierSources) {
-        this(new FileByteBufferFactory(file), identifierSources);
+        this(file, identifierSources, MMV_VERSION1);
+    }
+
+    /**
+     * Creates a new PcpMmvWriter writing to the underlying file, which will be created + opened as a
+     * memory-mapped file. Uses the provided architecture to determine whether to write 32- or
+     * 64-bit longs for some key header fields.
+     *
+     * @param file
+     *            the file to map
+     * @param identifierSources
+     *            the sources to use for coming up with identifiers for new metrics etc.
+     * @param mmvVersion
+     *            the MMV version format to use
+     */
+    public PcpMmvWriter(File file, IdentifierSourceSet identifierSources, MmvVersion mmvVersion) {
+        this(new FileByteBufferFactory(file), identifierSources, mmvVersion);
         this.file = file;
     }
 
     public PcpMmvWriter(ByteBufferFactory byteBufferFactory, IdentifierSourceSet identifierSources) {
-        super(byteBufferFactory, identifierSources);
+        this(byteBufferFactory, identifierSources, MMV_VERSION1);
+    }
+
+    public PcpMmvWriter(ByteBufferFactory byteBufferFactory, IdentifierSourceSet identifierSources, MmvVersion mmvVersion) {
+        this.byteBufferFactory = byteBufferFactory;
+        this.metricInfoStore = mmvVersion.createMetricInfoStore(identifierSources, stringStore);
+        this.instanceDomainStore = mmvVersion.createInstanceDomainStore(identifierSources, stringStore);
+        this.mmvVersion = mmvVersion;
+        this.metricNameValidator = mmvVersion.createMetricNameValidator();
+
         registerType(String.class, MMV_STRING_HANDLER);
     }
 
@@ -180,6 +215,7 @@ public class PcpMmvWriter extends BasePcpWriter {
      * Creates a new PcpMmvWriter writing to the underlying file, which will be created + opened as a
      * memory-mapped file.  This is the constructor most people should use, unless you have a really
      * good reason not to.  It automatically handles all (incl. cross-platform) file location issues.
+     * It will default to {@link MmvVersion#MMV_VERSION1} format
      * 
      * @param name
      *            logical name of instrumented subsystem (e.g. "hadoop")
@@ -187,7 +223,23 @@ public class PcpMmvWriter extends BasePcpWriter {
      *            the sources to use for coming up with identifiers for new metrics etc.
      */
     public PcpMmvWriter(String name, IdentifierSourceSet identifierSources) {
-        this(mmvFileFromName(name), identifierSources);
+        this(mmvFileFromName(name), identifierSources, MMV_VERSION1);
+    }
+
+    /**
+     * Creates a new PcpMmvWriter writing to the underlying file, which will be created + opened as a
+     * memory-mapped file.  This is the constructor most people should use, unless you have a really
+     * good reason not to.  It automatically handles all (incl. cross-platform) file location issues.
+     *
+     * @param name
+     *            logical name of instrumented subsystem (e.g. "hadoop")
+     * @param identifierSources
+     *            the sources to use for coming up with identifiers for new metrics etc.
+     * @param mmvVersion
+     *            the MMV version format to use
+     */
+    public PcpMmvWriter(String name, IdentifierSourceSet identifierSources, MmvVersion mmvVersion) {
+        this(mmvFileFromName(name), identifierSources, mmvVersion);
     }
 
     private static File mmvFileFromName(String name) {
@@ -206,6 +258,103 @@ public class PcpMmvWriter extends BasePcpWriter {
         return new File(mmvDir, name);
     }
 
+    public final void addMetric(MetricName name, Semantics semantics, Unit<?> unit, Object initialValue) {
+        TypeHandler<?> handler = typeHandlers.get(initialValue.getClass());
+        if (handler == null) {
+            throw new IllegalArgumentException("No default handler registered for type "
+                    + initialValue.getClass());
+        }
+        addMetricInfo(name, semantics, unit, initialValue, handler);
+
+    }
+
+    public final <T> void addMetric(MetricName name, Semantics semantics, Unit<?> unit, T initialValue, TypeHandler<T> pcpType) {
+        if (pcpType == null) {
+            throw new IllegalArgumentException("PCP Type handler must not be null");
+        }
+        addMetricInfo(name, semantics, unit, initialValue, pcpType);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see io.pcp.parfait.pcp.PcpWriter#registerType(java.lang.Class,
+     * io.pcp.parfait.pcp.types.TypeHandler)
+     */
+    public final <T> void registerType(Class<T> runtimeClass, TypeHandler<T> handler) {
+        if (started) {
+            // Can't add any more metrics anyway; harmless
+            return;
+        }
+        typeHandlers.put(runtimeClass, handler);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see io.pcp.parfait.pcp.PcpWriter#updateMetric(java.lang.String, java.lang.Object)
+     */
+    public final void updateMetric(MetricName name, Object value) {
+        if (!started) {
+            return;
+        }
+        PcpValueInfo info = metricData.get(name);
+        if (info == null) {
+            throw new IllegalArgumentException("Metric " + name
+                    + " was not added before initialising the writer");
+        }
+        updateValue(info, value);
+    }
+
+    /*
+     * (non-Javadoc)
+     * @see io.pcp.parfait.pcp.PcpWriter#start()
+     */
+    public final void start() throws IOException {
+        initialiseOffsets();
+
+        dataFileBuffer = byteBufferFactory.build(getBufferLength());
+        synchronized (globalLock) {
+            populateDataBuffer(dataFileBuffer, metricData.values());
+            preparePerMetricBufferSlices();
+        }
+
+        started = true;
+    }
+
+    @Override
+    public void reset() {
+        started = false;
+        metricData.clear();
+    }
+
+    @Override
+    public final void setInstanceDomainHelpText(String instanceDomain, String shortHelpText, String longHelpText) {
+        InstanceDomain domain = getInstanceDomain(instanceDomain);
+        domain.setHelpText(stringStore.createPcpString(shortHelpText), stringStore.createPcpString(longHelpText));
+    }
+
+    @Override
+    public final void setMetricHelpText(String metricName, String shortHelpText, String longHelpText) {
+        PcpMetricInfo info = getMetricInfo(metricName);
+        if (!info.hasHelpText()) {
+            info.setHelpText(stringStore.createPcpString(shortHelpText), stringStore.createPcpString(longHelpText));
+        }
+    }
+
+    private void preparePerMetricBufferSlices() {
+        for (PcpValueInfo info : metricData.values()) {
+            TypeHandler<?> rawHandler = info.getTypeHandler();
+            int bufferPosition = rawHandler.requiresLargeStorage() ? info.getLargeValue()
+                    .getOffset() : info.getOffset();
+            // need to position the original buffer first, as the sliced buffer starts from there
+            dataFileBuffer.position(bufferPosition);
+            ByteBuffer metricByteBufferSlice = dataFileBuffer.slice();
+            metricByteBufferSlice.limit(rawHandler.getDataLength());
+            perMetricByteBuffers.put(info, metricByteBufferSlice);
+            metricByteBufferSlice.order(dataFileBuffer.order());
+        }
+    }
+
+
     public void setClusterIdentifier(int clusterIdentifier) {
         Preconditions.checkArgument((clusterIdentifier & 0xFFFFF000)==0, "ClusterIdentifier can only be a 12bit value");
     	this.clusterIdentifier = clusterIdentifier;
@@ -216,12 +365,103 @@ public class PcpMmvWriter extends BasePcpWriter {
         this.processIdentifier = pid;
     }
 
+    public void setPerMetricLock(boolean usePerMetricLock) {
+        Preconditions.checkState(!started, "Cannot change use of perMetricLock when started");
+        this.usePerMetricLock = usePerMetricLock;
+    }
+
     public void setFlags(Set<MmvFlag> flags) {
         this.flags = EnumSet.copyOf(flags);
     }
 
-    @Override
-    protected void populateDataBuffer(ByteBuffer dataFileBuffer, Collection<PcpValueInfo> valueInfos)
+    private synchronized void addMetricInfo(MetricName name, Semantics semantics, Unit<?> unit,
+                                            Object initialValue, TypeHandler<?> pcpType) {
+        if (metricData.containsKey(name)) {
+            throw new IllegalArgumentException("Metric " + name
+                    + " has already been added to writer");
+        }
+        metricNameValidator.validateNameConstraints(name);
+        PcpMetricInfo metricInfo = getMetricInfo(name.getMetric());
+        InstanceDomain domain = null;
+        Instance instance = null;
+
+        if (name.hasInstance()) {
+            domain = getInstanceDomain(name.getInstanceDomainTag());
+            instance = domain.getInstance(name.getInstance());
+            metricInfo.setInstanceDomain(domain);
+        }
+        metricInfo.setTypeHandler(pcpType);
+        metricInfo.setUnit(unit);
+        metricInfo.setSemantics(semantics);
+
+        PcpValueInfo info = new PcpValueInfo(name, metricInfo, instance, initialValue,  stringStore);
+        metricData.put(name, info);
+    }
+
+    private PcpMetricInfo getMetricInfo(String name) {
+        return metricInfoStore.byName(name);
+    }
+
+    private InstanceDomain getInstanceDomain(String name) {
+        return instanceDomainStore.byName(name);
+    }
+
+    private Collection<PcpMetricInfo> getMetricInfos() {
+        return metricInfoStore.all();
+    }
+
+
+
+    private Collection<InstanceDomain> getInstanceDomains() {
+        return instanceDomainStore.all();
+    }
+
+    private Collection<Instance> getInstances() {
+        Collection<Instance> instances = new ArrayList<Instance>();
+        for (InstanceDomain domain : instanceDomainStore.all()) {
+            instances.addAll(domain.getInstances());
+        }
+        return instances;
+    }
+
+    private Collection<PcpValueInfo> getValueInfos() {
+        return metricData.values();
+    }
+
+    private Collection<PcpString> getStrings() {
+        return stringStore.getStrings();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void updateValue(PcpValueInfo info, Object value) {
+        @SuppressWarnings("rawtypes")
+        TypeHandler rawHandler = info.getTypeHandler();
+
+        if (usePerMetricLock) {
+            writeValueWithLockPerMetric(info, value, rawHandler);
+        } else {
+            writeValueWithGlobalLock(info, value, rawHandler);
+        }
+    }
+
+    private void writeValueWithLockPerMetric(PcpValueInfo info, Object value, TypeHandler rawHandler) {
+        ByteBuffer perMetricByteBuffer = perMetricByteBuffers.get(info);
+        synchronized (perMetricByteBuffer) {
+            perMetricByteBuffer.position(0);
+            rawHandler.putBytes(perMetricByteBuffer, value);
+        }
+
+    }
+
+    private void writeValueWithGlobalLock(PcpValueInfo info, Object value, TypeHandler rawHandler) {
+        synchronized (globalLock) {
+            dataFileBuffer.position(rawHandler.requiresLargeStorage() ? info.getLargeValue()
+                    .getOffset() : info.getOffset());
+            rawHandler.putBytes(dataFileBuffer, value);
+        }
+    }
+
+    private void populateDataBuffer(ByteBuffer dataFileBuffer, Collection<PcpValueInfo> valueInfos)
             throws IOException {
 
         // Automatically cleanup the file if this is a mapping where we
@@ -233,7 +473,7 @@ public class PcpMmvWriter extends BasePcpWriter {
 
         dataFileBuffer.position(0);
         dataFileBuffer.put(TAG);
-        dataFileBuffer.putInt(MMV_FORMAT_VERSION);
+        dataFileBuffer.putInt(mmvVersion.getVersion());
         long generation = System.currentTimeMillis() / 1000;
         dataFileBuffer.putLong(generation);
         int gen2Offset = dataFileBuffer.position();
@@ -245,10 +485,10 @@ public class PcpMmvWriter extends BasePcpWriter {
         dataFileBuffer.putInt(getProcessIdentifier());
         dataFileBuffer.putInt(clusterIdentifier);
 
-        Collection<InstanceDomain> instanceDomains = getInstanceDomains();
-        Collection<Instance> instances = getInstances();
-        Collection<PcpMetricInfo> metrics = getMetricInfos();
-        Collection<PcpString> strings = getStrings();
+        Collection<? extends MmvWritable> instanceDomains = getInstanceDomains();
+        Collection<? extends MmvWritable> instances = getInstances();
+        Collection<? extends MmvWritable> metrics = getMetricInfos();
+        Collection<? extends MmvWritable> strings = getStrings();
 
         int tocBlockIndex = 0;
 
@@ -281,28 +521,20 @@ public class PcpMmvWriter extends BasePcpWriter {
                     strings.iterator().next().getOffset());
         }
 
-        for (InstanceDomain instanceDomain : instanceDomains) {
-            dataFileBuffer.position(instanceDomain.getOffset());
-            writeInstanceDomainSection(dataFileBuffer, instanceDomain);
-            for (Instance instance : instanceDomain.getInstances()) {
-                dataFileBuffer.position(instance.getOffset());
-                writeInstanceSection(dataFileBuffer, instance);
-            }
+        for (MmvWritable instanceDomain : instanceDomains) {
+            instanceDomain.writeToMmv(dataFileBuffer);
         }
 
-        for (PcpMetricInfo info : metrics) {
-            dataFileBuffer.position(info.getOffset());
-            writeMetricsSection(dataFileBuffer, info, info.getTypeHandler().getMetricType());
+        for (MmvWritable info : metrics) {
+            info.writeToMmv(dataFileBuffer);
         }
 
-        for (PcpValueInfo info : valueInfos) {
-            dataFileBuffer.position(info.getOffset());
-            writeValueSection(dataFileBuffer, info);
+        for (MmvWritable info : valueInfos) {
+            info.writeToMmv(dataFileBuffer);
         }
 
-        for (PcpString string : strings) {
-            dataFileBuffer.position(string.getOffset());
-            writeStringSection(dataFileBuffer, string.getInitialValue());
+        for (MmvWritable string : strings) {
+            string.writeToMmv(dataFileBuffer);
         }
 
         // Once it's set up, let the agent know
@@ -318,25 +550,21 @@ public class PcpMmvWriter extends BasePcpWriter {
         return flagMask;
     }
 
-    private void writeStringSection(ByteBuffer dataFileBuffer, String value) {
-    	byte[] bytes = value.getBytes(PCP_CHARSET);
-    	Preconditions.checkArgument(bytes.length < STRING_BLOCK_LENGTH);
-        dataFileBuffer.put(bytes);
-        dataFileBuffer.put((byte) 0);
+    private int getBufferLength() {
+        return HEADER_LENGTH + (TOC_LENGTH * tocCount())
+                + getByteSizeTotalFor(getInstanceDomains())
+                + getByteSizeTotalFor(getInstances())
+                + getByteSizeTotalFor(getMetricInfos())
+                + getByteSizeTotalFor(getValueInfos())
+                + getByteSizeTotalFor(getStrings());
     }
 
-    @Override
-    protected int getBufferLength() {
-        int instanceDomainCount = getInstanceDomains().size();
-        int metricCount = getMetricInfos().size();
-        int instanceCount = getInstances().size();
-        int valueCount = getValueInfos().size();
-        int tocCount = tocCount();
-        int stringCount = getStrings().size();
-        return HEADER_LENGTH + (TOC_LENGTH * tocCount)
-                + (INSTANCE_DOMAIN_LENGTH * instanceDomainCount)
-                + (INSTANCE_LENGTH * instanceCount) + (METRIC_LENGTH * metricCount)
-                + (VALUE_LENGTH * valueCount) + (STRING_BLOCK_LENGTH * stringCount);
+    private int getByteSizeTotalFor(Collection<? extends PcpOffset> offsettables) {
+        int bytes = 0;
+        for(PcpOffset offsetable : offsettables) {
+            bytes += offsetable.byteSize();
+        }
+        return bytes;
     }
 
     /**
@@ -359,127 +587,30 @@ public class PcpMmvWriter extends BasePcpWriter {
     }
 
     /**
-     * Writes the descriptor block for an individual metric to the file.
-     * 
-     * @param dataFileBuffer
-     *            ByteBuffer positioned at the correct offset in the file for the block
-     * @param info
-     *            the info of the metric (name must be &le; {@link #METRIC_NAME_LIMIT} characters,
-     *            and must be convertible to {@link #PCP_CHARSET})
-     * @param metricType
-     *            the type of the metric
-     */
-    private void writeMetricsSection(ByteBuffer dataFileBuffer, PcpMetricInfo info,
-            MmvMetricType metricType) {
-        int originalPosition = dataFileBuffer.position();
-
-        dataFileBuffer.put(info.getMetricName().getBytes(PCP_CHARSET));
-        dataFileBuffer.put((byte) 0);
-        dataFileBuffer.position(originalPosition + METRIC_NAME_LIMIT + 1);
-        dataFileBuffer.putInt(info.getId());
-        dataFileBuffer.putInt(metricType.getIdentifier());
-        dataFileBuffer.putInt(info.getSemantics().getPcpValue());
-        dataFileBuffer.putInt(UnitMapping.getDimensions(info.getUnit(), info.getMetricName()));
-        if (info.getInstanceDomain() != null) {
-            dataFileBuffer.putInt(info.getInstanceDomain().getId());
-        } else {
-            dataFileBuffer.putInt(DEFAULT_INSTANCE_DOMAIN_ID);
-        }
-        // Just padding
-        dataFileBuffer.putInt(0);
-        dataFileBuffer.putLong(getStringOffset(info.getShortHelpText()));
-        dataFileBuffer.putLong(getStringOffset(info.getLongHelpText()));
-    }
-
-    /**
-     * Writes the value block for an individual metric to the file.
-     * 
-     * @param dataFileBuffer
-     *            ByteBuffer positioned at the correct offset in the file for the block
-     * @param value
-     *            the PcpValueInfo to be written to the file
-     */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private void writeValueSection(ByteBuffer dataFileBuffer, PcpValueInfo info) {
-        int originalPosition = dataFileBuffer.position();
-        TypeHandler rawHandler = info.getTypeHandler();
-        if (rawHandler.requiresLargeStorage()) {
-            // API requires the length here but it's currently unused -- write out the maximum
-            // possible length
-            dataFileBuffer.putLong(STRING_BLOCK_LENGTH - 1);
-            dataFileBuffer.putLong(info.getLargeValue().getOffset());
-            dataFileBuffer.position(info.getLargeValue().getOffset());
-        }
-        rawHandler.putBytes(dataFileBuffer, info.getInitialValue());
-        dataFileBuffer.position(originalPosition + DATA_VALUE_LENGTH);
-        dataFileBuffer.putLong(info.getDescriptorOffset());
-        dataFileBuffer.putLong(info.getInstanceOffset());
-    }
-
-    private void writeInstanceSection(ByteBuffer dataFileBuffer, Instance instance) {
-        dataFileBuffer.putLong(instance.getInstanceDomain().getOffset());
-        dataFileBuffer.putInt(0);
-        dataFileBuffer.putInt(instance.getId());
-        dataFileBuffer.put(instance.getName().getBytes(PCP_CHARSET));
-    }
-
-    private void writeInstanceDomainSection(ByteBuffer dataFileBuffer, InstanceDomain instanceDomain) {
-        dataFileBuffer.putInt(instanceDomain.getId());
-        dataFileBuffer.putInt(instanceDomain.getInstanceCount());
-        dataFileBuffer.putLong(instanceDomain.getFirstInstanceOffset());
-        dataFileBuffer.putLong(getStringOffset(instanceDomain.getShortHelpText()));
-        dataFileBuffer.putLong(getStringOffset(instanceDomain.getLongHelpText()));
-    }
-
-    private long getStringOffset(PcpString text) {
-        if (text == null) {
-            return 0;
-        }
-        return text.getOffset();
-    }
-
-    /**
      * Calculates the file offset of a given PCP MMV TOC block
      * 
      * @param tocIndex
      *            the 0-based index of the TOC block to be written
      * @return the file offset used to store that TOC block (32-bit regardless of architecture)
      */
-    private final int getTocOffset(int tocIndex) {
+    private int getTocOffset(int tocIndex) {
         return HEADER_LENGTH + (tocIndex * TOC_LENGTH);
     }
 
-    @Override
-    protected Charset getCharset() {
-        return PCP_CHARSET;
-    }
-
-    @Override
-    protected int getMetricNameLimit() {
-        return METRIC_NAME_LIMIT;
-    }
-
-    @Override
-    protected int getInstanceNameLimit() {
-        return INSTANCE_NAME_LIMIT;
-    }
-
-    @Override
-    protected synchronized void initialiseOffsets() {
+    private synchronized void initialiseOffsets() {
         int nextOffset = HEADER_LENGTH + (TOC_LENGTH * tocCount());
 
-        nextOffset = initializeOffsets(getInstanceDomains(), nextOffset, INSTANCE_DOMAIN_LENGTH);
-        nextOffset = initializeOffsets(getInstances(), nextOffset, INSTANCE_LENGTH);
-        nextOffset = initializeOffsets(getMetricInfos(), nextOffset, METRIC_LENGTH);
-        nextOffset = initializeOffsets(getValueInfos(), nextOffset, VALUE_LENGTH);
-        initializeOffsets(getStrings(), nextOffset, STRING_BLOCK_LENGTH);
+        nextOffset = initializeOffsets(getInstanceDomains(), nextOffset);
+        nextOffset = initializeOffsets(getInstances(), nextOffset);
+        nextOffset = initializeOffsets(getMetricInfos(), nextOffset);
+        nextOffset = initializeOffsets(getValueInfos(), nextOffset);
+        initializeOffsets(getStrings(), nextOffset);
     }
 
-	private int initializeOffsets(Collection<? extends PcpOffset> offsettables,
-			int nextOffset, int blockLength) {
+	private int initializeOffsets(Collection<? extends PcpOffset> offsettables, int nextOffset) {
         for (PcpOffset offsettable : offsettables) {
             offsettable.setOffset(nextOffset);
-            nextOffset += blockLength;
+            nextOffset += offsettable.byteSize();
         }
         return nextOffset;
     }
@@ -589,4 +720,40 @@ public class PcpMmvWriter extends BasePcpWriter {
         bridge.updateMetric(MetricName.parse("sheep[limpy].jumpitem"), "Honda Civic");
         // Values will be reflected in the agent immediately
     }
+
+    static abstract class Store<T extends PcpId> {
+        private final Map<String, T> byName = new LinkedHashMap<String, T>();
+        private final Map<Integer, T> byId = new LinkedHashMap<Integer, T>();
+        final IdentifierSource identifierSource;
+
+        Store(IdentifierSource source) {
+            this.identifierSource = source;
+        }
+
+        synchronized T byName(String name) {
+            T value = byName.get(name);
+            if (value == null) {
+                value = newInstance(name, byId.keySet());
+                byName.put(name, value);
+                byId.put(value.getId(), value);
+            }
+            return value;
+        }
+
+        synchronized Collection<T> all() {
+            return byName.values();
+        }
+
+        protected abstract T newInstance(String name, Set<Integer> usedIds);
+
+        synchronized int size() {
+            return byName.size();
+        }
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("byteBufferFactory", this.byteBufferFactory).toString();
+    }
+
 }
