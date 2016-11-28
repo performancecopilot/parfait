@@ -10,7 +10,7 @@ import static io.pcp.parfait.dxm.MmvVersion.MMV_VERSION1;
 import static io.pcp.parfait.dxm.MmvVersion.MMV_VERSION2;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static tec.units.ri.AbstractUnit.ONE;
+import static tec.uom.se.AbstractUnit.ONE;
 
 public class PcpMmvWriterIntegrationTest {
 
