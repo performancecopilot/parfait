@@ -261,7 +261,7 @@
           </dependency>
           <dependency>
             <groupId>systems.uom</groupId>
-            <artifactId>systems-unicode</artifactId>
+            <artifactId>systems-unicode-java8</artifactId>
             <version>${unit.systems.version}</version>
           </dependency>
           <dependency>
