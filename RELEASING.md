@@ -75,7 +75,9 @@ Once you have all the above components setup, the actual release process involve
   ```
   mvn release:prepare -DautoVersionSubmodules release:perform
   ```
-  This publishes the artifacts to a _*temporary*_ holding area within OSS Sonatype.
+  Note: use the tag convention of version number only - i.e. X.Y.Z only, without "parfait-" prefix -
+  as this results in generation of source tarballs on github with the appropriate contents.
+  This step publishes the artifacts to a _*temporary*_ holding area within OSS Sonatype.
   
   2. The next step is outlined well here: [http://central.sonatype.org/pages/releasing-the-deployment.html]
 

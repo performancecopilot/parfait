@@ -87,8 +87,8 @@
     <java.major.target.version>${jdk.version}</java.major.target.version>
     <metrics3.version>1.0.2</metrics3.version>
     <unit.version>1.0</unit.version>
-    <unit.se.version>1.0.1</unit.se.version>
-    <unit.systems.version>0.5</unit.systems.version>
+    <unit.se.version>1.0.4</unit.se.version>
+    <unit.systems.version>0.6</unit.systems.version>
   </properties>
 
     <build>
