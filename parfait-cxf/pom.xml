@@ -2,7 +2,7 @@
   <parent>
     <artifactId>parfait</artifactId>
     <groupId>io.pcp</groupId>
-    <version>0.5.1-SNAPSHOT</version>
+    <version>0.5.1</version>
   </parent>
   <properties>
     <cxf.version>2.2.3</cxf.version>
@@ -11,7 +11,7 @@
   <groupId>io.pcp.parfait</groupId>
   <artifactId>parfait-cxf</artifactId>
   <name>parfait-cxf</name>
-  <version>0.5.1-SNAPSHOT</version>
+  <version>0.5.1</version>
   <description>Library for performance monitoring of Apache CXF web services</description>
   <dependencies>
     <dependency>
