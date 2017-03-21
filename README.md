@@ -33,16 +33,18 @@ Install to a well-known place:
     $ mkdir lib
     $ cp parfait-agent/target/parfait-agent-jar-with-dependencies.jar lib/parfait.jar
 
-To run an application with the *parfait-agent* loaded:
+Ensure the target directory for memory-mapped files has been created according to the [security model](http://man7.org/linux/man-pages/man1/pmdammv.1.html#INSTALLATION) you wish to use.
+
+Then, to run an application with the *parfait-agent* loaded:
 
     $ java -javaagent:./lib/parfait.jar MyApplication
 
-Or, use the helper script provided:
+Or use the helper script provided:
 
     $ export PARFAIT_HOME=`pwd`
     $ ./bin/parfait [.sh|.bat] -- MyApplication
 
-In PCP, new **mmv** metrics will then appear automatically for the duration of the instrumented Java application - these metrics can be recorded, charted, used for automated live and historical analysis, and so on, using PCP tools.
+New PCP **mmv** metrics will then appear automatically for the duration of the instrumented Java application - these metrics can be recorded, charted, used for automated live and historical analysis, and so on, using PCP tools.
 
     $ pminfo --desc --fetch --helptext  mmv.MyApplication.java.jvm.compilation
 
