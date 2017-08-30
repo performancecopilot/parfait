@@ -3,7 +3,7 @@
 
   <groupId>io.pcp</groupId>
   <artifactId>parfait</artifactId>
-  <version>0.5.3-SNAPSHOT</version>
+  <version>0.5.2-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>parfait</name>
   <description>Java performance monitoring framework, including PCP bridge and agent</description>
