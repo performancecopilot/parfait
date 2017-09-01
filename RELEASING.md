@@ -73,7 +73,7 @@ Once you have all the above components setup, the actual release process involve
 
   1. Invoke Maven's release process, a neat one-liner is this:
   ```
-  mvn release:prepare -DautoVersionSubmodules release:perform
+  mvn release:prepare -DautoVersionSubmodules -DtagNameFormat="@{version}" release:perform
   ```
   Note: use the tag convention of version number only - i.e. X.Y.Z only, without "parfait-" prefix -
   as this results in generation of source tarballs on github with the appropriate contents.
