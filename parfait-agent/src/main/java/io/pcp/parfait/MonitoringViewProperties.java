@@ -155,4 +155,23 @@ public class MonitoringViewProperties {
         String connect = getDefaultConnection();
         System.setProperty(PARFAIT_CONNECT, connect);
     }
+
+    //
+    // Convenience routines for accessing properties after setup
+    //
+    public static String getName() {
+        return System.getProperty(PARFAIT_NAME);
+    }
+    public static Integer getCluster() {
+        return Integer.parseInt(System.getProperty(PARFAIT_CLUSTER));
+    }
+    public static Long getInterval() {
+        return Long.parseLong(System.getProperty(PARFAIT_INTERVAL));
+    }
+    public static Long getStartup() {
+        return Long.parseLong(System.getProperty(PARFAIT_STARTUP));
+    }
+    public static String getConnection() {
+        return System.getProperty(PARFAIT_CONNECT);
+    }
 }
