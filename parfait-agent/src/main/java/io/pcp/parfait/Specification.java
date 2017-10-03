@@ -16,6 +16,8 @@
 
 package io.pcp.parfait;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import systems.uom.quantity.Information;
@@ -38,41 +40,20 @@ public class Specification {
     public Specification() {
     }
 
-	private Specification(String name, String description,
-                String semantics, String unitName, String mBeanName,
+    private Specification(String name, String description,
+                String semantics, String units, String mBeanName,
                 String mBeanAttributeName, String mBeanCompositeDataItem) {
-        if (!name.isEmpty()) {
-            this.name = name;
-        }
-        if (!description.isEmpty()) {
-            this.description = description;
-        }
-        if (!semantics.isEmpty()) {
-            if (semantics.equalsIgnoreCase("constant")) {
-                this.semantics = ValueSemantics.CONSTANT;
-            }
-            else if (semantics.equalsIgnoreCase("counter")) {
-                this.semantics = ValueSemantics.FREE_RUNNING;
-            }
-            else {
-                this.semantics = ValueSemantics.MONOTONICALLY_INCREASING;
-            }
-        }
-        if (unitName.equalsIgnoreCase("milliseconds")) {
-        	Unit<Time> MILLISECONDS = MetricPrefix.MILLI(Units.SECOND);
-			this.unit = MILLISECONDS;
-        }
-        if(unitName.equalsIgnoreCase("bytes")) {
-        	Unit<Information> BYTE = systems.uom.unicode.CLDR.BYTE;
-        	this.unit = BYTE;
-        }
+        this.name = name;
+        this.description = description;
         this.mBeanName = mBeanName;
-        if (!mBeanAttributeName.isEmpty()) {
+        if (!units.isEmpty())
+            this.unit = parseUnits(units);
+        if (!semantics.isEmpty())
+            this.semantics = parseSemantics(semantics);
+        if (!mBeanAttributeName.isEmpty())
             this.mBeanAttributeName = mBeanAttributeName;
-        }
-        if (!mBeanCompositeDataItem.isEmpty()) {
+        if (!mBeanCompositeDataItem.isEmpty())
             this.mBeanCompositeDataItem = mBeanCompositeDataItem;
-        }
     }
 
     public Specification(JsonNode node) {
@@ -111,5 +92,41 @@ public class Specification {
 
     public String getMBeanCompositeDataItem() {
         return mBeanCompositeDataItem;
+    }
+
+    public ValueSemantics parseSemantics(String semantics) {
+        if (!semantics.isEmpty()) {
+            if (semantics.equalsIgnoreCase("constant") ||
+                semantics.equalsIgnoreCase("discrete"))
+                return ValueSemantics.CONSTANT;
+            else if (semantics.equalsIgnoreCase("count") ||
+                     semantics.equalsIgnoreCase("counter"))
+                return ValueSemantics.MONOTONICALLY_INCREASING;
+            else if (semantics.equalsIgnoreCase("gauge") ||
+                     semantics.equalsIgnoreCase("instant") ||
+                     semantics.equalsIgnoreCase("instantaneous"))
+                return ValueSemantics.FREE_RUNNING;
+            // TODO: else throw ParserException
+        }
+        return ValueSemantics.FREE_RUNNING;
+    }
+
+    public Unit<?> parseUnits(String units) {
+        if (units.equalsIgnoreCase("milliseconds")) {
+            Unit<Time> MILLISECONDS = MetricPrefix.MILLI(Units.SECOND);
+            return MILLISECONDS;
+        }
+        if (units.equalsIgnoreCase("bytes")) {
+            Unit<Information> BYTE = systems.uom.unicode.CLDR.BYTE;
+            return BYTE;
+        }
+        if (!units.isEmpty()) {
+           // TODO: throw ParserException
+        }
+        return ONE;
+
+// TODO: uom SimpleUnitFormat?  Something else?
+//        return [AbstractUnit].parse(units);
+
     }
 }
