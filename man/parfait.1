@@ -101,8 +101,8 @@ process to be instrumented with a javaagent:
 .ft CW
 .nf
 .in +0.5i
-java -Dparfait.name=sleep
-    -javaagent:/usr/share/java/parfait/parfait.jar
+java -Dparfait.name=sleep \\
+    -javaagent:/usr/share/java/parfait/parfait.jar \\
     -jar /usr/share/java/parfait/sleep.jar Main
 [...] PCP monitoring bridge started [PCP_TMP_DIR/mmv/sleep]]]
 G'day World!
@@ -118,12 +118,12 @@ use the following options:
 .ft CW
 .nf
 .in +0.5i
-java
-    -Dcom.sun.management.jmxremote
-    -Dcom.sun.management.jmxremote.port=9875
-    -Dcom.sun.management.jmxremote.local.only=true
-    -Dcom.sun.management.jmxremote.authenticate=false
-    -Dcom.sun.management.jmxremote.ssl=false
+java \\
+    -Dcom.sun.management.jmxremote \\
+    -Dcom.sun.management.jmxremote.port=9875 \\
+    -Dcom.sun.management.jmxremote.local.only=true \\
+    -Dcom.sun.management.jmxremote.authenticate=false \\
+    -Dcom.sun.management.jmxremote.ssl=false \\
     -jar /usr/share/java/parfait/sleep.jar Main
 G'day World!
 .in
@@ -137,8 +137,8 @@ which can be invoked as follows:
 .ft CW
 .nf
 .in +0.5i
-java -Dparfait.name=sleep
-    -jar /usr/share/java/parfait/parfait.jar
+java -Dparfait.name=sleep \\
+    -jar /usr/share/java/parfait/parfait.jar \\
     -connect=localhost:9875
 [...] PCP monitoring bridge started [PCP_TMP_DIR/mmv/sleep]]]
 .in
