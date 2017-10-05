@@ -74,7 +74,7 @@ public class SpecificationTest {
     public void testParsingUnitsTime() {
         final Specification pojo = new Specification();
         final Unit<Time> MILLISECONDS = MetricPrefix.MILLI(Units.SECOND);
-        Unit<?> unit = pojo.parseUnits("milliseconds");
+        Unit<?> unit = pojo.parseUnits("test", "milliseconds");
         assertEquals("Parsing milliseconds", unit, MILLISECONDS);
     }
 
@@ -82,7 +82,7 @@ public class SpecificationTest {
     public void testParsingUnitsInformation() {
         final Specification pojo = new Specification();
         final Unit<Information> BYTE = systems.uom.unicode.CLDR.BYTE;
-        Unit<?> unit = pojo.parseUnits("bytes");
+        Unit<?> unit = pojo.parseUnits("test", "bytes");
         assertEquals("Parsing bytes", unit, BYTE);
     }
 

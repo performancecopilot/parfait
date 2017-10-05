@@ -70,11 +70,11 @@ public class ParfaitAgent {
         List<Specification> allMonitorables = new ArrayList<>();
         File[] files;
         try {
-            files = new File("/src/main/resources").listFiles();
+            files = new File("/etc/parfait").listFiles();
             for (File file : files) {
                 allMonitorables.addAll(parseSpecification(file));
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return allMonitorables;
@@ -89,19 +89,10 @@ public class ParfaitAgent {
             for (JsonNode node : metrics) {
                 monitorables.add(new Specification(node));
             }
-            return monitorables;
-
-	// TODO: improve error handling here ...
-        } catch (JsonGenerationException e) {
-            e.printStackTrace();
-        } catch (JsonMappingException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(String.format("Ignoring file %s\n%s", file.getName(), e.getMessage()));
         }
-        return null;
+        return monitorables;
     }
 
     public static void startView(AgentMonitoringView view) throws InstanceNotFoundException, IntrospectionException, AttributeNotFoundException, UnsupportedOperationException, ReflectionException, MBeanException, IOException {
@@ -109,6 +100,7 @@ public class ParfaitAgent {
 
         allSpecifications = parseAllSpecifications();
         for (Specification specification : allSpecifications) {
+            logger.trace(String.format("Registering metric [%s]", specification.getName()));
             view.register(specification);
         }
         view.start();

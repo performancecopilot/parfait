@@ -30,6 +30,7 @@ import javax.measure.quantity.Time;
 
 public class Specification {
     public String name;
+    public boolean optional;
     public String description;
     public Unit<?> unit = ONE;
     public ValueSemantics semantics = ValueSemantics.FREE_RUNNING;
@@ -40,16 +41,17 @@ public class Specification {
     public Specification() {
     }
 
-    private Specification(String name, String description,
+    private Specification(String name, boolean optional, String description,
                 String semantics, String units, String mBeanName,
                 String mBeanAttributeName, String mBeanCompositeDataItem) {
         this.name = name;
+        this.optional = optional;
         this.description = description;
         this.mBeanName = mBeanName;
         if (!units.isEmpty())
-            this.unit = parseUnits(units);
+            this.unit = parseUnits(name, units);
         if (!semantics.isEmpty())
-            this.semantics = parseSemantics(semantics);
+            this.semantics = parseSemantics(name, semantics);
         if (!mBeanAttributeName.isEmpty())
             this.mBeanAttributeName = mBeanAttributeName;
         if (!mBeanCompositeDataItem.isEmpty())
@@ -58,6 +60,7 @@ public class Specification {
 
     public Specification(JsonNode node) {
         this(node.path("name").asText(),
+             node.path("optional").asBoolean(),
              node.path("description").asText(),
              node.path("semantics").asText(),
              node.path("units").asText(),
@@ -72,6 +75,10 @@ public class Specification {
 
     public String getName() {
         return name;
+    }
+
+    public boolean getOptional() {
+        return optional;
     }
 
     public String getDescription() {
@@ -94,7 +101,7 @@ public class Specification {
         return mBeanCompositeDataItem;
     }
 
-    public ValueSemantics parseSemantics(String semantics) {
+    public ValueSemantics parseSemantics(String name, String semantics) {
         if (!semantics.isEmpty()) {
             if (semantics.equalsIgnoreCase("constant") ||
                 semantics.equalsIgnoreCase("discrete"))
@@ -106,12 +113,13 @@ public class Specification {
                      semantics.equalsIgnoreCase("instant") ||
                      semantics.equalsIgnoreCase("instantaneous"))
                 return ValueSemantics.FREE_RUNNING;
-            // TODO: else throw ParserException
+            String msg = "Unexpected semantics [" + semantics + "]";
+            throw new SpecificationException(name, msg);
         }
         return ValueSemantics.FREE_RUNNING;
     }
 
-    public Unit<?> parseUnits(String units) {
+    public Unit<?> parseUnits(String name, String units) {
         if (units.equalsIgnoreCase("milliseconds")) {
             Unit<Time> MILLISECONDS = MetricPrefix.MILLI(Units.SECOND);
             return MILLISECONDS;
@@ -121,12 +129,12 @@ public class Specification {
             return BYTE;
         }
         if (!units.isEmpty()) {
-           // TODO: throw ParserException
+            String msg = "Unexpected units [" + units + "]";
+            throw new SpecificationException(name, msg);
         }
         return ONE;
 
-// TODO: uom SimpleUnitFormat?  Something else?
-//        return [AbstractUnit].parse(units);
-
+        // UoM SimpleUnitFormat?  Something else?
+        //  return [AbstractUnit].parse(units);
     }
 }

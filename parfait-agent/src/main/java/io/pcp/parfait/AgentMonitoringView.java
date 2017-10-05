@@ -48,8 +48,12 @@ import javax.management.ReflectionException;
 import javax.management.openmbean.CompositeData;
 import javax.measure.Unit;
 
+import org.apache.log4j.Logger;
+
 
 class AgentMonitoringView {
+    private static final Logger logger = Logger.getLogger(ParfaitAgent.class);
+
     private MonitorableRegistry registry = MonitorableRegistry.DEFAULT_REGISTRY;
 
     private final MBeanServerConnection server;
@@ -79,7 +83,7 @@ class AgentMonitoringView {
         view.start();
     }
 
-    public void register(Specification specification) throws InstanceNotFoundException, IntrospectionException, AttributeNotFoundException, UnsupportedOperationException, ReflectionException, MBeanException, IOException {
+    public <T> Monitorable<T> register(Specification specification) throws InstanceNotFoundException, IntrospectionException, AttributeNotFoundException, UnsupportedOperationException, ReflectionException, MBeanException, IOException {
         String beanName = registerBeanName(specification.getMBeanName());
         try {
             mBeanName = new ObjectName(beanName);
@@ -87,7 +91,7 @@ class AgentMonitoringView {
             throw new RuntimeException("Unexpected exception mbean name [" +
                                         beanName + "]", e);
         }
-        registry.register(createMonitorable(specification));
+        return createMonitorable(specification);
     }
 
     private <T> Monitorable<T> createMonitorable(Specification specification) throws InstanceNotFoundException, IntrospectionException, UnsupportedOperationException, ReflectionException, IOException, AttributeNotFoundException, MBeanException {
@@ -96,14 +100,22 @@ class AgentMonitoringView {
         attributeName = specification.getMBeanAttributeName();
         compositeDataItem = specification.getMBeanCompositeDataItem();
 
-        String typeName = checkAttributeName();
-        checkCompositeDataItem(typeName);
+        boolean optional = specification.getOptional();
+        try {
+            String typeName = checkAttributeName();
+            checkCompositeDataItem(typeName);
+        } catch (InstanceNotFoundException | UnsupportedOperationException e) {
+            if (optional)
+                return null;
+            throw new RuntimeException("Metric " + metric + " is not optional but has bad attribute [" + attributeName + "]", e);
+        }
 
         ValueSemantics semantics = specification.getSemantics();
         if (semantics == ValueSemantics.CONSTANT)
-            return new MonitoredConstant<T>(metric, text, getAttributeValue());
+            return new MonitoredConstant<T>(metric, text, this.registry,
+                            getAttributeValue());
         return new PollingMonitoredValue<T>(metric, text, this.registry,
-		        (int)(long)this.interval, new Supplier<T>() {
+                        (int)(long)this.interval, new Supplier<T>() {
                             public T get() {
                                 return getAttributeValue();
                             }
@@ -114,6 +126,7 @@ class AgentMonitoringView {
     protected <T> T getAttributeValue() {
         try {
             if (!Strings.isNullOrEmpty(compositeDataItem)) {
+                logger.trace(this.name + " get: " + compositeDataItem);
                 CompositeData data = (CompositeData) server.getAttribute(mBeanName, attributeName);
                 return (T) data.get(compositeDataItem);
             } else {
@@ -136,7 +149,7 @@ class AgentMonitoringView {
                     String returnValue = baseString + ",name=" + name;
                     ObjectName myBeanName = new ObjectName(returnValue);
                     if (server.isRegistered(myBeanName)) {
-                        //LOG.trace(this.name + " registered as " + returnValue);
+                        logger.trace(this.name + " registered mBean as " + returnValue);
                         return returnValue;
                     }
                 }
