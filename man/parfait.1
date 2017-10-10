@@ -10,13 +10,13 @@
 \fBparfait\fR [\fB\-n\fR/\fB\-\-name\fR \fIname\fR] [\fB\-c\fR/\fB\-\-cluster\fR \fIid\fR] [\fB\-i\fR/\fB\-\-interval\fR \fImsec\fR] [\fB\-s\fR/\fB\-\-startup\fR \fIdelay\fR] [\fB\-j\fR/\fB\-\-jmxserver\fR \fB\-\-connect\fR \fIhost:port\fR] [\fB\-\-\fR] [\fBjavaargs\fR \.\.\.]
 .
 .SH "DESCRIPTION"
-The \fBparfait\fR wrapper script provides instrumentation for an \fIunmodified\fR Java application\. It is a front end to the Parfait \fIhttps://github\.com/performancecopilot/parfait\fR modules which developers use to instrument Java applications directly\.
+The \fBparfait\fR wrapper script provides instrumentation for an \fIunmodified\fR Java application\. It is a front end to the Parfait \fIhttps://github\.com/performancecopilot/parfait\fR modules which developers use to access instrumentation from Java applications\.
 .
 .P
-\fBparfait\fR is thus limited to exposing performance metrics that it can find indirectly, such as via JMX\.
+The \fBparfait\fR script is limited to exposing performance metrics that it can find indirectly, such as via JMX\.
 .
 .P
-In order to be exported to the PCP Memory Mapped Values PMDA (see \fBpmdammv\fR(1) for details) these metrics must first be categorised with PCP metadata\.
+In order to be exported to the PCP Memory Mapped Values PMDA (see \fBpmdammv\fR(1) for details) these metrics must first be categorized with PCP metadata\.
 .
 .P
 This is performed by configuration of the \fIparfait\-agent\.jar\fR file used by \fBparfait\fR\. In the simplest form the configuration is sourced from files in the \fI/etc/parfait\fR directory\. Additional JMX managed beans can be added to the default set through configuration files in the \fI/etc/parfait\fR directory\.
@@ -69,13 +69,13 @@ pminfo \fB\-f\fR mmv
 pmprobe \fB\-v\fR mmv
 .
 .IP "\(bu" 4
-pmdumptext
-.
-.IP "\(bu" 4
 pmchart
 .
 .IP "\(bu" 4
 pmie
+.
+.IP "\(bu" 4
+pmrep
 .
 .IP "\(bu" 4
 [\.\.\. and many others \.\.\.]
@@ -85,39 +85,126 @@ pmie
 .P
 The default mode of operation involves directly running the Java process to be instrumented with a javaagent:
 .
-.TP
-\fIjava\fR \-Dparfait\.name=sleep \-javaagent:/usr/share/java/parfait/parfait\.jar \-jar /usr/share/java/parfait/sleep\.jar \fIMain\fR
-\fBPCP monitoring bridge started [PCP\-TMP\-DIR/mmv/sleep]]]; G\'day World!\fR
+.IP "\(bu" 4
+\fIjava\fR \-Dparfait\.name=sleep \fB\-javaagent\fR:/usr/share/java/parfait/parfait\.jar \-jar /usr/share/java/parfait/sleep\.jar \fIMain\fR
+.
+.IP "" 0
 .
 .P
-The alternative is the proxy mode, where an already running Java process is instrumented using its JMX server\. To start the Java application such that a JMX server is exposed, use the following options:
+The alternative is the proxy mode, where an already running Java process is instrumented using its JMX server\. To start the Java application with a JMX server exposed, use the following options:
 .
-.TP
-\fIjava\fR \-Dcom\.sun\.management\.jmxremote \-Dcom\.sun\.management\.jmxremote\.port=9875 \-Dcom\.sun\.management\.jmxremote\.local\.only=true \-Dcom\.sun\.management\.jmxremote\.authenticate=false \-Dcom\.sun\.management\.jmxremote\.ssl=false \-jar /usr/share/java/parfait/sleep\.jar \fIMain\fR
-\fBG\'day World!\fR
+.IP "\(bu" 4
+\fIjava\fR \fB\-Dcom\.sun\.management\.jmxremote \-Dcom\.sun\.management\.jmxremote\.port=9875\fR \-Dcom\.sun\.management\.jmxremote\.local\.only=true \-Dcom\.sun\.management\.jmxremote\.authenticate=false \-Dcom\.sun\.management\.jmxremote\.ssl=false \-jar /usr/share/java/parfait/sleep\.jar \fIMain\fR
+.
+.IP "" 0
 .
 .P
 The JMX server is then allowing access from instrumentation by \fBparfait\fR, which can be invoked as follows:
 .
-.TP
-\fIjava\fR \-Dparfait\.name=sleep \-jar /usr/share/java/parfait/parfait\.jar \-connect=localhost:9875
-\fBPCP monitoring bridge started [PCP\-TMP\-DIR/mmv/sleep]]]\fR
-.
-.SH "CONFIGURATION"
-TODO\.
-.
-.SH "FILES"
-.
 .IP "\(bu" 4
-\fI$PCP\-TMP\-DIR/mmv/*\fR default local of memory mapped values files created by \fBparfait\fR\.
-.
-.IP "\(bu" 4
-\fI/etc/parfait/*\.json\fR configuration files defining metrics in the format described above\.
+\fIjava\fR \-Dparfait\.name=sleep \-jar /usr/share/java/parfait/parfait\.jar \fB\-connect=localhost:9875\fR
 .
 .IP "" 0
 .
-.SH "REFERENCES"
-\fBPCPIntro\fR \fIhttp://man7\.org/linux/man\-pages/man1/pcpintro\.1\.html\fR \fBpmcd\fR \fIhttp://man7\.org/linux/man\-pages/man1/pmcd\.1\.html\fR \fBpmchart\fR \fIhttp://man7\.org/linux/man\-pages/man1/pmchart\.1\.html\fR \fBpmdammv\fR \fIhttp://man7\.org/linux/man\-pages/man1/pmdammv\.1\.html\fR \fBpmdumptext\fR \fIhttp://man7\.org/linux/man\-pages/man1/pmdumptext\.1\.html\fR \fBpmprobe\fR \fIhttp://man7\.org/linux/man\-pages/man1/pmprobe\.1\.html\fR \fBpminfo\fR \fIhttp://man7\.org/linux/man\-pages/man1/pminfo\.1\.html\fR \fBpmie\fR \fIhttp://man7\.org/linux/man\-pages/man1/pmie\.1\.html\fR \fBPMAPI\fR \fIhttp://man7\.org/linux/man\-pages/man3/PMAPI\.3\.html\fR and \fBPMNS\fR \fIhttp://man7\.org/linux/man\-pages/man5/pmns\.5\.html\fR
+.SH "CONFIGURATION"
+The statically configured metrics used by \fBparfait\-agent\fR are configured using JSON configuration files\. The default used when no files are present below \fI/etc/parfait\fR is:
+.
+.IP "\(bu" 4
+\fIjvm\.json\fR \fIhttps://github\.com/performancecopilot/parfait/tree/master/parfait\-agent/src/main/resources/jvm\.json\fR
+.
+.IP "" 0
+.
+.P
+This provides a handy reference for the semantic elements of the JSON configuration, which are:
+.
+.TP
+The \fBmetrics\fR array
+JSON array of individual metrics, must appear at the top level\.
+.
+.TP
+Metric \fBname\fR
+A string which forms the dotted\-form metric name, as well as the optional PCP instance name in square brackets\.
+.
+.TP
+Metric \fBdescription\fR
+An optional string providing explanatory help text for a metric\.
+.
+.TP
+Metric \fBsemantics\fR
+An optional string with one of the following values: \fIconstant\fR or \fIdiscrete\fR; \fIcount\fR or \fIcounter\fR; and \fIgauge\fR, \fIinstant\fR or \fIinstantaneous\fR\. These map directly to the PCP metric semantics\. The value \fIinstantaneous\fR is the default\.
+.
+.TP
+Metric \fBunits\fR
+A string which will be parsed to produce the JSR\-363 units for the metric\. Currently \fIbytes\fR or \fImilliseconds\fR are supported\.
+.
+.TP
+Whether the metric is \fBoptional\fR
+A boolean (default: \fIfalse\fR) which flags whether this metric must exist in the JVM\. Certain metrics only appear in some situations, or some versions of the JVM, these should be marked as \fBoptional\fR metrics\.
+.
+.TP
+Managed bean name \fBmBeanName\fR
+A string used to identify the Java managed bean backing this metric in the JVM (e\.g\. \fIjava\.lang:type=Memory\fR)\.
+.
+.TP
+Managed bean attribute name \fBmBeanAttributeName\fR
+An optional string used to identify a specific attribute of a managed bean (e\.g\. \fIHeapMemoryUsage\fR)\.
+.
+.TP
+Managed bean composite data item (\fBmBeanCompositeDataItem\fR)
+An optional string used to further classify an individual value of the managed bean attribute (e\.g\. \fImax\fR)\.
+.
+.SH "FILES"
+.
+.TP
+\fI$PCP\-TMP\-DIR/mmv/*\fR
+default local of memory mapped values files created by \fBparfait\fR\.
+.
+.TP
+\fI/etc/parfait/*\.json\fR
+configuration files defining metrics in the format described above\.
+.
+.SH "LINKS"
+Parfait \fIhttps://github\.com/performancecopilot/parfait\fR:
+.
+.IP "\(bu" 4
+Default metrics \fIhttps://github\.com/performancecopilot/parfait/tree/master/parfait\-agent/src/main/resources/jvm\.json\fR
+.
+.IP "" 0
+.
+.P
+Performance Co\-Pilot \fIhttp://pcp\.io\fR:
+.
+.IP "\(bu" 4
+\fBPCPIntro\fR \fIhttp://man7\.org/linux/man\-pages/man1/pcpintro\.1\.html\fR
+.
+.IP "\(bu" 4
+\fBpmcd\fR \fIhttp://man7\.org/linux/man\-pages/man1/pmcd\.1\.html\fR
+.
+.IP "\(bu" 4
+\fBpmchart\fR \fIhttp://man7\.org/linux/man\-pages/man1/pmchart\.1\.html\fR
+.
+.IP "\(bu" 4
+\fBpmdammv\fR \fIhttp://man7\.org/linux/man\-pages/man1/pmdammv\.1\.html\fR
+.
+.IP "\(bu" 4
+\fBpmie\fR \fIhttp://man7\.org/linux/man\-pages/man1/pmie\.1\.html\fR
+.
+.IP "\(bu" 4
+\fBpminfo\fR \fIhttp://man7\.org/linux/man\-pages/man1/pminfo\.1\.html\fR
+.
+.IP "\(bu" 4
+\fBpmprobe\fR \fIhttp://man7\.org/linux/man\-pages/man1/pmprobe\.1\.html\fR
+.
+.IP "\(bu" 4
+\fBpmrep\fR \fIhttp://man7\.org/linux/man\-pages/man1/pmrep\.1\.html\fR
+.
+.IP "\(bu" 4
+\fBPMAPI\fR \fIhttp://man7\.org/linux/man\-pages/man3/PMAPI\.3\.html\fR
+.
+.IP "\(bu" 4
+\fBPMNS\fR \fIhttp://man7\.org/linux/man\-pages/man5/pmns\.5\.html\fR
+.
+.IP "" 0
 .
 .SH "SEE ALSO"
-\fBPCPIntro\fR \fI1\fR, \fBpmcd\fR \fI1\fR, \fBpmchart\fR \fI1\fR \fBpmdammv\fR \fI1\fR \fBpmdumptext\fR \fI1\fR, \fBpmprobe\fR \fI1\fR, \fBpminfo\fR \fI1\fR, \fBpmie\fR \fI1\fR, \fBPMAPI\fR \fI3\fR, and \fBPMNS\fR \fI5\fR\.
+\fBPCPIntro\fR(1), \fBpmcd\fR(1), \fBpmchart\fR(1) \fBpmdammv\fR(1) \fBpmie\fR(1), \fBpminfo\fR(1), \fBpmprobe\fR(1), \fBpmrep\fR(1), \fBPMAPI\fR(3), and \fBPMNS\fR(5)\.

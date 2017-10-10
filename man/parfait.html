@@ -60,7 +60,7 @@
     <a href="#EXAMPLES">EXAMPLES</a>
     <a href="#CONFIGURATION">CONFIGURATION</a>
     <a href="#FILES">FILES</a>
-    <a href="#REFERENCES">REFERENCES</a>
+    <a href="#LINKS">LINKS</a>
     <a href="#SEE-ALSO">SEE ALSO</a>
   </div>
 
@@ -84,15 +84,15 @@
 <p>The <code>parfait</code> wrapper script provides instrumentation for
 an <em>unmodified</em> Java application.  It is a front end to the
 <a href="https://github.com/performancecopilot/parfait">Parfait</a>
-modules which developers use to instrument Java applications
-directly.</p>
+modules which developers use to access instrumentation from
+Java applications.</p>
 
-<p><code>parfait</code> is thus limited to exposing performance metrics
+<p>The <code>parfait</code> script is limited to exposing performance metrics
 that it can find indirectly, such as via JMX.</p>
 
 <p>In order to be exported to the PCP Memory Mapped Values PMDA
 (see <code>pmdammv</code>(1) for details)
-these metrics must first be categorised with PCP metadata.</p>
+these metrics must first be categorized with PCP metadata.</p>
 
 <p>This is performed by configuration of the <em>parfait-agent.jar</em>
 file used by <code>parfait</code>.  In the simplest form the configuration
@@ -150,9 +150,9 @@ any PCP client tool, such as</p>
 <ul>
 <li>pminfo <code>-f</code> mmv</li>
 <li>pmprobe <code>-v</code> mmv</li>
-<li>pmdumptext</li>
 <li>pmchart</li>
 <li>pmie</li>
+<li>pmrep</li>
 <li>[... and many others ...]</li>
 </ul>
 
@@ -160,70 +160,113 @@ any PCP client tool, such as</p>
 <p>The default mode of operation involves directly running the Java
 process to be instrumented with a javaagent:</p>
 
-<dl>
-<dt><em>java</em> -Dparfait.name=sleep -javaagent:/usr/share/java/parfait/parfait.jar -jar /usr/share/java/parfait/sleep.jar <em>Main</em></dt><dd><code>PCP monitoring bridge started [PCP-TMP-DIR/mmv/sleep]]]; G'day World!</code></dd>
-</dl>
+<ul>
+<li><em>java</em> -Dparfait.name=sleep <strong>-javaagent</strong>:/usr/share/java/parfait/parfait.jar -jar /usr/share/java/parfait/sleep.jar <em>Main</em></li>
+</ul>
 
 
 <p>The alternative is the proxy mode, where an already running Java
 process is instrumented using its JMX server.
-To start the Java application such that a JMX server is exposed,
-use the following options:</p>
+To start the Java application with a JMX server exposed, use the
+following options:</p>
 
-<dl>
-<dt><em>java</em> -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9875 -Dcom.sun.management.jmxremote.local.only=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -jar /usr/share/java/parfait/sleep.jar <em>Main</em></dt><dd><code>G'day World!</code></dd>
-</dl>
+<ul>
+<li><em>java</em> <strong>-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9875</strong> -Dcom.sun.management.jmxremote.local.only=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -jar /usr/share/java/parfait/sleep.jar <em>Main</em></li>
+</ul>
 
 
 <p>The JMX server is then allowing access from instrumentation by
 <code>parfait</code>, which can be invoked as follows:</p>
 
-<dl>
-<dt><em>java</em> -Dparfait.name=sleep -jar /usr/share/java/parfait/parfait.jar -connect=localhost:9875</dt><dd><code>PCP monitoring bridge started [PCP-TMP-DIR/mmv/sleep]]]</code></dd>
-</dl>
+<ul>
+<li><em>java</em> -Dparfait.name=sleep -jar /usr/share/java/parfait/parfait.jar <strong>-connect=localhost:9875</strong></li>
+</ul>
 
 
 <h2 id="CONFIGURATION">CONFIGURATION</h2>
 
-<p>TODO.</p>
-
-<h2 id="FILES">FILES</h2>
+<p>The statically configured metrics used by <strong>parfait-agent</strong> are
+configured using JSON configuration files.  The default used when
+no files are present below <em>/etc/parfait</em> is:</p>
 
 <ul>
-<li><em>$PCP-TMP-DIR/mmv/*</em>
-default local of memory mapped values files created by <code>parfait</code>.</li>
-<li><em>/etc/parfait/*.json</em>
-configuration files defining metrics in the format described above.</li>
+<li><a href="https://github.com/performancecopilot/parfait/tree/master/parfait-agent/src/main/resources/jvm.json"><em>jvm.json</em></a></li>
 </ul>
 
 
-<h2 id="REFERENCES">REFERENCES</h2>
+<p>This provides a handy reference for the semantic elements of the
+JSON configuration, which are:</p>
 
-<p><a href="http://man7.org/linux/man-pages/man1/pcpintro.1.html"><code>PCPIntro</code></a>
-<a href="http://man7.org/linux/man-pages/man1/pmcd.1.html"><code>pmcd</code></a>
-<a href="http://man7.org/linux/man-pages/man1/pmchart.1.html"><code>pmchart</code></a>
-<a href="http://man7.org/linux/man-pages/man1/pmdammv.1.html"><code>pmdammv</code></a>
-<a href="http://man7.org/linux/man-pages/man1/pmdumptext.1.html"><code>pmdumptext</code></a>
-<a href="http://man7.org/linux/man-pages/man1/pmprobe.1.html"><code>pmprobe</code></a>
-<a href="http://man7.org/linux/man-pages/man1/pminfo.1.html"><code>pminfo</code></a>
-<a href="http://man7.org/linux/man-pages/man1/pmie.1.html"><code>pmie</code></a>
-<a href="http://man7.org/linux/man-pages/man3/PMAPI.3.html"><code>PMAPI</code></a>
-and
-<a href="http://man7.org/linux/man-pages/man5/pmns.5.html"><code>PMNS</code></a></p>
+<dl>
+<dt>The <strong>metrics</strong> array</dt><dd><p>JSON array of individual metrics, must appear at the top level.</p></dd>
+<dt>Metric <strong>name</strong></dt><dd><p>A string which forms the dotted-form metric name, as well as the
+optional PCP instance name in square brackets.</p></dd>
+<dt>Metric <strong>description</strong></dt><dd><p>An optional string providing explanatory help text for a metric.</p></dd>
+<dt>Metric <strong>semantics</strong></dt><dd><p>An optional string with one of the following values: <em>constant</em>
+or <em>discrete</em>; <em>count</em> or <em>counter</em>; and <em>gauge</em>, <em>instant</em> or
+<em>instantaneous</em>.  These map directly to the PCP metric semantics.
+The value <em>instantaneous</em> is the default.</p></dd>
+<dt>Metric <strong>units</strong></dt><dd><p>A string which will be parsed to produce the JSR-363 units for
+the metric.  Currently <em>bytes</em> or <em>milliseconds</em> are supported.</p></dd>
+<dt>Whether the metric is <strong>optional</strong></dt><dd><p>A boolean (default: <em>false</em>) which flags whether this metric
+must exist in the JVM.  Certain metrics only appear in some
+situations, or some versions of the JVM, these should be marked
+as <strong>optional</strong> metrics.</p></dd>
+<dt>Managed bean name <strong>mBeanName</strong></dt><dd><p>A string used to identify the Java managed bean backing this
+metric in the JVM (e.g. <em>java.lang:type=Memory</em>).</p></dd>
+<dt>Managed bean attribute name <strong>mBeanAttributeName</strong></dt><dd><p>An optional string used to identify a specific attribute of a
+managed bean (e.g. <em>HeapMemoryUsage</em>).</p></dd>
+<dt>Managed bean composite data item (<strong>mBeanCompositeDataItem</strong>)</dt><dd><p>An optional string used to further classify an individual value
+of the managed bean attribute (e.g. <em>max</em>).</p></dd>
+</dl>
+
+
+<h2 id="FILES">FILES</h2>
+
+<dl>
+<dt><em>$PCP-TMP-DIR/mmv/*</em></dt><dd>default local of memory mapped values files created by <code>parfait</code>.</dd>
+<dt><em>/etc/parfait/*.json</em></dt><dd>configuration files defining metrics in the format described above.</dd>
+</dl>
+
+
+<h2 id="LINKS">LINKS</h2>
+
+<p><a href="https://github.com/performancecopilot/parfait">Parfait</a>:</p>
+
+<ul>
+<li><a href="https://github.com/performancecopilot/parfait/tree/master/parfait-agent/src/main/resources/jvm.json">Default metrics</a></li>
+</ul>
+
+
+<p><a href="http://pcp.io">Performance Co-Pilot</a>:</p>
+
+<ul>
+<li><a href="http://man7.org/linux/man-pages/man1/pcpintro.1.html"><code>PCPIntro</code></a></li>
+<li><a href="http://man7.org/linux/man-pages/man1/pmcd.1.html"><code>pmcd</code></a></li>
+<li><a href="http://man7.org/linux/man-pages/man1/pmchart.1.html"><code>pmchart</code></a></li>
+<li><a href="http://man7.org/linux/man-pages/man1/pmdammv.1.html"><code>pmdammv</code></a></li>
+<li><a href="http://man7.org/linux/man-pages/man1/pmie.1.html"><code>pmie</code></a></li>
+<li><a href="http://man7.org/linux/man-pages/man1/pminfo.1.html"><code>pminfo</code></a></li>
+<li><a href="http://man7.org/linux/man-pages/man1/pmprobe.1.html"><code>pmprobe</code></a></li>
+<li><a href="http://man7.org/linux/man-pages/man1/pmrep.1.html"><code>pmrep</code></a></li>
+<li><a href="http://man7.org/linux/man-pages/man3/PMAPI.3.html"><code>PMAPI</code></a></li>
+<li><a href="http://man7.org/linux/man-pages/man5/pmns.5.html"><code>PMNS</code></a></li>
+</ul>
+
 
 <h2 id="SEE-ALSO">SEE ALSO</h2>
 
-<p><a href="1"><code>PCPIntro</code></a>,
-<a href="1"><code>pmcd</code></a>,
-<a href="1"><code>pmchart</code></a>
-<a href="1"><code>pmdammv</code></a>
-<a href="1"><code>pmdumptext</code></a>,
-<a href="1"><code>pmprobe</code></a>,
-<a href="1"><code>pminfo</code></a>,
-<a href="1"><code>pmie</code></a>,
-<a href="3"><code>PMAPI</code></a>,
+<p><code>PCPIntro</code>(1),
+<code>pmcd</code>(1),
+<code>pmchart</code>(1)
+<code>pmdammv</code>(1)
+<code>pmie</code>(1),
+<code>pminfo</code>(1),
+<code>pmprobe</code>(1),
+<code>pmrep</code>(1),
+<code>PMAPI</code>(3),
 and
-<a href="5"><code>PMNS</code></a>.</p>
+<code>PMNS</code>(5).</p>
 
 
   <ol class='man-decor man-foot man foot'>
