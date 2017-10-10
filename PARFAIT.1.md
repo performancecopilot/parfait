@@ -1,8 +1,3 @@
-[//]: # ("Copyright (c) 2016-2017 Red Hat.")
-[//]: # ("A markdown man page for Parfait.")
-[//]: # ("Process with 'ronn' or similar: ")
-[//]: # ("https://github.com/rtomayko/ronn")
-
 parfait(1) -- Java instrumentation for Performance Co-Pilot (PCP)
 =================================================================
 
@@ -10,7 +5,6 @@ parfait(1) -- Java instrumentation for Performance Co-Pilot (PCP)
 `parfait` [`-n`/`--name` _name_] [`-c`/`--cluster` _id_] [`-i`/`--interval` _msec_] [`-s`/`--startup` _delay_] [`-j`/`--jmxserver` `--connect` _host:port_] [`--`] [`javaargs` ...]
 
 ## DESCRIPTION
-
 
 The `parfait` wrapper script provides instrumentation for
 an _unmodified_ Java application.  It is a front end to the
@@ -36,13 +30,13 @@ inaccessible, a minimal configuration is read from within the
 resources of the _parfait-agent.jar_ file.
 
 Configuration files must be in the JSON format - refer to the
-[CONFIGURATION][] section below for details of the file format.
+[CONFIGURATION][CONFIGURATION] section below for details of the file format.
 
 There are two forms of instrumentation available from the
 `parfait` script - direct instrumentation (agent mode) or
 via a JMX server (proxy mode).
 
-See the [EXAMPLES][] section below for an example invocation
+See the [EXAMPLES][EXAMPLES] section below for an example invocation
 for each mode.
 
 ## OPTIONS
