@@ -60,9 +60,6 @@ class AgentMonitoringView {
     private final Long interval;
     private final String name;
 
-    private ObjectName mBeanName;
-    private String attributeName;
-    private String compositeDataItem;
 
     public AgentMonitoringView(MBeanServerConnection server) {
         this.server = server;
@@ -85,25 +82,26 @@ class AgentMonitoringView {
 
     public <T> Monitorable<T> register(Specification specification) throws InstanceNotFoundException, IntrospectionException, AttributeNotFoundException, UnsupportedOperationException, ReflectionException, MBeanException, IOException {
         String beanName = registerBeanName(specification.getMBeanName());
+        ObjectName mBeanName;
         try {
             mBeanName = new ObjectName(beanName);
         } catch (Exception e) {
             throw new RuntimeException("Unexpected exception mbean name [" +
                                         beanName + "]", e);
         }
-        return createMonitorable(specification);
+        return createMonitorable(mBeanName, specification);
     }
 
-    private <T> Monitorable<T> createMonitorable(Specification specification) throws InstanceNotFoundException, IntrospectionException, UnsupportedOperationException, ReflectionException, IOException, AttributeNotFoundException, MBeanException {
+    private <T> Monitorable<T> createMonitorable(ObjectName mBeanName, Specification specification) throws InstanceNotFoundException, IntrospectionException, UnsupportedOperationException, ReflectionException, IOException, AttributeNotFoundException, MBeanException {
         String metric = specification.getName();
         String text = specification.getDescription();
-        attributeName = specification.getMBeanAttributeName();
-        compositeDataItem = specification.getMBeanCompositeDataItem();
+        String attributeName = specification.getMBeanAttributeName();
+        String compositeDataItem = specification.getMBeanCompositeDataItem();
 
         boolean optional = specification.getOptional();
         try {
-            String typeName = checkAttributeName();
-            checkCompositeDataItem(typeName);
+            String typeName = checkAttributeName(mBeanName, attributeName);
+            checkCompositeDataItem(mBeanName, typeName, attributeName, compositeDataItem);
         } catch (InstanceNotFoundException | UnsupportedOperationException e) {
             if (optional)
                 return null;
@@ -113,17 +111,17 @@ class AgentMonitoringView {
         ValueSemantics semantics = specification.getSemantics();
         if (semantics == ValueSemantics.CONSTANT)
             return new MonitoredConstant<T>(metric, text, this.registry,
-                            getAttributeValue());
+                            getAttributeValue(mBeanName, attributeName, compositeDataItem));
         return new PollingMonitoredValue<T>(metric, text, this.registry,
                         (int)(long)this.interval, new Supplier<T>() {
                             public T get() {
-                                return getAttributeValue();
+                                return getAttributeValue(mBeanName, attributeName, compositeDataItem);
                             }
                         }, semantics, specification.getUnits());
     }
 
     @SuppressWarnings("unchecked")
-    protected <T> T getAttributeValue() {
+    protected <T> T getAttributeValue(ObjectName mBeanName, String attributeName, String compositeDataItem) {
         try {
             if (!Strings.isNullOrEmpty(compositeDataItem)) {
                 logger.trace(this.name + " get: " + compositeDataItem);
@@ -165,7 +163,7 @@ class AgentMonitoringView {
         return beanName;
     }
 
-    private String checkAttributeName() throws UnsupportedOperationException, InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
+    private String checkAttributeName(ObjectName mBeanName, String attributeName) throws UnsupportedOperationException, InstanceNotFoundException, IntrospectionException, ReflectionException, IOException {
         MBeanInfo beanInfo = server.getMBeanInfo(mBeanName);
         MBeanAttributeInfo monitoredAttribute = null;
         MBeanAttributeInfo[] attributes = beanInfo.getAttributes();
@@ -182,7 +180,7 @@ class AgentMonitoringView {
         return monitoredAttribute.getType();
     }
 
-    private void checkCompositeDataItem(String attributeTypeName) throws AttributeNotFoundException, InstanceNotFoundException, MBeanException, ReflectionException, IOException {
+    private void checkCompositeDataItem(ObjectName mBeanName, String attributeTypeName, String attributeName, String compositeDataItem) throws AttributeNotFoundException, InstanceNotFoundException, MBeanException, ReflectionException, IOException {
         if (Strings.isNullOrEmpty(compositeDataItem))
             return;
         Preconditions.checkState(
