@@ -146,6 +146,7 @@
 	    "name": "java.memorypool.permgen[init]",
 	    "description": "Initial permgen memory configuration size",
 	    "units": "bytes",
+	    "optional": true,
 	    "mBeanName": "java.lang:type=MemoryPool,name=PS Perm Gen|Perm Gen|CMS Perm Gen",
 	    "mBeanAttributeName": "Usage",
 	    "mBeanCompositeDataItem": "init"
@@ -154,6 +155,7 @@
 	    "name": "java.memorypool.permgen[used]",
 	    "description": "Actual memory in use in permgen space",
 	    "units": "bytes",
+	    "optional": true,
 	    "mBeanName": "java.lang:type=MemoryPool,name=PS Perm Gen|Perm Gen|CMS Perm Gen",
 	    "mBeanAttributeName": "Usage",
 	    "mBeanCompositeDataItem": "used"
@@ -162,6 +164,7 @@
 	    "name": "java.memorypool.permgen[committed]",
 	    "description": "Virtual memory size for permgen space",
 	    "units": "bytes",
+	    "optional": true,
 	    "mBeanName": "java.lang:type=MemoryPool,name=PS Perm Gen|Perm Gen|CMS Perm Gen",
 	    "mBeanAttributeName": "Usage",
 	    "mBeanCompositeDataItem": "committed"
@@ -170,6 +173,7 @@
 	    "name": "java.memorypool.permgen[max]",
 	    "description": "Maximum permgen memory size",
 	    "units": "bytes",
+	    "optional": true,
 	    "mBeanName": "java.lang:type=MemoryPool,name=PS Perm Gen|Perm Gen|CMS Perm Gen",
 	    "mBeanAttributeName": "Usage",
 	    "mBeanCompositeDataItem": "max"

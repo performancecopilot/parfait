@@ -25,6 +25,8 @@ import io.pcp.parfait.MonitoringViewProperties;
 import io.pcp.parfait.AgentMonitoringView;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.net.ConnectException;
@@ -44,6 +46,9 @@ import org.apache.log4j.Logger;
 
 public class ParfaitAgent {
     private static final Logger logger = Logger.getLogger(ParfaitAgent.class);
+
+    private static final String RESOURCE = "/jvm.json";
+    private static final String PATHNAME = "/etc/parfait";
 
     // find the root cause of an exception, for nested BeansException case
     public static Throwable getCause(Throwable e) {
@@ -68,29 +73,44 @@ public class ParfaitAgent {
     // parse all configuration files from the parfait directory
     public static List<Specification> parseAllSpecifications() {
         List<Specification> allMonitorables = new ArrayList<>();
-        File[] files;
         try {
-            files = new File("/etc/parfait").listFiles();
+            File[] files = new File(PATHNAME).listFiles();
             for (File file : files) {
                 allMonitorables.addAll(parseSpecification(file));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            // reported, fallback to specification from resources
+        }
+        if (allMonitorables.size() < 1) {
+            InputStream res = ParfaitAgent.class.getResourceAsStream(RESOURCE);
+            allMonitorables.addAll(parseInputSpecification(res));
         }
         return allMonitorables;
     }
 
     // parse a single configuration file from the parfait directory
-    public static List<Specification> parseSpecification(File file) throws MalformedObjectNameException {
-        ObjectMapper mapper = new ObjectMapper();
+    public static List<Specification> parseSpecification(File file) {
         List<Specification> monitorables = new ArrayList<>();
         try {
-            JsonNode metrics = mapper.readTree(file).path("metrics");
+            InputStream stream = new FileInputStream(file);
+            monitorables = parseInputSpecification(stream);
+        } catch (Exception e) {
+            logger.error(String.format("Ignoring file %s", file.getName()));
+        }
+        return monitorables;
+    }
+
+    // parse a configuration stream (external file or resources)
+    public static List<Specification> parseInputSpecification(InputStream in) {
+        List<Specification> monitorables = new ArrayList<>();
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode metrics = mapper.readTree(in).path("metrics");
             for (JsonNode node : metrics) {
                 monitorables.add(new Specification(node));
             }
         } catch (Exception e) {
-            logger.error(String.format("Ignoring file %s\n%s", file.getName(), e.getMessage()));
+            logger.error(String.format("Unexpected JSON format\n%s", e.getMessage()));
         }
         return monitorables;
     }
