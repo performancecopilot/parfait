@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv='content-type' value='text/html;charset=utf8'>
+  <meta name='generator' value='Ronn/v0.7.3 (http://github.com/rtomayko/ronn/tree/0.7.3)'>
+  <title>parfait(1) - Java instrumentation for Performance Co-Pilot (PCP)</title>
+  <style type='text/css' media='all'>
+  /* style: man */
+  body#manpage {margin:0}
+  .mp {max-width:100ex;padding:0 9ex 1ex 4ex}
+  .mp p,.mp pre,.mp ul,.mp ol,.mp dl {margin:0 0 20px 0}
+  .mp h2 {margin:10px 0 0 0}
+  .mp > p,.mp > pre,.mp > ul,.mp > ol,.mp > dl {margin-left:8ex}
+  .mp h3 {margin:0 0 0 4ex}
+  .mp dt {margin:0;clear:left}
+  .mp dt.flush {float:left;width:8ex}
+  .mp dd {margin:0 0 0 9ex}
+  .mp h1,.mp h2,.mp h3,.mp h4 {clear:left}
+  .mp pre {margin-bottom:20px}
+  .mp pre+h2,.mp pre+h3 {margin-top:22px}
+  .mp h2+pre,.mp h3+pre {margin-top:5px}
+  .mp img {display:block;margin:auto}
+  .mp h1.man-title {display:none}
+  .mp,.mp code,.mp pre,.mp tt,.mp kbd,.mp samp,.mp h3,.mp h4 {font-family:monospace;font-size:14px;line-height:1.42857142857143}
+  .mp h2 {font-size:16px;line-height:1.25}
+  .mp h1 {font-size:20px;line-height:2}
+  .mp {text-align:justify;background:#fff}
+  .mp,.mp code,.mp pre,.mp pre code,.mp tt,.mp kbd,.mp samp {color:#131211}
+  .mp h1,.mp h2,.mp h3,.mp h4 {color:#030201}
+  .mp u {text-decoration:underline}
+  .mp code,.mp strong,.mp b {font-weight:bold;color:#131211}
+  .mp em,.mp var {font-style:italic;color:#232221;text-decoration:none}
+  .mp a,.mp a:link,.mp a:hover,.mp a code,.mp a pre,.mp a tt,.mp a kbd,.mp a samp {color:#0000ff}
+  .mp b.man-ref {font-weight:normal;color:#434241}
+  .mp pre {padding:0 4ex}
+  .mp pre code {font-weight:normal;color:#434241}
+  .mp h2+pre,h3+pre {padding-left:0}
+  ol.man-decor,ol.man-decor li {margin:3px 0 10px 0;padding:0;float:left;width:33%;list-style-type:none;text-transform:uppercase;color:#999;letter-spacing:1px}
+  ol.man-decor {width:100%}
+  ol.man-decor li.tl {text-align:left}
+  ol.man-decor li.tc {text-align:center;letter-spacing:4px}
+  ol.man-decor li.tr {text-align:right;float:right}
+  </style>
+</head>
+<!--
+  The following styles are deprecated and will be removed at some point:
+  div#man, div#man ol.man, div#man ol.head, div#man ol.man.
+
+  The .man-page, .man-decor, .man-head, .man-foot, .man-title, and
+  .man-navigation should be used instead.
+-->
+<body id='manpage'>
+  <div class='mp' id='man'>
+
+  <div class='man-navigation' style='display:none'>
+    <a href="#NAME">NAME</a>
+    <a href="#SYNOPSIS">SYNOPSIS</a>
+    <a href="#DESCRIPTION">DESCRIPTION</a>
+    <a href="#OPTIONS">OPTIONS</a>
+    <a href="#EXAMPLES">EXAMPLES</a>
+    <a href="#CONFIGURATION">CONFIGURATION</a>
+    <a href="#FILES">FILES</a>
+    <a href="#REFERENCES">REFERENCES</a>
+    <a href="#SEE-ALSO">SEE ALSO</a>
+  </div>
+
+  <ol class='man-decor man-head man head'>
+    <li class='tl'>parfait(1)</li>
+    <li class='tc'></li>
+    <li class='tr'>parfait(1)</li>
+  </ol>
+
+  <h2 id="NAME">NAME</h2>
+<p class="man-name">
+  <code>parfait</code> - <span class="man-whatis">Java instrumentation for Performance Co-Pilot (PCP)</span>
+</p>
+
+<h2 id="SYNOPSIS">SYNOPSIS</h2>
+
+<p><code>parfait</code> [<code>-n</code>/<code>--name</code> <em>name</em>] [<code>-c</code>/<code>--cluster</code> <em>id</em>] [<code>-i</code>/<code>--interval</code> <em>msec</em>] [<code>-s</code>/<code>--startup</code> <em>delay</em>] [<code>-j</code>/<code>--jmxserver</code> <code>--connect</code> <em>host:port</em>] [<code>--</code>] [<code>javaargs</code> ...]</p>
+
+<h2 id="DESCRIPTION">DESCRIPTION</h2>
+
+<p>The <code>parfait</code> wrapper script provides instrumentation for
+an <em>unmodified</em> Java application.  It is a front end to the
+<a href="https://github.com/performancecopilot/parfait">Parfait</a>
+modules which developers use to instrument Java applications
+directly.</p>
+
+<p><code>parfait</code> is thus limited to exposing performance metrics
+that it can find indirectly, such as via JMX.</p>
+
+<p>In order to be exported to the PCP Memory Mapped Values PMDA
+(see <code>pmdammv</code>(1) for details)
+these metrics must first be categorised with PCP metadata.</p>
+
+<p>This is performed by configuration of the <em>parfait-agent.jar</em>
+file used by <code>parfait</code>.  In the simplest form the configuration
+is sourced from files in the <em>/etc/parfait</em> directory.
+Additional JMX managed beans can be added to the default set
+through configuration files in the <em>/etc/parfait</em> directory.</p>
+
+<p>If this directory is empty, does not exist, or is otherwise
+inaccessible, a minimal configuration is read from within the
+resources of the <em>parfait-agent.jar</em> file.</p>
+
+<p>Configuration files must be in the JSON format - refer to the
+<a href="#CONFIGURATION" title="CONFIGURATION" data-bare-link="true">CONFIGURATION</a> section below for details of the file format.</p>
+
+<p>There are two forms of instrumentation available from the
+<code>parfait</code> script - direct instrumentation (agent mode) or
+via a JMX server (proxy mode).</p>
+
+<p>See the <a href="#EXAMPLES" title="EXAMPLES" data-bare-link="true">EXAMPLES</a> section below for an example invocation
+for each mode.</p>
+
+<h2 id="OPTIONS">OPTIONS</h2>
+
+<p>The command line options available are:</p>
+
+<dl>
+<dt><code>-n</code> / <code>--name</code> <em>name</em></dt><dd><p>The <em>name</em> argument specifies the <em>mmv.*</em> metric tree name in
+the <code>PMNS</code>(5) that will be used to identify this application.</p></dd>
+<dt><code>-c</code> / <code>--cluster</code> <em>identifier</em></dt><dd><p>The numeric performance metric cluster <em>identifier</em> to be used to
+uniquely identify this application.
+A value of zero is the default, and causes the MMV PMDA to simply
+use the next available number.</p></dd>
+<dt><code>-i</code> / <code>--interval</code> <em>msec</em></dt><dd><p>Delay between sampling (JMX values in particular) to refresh the
+values exported to PCP, in milliseconds.
+The default value is 1000 (1 second) and the minimum allowed value
+is 250 milliseconds.</p></dd>
+<dt><code>-j</code> / <code>--jmxserver</code> / <code>--connect</code> <em>hostname:port</em></dt><dd><p>Connect to the JMX server listening on the specified
+<em>hostname</em> and <em>port</em> number as the source of JMX metrics.
+This option allows proxying of metrics from a separate process,
+instead of the default <code>-javaagent</code> mode of operation.</p></dd>
+<dt><code>-s</code> / <code>--startup</code> <em>msec</em></dt><dd><p>Maximum startup time in which JMX values are still being created,
+before exporting as memory mapped values, in milliseconds.
+The default value is 5000 (5 seconds).</p></dd>
+</dl>
+
+
+<h2 id="EXAMPLES">EXAMPLES</h2>
+
+<p>The following examples can be installed locally using the
+<strong>parfait-examples</strong> package.</p>
+
+<p>The affects of each example invocation below can be seen using
+any PCP client tool, such as</p>
+
+<ul>
+<li>pminfo <code>-f</code> mmv</li>
+<li>pmprobe <code>-v</code> mmv</li>
+<li>pmdumptext</li>
+<li>pmchart</li>
+<li>pmie</li>
+<li>[... and many others ...]</li>
+</ul>
+
+
+<p>The default mode of operation involves directly running the Java
+process to be instrumented with a javaagent:</p>
+
+<dl>
+<dt><em>java</em> -Dparfait.name=sleep -javaagent:/usr/share/java/parfait/parfait.jar -jar /usr/share/java/parfait/sleep.jar <em>Main</em></dt><dd><code>PCP monitoring bridge started [PCP-TMP-DIR/mmv/sleep]]]; G'day World!</code></dd>
+</dl>
+
+
+<p>The alternative is the proxy mode, where an already running Java
+process is instrumented using its JMX server.
+To start the Java application such that a JMX server is exposed,
+use the following options:</p>
+
+<dl>
+<dt><em>java</em> -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9875 -Dcom.sun.management.jmxremote.local.only=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -jar /usr/share/java/parfait/sleep.jar <em>Main</em></dt><dd><code>G'day World!</code></dd>
+</dl>
+
+
+<p>The JMX server is then allowing access from instrumentation by
+<code>parfait</code>, which can be invoked as follows:</p>
+
+<dl>
+<dt><em>java</em> -Dparfait.name=sleep -jar /usr/share/java/parfait/parfait.jar -connect=localhost:9875</dt><dd><code>PCP monitoring bridge started [PCP-TMP-DIR/mmv/sleep]]]</code></dd>
+</dl>
+
+
+<h2 id="CONFIGURATION">CONFIGURATION</h2>
+
+<p>TODO.</p>
+
+<h2 id="FILES">FILES</h2>
+
+<ul>
+<li><em>$PCP-TMP-DIR/mmv/*</em>
+default local of memory mapped values files created by <code>parfait</code>.</li>
+<li><em>/etc/parfait/*.json</em>
+configuration files defining metrics in the format described above.</li>
+</ul>
+
+
+<h2 id="REFERENCES">REFERENCES</h2>
+
+<p><a href="http://man7.org/linux/man-pages/man1/pcpintro.1.html"><code>PCPIntro</code></a>
+<a href="http://man7.org/linux/man-pages/man1/pmcd.1.html"><code>pmcd</code></a>
+<a href="http://man7.org/linux/man-pages/man1/pmchart.1.html"><code>pmchart</code></a>
+<a href="http://man7.org/linux/man-pages/man1/pmdammv.1.html"><code>pmdammv</code></a>
+<a href="http://man7.org/linux/man-pages/man1/pmdumptext.1.html"><code>pmdumptext</code></a>
+<a href="http://man7.org/linux/man-pages/man1/pmprobe.1.html"><code>pmprobe</code></a>
+<a href="http://man7.org/linux/man-pages/man1/pminfo.1.html"><code>pminfo</code></a>
+<a href="http://man7.org/linux/man-pages/man1/pmie.1.html"><code>pmie</code></a>
+<a href="http://man7.org/linux/man-pages/man3/PMAPI.3.html"><code>PMAPI</code></a>
+and
+<a href="http://man7.org/linux/man-pages/man5/pmns.5.html"><code>PMNS</code></a></p>
+
+<h2 id="SEE-ALSO">SEE ALSO</h2>
+
+<p><a href="1"><code>PCPIntro</code></a>,
+<a href="1"><code>pmcd</code></a>,
+<a href="1"><code>pmchart</code></a>
+<a href="1"><code>pmdammv</code></a>
+<a href="1"><code>pmdumptext</code></a>,
+<a href="1"><code>pmprobe</code></a>,
+<a href="1"><code>pminfo</code></a>,
+<a href="1"><code>pmie</code></a>,
+<a href="3"><code>PMAPI</code></a>,
+and
+<a href="5"><code>PMNS</code></a>.</p>
+
+
+  <ol class='man-decor man-foot man foot'>
+    <li class='tl'></li>
+    <li class='tc'>October 2017</li>
+    <li class='tr'>parfait(1)</li>
+  </ol>
+
+  </div>
+</body>
+</html>

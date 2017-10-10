@@ -1,190 +1,123 @@
-'\"macro stdmacro
-.\"
-.\" Copyright (c) 2016 Red Hat.
-.\" 
-.TH PARFAIT 1 "PCP" "Performance Co-Pilot"
-.SH NAME
-\f3parfait\f1 \- Java instrumentation for Performance Co-Pilot (PCP)
-.SH SYNOPSIS
-\f3parfait\f1
-[\f3\-n\f1/\f3\-\-name\f1 \f2name\f1]
-[\f3\-c\f1/\f3\-\-cluster\f1 \f2id\f1]
-[\f3\-i\f1/\f3\-\-interval\f1 \f2msec\f1]
-[\f3\-j\f1/\f3\-\-jmxserver\f1/\f3\-\-connect\f1 \f2host:port\f1]
-[\f3\-s\f1/\f3\-\-startup\f1 \f2delay\f1]
-[\f3\-\-\f1]
-[\f2javaargs\f1 ...]
-.SH DESCRIPTION
-The
-.B parfait
-script provides instrumentation for unmodified Java applications.
-It is a front end to the Parfait APIs which developers can use to
-extensively instrument Java applications.
-.PP
-.B parfait
-is thus limited to exposing performance metrics that it can find
-indirectly, such as via JMX.
-In order to be exported to the Memory Mapped Values PMDA (see
-.BR pmdammv (1)
-for details) these metrics must be categorised with PCP metadata.
-This is performed by the
-.I parfait.jar
-used by
-.BR parfait .
-Additional JMX managed beans can be added to the default set through
-the creation of Spring XML configuration files defining the metadata.
-.PP
-There are two forms of instrumentation available from the
-.B parfait
-script \- direct instrumentation (agent mode) or via a JMX server
-(proxy mode).
-See the EXAMPLES section below for an example invocation for
-each mode.
-.PP
+.\" generated with Ronn/v0.7.3
+.\" http://github.com/rtomayko/ronn/tree/0.7.3
+.
+.TH "PARFAIT" "1" "October 2017" "" ""
+.
+.SH "NAME"
+\fBparfait\fR \- Java instrumentation for Performance Co\-Pilot (PCP)
+.
+.SH "SYNOPSIS"
+\fBparfait\fR [\fB\-n\fR/\fB\-\-name\fR \fIname\fR] [\fB\-c\fR/\fB\-\-cluster\fR \fIid\fR] [\fB\-i\fR/\fB\-\-interval\fR \fImsec\fR] [\fB\-s\fR/\fB\-\-startup\fR \fIdelay\fR] [\fB\-j\fR/\fB\-\-jmxserver\fR \fB\-\-connect\fR \fIhost:port\fR] [\fB\-\-\fR] [\fBjavaargs\fR \.\.\.]
+.
+.SH "DESCRIPTION"
+The \fBparfait\fR wrapper script provides instrumentation for an \fIunmodified\fR Java application\. It is a front end to the Parfait \fIhttps://github\.com/performancecopilot/parfait\fR modules which developers use to instrument Java applications directly\.
+.
+.P
+\fBparfait\fR is thus limited to exposing performance metrics that it can find indirectly, such as via JMX\.
+.
+.P
+In order to be exported to the PCP Memory Mapped Values PMDA (see \fBpmdammv\fR(1) for details) these metrics must first be categorised with PCP metadata\.
+.
+.P
+This is performed by configuration of the \fIparfait\-agent\.jar\fR file used by \fBparfait\fR\. In the simplest form the configuration is sourced from files in the \fI/etc/parfait\fR directory\. Additional JMX managed beans can be added to the default set through configuration files in the \fI/etc/parfait\fR directory\.
+.
+.P
+If this directory is empty, does not exist, or is otherwise inaccessible, a minimal configuration is read from within the resources of the \fIparfait\-agent\.jar\fR file\.
+.
+.P
+Configuration files must be in the JSON format \- refer to the \fICONFIGURATION\fR section below for details of the file format\.
+.
+.P
+There are two forms of instrumentation available from the \fBparfait\fR script \- direct instrumentation (agent mode) or via a JMX server (proxy mode)\.
+.
+.P
+See the \fIEXAMPLES\fR section below for an example invocation for each mode\.
+.
+.SH "OPTIONS"
 The command line options available are:
-.TP 5
-\fB\-n\fP/\fB\-\-name\fP
-The
-.I name
-argument specifies the
-.I mmv.*
-metric subtree name in the
-.BR PMNS (5)
-that will be used to identify this application.
+.
 .TP
-\fB\-c\fP/\fB\-\-cluster\fP
-The performance metric identifier
-.I cluster
-number to be used to identify this application.
-A value of zero is the default, and causes the MMV PMDA to simply
-use the next available number.
+\fB\-n\fR / \fB\-\-name\fR \fIname\fR
+The \fIname\fR argument specifies the \fImmv\.*\fR metric tree name in the \fBPMNS\fR(5) that will be used to identify this application\.
+.
 .TP
-\fB\-i\fP/\fB\-\-interval\fP
-Delay between sampling (JMX values in particular) to refresh the
-values exported to PCP, in milliseconds.
-The default value is 1000 (1 second) and the minimum allowed value
-is 250 milliseconds.
+\fB\-c\fR / \fB\-\-cluster\fR \fIidentifier\fR
+The numeric performance metric cluster \fIidentifier\fR to be used to uniquely identify this application\. A value of zero is the default, and causes the MMV PMDA to simply use the next available number\.
+.
 .TP
-\fB\-j\fP/\fB\-\-jmxserver\fP/\fB\-\-connect\fP
-Connect to the JMX server listening on the specified
-.IR hostname:port
-as the source of JMX metrics.
-This option allows proxying of metrics from a separate process,
-instead of the default javaagent mode of operation.
+\fB\-i\fR / \fB\-\-interval\fR \fImsec\fR
+Delay between sampling (JMX values in particular) to refresh the values exported to PCP, in milliseconds\. The default value is 1000 (1 second) and the minimum allowed value is 250 milliseconds\.
+.
 .TP
-\fB\-s\fP/\fB\-\-startup\fP
-Maximum startup time in which JMX values are still being created,
-before exporting as memory mapped values, in milliseconds.
-The default value is 5000 (5 seconds).
-.SH EXAMPLES
-The following examples can be installed via the parfait-examples
-package.
-The affects of each example invocation below can be seen using any
-PCP client tool, such as
+\fB\-j\fR / \fB\-\-jmxserver\fR / \fB\-\-connect\fR \fIhostname:port\fR
+Connect to the JMX server listening on the specified \fIhostname\fR and \fIport\fR number as the source of JMX metrics\. This option allows proxying of metrics from a separate process, instead of the default \fB\-javaagent\fR mode of operation\.
+.
+.TP
+\fB\-s\fR / \fB\-\-startup\fR \fImsec\fR
+Maximum startup time in which JMX values are still being created, before exporting as memory mapped values, in milliseconds\. The default value is 5000 (5 seconds)\.
+.
+.SH "EXAMPLES"
+The following examples can be installed locally using the \fBparfait\-examples\fR package\.
+.
 .P
-.ft CW
-.nf
-.in +0.5i
-pminfo \-f mmv
-pmprobe \-v mmv
+The affects of each example invocation below can be seen using any PCP client tool, such as
+.
+.IP "\(bu" 4
+pminfo \fB\-f\fR mmv
+.
+.IP "\(bu" 4
+pmprobe \fB\-v\fR mmv
+.
+.IP "\(bu" 4
 pmdumptext
+.
+.IP "\(bu" 4
 pmchart
+.
+.IP "\(bu" 4
 pmie
-[... and many others.]
-.in
-.fi
-.ft 1
+.
+.IP "\(bu" 4
+[\.\.\. and many others \.\.\.]
+.
+.IP "" 0
+.
 .P
-The default mode of operation involves directly running the Java
-process to be instrumented with a javaagent:
+The default mode of operation involves directly running the Java process to be instrumented with a javaagent:
+.
+.TP
+\fIjava\fR \-Dparfait\.name=sleep \-javaagent:/usr/share/java/parfait/parfait\.jar \-jar /usr/share/java/parfait/sleep\.jar \fIMain\fR
+\fBPCP monitoring bridge started [PCP\-TMP\-DIR/mmv/sleep]]]; G\'day World!\fR
+.
 .P
-.ft CW
-.nf
-.in +0.5i
-java -Dparfait.name=sleep \\
-    -javaagent:/usr/share/java/parfait/parfait.jar \\
-    -jar /usr/share/java/parfait/sleep.jar Main
-[...] PCP monitoring bridge started [PCP_TMP_DIR/mmv/sleep]]]
-G'day World!
-.in
-.fi
-.ft 1
+The alternative is the proxy mode, where an already running Java process is instrumented using its JMX server\. To start the Java application such that a JMX server is exposed, use the following options:
+.
+.TP
+\fIjava\fR \-Dcom\.sun\.management\.jmxremote \-Dcom\.sun\.management\.jmxremote\.port=9875 \-Dcom\.sun\.management\.jmxremote\.local\.only=true \-Dcom\.sun\.management\.jmxremote\.authenticate=false \-Dcom\.sun\.management\.jmxremote\.ssl=false \-jar /usr/share/java/parfait/sleep\.jar \fIMain\fR
+\fBG\'day World!\fR
+.
 .P
-The alternative is the proxy mode, where an already running Java
-process is instrumented using its JMX server.
-To start the Java application such that a JMX server is exposed,
-use the following options:
-.P
-.ft CW
-.nf
-.in +0.5i
-java \\
-    -Dcom.sun.management.jmxremote \\
-    -Dcom.sun.management.jmxremote.port=9875 \\
-    -Dcom.sun.management.jmxremote.local.only=true \\
-    -Dcom.sun.management.jmxremote.authenticate=false \\
-    -Dcom.sun.management.jmxremote.ssl=false \\
-    -jar /usr/share/java/parfait/sleep.jar Main
-G'day World!
-.in
-.fi
-.ft 1
-.P
-The JMX server is then allowing access from instrumentation by
-.BR parfait ,
-which can be invoked as follows:
-.P
-.ft CW
-.nf
-.in +0.5i
-java -Dparfait.name=sleep \\
-    -jar /usr/share/java/parfait/parfait.jar \\
-    -connect=localhost:9875
-[...] PCP monitoring bridge started [PCP_TMP_DIR/mmv/sleep]]]
-.in
-.fi
-.ft 1
-.P
-.SH FILES
-.PD 0
-.TP 10
-.BI $PCP_TMP_DIR/mmv/ *
-default local of memory mapped values files created by
-.BR parfait .
-.TP 10
-.BI /etc/parfait/ *.xml
-Spring bean XML configuration files defining additional metrics.
-Refer to the Spring documentation and the parfait-agent resources
-at
-.I https://github.com/performancecopilot/parfait
-for further details.
-.PD
-.SH "PCP ENVIRONMENT"
-Environment variables with the prefix
-.B PCP_
-are used to parameterize the file and directory names
-used by PCP.
-On each installation, the file
-.I /etc/pcp.conf
-contains the local values for these variables.
-The
-.B $PCP_CONF
-variable may be used to specify an alternative
-configuration file,
-as described in
-.BR pcp.conf (5).
-.SH SEE ALSO
-.BR PCPIntro (1),
-.BR pmcd (1),
-.BR pmchart (1),
-.BR pmdammv (1),
-.BR pmdumptext (1),
-.BR pmprobe (1),
-.BR pminfo (1),
-.BR pmie (1),
-.BR PMAPI (3),
-.BR PMWEBAPI (3),
-.BR pcp.conf (5),
-.BR pcp.env (5)
-and
-.BR PMNS (5).
+The JMX server is then allowing access from instrumentation by \fBparfait\fR, which can be invoked as follows:
+.
+.TP
+\fIjava\fR \-Dparfait\.name=sleep \-jar /usr/share/java/parfait/parfait\.jar \-connect=localhost:9875
+\fBPCP monitoring bridge started [PCP\-TMP\-DIR/mmv/sleep]]]\fR
+.
+.SH "CONFIGURATION"
+TODO\.
+.
+.SH "FILES"
+.
+.IP "\(bu" 4
+\fI$PCP\-TMP\-DIR/mmv/*\fR default local of memory mapped values files created by \fBparfait\fR\.
+.
+.IP "\(bu" 4
+\fI/etc/parfait/*\.json\fR configuration files defining metrics in the format described above\.
+.
+.IP "" 0
+.
+.SH "REFERENCES"
+\fBPCPIntro\fR \fIhttp://man7\.org/linux/man\-pages/man1/pcpintro\.1\.html\fR \fBpmcd\fR \fIhttp://man7\.org/linux/man\-pages/man1/pmcd\.1\.html\fR \fBpmchart\fR \fIhttp://man7\.org/linux/man\-pages/man1/pmchart\.1\.html\fR \fBpmdammv\fR \fIhttp://man7\.org/linux/man\-pages/man1/pmdammv\.1\.html\fR \fBpmdumptext\fR \fIhttp://man7\.org/linux/man\-pages/man1/pmdumptext\.1\.html\fR \fBpmprobe\fR \fIhttp://man7\.org/linux/man\-pages/man1/pmprobe\.1\.html\fR \fBpminfo\fR \fIhttp://man7\.org/linux/man\-pages/man1/pminfo\.1\.html\fR \fBpmie\fR \fIhttp://man7\.org/linux/man\-pages/man1/pmie\.1\.html\fR \fBPMAPI\fR \fIhttp://man7\.org/linux/man\-pages/man3/PMAPI\.3\.html\fR and \fBPMNS\fR \fIhttp://man7\.org/linux/man\-pages/man5/pmns\.5\.html\fR
+.
+.SH "SEE ALSO"
+\fBPCPIntro\fR \fI1\fR, \fBpmcd\fR \fI1\fR, \fBpmchart\fR \fI1\fR \fBpmdammv\fR \fI1\fR \fBpmdumptext\fR \fI1\fR, \fBpmprobe\fR \fI1\fR, \fBpminfo\fR \fI1\fR, \fBpmie\fR \fI1\fR, \fBPMAPI\fR \fI3\fR, and \fBPMNS\fR \fI5\fR\.
