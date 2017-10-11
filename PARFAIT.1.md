@@ -30,14 +30,14 @@ inaccessible, a minimal configuration is read from within the
 resources of the _parfait-agent.jar_ file.
 
 Configuration files must be in the JSON format - refer to the
-[CONFIGURATION][CONFIGURATION] section below for details of the file format.
+CONFIGURATION section below for details of the file format.
 
 There are two forms of instrumentation available from the
 `parfait` script - direct instrumentation (agent mode) or
 via a JMX server (proxy mode).
 
-See the [EXAMPLES][EXAMPLES] section below for an example invocation
-for each mode.
+See the EXAMPLES section below for a sample invocation for
+both modes.
 
 ## OPTIONS
 
