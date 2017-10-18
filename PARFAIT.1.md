@@ -70,6 +70,9 @@ Maximum startup time in which JMX values are still being created,
 before exporting as memory mapped values, in milliseconds.
 The default value is 5000 (5 seconds).
 
+* `-h` / `--help:
+Show a brief usage message and exit.
+
 ## EXAMPLES
 
 The following examples can be installed locally using the
@@ -81,12 +84,16 @@ any PCP client tool, such as
 * pminfo `-f` mmv
 * pmprobe `-v` mmv
 * pmchart
-* pmie
 * pmrep
+* pmie
 * [... and many others ...]
 
 The default mode of operation involves directly running the Java
 process to be instrumented with a javaagent:
+
+* _parfait_ --name sleep -- -jar /usr/share/java/parfait/sleep.jar _Main_
+
+Behind the scenes this runs:
 
 * _java_ -Dparfait.name=sleep **-javaagent**:/usr/share/java/parfait/parfait.jar -jar /usr/share/java/parfait/sleep.jar _Main_
 
@@ -99,6 +106,10 @@ following options:
 
 The JMX server is then allowing access from instrumentation by
 `parfait`, which can be invoked as follows:
+
+* _parfait_ --name sleep --connect localhost:9875
+
+Behind the scenes this runs:
 
 * _java_ -Dparfait.name=sleep -jar /usr/share/java/parfait/parfait.jar **-connect=localhost:9875**
 
@@ -151,10 +162,16 @@ managed bean (e.g. _HeapMemoryUsage_).
 An optional string used to further classify an individual value
 of the managed bean attribute (e.g. _max_).
 
+## ENVIRONMENT
+
+The  contents of the environment variable **PARFAIT_JAVA_OPTS**,
+if any, are inserted into the java command line before the
+_-javaagent_ argument and before any arguments in _javaargs_.
+
 ## FILES
 
-* _$PCP-TMP-DIR/mmv/*_:
-default local of memory mapped values files created by `parfait`.
+* _$PCP\_TMP\_DIR/mmv/*_:
+memory mapped values files created by `parfait`.
 * _/etc/parfait/*.json_:
 configuration files defining metrics in the format described above.
 
