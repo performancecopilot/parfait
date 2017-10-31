@@ -18,34 +18,48 @@ package io.pcp.parfait;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
 import static systems.uom.unicode.CLDR.BYTE;
 import static tec.uom.se.unit.MetricPrefix.MILLI;
 import static tec.uom.se.unit.Units.SECOND;
 
-import java.lang.reflect.Field;
-import javax.measure.Unit;
-import javax.measure.quantity.Time;
-
-import org.hamcrest.Matchers;
 import org.junit.Test;
-import systems.uom.quantity.Information;
-import tec.uom.se.unit.MetricPrefix;
-import tec.uom.se.unit.Units;
 
 public class SpecificationTest {
 
     @Test
-    public void getUnits_shouldReturnMillisecondUnitsWhenASpecificationIsDefinedWithAMillisecondString() {
-        final Specification specification = new Specification("test", false, null, "", "milliseconds", null, "", "");
+    public void getUnits_shouldReturnMillisecondUnits_whenASpecificationIsDefinedWithACustomMillisecondsString() {
+        final Specification specification = specificationWithUnit("milliseconds");
 
         assertThat(specification.getUnits(), is(MILLI(SECOND)));
     }
 
     @Test
-    public void getUnits_shouldReturnByteUnitsWhenASpecificationIsDefinedWithABytesString() {
-        final Specification specification = new Specification("test", false, null, "", "bytes", null, "", "");
+    public void getUnits_shouldReturnMillisecondUnits_whenASpecificationIsDefinedWithTheUnitsOfMeasurementMsString() {
+        final Specification specification = specificationWithUnit("ms");
+
+        assertThat(specification.getUnits(), is(MILLI(SECOND)));
+    }
+
+    @Test
+    public void getUnits_shouldReturnByteUnits_whenASpecificationIsDefinedWithACustomBytesString() {
+        final Specification specification = specificationWithUnit("bytes");
 
         assertThat(specification.getUnits(), is(BYTE));
+    }
+
+    @Test
+    public void getUnits_shouldReturnByteUnits_whenASpecificationIsDefinedWithAUnitsOfMeasurementByteString() {
+        final Specification specification = specificationWithUnit("byte");
+
+        assertThat(specification.getUnits(), is(BYTE));
+    }
+
+    @Test(expected = SpecificationException.class)
+    public void new_throwsASpecificationExceptionIfTheUnitsCannotBeParsed() {
+        specificationWithUnit("not-a-unit");
+    }
+
+    private Specification specificationWithUnit(String unit) {
+        return new Specification("test", false, null, "", unit, null, "", "");
     }
 }

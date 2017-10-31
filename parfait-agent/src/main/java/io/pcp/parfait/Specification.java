@@ -16,16 +16,22 @@
 
 package io.pcp.parfait;
 
-import static tec.uom.se.AbstractUnit.ONE;
+import static systems.uom.unicode.CLDR.BYTE;
+import static tec.uom.se.unit.MetricPrefix.MILLI;
+import static tec.uom.se.unit.Units.SECOND;
 
 import javax.measure.Unit;
-import javax.measure.quantity.Time;
+import javax.measure.format.ParserException;
 
-import systems.uom.quantity.Information;
-import tec.uom.se.unit.MetricPrefix;
-import tec.uom.se.unit.Units;
+import tec.uom.se.format.SimpleUnitFormat;
 
 class Specification {
+
+    static {
+        SimpleUnitFormat.getInstance().alias(MILLI(SECOND), "milliseconds");
+        SimpleUnitFormat.getInstance().alias(BYTE, "bytes");
+    }
+
     private final String name;
     private final boolean optional;
     private final String description;
@@ -98,18 +104,10 @@ class Specification {
     }
 
     private Unit<?> parseUnits(String name, String units) {
-        if (units.equalsIgnoreCase("milliseconds")) {
-            Unit<Time> MILLISECONDS = MetricPrefix.MILLI(Units.SECOND);
-            return MILLISECONDS;
+        try {
+            return SimpleUnitFormat.getInstance().parse(units);
+        } catch (ParserException e) {
+            throw new SpecificationException("Unexpected units [" + units + "] for " + name, e);
         }
-        if (units.equalsIgnoreCase("bytes")) {
-            Unit<Information> BYTE = systems.uom.unicode.CLDR.BYTE;
-            return BYTE;
-        }
-        if (!units.isEmpty()) {
-            String msg = "Unexpected units [" + units + "]";
-            throw new SpecificationException(name, msg);
-        }
-        return ONE;
     }
 }
