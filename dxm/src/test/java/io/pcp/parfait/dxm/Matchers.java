@@ -27,7 +27,7 @@ import static org.unitils.reflectionassert.ReflectionComparatorFactory.createRef
 
 public class Matchers {
 
-    static class ReflectiveMatcher extends TypeSafeMatcher<Object> {
+    public static class ReflectiveMatcher extends TypeSafeMatcher<Object> {
 
         private final Object expected;
         private Difference difference;
@@ -50,7 +50,7 @@ public class Matchers {
             }
         }
 
-        static ReflectiveMatcher reflectivelyEqualing(Object expected) {
+        public static ReflectiveMatcher reflectivelyEqualing(Object expected) {
             return new ReflectiveMatcher(expected);
         }
 

@@ -33,14 +33,6 @@ public class SpecificationException extends RuntimeException {
     /**
      * Constructor for SpecificationException.
      * @param msg the detail message
-     */
-    public SpecificationException(String msg) {
-        super(msg);
-    }
-
-    /**
-     * Constructor for SpecificationException.
-     * @param msg the detail message
      * @param cause the root cause (raw Java exception)
      */
     public SpecificationException(String msg, Throwable cause) {
