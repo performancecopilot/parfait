@@ -25,10 +25,11 @@ Usage: parfait [options] [--] [javaargs]
 
 Options:
   -n/--name NAME
-     use the string which follows as the program name exported
+     Use the string which follows as the program name exported
      via PCP memory mapped value (MMV) metrics.  mmv.<name> in
      the performance metric name space (PMNS).  Overrides the
-     parfait.name Java system property.
+     parfait.name Java system property.  If not set, a generated
+     name will be used.
 
   -c/--cluster N
      Use the numeric cluster identifier for PCP/MMV metric IDs
@@ -56,41 +57,44 @@ Options:
      property.  Specified in milliseconds.
 
   -h/--help
+     Show this usage message and exit.
 
-  -- optional separator to distinguish trailing arguments
+  --
+     Optional separator to distinguish trailing arguments.
 
-  javaargs trailing arguments to be supplied to the java command
+  javaargs
+     Optional trailing arguments to be supplied to the java command.
 
 The script employs the java command found in the current execution
-PATH.  If PARFAIT_JAVA_OPTS is set then this is inserted into the
-java command line before the -javaagent argument and before any
-arguments in javaargs.
+PATH.  If the environment variable PARFAIT_JAVA_OPTS is set then
+this is inserted into the java command line before the -javaagent
+argument and before any arguments in javaargs.
 EOF
-    exit 1
+    exit $1
 }
 
 # use PARFAIT_HOME to locate installed parfait release
 if [ -z "$PARFAIT_HOME" ]; then
     # use root of the path to this script to locate the parfait-agent jar
-    PARFAIT_HOME=${0%*/bin/parfait.sh}
+    PARFAIT_HOME="${0%*/bin/parfait.sh}"
     # also allow for rename to plain parfait
     if [ "$PARFAIT_HOME" = "$0" ]; then
-        PARFAIT_HOME=${0%*/bin/parfait}
+        PARFAIT_HOME="${0%*/bin/parfait}"
     fi
     if [ "$PARFAIT_HOME" = "$0" ]; then
         echo "Unable to find parfait home"
-        exit
+        exit 1
     fi
 fi
 
 # the parfait agent jar should be in the lib directory
-if [ -f ${PARFAIT_HOME}/lib/parfait.jar ]; then
-    PARFAIT_JAR=${PARFAIT_HOME}/lib/parfait.jar
-elif [ -f ${PARFAIT_HOME}/share/java/parfait/parfait.jar ]; then
-    PARFAIT_JAR=${PARFAIT_HOME}/share/java/parfait/parfait.jar
+if [ -f "${PARFAIT_HOME}/lib/parfait.jar" ]; then
+    PARFAIT_JAR="${PARFAIT_HOME}/lib/parfait.jar"
+elif [ -f "${PARFAIT_HOME}/share/java/parfait/parfait.jar" ]; then
+    PARFAIT_JAR="${PARFAIT_HOME}/share/java/parfait/parfait.jar"
 else
     echo "Cannot locate parfait agent jar"
-    exit
+    exit 1
 fi
 
 JVMMODE="agent"	# running in -javaagent mode or as JMX server proxy?
@@ -105,33 +109,33 @@ PARFAIT_CONNECT=
 while [ $# -ge 1 -a "${1#-*}" != "$1" ]
 do
     if [ "$1" = "-n" -o "$1" = "--name" ]; then
-        [ $# -ge 2 ] || usage
+        [ $# -ge 2 ] || usage 1
         PARFAIT_NAME=$2
         shift;
         shift;
     elif [ "$1" = "-i" -o "$1" = "--interval" ]; then
-        [ $# -ge 2 ] || usage
+        [ $# -ge 2 ] || usage 1
         PARFAIT_INTERVAL=$2
         shift;
         shift;
     elif [ "$1" = "-c" -o "$1" = "--cluster" ]; then
-        [ $# -ge 2 ] || usage
+        [ $# -ge 2 ] || usage 1
         PARFAIT_CLUSTER=$2
         shift;
         shift;
     elif [ "$1" = "-s" -o "$1" = "--startup" ]; then
-        [ $# -ge 2 ] || usage
+        [ $# -ge 2 ] || usage 1
         PARFAIT_STARTUP=$2
         shift;
         shift;
     elif [ "$1" = "-j" -o "$1" = "--jmxserver" -o "$1" = "--connect" ]; then
-        [ $# -ge 2 ] || usage
+        [ $# -ge 2 ] || usage 1
         PARFAIT_CONNECT=$2
         JVMMODE="proxy"
         shift;
         shift;
     elif [ "$1" = "-h" -o "$1" = "--help" ]; then
-        usage
+        usage 0
     elif [ "$1" = "--" ]; then
         shift;
         break;
@@ -141,14 +145,14 @@ do
     fi
 done
 
-if [ $JVMMODE = proxy ]; then
+if [ "$JVMMODE" = "proxy" ]; then
     OPTIONS="-connect $PARFAIT_CONNECT"
     [ -n "$PARFAIT_NAME" ] && OPTIONS="$OPTIONS -name $PARFAIT_NAME"
     [ -n "$PARFAIT_CLUSTER" ] && OPTIONS="$OPTIONS -cluster $PARFAIT_CLUSTER"
     [ -n "$PARFAIT_INTERVAL" ] && OPTIONS="$OPTIONS -interval $PARFAIT_INTERVAL"
     ARGUMENTS="-jar ${PARFAIT_JAR} ParfaitAgent ${OPTIONS}"
 else
-    [ -z "$*" ] && usage
+    [ -z "$*" ] && usage 1
     [ -n "$PARFAIT_NAME" ] && OPTIONS="$OPTIONS,name:$PARFAIT_NAME"
     [ -n "$PARFAIT_CLUSTER" ] && OPTIONS="$OPTIONS,cluster:$PARFAIT_CLUSTER"
     [ -n "$PARFAIT_INTERVAL" ] && OPTIONS="$OPTIONS,interval:$PARFAIT_INTERVAL"
