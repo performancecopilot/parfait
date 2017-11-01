@@ -75,8 +75,10 @@ public class ParfaitAgent {
         List<Specification> allMonitorables = new ArrayList<>();
         try {
             File[] files = new File(PATHNAME).listFiles();
-            for (File file : files) {
-                allMonitorables.addAll(parseSpecification(file));
+            if (files != null) {
+                for (File file : files) {
+                    allMonitorables.addAll(parseSpecification(file));
+                }
             }
         } catch (Exception e) {
             // reported, fallback to specification from resources
@@ -110,7 +112,7 @@ public class ParfaitAgent {
                 monitorables.add(new Specification(node));
             }
         } catch (Exception e) {
-            logger.error(String.format("Unexpected JSON format\n%s", e.getMessage()));
+            logger.error(String.format("Unexpected JSON format%n%s", e.getMessage()));
         }
         return monitorables;
     }

@@ -60,7 +60,7 @@ public class ProductBuilder extends Thread {
     public void run() {
         while (true) {
             build();
-            System.out.format("Built %d %s\n", completed.get(), name);
+            System.out.format("Built %d %s%n", completed.get(), name);
         }
     }
 }
