@@ -76,7 +76,7 @@ public final class UnitMapping {
             return false;
         }
         Unit<?> divided = left.divide(right);
-        if (!divided.getDimension().equals(NONE)) {
+        if (!divided.getDimension().equals(Dimension.NONE)) {
             return false;
         }
         return divided.asType(Dimensionless.class).getConverterTo(ONE).equals(IDENTITY);
