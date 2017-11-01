@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2016 Red Hat
+# Copyright (c) 2016-2017 Red Hat
 #
 # This is free software; you can redistribute it and/or modify it
 # under the terms of the GNU Lesser General Public License as
@@ -157,4 +157,4 @@ else
 fi
 
 # allow for extra java opts via setting PARFAIT_JAVA_OPTS
-exec java ${PARFAIT_JAVA_OPTS} ${ARGUMENTS} $*
+exec java ${PARFAIT_JAVA_OPTS} ${ARGUMENTS} "$@"
