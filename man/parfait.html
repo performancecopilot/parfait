@@ -59,6 +59,7 @@
     <a href="#OPTIONS">OPTIONS</a>
     <a href="#EXAMPLES">EXAMPLES</a>
     <a href="#CONFIGURATION">CONFIGURATION</a>
+    <a href="#ENVIRONMENT">ENVIRONMENT</a>
     <a href="#FILES">FILES</a>
     <a href="#LINKS">LINKS</a>
     <a href="#SEE-ALSO">SEE ALSO</a>
@@ -104,15 +105,19 @@ through configuration files in the <em>/etc/parfait</em> directory.</p>
 inaccessible, a minimal configuration is read from within the
 resources of the <em>parfait-agent.jar</em> file.</p>
 
+<p>The available managed beans from a running <code>java</code>(1) application
+can be explored using standard Java tools like <code>jconsole</code>(1),
+when JMX access has been setup as in the EXAMPLES section below.</p>
+
 <p>Configuration files must be in the JSON format - refer to the
-<a href="#CONFIGURATION" title="CONFIGURATION" data-bare-link="true">CONFIGURATION</a> section below for details of the file format.</p>
+CONFIGURATION section below for details of the file format.</p>
 
 <p>There are two forms of instrumentation available from the
 <code>parfait</code> script - direct instrumentation (agent mode) or
 via a JMX server (proxy mode).</p>
 
-<p>See the <a href="#EXAMPLES" title="EXAMPLES" data-bare-link="true">EXAMPLES</a> section below for an example invocation
-for each mode.</p>
+<p>See the EXAMPLES section below for a sample invocation for
+both modes.</p>
 
 <h2 id="OPTIONS">OPTIONS</h2>
 
@@ -136,6 +141,7 @@ instead of the default <code>-javaagent</code> mode of operation.</p></dd>
 <dt><code>-s</code> / <code>--startup</code> <em>msec</em></dt><dd><p>Maximum startup time in which JMX values are still being created,
 before exporting as memory mapped values, in milliseconds.
 The default value is 5000 (5 seconds).</p></dd>
+<dt><code>-h</code> / <code>--help</code></dt><dd><p>Show a brief usage message and exit.</p></dd>
 </dl>
 
 
@@ -151,8 +157,8 @@ any PCP client tool, such as</p>
 <li>pminfo <code>-f</code> mmv</li>
 <li>pmprobe <code>-v</code> mmv</li>
 <li>pmchart</li>
-<li>pmie</li>
 <li>pmrep</li>
+<li>pmie</li>
 <li>[... and many others ...]</li>
 </ul>
 
@@ -161,7 +167,14 @@ any PCP client tool, such as</p>
 process to be instrumented with a javaagent:</p>
 
 <ul>
-<li><em>java</em> -Dparfait.name=sleep <strong>-javaagent</strong>:/usr/share/java/parfait/parfait.jar -jar /usr/share/java/parfait/sleep.jar <em>Main</em></li>
+<li><em>parfait</em> --name sleep -- -jar /usr/share/java/parfait/sleep.jar</li>
+</ul>
+
+
+<p>Behind the scenes this runs:</p>
+
+<ul>
+<li><em>java</em> -Dparfait.name=sleep <strong>-javaagent</strong>:/usr/share/java/parfait/parfait.jar -jar /usr/share/java/parfait/sleep.jar</li>
 </ul>
 
 
@@ -171,12 +184,19 @@ To start the Java application with a JMX server exposed, use the
 following options:</p>
 
 <ul>
-<li><em>java</em> <strong>-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9875</strong> -Dcom.sun.management.jmxremote.local.only=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -jar /usr/share/java/parfait/sleep.jar <em>Main</em></li>
+<li><em>java</em> <strong>-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9875</strong> -Dcom.sun.management.jmxremote.local.only=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -jar /usr/share/java/parfait/sleep.jar</li>
 </ul>
 
 
 <p>The JMX server is then allowing access from instrumentation by
 <code>parfait</code>, which can be invoked as follows:</p>
+
+<ul>
+<li><em>parfait</em> --name sleep --connect localhost:9875</li>
+</ul>
+
+
+<p>Behind the scenes this runs:</p>
 
 <ul>
 <li><em>java</em> -Dparfait.name=sleep -jar /usr/share/java/parfait/parfait.jar <strong>-connect=localhost:9875</strong></li>
@@ -207,7 +227,11 @@ or <em>discrete</em>; <em>count</em> or <em>counter</em>; and <em>gauge</em>, <e
 <em>instantaneous</em>.  These map directly to the PCP metric semantics.
 The value <em>instantaneous</em> is the default.</p></dd>
 <dt>Metric <strong>units</strong></dt><dd><p>A string which will be parsed to produce the JSR-363 units for
-the metric.  Currently <em>bytes</em> or <em>milliseconds</em> are supported.</p></dd>
+the metric.  Acceptable unit strings include: <em>s</em>, <em>seconds</em>,
+<em>ms</em>, <em>milliseconds</em>, <em>µs</em>, <em>microseconds</em>, <em>ns</em>, <em>nanoseconds</em>,
+<em>B</em>, <em>byte</em>, <em>bytes</em>, <em>KiB</em>, <em>Kbyte</em>, <em>MiB</em>, <em>Mbyte</em>,
+<em>GiB</em>, <em>Gbyte</em>, <em>TiB</em>, <em>Tbyte</em>, <em>EiB</em>, <em>Ebyte</em>,
+as well as <em>none</em>, <em>one</em> and the empty string.</p></dd>
 <dt>Whether the metric is <strong>optional</strong></dt><dd><p>A boolean (default: <em>false</em>) which flags whether this metric
 must exist in the JVM.  Certain metrics only appear in some
 situations, or some versions of the JVM, these should be marked
@@ -221,10 +245,16 @@ of the managed bean attribute (e.g. <em>max</em>).</p></dd>
 </dl>
 
 
+<h2 id="ENVIRONMENT">ENVIRONMENT</h2>
+
+<p>The  contents of the environment variable <strong>PARFAIT_JAVA_OPTS</strong>,
+if any, are inserted into the java command line before the
+<em>-javaagent</em> argument and before any arguments in <em>javaargs</em>.</p>
+
 <h2 id="FILES">FILES</h2>
 
 <dl>
-<dt><em>$PCP-TMP-DIR/mmv/*</em></dt><dd>default local of memory mapped values files created by <code>parfait</code>.</dd>
+<dt><em>$PCP_TMP_DIR/mmv/*</em></dt><dd>memory mapped values files created by <code>parfait</code>.</dd>
 <dt><em>/etc/parfait/*.json</em></dt><dd>configuration files defining metrics in the format described above.</dd>
 </dl>
 
@@ -256,7 +286,9 @@ of the managed bean attribute (e.g. <em>max</em>).</p></dd>
 
 <h2 id="SEE-ALSO">SEE ALSO</h2>
 
-<p><code>PCPIntro</code>(1),
+<p><code>java</code>(1),
+<code>jconsole</code>(1),
+<code>PCPIntro</code>(1),
 <code>pmcd</code>(1),
 <code>pmchart</code>(1)
 <code>pmdammv</code>(1)
@@ -271,7 +303,7 @@ and
 
   <ol class='man-decor man-foot man foot'>
     <li class='tl'></li>
-    <li class='tc'>October 2017</li>
+    <li class='tc'>November 2017</li>
     <li class='tr'>parfait(1)</li>
   </ol>
 

@@ -17,7 +17,10 @@
 package io.pcp.parfait;
 
 import static systems.uom.unicode.CLDR.BYTE;
+import static tec.uom.se.AbstractUnit.ONE;
+import static tec.uom.se.unit.MetricPrefix.MICRO;
 import static tec.uom.se.unit.MetricPrefix.MILLI;
+import static tec.uom.se.unit.MetricPrefix.NANO;
 import static tec.uom.se.unit.Units.SECOND;
 
 import javax.measure.Unit;
@@ -28,8 +31,24 @@ import tec.uom.se.format.SimpleUnitFormat;
 class Specification {
 
     static {
+        SimpleUnitFormat.getInstance().alias(ONE, "none");
+        SimpleUnitFormat.getInstance().alias(NANO(SECOND), "nanoseconds");
+        SimpleUnitFormat.getInstance().alias(NANO(SECOND), "nanosecond");
+        SimpleUnitFormat.getInstance().alias(MICRO(SECOND), "microseconds");
+        SimpleUnitFormat.getInstance().alias(MICRO(SECOND), "microsecond");
         SimpleUnitFormat.getInstance().alias(MILLI(SECOND), "milliseconds");
+        SimpleUnitFormat.getInstance().alias(MILLI(SECOND), "millisecond");
         SimpleUnitFormat.getInstance().alias(BYTE, "bytes");
+        SimpleUnitFormat.getInstance().alias(BYTE.multiply(1L << 10), "KiB");
+        SimpleUnitFormat.getInstance().alias(BYTE.multiply(1L << 10), "Kbyte");
+        SimpleUnitFormat.getInstance().alias(BYTE.multiply(1L << 20), "MiB");
+        SimpleUnitFormat.getInstance().alias(BYTE.multiply(1L << 20), "Mbyte");
+        SimpleUnitFormat.getInstance().alias(BYTE.multiply(1L << 30), "GiB");
+        SimpleUnitFormat.getInstance().alias(BYTE.multiply(1L << 30), "Gbyte");
+        SimpleUnitFormat.getInstance().alias(BYTE.multiply(1L << 40), "TiB");
+        SimpleUnitFormat.getInstance().alias(BYTE.multiply(1L << 40), "Tbyte");
+        SimpleUnitFormat.getInstance().alias(BYTE.multiply(1L << 50), "EiB");
+        SimpleUnitFormat.getInstance().alias(BYTE.multiply(1L << 50), "Ebyte");
     }
 
     private final String name;

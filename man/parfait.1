@@ -1,7 +1,7 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "PARFAIT" "1" "October 2017" "" ""
+.TH "PARFAIT" "1" "November 2017" "" ""
 .
 .SH "NAME"
 \fBparfait\fR \- Java instrumentation for Performance Co\-Pilot (PCP)
@@ -25,13 +25,16 @@ This is performed by configuration of the \fIparfait\-agent\.jar\fR file used by
 If this directory is empty, does not exist, or is otherwise inaccessible, a minimal configuration is read from within the resources of the \fIparfait\-agent\.jar\fR file\.
 .
 .P
-Configuration files must be in the JSON format \- refer to the \fICONFIGURATION\fR section below for details of the file format\.
+The available managed beans from a running \fBjava\fR(1) application can be explored using standard Java tools like \fBjconsole\fR(1), when JMX access has been setup as in the EXAMPLES section below\.
+.
+.P
+Configuration files must be in the JSON format \- refer to the CONFIGURATION section below for details of the file format\.
 .
 .P
 There are two forms of instrumentation available from the \fBparfait\fR script \- direct instrumentation (agent mode) or via a JMX server (proxy mode)\.
 .
 .P
-See the \fIEXAMPLES\fR section below for an example invocation for each mode\.
+See the EXAMPLES section below for a sample invocation for both modes\.
 .
 .SH "OPTIONS"
 The command line options available are:
@@ -56,6 +59,10 @@ Connect to the JMX server listening on the specified \fIhostname\fR and \fIport\
 \fB\-s\fR / \fB\-\-startup\fR \fImsec\fR
 Maximum startup time in which JMX values are still being created, before exporting as memory mapped values, in milliseconds\. The default value is 5000 (5 seconds)\.
 .
+.TP
+\fB\-h\fR / \fB\-\-help\fR
+Show a brief usage message and exit\.
+.
 .SH "EXAMPLES"
 The following examples can be installed locally using the \fBparfait\-examples\fR package\.
 .
@@ -72,10 +79,10 @@ pmprobe \fB\-v\fR mmv
 pmchart
 .
 .IP "\(bu" 4
-pmie
+pmrep
 .
 .IP "\(bu" 4
-pmrep
+pmie
 .
 .IP "\(bu" 4
 [\.\.\. and many others \.\.\.]
@@ -86,7 +93,15 @@ pmrep
 The default mode of operation involves directly running the Java process to be instrumented with a javaagent:
 .
 .IP "\(bu" 4
-\fIjava\fR \-Dparfait\.name=sleep \fB\-javaagent\fR:/usr/share/java/parfait/parfait\.jar \-jar /usr/share/java/parfait/sleep\.jar \fIMain\fR
+\fIparfait\fR \-\-name sleep \-\- \-jar /usr/share/java/parfait/sleep\.jar
+.
+.IP "" 0
+.
+.P
+Behind the scenes this runs:
+.
+.IP "\(bu" 4
+\fIjava\fR \-Dparfait\.name=sleep \fB\-javaagent\fR:/usr/share/java/parfait/parfait\.jar \-jar /usr/share/java/parfait/sleep\.jar
 .
 .IP "" 0
 .
@@ -94,12 +109,20 @@ The default mode of operation involves directly running the Java process to be i
 The alternative is the proxy mode, where an already running Java process is instrumented using its JMX server\. To start the Java application with a JMX server exposed, use the following options:
 .
 .IP "\(bu" 4
-\fIjava\fR \fB\-Dcom\.sun\.management\.jmxremote \-Dcom\.sun\.management\.jmxremote\.port=9875\fR \-Dcom\.sun\.management\.jmxremote\.local\.only=true \-Dcom\.sun\.management\.jmxremote\.authenticate=false \-Dcom\.sun\.management\.jmxremote\.ssl=false \-jar /usr/share/java/parfait/sleep\.jar \fIMain\fR
+\fIjava\fR \fB\-Dcom\.sun\.management\.jmxremote \-Dcom\.sun\.management\.jmxremote\.port=9875\fR \-Dcom\.sun\.management\.jmxremote\.local\.only=true \-Dcom\.sun\.management\.jmxremote\.authenticate=false \-Dcom\.sun\.management\.jmxremote\.ssl=false \-jar /usr/share/java/parfait/sleep\.jar
 .
 .IP "" 0
 .
 .P
 The JMX server is then allowing access from instrumentation by \fBparfait\fR, which can be invoked as follows:
+.
+.IP "\(bu" 4
+\fIparfait\fR \-\-name sleep \-\-connect localhost:9875
+.
+.IP "" 0
+.
+.P
+Behind the scenes this runs:
 .
 .IP "\(bu" 4
 \fIjava\fR \-Dparfait\.name=sleep \-jar /usr/share/java/parfait/parfait\.jar \fB\-connect=localhost:9875\fR
@@ -135,7 +158,7 @@ An optional string with one of the following values: \fIconstant\fR or \fIdiscre
 .
 .TP
 Metric \fBunits\fR
-A string which will be parsed to produce the JSR\-363 units for the metric\. Currently \fIbytes\fR or \fImilliseconds\fR are supported\.
+A string which will be parsed to produce the JSR\-363 units for the metric\. Acceptable unit strings include: \fIs\fR, \fIseconds\fR, \fIms\fR, \fImilliseconds\fR, \fIµs\fR, \fImicroseconds\fR, \fIns\fR, \fInanoseconds\fR, \fIB\fR, \fIbyte\fR, \fIbytes\fR, \fIKiB\fR, \fIKbyte\fR, \fIMiB\fR, \fIMbyte\fR, \fIGiB\fR, \fIGbyte\fR, \fITiB\fR, \fITbyte\fR, \fIEiB\fR, \fIEbyte\fR, as well as \fInone\fR, \fIone\fR and the empty string\.
 .
 .TP
 Whether the metric is \fBoptional\fR
@@ -153,11 +176,14 @@ An optional string used to identify a specific attribute of a managed bean (e\.g
 Managed bean composite data item (\fBmBeanCompositeDataItem\fR)
 An optional string used to further classify an individual value of the managed bean attribute (e\.g\. \fImax\fR)\.
 .
+.SH "ENVIRONMENT"
+The contents of the environment variable \fBPARFAIT_JAVA_OPTS\fR, if any, are inserted into the java command line before the \fI\-javaagent\fR argument and before any arguments in \fIjavaargs\fR\.
+.
 .SH "FILES"
 .
 .TP
-\fI$PCP\-TMP\-DIR/mmv/*\fR
-default local of memory mapped values files created by \fBparfait\fR\.
+\fI$PCP_TMP_DIR/mmv/*\fR
+memory mapped values files created by \fBparfait\fR\.
 .
 .TP
 \fI/etc/parfait/*\.json\fR
@@ -207,4 +233,4 @@ Performance Co\-Pilot \fIhttp://pcp\.io\fR:
 .IP "" 0
 .
 .SH "SEE ALSO"
-\fBPCPIntro\fR(1), \fBpmcd\fR(1), \fBpmchart\fR(1) \fBpmdammv\fR(1) \fBpmie\fR(1), \fBpminfo\fR(1), \fBpmprobe\fR(1), \fBpmrep\fR(1), \fBPMAPI\fR(3), and \fBPMNS\fR(5)\.
+\fBjava\fR(1), \fBjconsole\fR(1), \fBPCPIntro\fR(1), \fBpmcd\fR(1), \fBpmchart\fR(1) \fBpmdammv\fR(1) \fBpmie\fR(1), \fBpminfo\fR(1), \fBpmprobe\fR(1), \fBpmrep\fR(1), \fBPMAPI\fR(3), and \fBPMNS\fR(5)\.
