@@ -73,6 +73,15 @@
       </roles>
       <timezone>+10</timezone>
     </developer>
+    <developer>
+      <id>ryan</id>
+      <name>Ryan Doyle</name>
+      <email>ryan@doylenet.net</email>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>+10</timezone>
+    </developer>
   </developers>
   <modules>
     <module>parfait-core</module>
