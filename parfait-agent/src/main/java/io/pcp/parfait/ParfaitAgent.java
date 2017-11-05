@@ -16,36 +16,29 @@
 
 package io.pcp.parfait;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.pcp.parfait.MonitoringViewProperties;
-import io.pcp.parfait.AgentMonitoringView;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.IOException;
-import java.lang.instrument.Instrumentation;
-import java.net.ConnectException;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.management.MalformedObjectNameException;
-import javax.management.ReflectionException;
-import javax.management.MBeanServerConnection;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.IntrospectionException;
 import javax.management.MBeanException;
 import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
+import javax.management.ReflectionException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.instrument.Instrumentation;
+import java.net.ConnectException;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.log4j.Logger;
 
 public class ParfaitAgent {
     private static final Logger logger = Logger.getLogger(ParfaitAgent.class);
+    private static final SpecificationAdapter specificationAdapter = new SpecificationAdapter();
 
     private static final String RESOURCE = "/jvm.json";
     private static final String PATHNAME = "/etc/parfait";
@@ -75,8 +68,10 @@ public class ParfaitAgent {
         List<Specification> allMonitorables = new ArrayList<>();
         try {
             File[] files = new File(PATHNAME).listFiles();
-            for (File file : files) {
-                allMonitorables.addAll(parseSpecification(file));
+            if (files != null) {
+                for (File file : files) {
+                    allMonitorables.addAll(parseSpecification(file));
+                }
             }
         } catch (Exception e) {
             // reported, fallback to specification from resources
@@ -107,10 +102,10 @@ public class ParfaitAgent {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode metrics = mapper.readTree(in).path("metrics");
             for (JsonNode node : metrics) {
-                monitorables.add(new Specification(node));
+                monitorables.add(specificationAdapter.fromJson(node));
             }
         } catch (Exception e) {
-            logger.error(String.format("Unexpected JSON format\n%s", e.getMessage()));
+            logger.error(String.format("Unexpected JSON format%n%s", e.getMessage()));
         }
         return monitorables;
     }

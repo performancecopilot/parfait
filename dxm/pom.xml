@@ -73,7 +73,7 @@
     <dependency>
       <groupId>org.unitils</groupId>
       <artifactId>unitils-core</artifactId>
-      <version>3.4.3</version>
+      <version>${unitils.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>

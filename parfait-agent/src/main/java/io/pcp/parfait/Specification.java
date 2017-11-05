@@ -16,92 +16,96 @@
 
 package io.pcp.parfait;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.JsonNode;
-
-import systems.uom.quantity.Information;
-import tec.uom.se.unit.MetricPrefix;
-import tec.uom.se.unit.Units;
+import static systems.uom.unicode.CLDR.BYTE;
 import static tec.uom.se.AbstractUnit.ONE;
+import static tec.uom.se.unit.MetricPrefix.MICRO;
+import static tec.uom.se.unit.MetricPrefix.MILLI;
+import static tec.uom.se.unit.MetricPrefix.NANO;
+import static tec.uom.se.unit.Units.SECOND;
 
 import javax.measure.Unit;
-import javax.measure.quantity.Time;
+import javax.measure.format.ParserException;
 
-public class Specification {
-    public String name;
-    public boolean optional;
-    public String description;
-    public Unit<?> unit = ONE;
-    public ValueSemantics semantics = ValueSemantics.FREE_RUNNING;
-    public String mBeanName;
-    public String mBeanAttributeName;
-    public String mBeanCompositeDataItem;
-    
-    public Specification() {
+import tec.uom.se.format.SimpleUnitFormat;
+
+class Specification {
+
+    static {
+        SimpleUnitFormat.getInstance().alias(ONE, "none");
+        SimpleUnitFormat.getInstance().alias(NANO(SECOND), "nanoseconds");
+        SimpleUnitFormat.getInstance().alias(NANO(SECOND), "nanosecond");
+        SimpleUnitFormat.getInstance().alias(MICRO(SECOND), "microseconds");
+        SimpleUnitFormat.getInstance().alias(MICRO(SECOND), "microsecond");
+        SimpleUnitFormat.getInstance().alias(MILLI(SECOND), "milliseconds");
+        SimpleUnitFormat.getInstance().alias(MILLI(SECOND), "millisecond");
+        SimpleUnitFormat.getInstance().alias(BYTE, "bytes");
+        SimpleUnitFormat.getInstance().alias(BYTE.multiply(1L << 10), "KiB");
+        SimpleUnitFormat.getInstance().alias(BYTE.multiply(1L << 10), "Kbyte");
+        SimpleUnitFormat.getInstance().alias(BYTE.multiply(1L << 20), "MiB");
+        SimpleUnitFormat.getInstance().alias(BYTE.multiply(1L << 20), "Mbyte");
+        SimpleUnitFormat.getInstance().alias(BYTE.multiply(1L << 30), "GiB");
+        SimpleUnitFormat.getInstance().alias(BYTE.multiply(1L << 30), "Gbyte");
+        SimpleUnitFormat.getInstance().alias(BYTE.multiply(1L << 40), "TiB");
+        SimpleUnitFormat.getInstance().alias(BYTE.multiply(1L << 40), "Tbyte");
+        SimpleUnitFormat.getInstance().alias(BYTE.multiply(1L << 50), "EiB");
+        SimpleUnitFormat.getInstance().alias(BYTE.multiply(1L << 50), "Ebyte");
     }
 
-    private Specification(String name, boolean optional, String description,
+    private final String name;
+    private final boolean optional;
+    private final String description;
+    private final Unit<?> unit;
+    private final ValueSemantics semantics;
+    private final String mBeanName;
+    private final String mBeanAttributeName;
+    private final String mBeanCompositeDataItem;
+
+    Specification(String name, boolean optional, String description,
                 String semantics, String units, String mBeanName,
                 String mBeanAttributeName, String mBeanCompositeDataItem) {
         this.name = name;
         this.optional = optional;
         this.description = description;
         this.mBeanName = mBeanName;
-        if (!units.isEmpty())
-            this.unit = parseUnits(name, units);
-        if (!semantics.isEmpty())
-            this.semantics = parseSemantics(name, semantics);
-        if (!mBeanAttributeName.isEmpty())
-            this.mBeanAttributeName = mBeanAttributeName;
-        if (!mBeanCompositeDataItem.isEmpty())
-            this.mBeanCompositeDataItem = mBeanCompositeDataItem;
+        this.unit = parseUnits(name, units);
+        this.semantics = parseSemantics(name, semantics);
+        this.mBeanAttributeName = mBeanAttributeName;
+        this.mBeanCompositeDataItem = mBeanCompositeDataItem;
     }
 
-    public Specification(JsonNode node) {
-        this(node.path("name").asText(),
-             node.path("optional").asBoolean(),
-             node.path("description").asText(),
-             node.path("semantics").asText(),
-             node.path("units").asText(),
-             node.path("mBeanName").asText(),
-             node.path("mBeanAttributeName").asText(),
-             node.path("mBeanCompositeDataItem").asText());
-    }
-
-    public ValueSemantics getSemantics() {
+    ValueSemantics getSemantics() {
         return semantics;
     }
 
-    public String getName() {
+    String getName() {
         return name;
     }
 
-    public boolean getOptional() {
+    boolean getOptional() {
         return optional;
     }
 
-    public String getDescription() {
+    String getDescription() {
         return description;
     }
 
-    public Unit<?> getUnits() {
+    Unit<?> getUnits() {
         return unit;
     }
 
-    public String getMBeanName() {
+    String getMBeanName() {
         return mBeanName;
     }
 
-    public String getMBeanAttributeName() {
+    String getMBeanAttributeName() {
         return mBeanAttributeName;
     }
 
-    public String getMBeanCompositeDataItem() {
+    String getMBeanCompositeDataItem() {
         return mBeanCompositeDataItem;
     }
 
-    public ValueSemantics parseSemantics(String name, String semantics) {
+    private ValueSemantics parseSemantics(String name, String semantics) {
         if (!semantics.isEmpty()) {
             if (semantics.equalsIgnoreCase("constant") ||
                 semantics.equalsIgnoreCase("discrete"))
@@ -113,28 +117,16 @@ public class Specification {
                      semantics.equalsIgnoreCase("instant") ||
                      semantics.equalsIgnoreCase("instantaneous"))
                 return ValueSemantics.FREE_RUNNING;
-            String msg = "Unexpected semantics [" + semantics + "]";
-            throw new SpecificationException(name, msg);
+            throw new SpecificationException(name, "Unexpected semantics [" + semantics + "]");
         }
         return ValueSemantics.FREE_RUNNING;
     }
 
-    public Unit<?> parseUnits(String name, String units) {
-        if (units.equalsIgnoreCase("milliseconds")) {
-            Unit<Time> MILLISECONDS = MetricPrefix.MILLI(Units.SECOND);
-            return MILLISECONDS;
+    private Unit<?> parseUnits(String name, String units) {
+        try {
+            return SimpleUnitFormat.getInstance().parse(units);
+        } catch (ParserException e) {
+            throw new SpecificationException("Unexpected units [" + units + "] for " + name, e);
         }
-        if (units.equalsIgnoreCase("bytes")) {
-            Unit<Information> BYTE = systems.uom.unicode.CLDR.BYTE;
-            return BYTE;
-        }
-        if (!units.isEmpty()) {
-            String msg = "Unexpected units [" + units + "]";
-            throw new SpecificationException(name, msg);
-        }
-        return ONE;
-
-        // UoM SimpleUnitFormat?  Something else?
-        //  return [AbstractUnit].parse(units);
     }
 }

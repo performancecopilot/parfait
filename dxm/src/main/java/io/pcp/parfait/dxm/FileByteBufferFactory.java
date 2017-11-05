@@ -37,17 +37,22 @@ public class FileByteBufferFactory implements ByteBufferFactory {
     public ByteBuffer build(int length) throws IOException {
         RandomAccessFile fos = null;
         try {
-            if (file.getParentFile().exists()) {
+            File parent = file.getParentFile();
+            if (parent == null) {
+                throw new RuntimeException(
+                        "Could not find parent of output file "
+                                + file.getCanonicalPath());
+            } else if (parent.exists()) {
                 file.delete();  /* directory update visible to MMV PMDA */
                 if (file.exists()) {
                     throw new RuntimeException(
                             "Could not delete existing file "
                                     + file.getCanonicalPath());
                 }
-            } else if (!file.getParentFile().mkdirs()) {
+            } else if (!parent.mkdirs()) {
                 throw new RuntimeException(
                         "Could not create output directory "
-                                + file.getParentFile().getCanonicalPath());
+                                + parent.getCanonicalPath());
             }
             fos = new RandomAccessFile(file, "rw");
             fos.setLength(length);

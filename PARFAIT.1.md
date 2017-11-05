@@ -29,6 +29,10 @@ If this directory is empty, does not exist, or is otherwise
 inaccessible, a minimal configuration is read from within the
 resources of the _parfait-agent.jar_ file.
 
+The available managed beans from a running `java`(1) application
+can be explored using standard Java tools like `jconsole`(1),
+when JMX access has been setup as in the EXAMPLES section below.
+
 Configuration files must be in the JSON format - refer to the
 CONFIGURATION section below for details of the file format.
 
@@ -70,6 +74,9 @@ Maximum startup time in which JMX values are still being created,
 before exporting as memory mapped values, in milliseconds.
 The default value is 5000 (5 seconds).
 
+* `-h` / `--help`:
+Show a brief usage message and exit.
+
 ## EXAMPLES
 
 The following examples can be installed locally using the
@@ -81,24 +88,32 @@ any PCP client tool, such as
 * pminfo `-f` mmv
 * pmprobe `-v` mmv
 * pmchart
-* pmie
 * pmrep
+* pmie
 * [... and many others ...]
 
 The default mode of operation involves directly running the Java
 process to be instrumented with a javaagent:
 
-* _java_ -Dparfait.name=sleep **-javaagent**:/usr/share/java/parfait/parfait.jar -jar /usr/share/java/parfait/sleep.jar _Main_
+* _parfait_ --name sleep -- -jar /usr/share/java/parfait/sleep.jar
+
+Behind the scenes this runs:
+
+* _java_ -Dparfait.name=sleep **-javaagent**:/usr/share/java/parfait/parfait.jar -jar /usr/share/java/parfait/sleep.jar
 
 The alternative is the proxy mode, where an already running Java
 process is instrumented using its JMX server.
 To start the Java application with a JMX server exposed, use the
 following options:
 
-* _java_ **-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9875** -Dcom.sun.management.jmxremote.local.only=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -jar /usr/share/java/parfait/sleep.jar _Main_
+* _java_ **-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9875** -Dcom.sun.management.jmxremote.local.only=true -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -jar /usr/share/java/parfait/sleep.jar
 
 The JMX server is then allowing access from instrumentation by
 `parfait`, which can be invoked as follows:
+
+* _parfait_ --name sleep --connect localhost:9875
+
+Behind the scenes this runs:
 
 * _java_ -Dparfait.name=sleep -jar /usr/share/java/parfait/parfait.jar **-connect=localhost:9875**
 
@@ -131,7 +146,11 @@ The value _instantaneous_ is the default.
 
 * Metric **units**:
 A string which will be parsed to produce the JSR-363 units for
-the metric.  Currently _bytes_ or _milliseconds_ are supported.
+the metric.  Acceptable unit strings include: _s_, _seconds_,
+_ms_, _milliseconds_, _µs_, _microseconds_, _ns_, _nanoseconds_,
+_B_, _byte_, _bytes_, _KiB_, _Kbyte_, _MiB_, _Mbyte_,
+_GiB_, _Gbyte_, _TiB_, _Tbyte_, _EiB_, _Ebyte_,
+as well as _none_, _one_ and the empty string.
 
 * Whether the metric is **optional**:
 A boolean (default: _false_) which flags whether this metric
@@ -151,10 +170,16 @@ managed bean (e.g. _HeapMemoryUsage_).
 An optional string used to further classify an individual value
 of the managed bean attribute (e.g. _max_).
 
+## ENVIRONMENT
+
+The  contents of the environment variable **PARFAIT_JAVA_OPTS**,
+if any, are inserted into the java command line before the
+_-javaagent_ argument and before any arguments in _javaargs_.
+
 ## FILES
 
-* _$PCP-TMP-DIR/mmv/*_:
-default local of memory mapped values files created by `parfait`.
+* _$PCP\_TMP\_DIR/mmv/*_:
+memory mapped values files created by `parfait`.
 * _/etc/parfait/*.json_:
 configuration files defining metrics in the format described above.
 
@@ -179,6 +204,8 @@ configuration files defining metrics in the format described above.
 
 ## SEE ALSO
 
+`java`(1),
+`jconsole`(1),
 `PCPIntro`(1),
 `pmcd`(1),
 `pmchart`(1)
