@@ -7,8 +7,8 @@ To release parfait out to the wider community, you will need the following:
    * Maven
    * gpg
    * An account on [OSS Sonatype Repo](https://oss.sonatype.org/)
-   
-   
+
+
 OSS Sonatype
 ------------
 
@@ -16,7 +16,7 @@ You need to have access to OSS Sonatype repo to perform some manual actions duri
 
 The best place to start is to [read this Overview guide](http://central.sonatype.org/pages/ossrh-guide.html).
 
-It appears the account to be created _may_ need to be linked with access to the `io.pcp` project.  Create a new Sonatype JIRA Issue and add myself (`psmith@aconex.com`) as a watcher.  
+It appears the account to be created _may_ need to be linked with access to the `io.pcp` project.  Create a new Sonatype JIRA Issue and add myself (`psmith@aconex.com`) as a watcher.
 
 gpg
 ---
@@ -42,8 +42,8 @@ As outlined in the docs, to streamline the release process I recommend encoding 
       <activeProfile>gpg</activeProfile>
     ...
     </activeProfiles>
-    
-   
+
+
 Otherwise you will be asked for the passphrase for every single Parfait module (which is quite a few)....
 
 Maven
@@ -73,12 +73,12 @@ Once you have all the above components setup, the actual release process involve
 
   1. Invoke Maven's release process, a neat one-liner is this:
   ```
-  mvn release:prepare -DautoVersionSubmodules -DtagNameFormat="@{version}" release:perform
+  mvn release:prepare -DautoVersionSubmodules -DtagNameFormat="@{releaseVersion}" release:perform
   ```
   Note: use the tag convention of version number only - i.e. X.Y.Z only, without "parfait-" prefix -
   as this results in generation of source tarballs on github with the appropriate contents.
   This step publishes the artifacts to a _*temporary*_ holding area within OSS Sonatype.
-  
+
   2. The next step is outlined well here: [http://central.sonatype.org/pages/releasing-the-deployment.html]
 
 
