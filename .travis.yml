@@ -1,14 +1,8 @@
-language: java
+language: bash
 
 dist: trusty
 sudo: required
+services:
+  - docker
 
-before_install:
-  - wget -qO - https://bintray.com/user/downloadSubjectPublicKey?username=pcp | sudo apt-key add -
-  - echo "deb https://dl.bintray.com/pcp/trusty trusty main" | sudo tee -a /etc/apt/sources.list
-  - sudo apt-get -qq update
-  - sudo apt-get install -y pcp pcp-gui
-  - sudo touch /var/lib/pcp/pmdas/mmv/.NeedInstall
-  - sudo service pcp restart
-
-script: mvn -B -V clean install verify
+script: docker run -ti -v `pwd`:/parfait maven:3-jdk-8 /parfait/.ci.sh
