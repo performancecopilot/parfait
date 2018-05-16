@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2016-2017 Red Hat
+# Copyright (c) 2016-2018 Red Hat
 #
 # This is free software; you can redistribute it and/or modify it
 # under the terms of the GNU Lesser General Public License as
@@ -146,10 +146,10 @@ do
 done
 
 if [ "$JVMMODE" = "proxy" ]; then
-    OPTIONS="-connect $PARFAIT_CONNECT"
-    [ -n "$PARFAIT_NAME" ] && OPTIONS="$OPTIONS -name $PARFAIT_NAME"
-    [ -n "$PARFAIT_CLUSTER" ] && OPTIONS="$OPTIONS -cluster $PARFAIT_CLUSTER"
-    [ -n "$PARFAIT_INTERVAL" ] && OPTIONS="$OPTIONS -interval $PARFAIT_INTERVAL"
+    OPTIONS="-connect=$PARFAIT_CONNECT"
+    [ -n "$PARFAIT_NAME" ] && OPTIONS="$OPTIONS -name=$PARFAIT_NAME"
+    [ -n "$PARFAIT_CLUSTER" ] && OPTIONS="$OPTIONS -cluster=$PARFAIT_CLUSTER"
+    [ -n "$PARFAIT_INTERVAL" ] && OPTIONS="$OPTIONS -interval=$PARFAIT_INTERVAL"
     ARGUMENTS="-jar ${PARFAIT_JAR} ParfaitAgent ${OPTIONS}"
 else
     [ -z "$*" ] && usage 1
