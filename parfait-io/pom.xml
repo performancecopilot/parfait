@@ -2,14 +2,14 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.custardsource.parfait</groupId>
   <artifactId>parfait-io</artifactId>
-  <version>0.3.10</version>
+  <version>0.3.11-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>parfait-io</name>
   <description>Toolset for collection IO-related metrics for parfait</description>
   <parent>
     <groupId>com.custardsource</groupId>
     <artifactId>parfait</artifactId>
-    <version>0.3.10</version>
+    <version>0.3.11-SNAPSHOT</version>
   </parent>
   <dependencies>
     <dependency>
