@@ -5,7 +5,7 @@
     <version>0.3.10-SNAPSHOT</version>
   </parent>
   <properties>
-    <cxf.version>2.2.3</cxf.version>
+    <cxf.version>2.3.0</cxf.version>
   </properties>
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.custardsource.parfait</groupId>
