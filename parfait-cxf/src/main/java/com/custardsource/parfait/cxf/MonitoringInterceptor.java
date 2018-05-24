@@ -3,6 +3,7 @@ package com.custardsource.parfait.cxf;
 import org.apache.cxf.interceptor.Fault;
 import org.apache.cxf.jaxrs.model.OperationResourceInfo;
 import org.apache.cxf.message.Exchange;
+import org.apache.cxf.message.MessageImpl;
 import org.apache.cxf.message.XMLMessage;
 import org.apache.cxf.phase.AbstractPhaseInterceptor;
 import org.apache.cxf.phase.Phase;
@@ -11,7 +12,7 @@ import com.custardsource.parfait.timing.EventMetricCollector;
 import com.custardsource.parfait.timing.EventTimer;
 import com.custardsource.parfait.timing.Timeable;
 
-public class MonitoringInterceptor extends AbstractPhaseInterceptor<XMLMessage> {
+public class MonitoringInterceptor extends AbstractPhaseInterceptor<MessageImpl> {
 	private final EventTimer timer;
 
 	public MonitoringInterceptor(EventTimer timer) {
@@ -20,7 +21,8 @@ public class MonitoringInterceptor extends AbstractPhaseInterceptor<XMLMessage> 
 	}
 
 	@Override
-	public void handleMessage(XMLMessage message) throws Fault {
+	public void handleMessage(MessageImpl message) throws Fault {
+		XMLMessage xmlMsg = new XMLMessage(message);
 		Exchange exchange = message.getExchange();
 		// TODO break out into a strategy (not JAXRS-specific)
 		OperationResourceInfo operationResourceInfo = exchange.get(OperationResourceInfo.class);
@@ -31,7 +33,7 @@ public class MonitoringInterceptor extends AbstractPhaseInterceptor<XMLMessage> 
 
 		// TODO annotate with a better name?
 		String methodName = operationResourceInfo.getMethodToInvoke().getName();
-		// TODO annotate with a better name?
+		// TODO annotate with a better name?	
 		Object key = operationResourceInfo.getClassResourceInfo().getResourceProvider()
 				.getInstance(message);
 		if (!(key instanceof Timeable)) {
