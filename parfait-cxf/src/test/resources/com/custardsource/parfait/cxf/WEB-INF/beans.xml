@@ -9,7 +9,6 @@ http://cxf.apache.org/schemas/jaxrs.xsd">
 
   <!-- do not use import statements if CXFServlet init parameters link to this beans.xml -->
   <import resource="classpath:META-INF/cxf/cxf.xml" />
-  <import resource="classpath:META-INF/cxf/cxf-extension-jaxrs-binding.xml" />
   <import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
   
   <bean id="timer" class="com.custardsource.parfait.timing.EventTimer">

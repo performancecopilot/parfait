@@ -5,7 +5,7 @@
     <version>0.3.11-SNAPSHOT</version>
   </parent>
   <properties>
-    <cxf.version>2.3.0</cxf.version>
+    <cxf.version>3.0.14</cxf.version>
   </properties>
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.custardsource.parfait</groupId>
@@ -28,16 +28,21 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-expression</artifactId>
-      <version>3.0.5.RELEASE</version>
+      <version>${spring.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-aop</artifactId>
-      <version>3.0.5.RELEASE</version>
+      <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-web</artifactId>
+        <version>${spring.version}</version>
     </dependency>
     <dependency>
     	<groupId>org.apache.cxf</groupId>
-    	<artifactId>cxf-api</artifactId>
+    	<artifactId>cxf-core</artifactId>
         <version>${cxf.version}</version>
     	<type>jar</type>
     	<scope>compile</scope>
