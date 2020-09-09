@@ -76,7 +76,7 @@
       <plugin>
 	<groupId>com.mycila</groupId>
         <artifactId>license-maven-plugin</artifactId>
-        <version>4.0.rc1</version>
+        <version>${license-maven-plugin.version}</version>
         <inherited>false</inherited>
         <configuration>
           <skip>${license.skip}</skip>

@@ -117,6 +117,7 @@
     <unit.systems.version>0.6</unit.systems.version>
     <unitils.version>3.4.3</unitils.version>
     <jackson.version>2.11.2</jackson.version>
+      <license-maven-plugin.version>4.0.rc1</license-maven-plugin.version>
   </properties>
 
     <build>
@@ -222,7 +223,7 @@
 	    <plugin>
 	      <groupId>com.mycila</groupId>
               <artifactId>license-maven-plugin</artifactId>
-              <version>4.0.rc1</version>
+              <version>${license-maven-plugin.version}</version>
               <inherited>false</inherited>
               <configuration>
                 <skip>${license.skip}</skip>
