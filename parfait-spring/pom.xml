@@ -39,13 +39,13 @@
         <dependency>
             <groupId>cglib</groupId>
             <artifactId>cglib</artifactId>
-            <version>2.2</version>
+            <version>3.3.0</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.aspectj</groupId>
             <artifactId>aspectjweaver</artifactId>
-            <version>1.8.4</version>
+            <version>1.9.6</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
