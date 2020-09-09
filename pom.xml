@@ -117,7 +117,7 @@
     <unit.systems.version>0.6</unit.systems.version>
     <unitils.version>3.4.3</unitils.version>
     <jackson.version>2.11.2</jackson.version>
-      <license-maven-plugin.version>4.0.rc1</license-maven-plugin.version>
+    <license-maven-plugin.version>3.0</license-maven-plugin.version>
   </properties>
 
     <build>
