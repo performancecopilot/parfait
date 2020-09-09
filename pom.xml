@@ -104,7 +104,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <spring.version>4.2.5.RELEASE</spring.version>
     <slf4j.version>1.6.1</slf4j.version>
-    <log4j.version>1.2.14</log4j.version>
+    <log4j.version>1.2.17</log4j.version>
     <jdk.version>1.8</jdk.version>
     <project.build.javaVersion>${jdk.version}</project.build.javaVersion>
     <maven.compile.targetLevel>${jdk.version}</maven.compile.targetLevel>
