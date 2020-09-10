@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+#ensure no prompts for stuff like timezones
 export DEBIAN_FRONTEND=noninteractive
 
 apt-get update
@@ -8,7 +9,6 @@ wget -qO - https://bintray.com/user/downloadSubjectPublicKey?username=pcp | apt-
 echo "deb https://dl.bintray.com/pcp/focal focal main" >> /etc/apt/sources.list
 apt-get -qq update
 
-# prompts for timezone stuff?
 apt-get install -y pcp pcp-gui
 touch /var/lib/pcp/pmdas/mmv/.NeedInstall
 /etc/init.d/pmcd start
