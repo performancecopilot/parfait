@@ -1,8 +1,8 @@
 language: bash
 
-dist: bionic
+dist: focal
 sudo: required
 services:
   - docker
 
-script: docker run -ti -v `pwd`:/parfait maven:3-jdk-8 /parfait/.ci.sh
+script: docker run -ti -v `pwd`:/parfait  ubuntu:focal /parfait/.ci.sh
