@@ -73,9 +73,9 @@ Once you have all the above components setup, the actual release process involve
 
   1. Invoke Maven's release process, a neat one-liner is this:
   ```
-  mvn release:prepare -DautoVersionSubmodules -DtagNameFormat="@{releaseVersion}" release:perform
+  mvn release:prepare release:perform
   ```
-  Note: use the tag convention of version number only - i.e. X.Y.Z only, without "parfait-" prefix -
+  Note: by default Parfait uses the tag convention of version number only - i.e. X.Y.Z only, without "parfait-" prefix -
   as this results in generation of source tarballs on github with the appropriate contents.
   This step publishes the artifacts to a _*temporary*_ holding area within OSS Sonatype.
 

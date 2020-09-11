@@ -129,6 +129,8 @@
                     <version>2.5.3</version>
                     <configuration>
                         <mavenExecutorId>forked-path</mavenExecutorId>
+                        <autoVersionSubmodules>true</autoVersionSubmodules>
+                        <tagNameFormat>@{project.version}</tagNameFormat>
                     </configuration>
                 </plugin>
             </plugins>
