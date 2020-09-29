@@ -113,9 +113,9 @@
     <java.major.source.version>${jdk.version}</java.major.source.version>
     <java.major.target.version>${jdk.version}</java.major.target.version>
     <metrics3.version>2.0.13</metrics3.version>
-    <unit.version>1.0</unit.version>
-    <unit.se.version>1.0.4</unit.se.version>
-    <unit.systems.version>0.6</unit.systems.version>
+    <unit.version>2.0</unit.version>
+    <unit.ri.version>2.0.4</unit.ri.version>
+    <unit.systems.version>2.0.2</unit.systems.version>
     <unitils.version>3.4.3</unitils.version>
     <jackson.version>2.11.2</jackson.version>
     <license-maven-plugin.version>3.0</license-maven-plugin.version>
@@ -340,9 +340,9 @@
             <version>${unit.version}</version>
           </dependency>
           <dependency>
-            <groupId>tec.uom</groupId>
-            <artifactId>uom-se</artifactId>
-            <version>${unit.se.version}</version>
+            <groupId>tech.units</groupId>
+            <artifactId>indriya</artifactId>
+            <version>${unit.ri.version}</version>
           </dependency>
           <dependency>
             <groupId>systems.uom</groupId>
@@ -351,7 +351,7 @@
           </dependency>
           <dependency>
             <groupId>systems.uom</groupId>
-            <artifactId>systems-unicode-java8</artifactId>
+            <artifactId>systems-unicode</artifactId>
             <version>${unit.systems.version}</version>
           </dependency>
           <dependency>

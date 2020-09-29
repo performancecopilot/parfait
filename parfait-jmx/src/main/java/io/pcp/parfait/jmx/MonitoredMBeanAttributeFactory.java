@@ -16,7 +16,7 @@
 
 package io.pcp.parfait.jmx;
 
-import static tec.uom.se.AbstractUnit.ONE;
+import static tech.units.indriya.AbstractUnit.ONE;
 
 import java.io.IOException;
 

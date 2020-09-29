@@ -67,7 +67,7 @@ public interface Monitorable<T> {
      * @return the JSR-363 Unit represented by the value of this Monitorable.
      *         This may be used to do comparisons and rate-conversions between
      *         metrics which do not share the same scale. Values which do not
-     *         take a unit should use {@link tec.uom.se.AbstractUnit#ONE};
+     *         take a unit should use {@link tech.units.indriya.AbstractUnit#ONE};
      *         values for which no unit is sensible (e.g. String values) may
      *         return null.
      */

@@ -18,10 +18,9 @@ package io.pcp.parfait.dxm.semantics;
 
 import static systems.uom.unicode.CLDR.BIT;
 import static systems.uom.unicode.CLDR.BYTE;
-import static tec.uom.se.AbstractConverter.IDENTITY;
-import static tec.uom.se.AbstractQuantity.NONE;
-import static tec.uom.se.AbstractUnit.ONE;
-import static tec.uom.se.unit.Units.SECOND;
+import static tech.units.indriya.AbstractUnit.ONE;
+import static tech.units.indriya.function.AbstractConverter.IDENTITY;
+import static tech.units.indriya.unit.Units.SECOND;
 
 import javax.measure.quantity.Dimensionless;
 import javax.measure.Unit;

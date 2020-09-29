@@ -38,7 +38,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.unitils.reflectionassert.ReflectionAssert.assertReflectionEquals;
-import static tec.uom.se.unit.Units.HOUR;
+import static tech.units.indriya.unit.Units.HOUR;
 
 public class PcpMetricInfoV2Test {
 

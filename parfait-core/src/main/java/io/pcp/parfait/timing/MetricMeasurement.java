@@ -16,8 +16,9 @@
 
 package io.pcp.parfait.timing;
 
-import tec.uom.se.AbstractQuantity;
-import tec.uom.se.quantity.NumberQuantity;
+import tech.units.indriya.quantity.Quantities;
+
+import javax.measure.Quantity;
 
 import com.google.common.base.Preconditions;
 
@@ -39,6 +40,7 @@ class MetricMeasurement {
 
     public MetricMeasurement(ThreadMetric metricSource, Thread thread) {
         this.metricSource = metricSource;
+        System.out.println(metricSource.getMetricName() + " " + metricSource.getUnit()); // FIXME debug output
         this.thread = thread;
     }
 
@@ -68,14 +70,14 @@ class MetricMeasurement {
         endValue = metricSource.getValueForThread(thread);
     }
 
-    public AbstractQuantity<?> totalValue() {
+    public Quantity<?> totalValue() {
     	Preconditions.checkState(endValue != null, "Can't measure time until timer is stopped");
-        return NumberQuantity.of(endValue - startValue, metricSource.getUnit());
+        return Quantities.getQuantity(endValue - startValue, metricSource.getUnit());
     }
 
-    public AbstractQuantity<?> ownTimeValue() {
+    public Quantity<?> ownTimeValue() {
     	Preconditions.checkState(endValue != null, "Can't measure time until timer is stopped");
-        return NumberQuantity.of(ownValueSoFar, metricSource.getUnit());
+        return Quantities.getQuantity(ownValueSoFar, metricSource.getUnit());
     }
 
     public long inProgressValue() {

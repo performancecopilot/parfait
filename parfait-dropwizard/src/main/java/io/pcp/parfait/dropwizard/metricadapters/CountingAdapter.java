@@ -16,7 +16,7 @@
 
 package io.pcp.parfait.dropwizard.metricadapters;
 
-import static tec.uom.se.AbstractUnit.ONE;
+import static tech.units.indriya.AbstractUnit.ONE;
 
 import java.util.Set;
 

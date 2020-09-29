@@ -137,7 +137,7 @@
     </dependency>
     <dependency>
        <groupId>systems.uom</groupId>
-       <artifactId>systems-unicode-java8</artifactId>
+       <artifactId>systems-unicode</artifactId>
     </dependency>
     <dependency>
       <groupId>io.pcp.parfait</groupId>

@@ -46,8 +46,8 @@
 			<artifactId>unit-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>tec.uom</groupId>
-			<artifactId>uom-se</artifactId>
+			<groupId>tech.units</groupId>
+			<artifactId>indriya</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>systems.uom</groupId>
@@ -55,7 +55,7 @@
 		</dependency>
 		<dependency>
             <groupId>systems.uom</groupId>
-            <artifactId>systems-unicode-java8</artifactId>
+            <artifactId>systems-unicode</artifactId>
         </dependency>
 	</dependencies>
 </project>

@@ -16,8 +16,8 @@
 
 package io.pcp.parfait.dropwizard.metricadapters;
 
-import static tec.uom.se.unit.MetricPrefix.NANO;
-import static tec.uom.se.unit.Units.SECOND;
+import static javax.measure.MetricPrefix.NANO;
+import static tech.units.indriya.unit.Units.SECOND;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;

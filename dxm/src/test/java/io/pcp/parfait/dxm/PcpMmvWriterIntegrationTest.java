@@ -26,7 +26,7 @@ import static io.pcp.parfait.dxm.MmvVersion.MMV_VERSION1;
 import static io.pcp.parfait.dxm.MmvVersion.MMV_VERSION2;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static tec.uom.se.AbstractUnit.ONE;
+import static tech.units.indriya.AbstractUnit.ONE;
 
 public class PcpMmvWriterIntegrationTest {
 

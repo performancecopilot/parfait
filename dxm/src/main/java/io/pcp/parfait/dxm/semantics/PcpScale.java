@@ -16,9 +16,9 @@
 
 package io.pcp.parfait.dxm.semantics;
 
-import static tec.uom.se.AbstractUnit.ONE;
+import static tech.units.indriya.AbstractUnit.ONE;
 
-import tec.uom.se.unit.Units;
+import tech.units.indriya.unit.Units;
 
 import systems.uom.quantity.Information;
 import systems.uom.unicode.CLDR;
