@@ -72,11 +72,13 @@ class MetricMeasurement {
 
     public Quantity<?> totalValue() {
     	Preconditions.checkState(endValue != null, "Can't measure time until timer is stopped");
-        return Quantities.getQuantity(endValue - startValue, metricSource.getUnit());
+        System.out.println("Unit: " + metricSource.getUnit()); // FIXME remove
+    	return Quantities.getQuantity(endValue - startValue, metricSource.getUnit());
     }
 
     public Quantity<?> ownTimeValue() {
     	Preconditions.checkState(endValue != null, "Can't measure time until timer is stopped");
+    	System.out.println("Unit: " + metricSource.getUnit()); // FIXME remove
         return Quantities.getQuantity(ownValueSoFar, metricSource.getUnit());
     }
 
