@@ -20,6 +20,9 @@ import tech.units.indriya.quantity.Quantities;
 
 import javax.measure.Quantity;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Preconditions;
 
 /**
@@ -31,6 +34,8 @@ import com.google.common.base.Preconditions;
  * in this event's code as opposed to forwarding elsewhere).
  */
 class MetricMeasurement {
+	private static final Logger LOG = LoggerFactory.getLogger(MetricMeasurement.class);
+	
     private volatile Long startValue;
     private Long endValue;
     private Long lastStartOwnTimeValue;
@@ -39,9 +44,14 @@ class MetricMeasurement {
     private final Thread thread;
 
     public MetricMeasurement(ThreadMetric metricSource, Thread thread) {
-        this.metricSource = metricSource;
-        System.out.println(metricSource.getMetricName() + " " + metricSource.getUnit()); // FIXME debug output
+        this.metricSource = metricSource;        
         this.thread = thread;
+        if (metricSource != null && LOG.isWarnEnabled()) {
+	        LOG.warn("Constructor: ThreadMetric ({}, {}, {}), Thread({})",
+	                new Object[] { metricSource.getMetricName(), 
+	                		metricSource.getUnit(), metricSource.getDescription(),
+	                		thread });
+        }
     }
 
     public void startTimer() {
@@ -72,13 +82,11 @@ class MetricMeasurement {
 
     public Quantity<?> totalValue() {
     	Preconditions.checkState(endValue != null, "Can't measure time until timer is stopped");
-        System.out.println("Unit: " + metricSource.getUnit()); // FIXME remove
     	return Quantities.getQuantity(endValue - startValue, metricSource.getUnit());
     }
 
     public Quantity<?> ownTimeValue() {
-    	Preconditions.checkState(endValue != null, "Can't measure time until timer is stopped");
-    	System.out.println("Unit: " + metricSource.getUnit()); // FIXME remove
+    	Preconditions.checkState(endValue != null, "Can't measure time until timer is stopped");    	
         return Quantities.getQuantity(ownValueSoFar, metricSource.getUnit());
     }
 
