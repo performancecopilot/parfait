@@ -46,8 +46,8 @@ class MetricMeasurement {
     public MetricMeasurement(ThreadMetric metricSource, Thread thread) {
         this.metricSource = metricSource;        
         this.thread = thread;
-        if (metricSource != null && LOG.isWarnEnabled()) {
-	        LOG.warn("Constructor: ThreadMetric ({}, {}, {}), Thread({})",
+        if (metricSource != null && LOG.isDebugEnabled()) {
+	        LOG.debug("Constructor: ThreadMetric ({}, {}, {}), Thread({})",
 	                new Object[] { metricSource.getMetricName(), 
 	                		metricSource.getUnit(), metricSource.getDescription(),
 	                		thread });
