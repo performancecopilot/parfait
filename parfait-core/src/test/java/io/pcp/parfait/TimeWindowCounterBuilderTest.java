@@ -18,7 +18,7 @@ package io.pcp.parfait;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static tec.uom.se.AbstractUnit.ONE;
+import static tech.units.indriya.AbstractUnit.ONE;
 import static systems.uom.unicode.CLDR.BYTE;
 
 import org.junit.Before;

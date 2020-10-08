@@ -82,7 +82,7 @@ A *Monitorable* has a few important key properties:
   - A human-readable description of the metric's meaning and origin.
 
 - **unit**
-  - A JSR-363 measurement unit for the metric.
+  - A JSR-385 measurement unit for the metric.
   - This may or may not be used by various output formats, but is intended to provide additional context and comparisons between units (e.g. between B/s and KB/s)
 
 - **valueSemantics**
@@ -142,7 +142,7 @@ All binary versions of *parfait* are synced to the Maven central repository. If 
         <dependency>
           <groupId>io.pcp.parfait</groupId>
           <artifactId>parfait-core</artifactId>
-          <version>0.5.1</version>
+          <version>1.1.0</version>
         </dependency>
         ...
       <dependencies>

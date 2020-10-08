@@ -16,8 +16,8 @@
 
 package io.pcp.parfait.timing;
 
-import static tec.uom.se.unit.Units.HERTZ;
-import static tec.uom.se.unit.MetricPrefix.MEGA;
+import static tech.units.indriya.unit.Units.HERTZ;
+import static javax.measure.MetricPrefix.MEGA;
 
 import javax.measure.Unit;
 import junit.framework.TestCase;
@@ -26,7 +26,7 @@ public class LoggerSinkTest extends TestCase {
     public void testShouldProduceExpectedMetricString() {
         MetricMeasurement measurement = getUnitMeasurement(HERTZ, 1);
         String result = new LoggerSink().buildSingleMetricResult(measurement);
-        assertEquals("dummy: own 1.0 Hz, total 1.0 Hz", result);
+        assertEquals("dummy: own 1 Hz, total 1 Hz", result);
     }
 
     public void testShouldNormalizeMetricStringToCorrectUnit() {

@@ -27,6 +27,9 @@ import static org.mockito.Mockito.when;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
+
+import tech.units.indriya.AbstractUnit;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -60,7 +63,7 @@ public class EventMetricCollectorTest {
         when(nestedCounter.getEventGroupName()).thenReturn(NESTED_GROUP);
         EventMetricCounters invocationCounter = mock(EventMetricCounters.class);
         when(topLevelCounter.getInvocationCounter()).thenReturn(invocationCounter);
-        ThreadMetric threadMetric = mock(ThreadMetric.class);
+        ThreadMetric threadMetric = new DummyThreadMetric(AbstractUnit.ONE);
         when(topLevelCounter.getMetricSources()).thenReturn(newArrayList(threadMetric));
         when(topLevelCounter.getCounterForMetric(threadMetric)).thenReturn(topLevelMetricCounters);
     }

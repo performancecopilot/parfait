@@ -16,9 +16,9 @@
 
 package io.pcp.parfait.jdbc;
 
-import static tec.uom.se.unit.MetricPrefix.MILLI;
-import static tec.uom.se.unit.Units.SECOND;
-import static tec.uom.se.AbstractUnit.ONE;
+import static javax.measure.MetricPrefix.MILLI;
+import static tech.units.indriya.unit.Units.SECOND;
+import static tech.units.indriya.AbstractUnit.ONE;
 
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationHandler;

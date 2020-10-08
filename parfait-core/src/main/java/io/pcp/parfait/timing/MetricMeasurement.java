@@ -16,8 +16,12 @@
 
 package io.pcp.parfait.timing;
 
-import tec.uom.se.AbstractQuantity;
-import tec.uom.se.quantity.NumberQuantity;
+import tech.units.indriya.quantity.Quantities;
+
+import javax.measure.Quantity;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
@@ -30,6 +34,8 @@ import com.google.common.base.Preconditions;
  * in this event's code as opposed to forwarding elsewhere).
  */
 class MetricMeasurement {
+	private static final Logger LOG = LoggerFactory.getLogger(MetricMeasurement.class);
+	
     private volatile Long startValue;
     private Long endValue;
     private Long lastStartOwnTimeValue;
@@ -38,8 +44,14 @@ class MetricMeasurement {
     private final Thread thread;
 
     public MetricMeasurement(ThreadMetric metricSource, Thread thread) {
-        this.metricSource = metricSource;
+        this.metricSource = metricSource;        
         this.thread = thread;
+        if (metricSource != null && LOG.isDebugEnabled()) {
+	        LOG.debug("Constructor: ThreadMetric ({}, {}, {}), Thread({})",
+	                new Object[] { metricSource.getMetricName(), 
+	                		metricSource.getUnit(), metricSource.getDescription(),
+	                		thread });
+        }
     }
 
     public void startTimer() {
@@ -68,14 +80,14 @@ class MetricMeasurement {
         endValue = metricSource.getValueForThread(thread);
     }
 
-    public AbstractQuantity<?> totalValue() {
+    public Quantity<?> totalValue() {
     	Preconditions.checkState(endValue != null, "Can't measure time until timer is stopped");
-        return NumberQuantity.of(endValue - startValue, metricSource.getUnit());
+    	return Quantities.getQuantity(endValue - startValue, metricSource.getUnit());
     }
 
-    public AbstractQuantity<?> ownTimeValue() {
-    	Preconditions.checkState(endValue != null, "Can't measure time until timer is stopped");
-        return NumberQuantity.of(ownValueSoFar, metricSource.getUnit());
+    public Quantity<?> ownTimeValue() {
+    	Preconditions.checkState(endValue != null, "Can't measure time until timer is stopped");    	
+        return Quantities.getQuantity(ownValueSoFar, metricSource.getUnit());
     }
 
     public long inProgressValue() {

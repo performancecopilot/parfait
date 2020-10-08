@@ -16,7 +16,7 @@
 
 package io.pcp.parfait.dropwizard.metricadapters;
 
-import static tec.uom.se.AbstractUnit.ONE;
+import static tech.units.indriya.AbstractUnit.ONE;
 
 import com.codahale.metrics.Metered;
 import io.pcp.parfait.Monitorable;

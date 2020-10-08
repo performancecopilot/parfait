@@ -16,7 +16,7 @@
 
 package io.pcp.parfait;
 
-import static tec.uom.se.AbstractUnit.ONE;
+import static tech.units.indriya.AbstractUnit.ONE;
 
 import java.util.List;
 import java.util.Timer;

@@ -17,16 +17,16 @@
 package io.pcp.parfait;
 
 import static systems.uom.unicode.CLDR.BYTE;
-import static tec.uom.se.AbstractUnit.ONE;
-import static tec.uom.se.unit.MetricPrefix.MICRO;
-import static tec.uom.se.unit.MetricPrefix.MILLI;
-import static tec.uom.se.unit.MetricPrefix.NANO;
-import static tec.uom.se.unit.Units.SECOND;
+import static tech.units.indriya.AbstractUnit.ONE;
+import static javax.measure.MetricPrefix.MICRO;
+import static javax.measure.MetricPrefix.MILLI;
+import static javax.measure.MetricPrefix.NANO;
+import static tech.units.indriya.unit.Units.SECOND;
 
 import javax.measure.Unit;
-import javax.measure.format.ParserException;
+import javax.measure.format.MeasurementParseException;
 
-import tec.uom.se.format.SimpleUnitFormat;
+import tech.units.indriya.format.SimpleUnitFormat;
 
 class Specification {
 
@@ -125,7 +125,7 @@ class Specification {
     private Unit<?> parseUnits(String name, String units) {
         try {
             return SimpleUnitFormat.getInstance().parse(units);
-        } catch (ParserException e) {
+        } catch (MeasurementParseException e) {
             throw new SpecificationException("Unexpected units [" + units + "] for " + name, e);
         }
     }
