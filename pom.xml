@@ -243,6 +243,27 @@
                     </execution>
                 </executions>
             </plugin>
+        <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>license-maven-plugin</artifactId>
+            <version>2.0.0</version>
+            <configuration>
+                <useMissingFile>true</useMissingFile>
+                <useRepositoryMissingFiles>false</useRepositoryMissingFiles>
+                <licenseMerges>
+                    <licenseMerge>The Apache Software License, Version 2.0|Apache License, Version 2.0|Apache Public License 2.0|Apache 2.0|ASF 2.0|Apache License 2.0|Apache License, version 2.0|Apache 2</licenseMerge>
+                    <licenseMerge>MIT License|The MIT License</licenseMerge>
+                </licenseMerges>
+            </configuration>
+            <executions>
+                <execution>
+                    <phase>generate-resources</phase>
+                    <goals>
+                        <goal>aggregate-add-third-party</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
 	    <plugin>
 	      <groupId>com.mycila</groupId>
               <artifactId>license-maven-plugin</artifactId>
@@ -281,6 +302,11 @@
                 </execution>
               </executions>
 	    </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.9.1</version>
+            </plugin>
         </plugins>
         <extensions>
             <extension>
@@ -328,6 +354,20 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>findbugs-maven-plugin</artifactId>
                 <version>3.0.5</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>3.1.0</version>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>index</report>
+                            <report>licenses</report>
+                            <report>dependency-info</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
             </plugin>
         </plugins>
     </reporting>
