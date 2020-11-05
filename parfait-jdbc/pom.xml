@@ -19,14 +19,14 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.pcp.parfait</groupId>
   <artifactId>parfait-jdbc</artifactId>
-  <version>1.1.1-SNAPSHOT</version>
+  <version>1.1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>parfait-jdbc</name>
   <description>JDBC driver to allow collection of Parfait performance metrics</description>
   <parent>
     <groupId>io.pcp</groupId>
     <artifactId>parfait</artifactId>
-    <version>1.1.1-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT</version>
   </parent>
   <dependencies>
     <dependency>
