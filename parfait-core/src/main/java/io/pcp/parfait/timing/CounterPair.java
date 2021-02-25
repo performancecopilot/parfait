@@ -20,11 +20,11 @@ import io.pcp.parfait.Counter;
 import io.pcp.parfait.MonitoredCounter;
 
 public class CounterPair implements Counter {
-    private final MonitoredCounter masterCounter;
+    private final MonitoredCounter primaryCounter;
     private final ThreadCounter threadCounter;
 
-    CounterPair(MonitoredCounter masterCounter, ThreadCounter threadCounter) {
-        this.masterCounter = masterCounter;
+    CounterPair(MonitoredCounter primaryCounter, ThreadCounter threadCounter) {
+        this.primaryCounter = primaryCounter;
         this.threadCounter = threadCounter;
     }
 
@@ -35,7 +35,7 @@ public class CounterPair implements Counter {
 
     @Override
     public void inc(long increment) {
-        masterCounter.inc(increment);
+        primaryCounter.inc(increment);
         threadCounter.inc(increment);
     }
 
@@ -43,7 +43,12 @@ public class CounterPair implements Counter {
         return threadCounter;
     }
 
+    public MonitoredCounter getPrimaryCounter() {
+        return primaryCounter;
+    }
+
+    @Deprecated
     public MonitoredCounter getMasterCounter() {
-        return masterCounter;
+        return getPrimaryCounter();
     }
 }

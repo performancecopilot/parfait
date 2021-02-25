@@ -78,7 +78,7 @@
 
 <h2 id="SYNOPSIS">SYNOPSIS</h2>
 
-<p><code>parfait</code> [<code>-n</code>/<code>--name</code> <em>name</em>] [<code>-c</code>/<code>--cluster</code> <em>id</em>] [<code>-i</code>/<code>--interval</code> <em>msec</em>] [<code>-s</code>/<code>--startup</code> <em>delay</em>] [<code>-j</code>/<code>--jmxserver</code> <code>--connect</code> <em>host:port</em>] [<code>--</code>] [<code>javaargs</code> ...]</p>
+<p><code>parfait</code> [<code>-n</code> <em>name</em>] [<code>-c</code> <em>id</em>] [<code>-i</code> <em>msec</em>] [<code>-s</code> <em>delay</em>] [[<code>--jmxserver</code>] | [<code>--connect</code> <em>host:port</em>]] [<code>--</code>] [<code>javaargs</code> ...]</p>
 
 <h2 id="DESCRIPTION">DESCRIPTION</h2>
 
@@ -124,17 +124,17 @@ both modes.</p>
 <p>The command line options available are:</p>
 
 <dl>
-<dt><code>-n</code> / <code>--name</code> <em>name</em></dt><dd><p>The <em>name</em> argument specifies the <em>mmv.*</em> metric tree name in
+<dt><code>-n</code> <em>name</em>, <code>--name</code> <em>name</em></dt><dd><p>The <em>name</em> argument specifies the <em>mmv.*</em> metric tree name in
 the <code>PMNS</code>(5) that will be used to identify this application.</p></dd>
-<dt><code>-c</code> / <code>--cluster</code> <em>identifier</em></dt><dd><p>The numeric performance metric cluster <em>identifier</em> to be used to
+<dt><code>-c</code> <em>identifier</em>, <code>--cluster</code> <em>identifier</em></dt><dd><p>The numeric performance metric cluster <em>identifier</em> to be used to
 uniquely identify this application.
 A value of zero is the default, and causes the MMV PMDA to simply
 use the next available number.</p></dd>
-<dt><code>-i</code> / <code>--interval</code> <em>msec</em></dt><dd><p>Delay between sampling (JMX values in particular) to refresh the
+<dt><code>-i</code> <em>msec</em>, <code>--interval</code> <em>msec</em></dt><dd><p>Delay between sampling (JMX values in particular) to refresh the
 values exported to PCP, in milliseconds.
 The default value is 1000 (1 second) and the minimum allowed value
 is 250 milliseconds.</p></dd>
-<dt><code>-j</code> / <code>--jmxserver</code> / <code>--connect</code> <em>hostname:port</em></dt><dd><p>Connect to the JMX server listening on the specified
+<dt><code>-j</code>, <code>--jmxserver</code>, <code>--connect</code> <em>hostname:port</em></dt><dd><p>Connect to the JMX server listening on the specified
 <em>hostname</em> and <em>port</em> number as the source of JMX metrics.
 This option allows proxying of metrics from a separate process,
 instead of the default <code>-javaagent</code> mode of operation.</p></dd>
@@ -210,7 +210,7 @@ configured using JSON configuration files.  The default used when
 no files are present below <em>/etc/parfait</em> is:</p>
 
 <ul>
-<li><a href="https://github.com/performancecopilot/parfait/tree/master/parfait-agent/src/main/resources/jvm.json"><em>jvm.json</em></a></li>
+<li><a href="https://github.com/performancecopilot/parfait/tree/main/parfait-agent/src/main/resources/jvm.json"><em>jvm.json</em></a></li>
 </ul>
 
 
@@ -264,7 +264,7 @@ if any, are inserted into the java command line before the
 <p><a href="https://github.com/performancecopilot/parfait">Parfait</a>:</p>
 
 <ul>
-<li><a href="https://github.com/performancecopilot/parfait/tree/master/parfait-agent/src/main/resources/jvm.json">Default metrics</a></li>
+<li><a href="https://github.com/performancecopilot/parfait/tree/main/parfait-agent/src/main/resources/jvm.json">Default metrics</a></li>
 </ul>
 
 
@@ -303,7 +303,7 @@ and
 
   <ol class='man-decor man-foot man foot'>
     <li class='tl'></li>
-    <li class='tc'>November 2017</li>
+    <li class='tc'>February 2021</li>
     <li class='tr'>parfait(1)</li>
   </ol>
 

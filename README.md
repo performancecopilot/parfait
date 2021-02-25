@@ -1,8 +1,8 @@
-![Parfait](https://raw.githubusercontent.com/performancecopilot/parfait/master/site/images/logo.jpg "Parfait Performance Monitoring")
+![Parfait](https://raw.githubusercontent.com/performancecopilot/parfait/main/site/images/logo.jpg "Parfait Performance Monitoring")
 
 Parfait is a performance monitoring library for Java which extracts metrics and makes them available in a variety of ways (including JMX beans and the open-source cross-platform [Performance Co-Pilot](http://pcp.io)).
 
-[![Build Status](https://travis-ci.org/performancecopilot/parfait.svg?branch=master)](https://travis-ci.org/performancecopilot/parfait)
+[![Build Status](https://travis-ci.org/performancecopilot/parfait.svg?branch=main)](https://travis-ci.org/performancecopilot/parfait)
 
 # Requirements
 
@@ -59,7 +59,7 @@ New PCP **mmv** metrics will then appear automatically for the duration of the i
 
 *parfait* is, like an ogre, made up of many layers. *parfait* provides several modules assisting with the various stages of metrics collection and performance monitoring (integration, collection, output), and each module is a separate Maven subproject (and hence, separate .jar artifact). The following diagram illustrates the provided core modules, along with their key responsibilities and some interactions between them:
 
-![Parfait Layers](https://raw.githubusercontent.com/performancecopilot/parfait/master/site/images/parfait-layers.png "Parfait Layers")
+![Parfait Layers](https://raw.githubusercontent.com/performancecopilot/parfait/main/site/images/parfait-layers.png "Parfait Layers")
 
 ## parfait-core
 *parfait-core* is the main module of *parfait*.  Fundamentally, it defines two things: a set of basic types used to encapsulate monitored values (such as the number of active user sessions, total database query execution count, and so on), and a very simple output mechanism for same. This provides a simple, powerful, and flexible way of collecting values from a variety of sources and collating them to different monitoring systems.

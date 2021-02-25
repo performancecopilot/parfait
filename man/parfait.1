@@ -1,13 +1,13 @@
 .\" generated with Ronn/v0.7.3
 .\" http://github.com/rtomayko/ronn/tree/0.7.3
 .
-.TH "PARFAIT" "1" "November 2017" "" ""
+.TH "PARFAIT" "1" "February 2021" "" ""
 .
 .SH "NAME"
 \fBparfait\fR \- Java instrumentation for Performance Co\-Pilot (PCP)
 .
 .SH "SYNOPSIS"
-\fBparfait\fR [\fB\-n\fR/\fB\-\-name\fR \fIname\fR] [\fB\-c\fR/\fB\-\-cluster\fR \fIid\fR] [\fB\-i\fR/\fB\-\-interval\fR \fImsec\fR] [\fB\-s\fR/\fB\-\-startup\fR \fIdelay\fR] [\fB\-j\fR/\fB\-\-jmxserver\fR \fB\-\-connect\fR \fIhost:port\fR] [\fB\-\-\fR] [\fBjavaargs\fR \.\.\.]
+\fBparfait\fR [\fB\-n\fR \fIname\fR] [\fB\-c\fR \fIid\fR] [\fB\-i\fR \fImsec\fR] [\fB\-s\fR \fIdelay\fR] [[\fB\-\-jmxserver\fR] | [\fB\-\-connect\fR \fIhost:port\fR]] [\fB\-\-\fR] [\fBjavaargs\fR \.\.\.]
 .
 .SH "DESCRIPTION"
 The \fBparfait\fR wrapper script provides instrumentation for an \fIunmodified\fR Java application\. It is a front end to the Parfait \fIhttps://github\.com/performancecopilot/parfait\fR modules which developers use to access instrumentation from Java applications\.
@@ -40,19 +40,19 @@ See the EXAMPLES section below for a sample invocation for both modes\.
 The command line options available are:
 .
 .TP
-\fB\-n\fR / \fB\-\-name\fR \fIname\fR
+\fB\-n\fR \fIname\fR, \fB\-\-name\fR \fIname\fR
 The \fIname\fR argument specifies the \fImmv\.*\fR metric tree name in the \fBPMNS\fR(5) that will be used to identify this application\.
 .
 .TP
-\fB\-c\fR / \fB\-\-cluster\fR \fIidentifier\fR
+\fB\-c\fR \fIidentifier\fR, \fB\-\-cluster\fR \fIidentifier\fR
 The numeric performance metric cluster \fIidentifier\fR to be used to uniquely identify this application\. A value of zero is the default, and causes the MMV PMDA to simply use the next available number\.
 .
 .TP
-\fB\-i\fR / \fB\-\-interval\fR \fImsec\fR
+\fB\-i\fR \fImsec\fR, \fB\-\-interval\fR \fImsec\fR
 Delay between sampling (JMX values in particular) to refresh the values exported to PCP, in milliseconds\. The default value is 1000 (1 second) and the minimum allowed value is 250 milliseconds\.
 .
 .TP
-\fB\-j\fR / \fB\-\-jmxserver\fR / \fB\-\-connect\fR \fIhostname:port\fR
+\fB\-j\fR, \fB\-\-jmxserver\fR, \fB\-\-connect\fR \fIhostname:port\fR
 Connect to the JMX server listening on the specified \fIhostname\fR and \fIport\fR number as the source of JMX metrics\. This option allows proxying of metrics from a separate process, instead of the default \fB\-javaagent\fR mode of operation\.
 .
 .TP
@@ -133,7 +133,7 @@ Behind the scenes this runs:
 The statically configured metrics used by \fBparfait\-agent\fR are configured using JSON configuration files\. The default used when no files are present below \fI/etc/parfait\fR is:
 .
 .IP "\(bu" 4
-\fIjvm\.json\fR \fIhttps://github\.com/performancecopilot/parfait/tree/master/parfait\-agent/src/main/resources/jvm\.json\fR
+\fIjvm\.json\fR \fIhttps://github\.com/performancecopilot/parfait/tree/main/parfait\-agent/src/main/resources/jvm\.json\fR
 .
 .IP "" 0
 .
@@ -193,7 +193,7 @@ configuration files defining metrics in the format described above\.
 Parfait \fIhttps://github\.com/performancecopilot/parfait\fR:
 .
 .IP "\(bu" 4
-Default metrics \fIhttps://github\.com/performancecopilot/parfait/tree/master/parfait\-agent/src/main/resources/jvm\.json\fR
+Default metrics \fIhttps://github\.com/performancecopilot/parfait/tree/main/parfait\-agent/src/main/resources/jvm\.json\fR
 .
 .IP "" 0
 .

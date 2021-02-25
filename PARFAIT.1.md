@@ -2,7 +2,7 @@ parfait(1) -- Java instrumentation for Performance Co-Pilot (PCP)
 =================================================================
 
 ## SYNOPSIS
-`parfait` [`-n`/`--name` _name_] [`-c`/`--cluster` _id_] [`-i`/`--interval` _msec_] [`-s`/`--startup` _delay_] [`-j`/`--jmxserver` `--connect` _host:port_] [`--`] [`javaargs` ...]
+`parfait` [`-n` _name_] [`-c` _id_] [`-i` _msec_] [`-s` _delay_] [[`--jmxserver`] | [`--connect` _host:port_]] [`--`] [`javaargs` ...]
 
 ## DESCRIPTION
 
@@ -47,23 +47,23 @@ both modes.
 
 The command line options available are:
 
-* `-n` / `--name` _name_:
+* `-n` _name_, `--name` _name_:
 The _name_ argument specifies the _mmv.*_ metric tree name in
 the `PMNS`(5) that will be used to identify this application.
 
-* `-c` / `--cluster` _identifier_:
+* `-c` _identifier_, `--cluster` _identifier_:
 The numeric performance metric cluster _identifier_ to be used to
 uniquely identify this application.
 A value of zero is the default, and causes the MMV PMDA to simply
 use the next available number.
 
-* `-i` / `--interval` _msec_:
+* `-i` _msec_, `--interval` _msec_:
 Delay between sampling (JMX values in particular) to refresh the
 values exported to PCP, in milliseconds.
 The default value is 1000 (1 second) and the minimum allowed value
 is 250 milliseconds.
 
-* `-j` / `--jmxserver` / `--connect` _hostname:port_:
+* `-j`, `--jmxserver`, `--connect` _hostname:port_:
 Connect to the JMX server listening on the specified
 _hostname_ and _port_ number as the source of JMX metrics.
 This option allows proxying of metrics from a separate process,
@@ -123,7 +123,7 @@ The statically configured metrics used by **parfait-agent** are
 configured using JSON configuration files.  The default used when
 no files are present below _/etc/parfait_ is:
 
-* [_jvm.json_](https://github.com/performancecopilot/parfait/tree/master/parfait-agent/src/main/resources/jvm.json)
+* [_jvm.json_](https://github.com/performancecopilot/parfait/tree/main/parfait-agent/src/main/resources/jvm.json)
 
 This provides a handy reference for the semantic elements of the
 JSON configuration, which are:
@@ -187,7 +187,7 @@ configuration files defining metrics in the format described above.
 
 [Parfait](https://github.com/performancecopilot/parfait):
 
-* [Default metrics](https://github.com/performancecopilot/parfait/tree/master/parfait-agent/src/main/resources/jvm.json)
+* [Default metrics](https://github.com/performancecopilot/parfait/tree/main/parfait-agent/src/main/resources/jvm.json)
 
 [Performance Co-Pilot](http://pcp.io):
 
