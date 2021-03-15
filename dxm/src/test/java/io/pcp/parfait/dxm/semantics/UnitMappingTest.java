@@ -31,13 +31,16 @@ public class UnitMappingTest {
 
     @Test
     public void getUnitMapping_whenTimeAndDerivativeUnitsGiven() {
-        UnitMapping milliSeconds = UnitMapping.findUnitMapping(MetricPrefix.MILLI(SECOND));
+        UnitMapping milliSeconds = UnitMapping.findUnitMapping(SECOND.divide(1000));
         assertNotNull(milliSeconds);
 
-        UnitMapping onePerMinute = UnitMapping.findUnitMapping(AbstractUnit.ONE.divide(Units.MINUTE));
-        assertNotNull(onePerMinute);
+        UnitMapping milliSeconds1 = UnitMapping.findUnitMapping(MetricPrefix.MILLI(SECOND));
+        assertNotNull(milliSeconds1);
 
         UnitMapping milliSeconds2 = UnitMapping.findUnitMapping(MILLISECOND);
         assertNotNull(milliSeconds2);
+
+        UnitMapping onePerMinute = UnitMapping.findUnitMapping(AbstractUnit.ONE.divide(Units.MINUTE));
+        assertNotNull(onePerMinute);
     }
 }

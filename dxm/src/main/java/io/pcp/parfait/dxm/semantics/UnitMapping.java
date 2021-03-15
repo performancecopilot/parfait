@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import io.pcp.parfait.dxm.semantics.PcpScale.SpaceScale;
 import io.pcp.parfait.dxm.semantics.PcpScale.TimeScale;
 import io.pcp.parfait.dxm.semantics.PcpScale.UnitScale;
+import tech.units.indriya.unit.UnitDimension;
 
 public final class UnitMapping {
     private static final Logger LOG = LoggerFactory.getLogger(UnitMapping.class);
@@ -75,7 +76,7 @@ public final class UnitMapping {
             return false;
         }
         Unit<?> divided = left.divide(right);
-        if (!divided.getDimension().equals(Dimension.NONE)) {
+        if (!divided.getDimension().equals(UnitDimension.NONE)) {
             return false;
         }
         return divided.asType(Dimensionless.class).getConverterTo(ONE).equals(IDENTITY);
