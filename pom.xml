@@ -105,7 +105,6 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <spring.version>4.3.28.RELEASE</spring.version>
     <slf4j.version>1.6.1</slf4j.version>
-    <log4j.version>1.2.17</log4j.version>
     <jdk.version>1.8</jdk.version>
     <project.build.javaVersion>${jdk.version}</project.build.javaVersion>
     <maven.compile.targetLevel>${jdk.version}</maven.compile.targetLevel>
@@ -378,11 +377,6 @@
            <groupId>org.slf4j</groupId>
            <artifactId>slf4j-api</artifactId>
            <version>${slf4j.version}</version>
-         </dependency>
-          <dependency>
-              <groupId>log4j</groupId>
-              <artifactId>log4j</artifactId>
-              <version>${log4j.version}</version>
           </dependency>
           <dependency>
               <groupId>com.google.guava</groupId>
@@ -443,11 +437,6 @@
     <dependency>
      <groupId>org.slf4j</groupId>
      <artifactId>slf4j-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>log4j</groupId>
-      <artifactId>log4j</artifactId>
-      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>

@@ -29,8 +29,6 @@ import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 
-import org.apache.log4j.Logger;
-
 /**
  * Convenience mechanisms for locating MBeanServer classes.
  */

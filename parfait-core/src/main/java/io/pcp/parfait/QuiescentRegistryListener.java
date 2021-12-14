@@ -20,14 +20,15 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import com.google.common.base.Supplier;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Designed to run code after the MonitorableRegistry has become quiet, in terms of addition of new metrics
  */
 public class QuiescentRegistryListener implements MonitorableRegistryListener {
 
-    private static final Logger LOG = Logger.getLogger(QuiescentRegistryListener.class);
+    private static final Logger LOG = LoggerFactory.getLogger(QuiescentRegistryListener.class);
 
     private final Scheduler quiescentScheduler;
     private volatile long lastTimeMonitorableAdded = 0;

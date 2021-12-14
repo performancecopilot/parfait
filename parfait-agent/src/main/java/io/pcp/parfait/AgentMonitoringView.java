@@ -48,11 +48,12 @@ import javax.management.ReflectionException;
 import javax.management.openmbean.CompositeData;
 import javax.measure.Unit;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 class AgentMonitoringView {
-    private static final Logger logger = Logger.getLogger(ParfaitAgent.class);
+    private static final Logger logger = LoggerFactory.getLogger(ParfaitAgent.class);
 
     private MonitorableRegistry registry = MonitorableRegistry.DEFAULT_REGISTRY;
 

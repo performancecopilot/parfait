@@ -95,11 +95,6 @@ public class ThreadContext {
      * Clears all values for the current thread.
      */
     public void clear() {
-
-        /**
-         * Unfortunately log4j's MDC historically never had a mechanism to block remove keys,
-         * so we're forced to do this one by one.
-         */
         for (String key : allKeys()) {
            mdcBridge.remove(key);
         }
@@ -127,21 +122,18 @@ public class ThreadContext {
     }
 
     /**
-     * Factory method that creates a new ThreadContext initialized to also update Log4j's MDC.
+     * Factory methods that create a new ThreadContext initialised to also update SLF4J's MDC
      */
     public static ThreadContext newMDCEnabledContext() {
-        return new ThreadContext(new Log4jMdcBridge());
+        return newSLF4JEnabledContext();
     }
 
-    /**
-     * Factory method that creates a new ThreadContext initialised to also update SLF4J's MDC
-     */
     public static ThreadContext newSLF4JEnabledContext() {
         return new ThreadContext(new Slf4jMDCBridge());
     }
 
     public interface MdcBridge {
-    	void put(String key, Object object);
+		void put(String key, Object object);
 
 		void remove(String key);
     }
@@ -158,18 +150,6 @@ public class ThreadContext {
 		}
     }
     
-    public static class Log4jMdcBridge implements MdcBridge {
-		@Override
-		public void put(String key, Object object) {
-			org.apache.log4j.MDC.put(key, object);
-		}
-
-		@Override
-		public void remove(String key) {
-			org.apache.log4j.MDC.remove(key);
-		}
-	}
-
     public static class Slf4jMDCBridge implements MdcBridge {
 		@Override
 		public void put(String key, Object object) {
