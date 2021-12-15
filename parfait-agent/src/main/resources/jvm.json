@@ -182,6 +182,7 @@
 	    "name": "java.memorypool.eden[init]",
 	    "description": "Initial Eden memory configuration size",
 	    "units": "bytes",
+	    "optional": true,
 	    "mBeanName": "java.lang:type=MemoryPool,name=PS Eden Space|Eden Space|Par Eden Space",
 	    "mBeanAttributeName": "Usage",
 	    "mBeanCompositeDataItem": "init"
@@ -190,6 +191,7 @@
 	    "name": "java.memorypool.eden[used]",
 	    "description": "Actual memory in use in Eden space",
 	    "units": "bytes",
+	    "optional": true,
 	    "mBeanName": "java.lang:type=MemoryPool,name=PS Eden Space|Eden Space|Par Eden Space",
 	    "mBeanAttributeName": "Usage",
 	    "mBeanCompositeDataItem": "used"
@@ -198,6 +200,7 @@
 	    "name": "java.memorypool.eden[committed]",
 	    "description": "Virtual memory size for Eden space",
 	    "units": "bytes",
+	    "optional": true,
 	    "mBeanName": "java.lang:type=MemoryPool,name=PS Eden Space|Eden Space|Par Eden Space",
 	    "mBeanAttributeName": "Usage",
 	    "mBeanCompositeDataItem": "committed"
@@ -206,6 +209,7 @@
 	    "name": "java.memorypool.eden[max]",
 	    "description": "Maximum Eden memory size",
 	    "units": "bytes",
+	    "optional": true,
 	    "mBeanName": "java.lang:type=MemoryPool,name=PS Eden Space|Eden Space|Par Eden Space",
 	    "mBeanAttributeName": "Usage",
 	    "mBeanCompositeDataItem": "max"
@@ -214,6 +218,7 @@
 	    "name": "java.memorypool.survivor[init]",
 	    "description": "Initial survivor memory configuration size",
 	    "units": "bytes",
+	    "optional": true,
 	    "mBeanName": "java.lang:type=MemoryPool,name=PS Survivor Space|Survivor Space|Par Survivor Space",
 	    "mBeanAttributeName": "Usage",
 	    "mBeanCompositeDataItem": "init"
@@ -222,6 +227,7 @@
 	    "name": "java.memorypool.survivor[used]",
 	    "description": "Actual memory in use in survivor space",
 	    "units": "bytes",
+	    "optional": true,
 	    "mBeanName": "java.lang:type=MemoryPool,name=PS Survivor Space|Survivor Space|Par Survivor Space",
 	    "mBeanAttributeName": "Usage",
 	    "mBeanCompositeDataItem": "used"
@@ -230,6 +236,7 @@
 	    "name": "java.memorypool.survivor[committed]",
 	    "description": "Virtual memory size for survivor space",
 	    "units": "bytes",
+	    "optional": true,
 	    "mBeanName": "java.lang:type=MemoryPool,name=PS Survivor Space|Survivor Space|Par Survivor Space",
 	    "mBeanAttributeName": "Usage",
 	    "mBeanCompositeDataItem": "committed"
@@ -238,6 +245,7 @@
 	    "name": "java.memorypool.survivor[max]",
 	    "description": "Maximum survivor memory size",
 	    "units": "bytes",
+	    "optional": true,
 	    "mBeanName": "java.lang:type=MemoryPool,name=PS Survivor Space|Survivor Space|Par Survivor Space",
 	    "mBeanAttributeName": "Usage",
 	    "mBeanCompositeDataItem": "max"
@@ -246,6 +254,7 @@
 	    "name": "java.memorypool.codecache[init]",
 	    "description": "Initial codecache memory configuration size",
 	    "units": "bytes",
+	    "optional": true,
 	    "mBeanName": "java.lang:type=MemoryPool,name=Code Cache",
 	    "mBeanAttributeName": "Usage",
 	    "mBeanCompositeDataItem": "init"
@@ -254,6 +263,7 @@
 	    "name": "java.memorypool.codecache[used]",
 	    "description": "Actual memory in use in codecache space",
 	    "units": "bytes",
+	    "optional": true,
 	    "mBeanName": "java.lang:type=MemoryPool,name=Code Cache",
 	    "mBeanAttributeName": "Usage",
 	    "mBeanCompositeDataItem": "used"
@@ -262,6 +272,7 @@
 	    "name": "java.memorypool.codecache[committed]",
 	    "description": "Virtual memory size for codecache space",
 	    "units": "bytes",
+	    "optional": true,
 	    "mBeanName": "java.lang:type=MemoryPool,name=Code Cache",
 	    "mBeanAttributeName": "Usage",
 	    "mBeanCompositeDataItem": "committed"
@@ -270,6 +281,7 @@
 	    "name": "java.memorypool.codecache[max]",
 	    "description": "Maximum codecache memory size",
 	    "units": "bytes",
+	    "optional": true,
 	    "mBeanName": "java.lang:type=MemoryPool,name=Code Cache",
 	    "mBeanAttributeName": "Usage",
 	    "mBeanCompositeDataItem": "max"
@@ -278,6 +290,7 @@
 	    "name": "java.memorypool.tenured[init]",
 	    "description": "Initial tenured memory configuration size",
 	    "units": "bytes",
+	    "optional": true,
 	    "mBeanName": "java.lang:type=MemoryPool,name=PS Old Gen|Tenured Gen|CMS Old Gen",
 	    "mBeanAttributeName": "Usage",
 	    "mBeanCompositeDataItem": "init"
@@ -286,6 +299,7 @@
 	    "name": "java.memorypool.tenured[used]",
 	    "description": "Actual memory in use in tenured space",
 	    "units": "bytes",
+	    "optional": true,
 	    "mBeanName": "java.lang:type=MemoryPool,name=PS Old Gen|Tenured Gen|CMS Old Gen",
 	    "mBeanAttributeName": "Usage",
 	    "mBeanCompositeDataItem": "used"
@@ -294,6 +308,7 @@
 	    "name": "java.memorypool.tenured[committed]",
 	    "description": "Virtual memory size for tenured space",
 	    "units": "bytes",
+	    "optional": true,
 	    "mBeanName": "java.lang:type=MemoryPool,name=PS Old Gen|Tenured Gen|CMS Old Gen",
 	    "mBeanAttributeName": "Usage",
 	    "mBeanCompositeDataItem": "committed"
@@ -302,6 +317,7 @@
 	    "name": "java.memorypool.tenured[max]",
 	    "description": "Maximum tenured memory size",
 	    "units": "bytes",
+	    "optional": true,
 	    "mBeanName": "java.lang:type=MemoryPool,name=PS Old Gen|Tenured Gen|CMS Old Gen",
 	    "mBeanAttributeName": "Usage",
 	    "mBeanCompositeDataItem": "max"
@@ -309,6 +325,7 @@
 	{
 	    "name": "java.memory.gc.full.count",
 	    "description": "Count of JVM full garbage collections",
+	    "optional": true,
 	    "semantics": "counter",
 	    "mBeanName": "java.lang:type=GarbageCollector,name=MarkSweepCompact|PS MarkSweep|ConcurrentMarkSweep",
 	    "mBeanAttributeName": "CollectionCount"
@@ -317,6 +334,7 @@
 	    "name": "java.memory.gc.full.time",
 	    "description": "Time spent performing full garbage collections",
 	    "units": "milliseconds",
+	    "optional": true,
 	    "semantics": "counter",
 	    "mBeanName": "java.lang:type=GarbageCollector,name=MarkSweepCompact|PS MarkSweep|ConcurrentMarkSweep",
 	    "mBeanAttributeName": "CollectionTime"
@@ -324,6 +342,7 @@
 	{
 	    "name": "java.memory.gc.minor.count",
 	    "description": "Count of JVM minor garbage collections",
+	    "optional": true,
 	    "semantics": "counter",
 	    "mBeanName": "java.lang:type=GarbageCollector,name=Copy|PS Scavenge|ParNew",
 	    "mBeanAttributeName": "CollectionCount"
@@ -332,6 +351,7 @@
 	    "name": "java.memory.gc.minor.time",
 	    "description": "Time spent performing minor garbage collections",
 	    "units": "milliseconds",
+	    "optional": true,
 	    "semantics": "counter",
 	    "mBeanName": "java.lang:type=GarbageCollector,name=Copy|PS Scavenge|ParNew",
 	    "mBeanAttributeName": "CollectionTime"
