@@ -34,10 +34,11 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ParfaitAgent {
-    private static final Logger logger = Logger.getLogger(ParfaitAgent.class);
+    private static final Logger logger = LoggerFactory.getLogger(ParfaitAgent.class);
     private static final SpecificationAdapter specificationAdapter = new SpecificationAdapter();
 
     private static final String RESOURCE = "/jvm.json";
