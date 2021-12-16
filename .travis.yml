@@ -1,8 +1,0 @@
-language: bash
-
-dist: focal
-sudo: required
-services:
-  - docker
-
-script: docker run -ti -v `pwd`:/parfait  ubuntu:focal /parfait/.ci.sh
