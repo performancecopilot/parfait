@@ -10,6 +10,7 @@
 	{
 	    "name": "java.runtime_name",
 	    "description": "An internal Java process identifier",
+	    "units": "none",
 	    "semantics": "constant",
 	    "mBeanName": "java.lang:type=Runtime",
 	    "mBeanAttributeName": "Name"
