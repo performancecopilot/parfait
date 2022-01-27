@@ -117,6 +117,7 @@
     <unit.systems.version>2.0.2</unit.systems.version>
     <unitils.version>3.4.3</unitils.version>
     <jackson.version>2.11.2</jackson.version>
+    <mockito.version>3.12.4</mockito.version>
     <license-maven-plugin.version>3.0</license-maven-plugin.version>
   </properties>
 
@@ -386,7 +387,12 @@
           <dependency>
               <groupId>org.mockito</groupId>
               <artifactId>mockito-core</artifactId>
-              <version>3.5.10</version>
+              <version>${mockito.version}</version>
+          </dependency>
+          <dependency>
+              <groupId>org.mockito</groupId>
+              <artifactId>mockito-inline</artifactId>
+              <version>${mockito.version}</version>
           </dependency>
           <dependency>
               <groupId>net.jcip</groupId>
