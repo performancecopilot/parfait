@@ -81,26 +81,4 @@ public class ThreadContextTest extends TestCase {
         context.clear();
         assertNull("get() after clear should return null", context.get(testKey));
     }
-
-/* -- Slf4j provides no MDC context API --
-    public void testClearRemovesMDCValue() {
-
-        ThreadContext logThreadContext = ThreadContext.newMDCEnabledContext();
-
-        Hashtable mdcContext = MDC.getContext();
-        assertTrue(mdcContext == null || mdcContext.isEmpty());
-
-        final String testKey = "painter";
-        logThreadContext.put(testKey, 7);
-
-        mdcContext = MDC.getContext();
-        assertEquals(1, mdcContext.size());
-
-        mdcContext.clear();
-        assertEquals(0, mdcContext.size());
-
-        logThreadContext.clear();
-        assertNull("get() after clear should return null", logThreadContext.get(testKey));
-    }
-*/
 }
