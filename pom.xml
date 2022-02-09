@@ -117,7 +117,7 @@
     <unit.systems.version>2.0.2</unit.systems.version>
     <unitils.version>3.4.3</unitils.version>
     <jackson.version>2.11.2</jackson.version>
-    <mockito.version>3.12.4</mockito.version>
+    <mockito.version>4.3.1</mockito.version>
     <license-maven-plugin.version>3.0</license-maven-plugin.version>
   </properties>
 
