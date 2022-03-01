@@ -23,9 +23,10 @@ import io.pcp.parfait.dxm.types.MmvMetricType;
 import io.pcp.parfait.dxm.types.TypeHandler;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -41,6 +42,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static tech.units.indriya.AbstractUnit.ONE;
 
+@RunWith(MockitoJUnitRunner.class)
 public class PcpMmvWriterTest {
 
     private static final String SOME_METRIC_NAME = "some.metric";
@@ -68,7 +70,6 @@ public class PcpMmvWriterTest {
 
     @Before
     public void setUp() throws IOException {
-        MockitoAnnotations.initMocks(this);
         when(mmvVersion.createMetricNameValidator()).thenReturn(metricNameValidator);
         when(mmvVersion.createInstanceDomainStore(eq(identifierSourceSet), any(PcpStringStore.class))).thenReturn(instanceDomainStore);
         when(mmvVersion.createMetricInfoStore(eq(identifierSourceSet), any(PcpStringStore.class))).thenReturn(metricInfoStore);
@@ -118,7 +119,6 @@ public class PcpMmvWriterTest {
         when(customTypeTypeHandler.getMetricType()).thenReturn(MmvMetricType.DOUBLE);
         when(metricInfoStore.byName(SOME_METRIC_NAME)).thenReturn(pcpMetricInfo);
         doReturn(customTypeTypeHandler).when(pcpMetricInfo).getTypeHandler();
-        when(byteBuffer.slice()).thenReturn(mock(ByteBuffer.class));
 
         pcpMmvWriter.registerType(CustomType.class, customTypeTypeHandler);
         pcpMmvWriter.start();

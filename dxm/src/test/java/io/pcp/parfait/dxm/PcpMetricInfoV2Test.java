@@ -23,11 +23,12 @@ import io.pcp.parfait.dxm.types.MmvMetricType;
 import io.pcp.parfait.dxm.types.TypeHandler;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.nio.ByteBuffer;
 
@@ -40,6 +41,7 @@ import static org.mockito.Mockito.when;
 import static org.unitils.reflectionassert.ReflectionAssert.assertReflectionEquals;
 import static tech.units.indriya.unit.Units.HOUR;
 
+@RunWith(MockitoJUnitRunner.class)
 public class PcpMetricInfoV2Test {
 
     private static final int STRING_OFFSET = 10;
@@ -57,7 +59,6 @@ public class PcpMetricInfoV2Test {
 
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
         pcpMetricInfoV2 = new PcpMetricInfoV2("name", 1, nameAsPcpString);
     }
 

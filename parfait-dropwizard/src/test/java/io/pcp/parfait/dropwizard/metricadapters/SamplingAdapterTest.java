@@ -18,7 +18,7 @@ package io.pcp.parfait.dropwizard.metricadapters;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -53,8 +53,8 @@ public class SamplingAdapterTest {
     private static final String THREE_NINES = "threenines";
 
 
-    private static final long INITIAL_MAX = 11l;
-    private static final long INITIAL_MIN = 22l;
+    private static final long INITIAL_MAX = 11L;
+    private static final long INITIAL_MIN = 22L;
     private static final Double INITIAL_MEDIAN = 12.34;
     private static final Double INITIAL_STDDEV = 56.78;
     private static final Double INITIAL_MEAN = 90.12;

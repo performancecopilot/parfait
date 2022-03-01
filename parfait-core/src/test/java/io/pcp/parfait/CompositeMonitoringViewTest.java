@@ -18,8 +18,9 @@ package io.pcp.parfait;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Collection;
 
@@ -28,6 +29,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@RunWith(MockitoJUnitRunner.class)
 public class CompositeMonitoringViewTest {
 
     @Mock
@@ -43,13 +45,8 @@ public class CompositeMonitoringViewTest {
 
     @Before
     public void setUp() {
-
-        MockitoAnnotations.initMocks(this);
-
         when(monitoringView1.isRunning()).thenReturn(false);
         when(monitoringView2.isRunning()).thenReturn(true);
-
-        when(monitorables.size()).thenReturn(2);
 
         this.compositeMonitoringView = new CompositeMonitoringView(monitoringView1, monitoringView2);
     }

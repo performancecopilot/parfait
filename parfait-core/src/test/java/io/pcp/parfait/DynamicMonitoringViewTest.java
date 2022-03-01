@@ -18,8 +18,9 @@ package io.pcp.parfait;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Collections;
 import java.util.List;
@@ -29,7 +30,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-
+@RunWith(MockitoJUnitRunner.class)
 public class DynamicMonitoringViewTest {
 
     @Mock
@@ -44,7 +45,6 @@ public class DynamicMonitoringViewTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         dynamicMonitoringView = new DynamicMonitoringView(monitorableRegistry, monitoringView, 2000);
         when(monitorableRegistry.getMonitorables()).thenReturn(monitorables);
     }

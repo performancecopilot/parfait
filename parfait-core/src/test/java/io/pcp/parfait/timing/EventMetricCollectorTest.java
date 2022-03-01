@@ -28,13 +28,15 @@ import java.util.Map;
 
 import com.google.common.collect.Maps;
 
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 import tech.units.indriya.AbstractUnit;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
+@RunWith(MockitoJUnitRunner.class)
 public class EventMetricCollectorTest {
 
     private static final String TOP_LEVEL_GROUP = "eventGroup1";
@@ -52,8 +54,6 @@ public class EventMetricCollectorTest {
 
     @Before
     public void givenAnEventMetricCollector() {
-        MockitoAnnotations.initMocks(this);
-
         Map<Object, EventCounters> perEventCounters = Maps.newHashMap();
         perEventCounters.put(TOP_LEVEL_GROUP, topLevelCounter);
         perEventCounters.put(NESTED_GROUP, nestedCounter);
