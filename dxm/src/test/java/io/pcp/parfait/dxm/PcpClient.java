@@ -19,6 +19,7 @@ package io.pcp.parfait.dxm;
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,7 +32,7 @@ class PcpClient {
             throw new PcpFetchException(exec);
         }
 
-        String result = IOUtils.toString(exec.getInputStream());
+        String result = IOUtils.toString(exec.getInputStream(), Charset.defaultCharset());
         Pattern pattern = Pattern.compile("\t(.*?)\n");
         Matcher matcher = pattern.matcher(result);
         if(matcher.find()) {
@@ -43,7 +44,7 @@ class PcpClient {
     private static class PcpFetchException extends RuntimeException {
 
         PcpFetchException(Process process) throws IOException {
-            super(IOUtils.toString(process.getErrorStream()));
+            super(IOUtils.toString(process.getErrorStream(), Charset.defaultCharset()));
         }
 
         PcpFetchException(String message) {

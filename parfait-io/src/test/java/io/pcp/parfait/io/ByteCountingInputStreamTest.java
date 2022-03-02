@@ -23,21 +23,19 @@ import junit.framework.TestCase;
 
 import io.pcp.parfait.MonitorableRegistry;
 import io.pcp.parfait.MonitoredCounter;
-import io.pcp.parfait.io.ByteCountingInputStream;
 
 public class ByteCountingInputStreamTest extends TestCase {
     private static final byte[] TEST_BYTES = new byte[] { 0, 1, 2, 3, 4 };
     private MonitoredCounter counter;
-    private ByteArrayInputStream bais;
     private ByteCountingInputStream bcis;
-    private MonitorableRegistry registry = new MonitorableRegistry();
+    private final MonitorableRegistry registry = new MonitorableRegistry();
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         counter = new MonitoredCounter("food", "", registry);
-        this.bais = new ByteArrayInputStream(TEST_BYTES);
-        this.bcis = new ByteCountingInputStream(this.bais, counter);
+        ByteArrayInputStream bais = new ByteArrayInputStream(TEST_BYTES);
+        this.bcis = new ByteCountingInputStream(bais, counter);
     }
 
     public void testBytesRead() throws IOException {

@@ -132,7 +132,7 @@ public class CPUThreadTest {
 
         CPUThreadTest cpuThreadTest = new CPUThreadTest();
         try {
-            new JCommander(cpuThreadTest, args);
+            new JCommander(cpuThreadTest).parse(args);
             cpuThreadTest.doTest();
         } catch (Exception e) {
             e.printStackTrace();

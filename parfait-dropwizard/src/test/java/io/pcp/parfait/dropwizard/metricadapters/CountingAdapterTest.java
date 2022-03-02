@@ -19,7 +19,7 @@ package io.pcp.parfait.dropwizard.metricadapters;
 import static tech.units.indriya.AbstractUnit.ONE;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 import javax.measure.Unit;
