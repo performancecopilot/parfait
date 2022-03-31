@@ -103,7 +103,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <spring.version>4.3.28.RELEASE</spring.version>
+    <spring.version>5.3.18</spring.version>
     <slf4j.version>1.6.1</slf4j.version>
     <jdk.version>1.8</jdk.version>
     <project.build.javaVersion>${jdk.version}</project.build.javaVersion>
