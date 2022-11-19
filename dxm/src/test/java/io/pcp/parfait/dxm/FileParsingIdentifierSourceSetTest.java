@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.Set;
 
@@ -122,7 +123,7 @@ public class FileParsingIdentifierSourceSetTest {
 
     private File tempFile(String contents) {
         try {
-            File output = File.createTempFile("parfait-fileparsing", "test");
+            File output = Files.createTempFile("parfait-fileparsing", "test").toFile();
             output.deleteOnExit();
             Writer outWriter = new FileWriter(output);
             outWriter.write(contents);
