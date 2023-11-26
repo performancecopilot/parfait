@@ -49,7 +49,7 @@ public class MonitoringInterceptor extends AbstractPhaseInterceptor<XMLMessage> 
 		String methodName = operationResourceInfo.getMethodToInvoke().getName();
 		// TODO annotate with a better name?
 		Object key = operationResourceInfo.getClassResourceInfo().getResourceProvider()
-				.getInstance();
+				.getInstance(message);
 		if (!(key instanceof Timeable)) {
 			message.getInterceptorChain().doIntercept(message);
 			return;
