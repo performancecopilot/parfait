@@ -18,8 +18,8 @@ jobs:
         run: pcp
       - uses: actions/setup-java@v4
         with:
-          distribution: 'oracle'
-          java-version: '17'
+          distribution: 'zulu'
+          java-version: '11'
       - name: open up access
         run: sudo chmod o+w /var/lib/pcp/tmp/mmv
       - name: verify parfait
