@@ -31,7 +31,8 @@ As outlined in the docs, to streamline the release process I recommend encoding 
       <profile>
          <id>gpg</id>
          <properties>
-            <gpg.executable>gpg2</gpg.executable>
+            <gpg.executable>gpg</gpg.executable>
+            <gpg.keyname>tallpsmith@gmail.com</gpg.keyname>
             <gpg.passphrase>..................</gpg.passphrase>
           </properties>
       </profile>
