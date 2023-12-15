@@ -18,7 +18,7 @@ jobs:
         run: pcp
       - uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: 'oracle'
           java-version: '17'
       - name: install maven
         run: sudo apt-get install -y maven
