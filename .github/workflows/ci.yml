@@ -21,7 +21,7 @@ jobs:
     - name: list Java alternatives available
       run: update-alternatives --config java
     - name: Switch Java version to 17
-      run: sudo update-java-alternatives --set /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+      run: sudo update-java-alternatives -s java-17-openjdk-amd64
     - name: install maven
       run: sudo apt-get install -y maven
     - name: open up access
