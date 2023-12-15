@@ -20,8 +20,6 @@ jobs:
         with:
           distribution: 'oracle'
           java-version: '17'
-      - name: install maven
-        run: sudo apt-get install -y maven
       - name: open up access
         run: sudo chmod o+w /var/lib/pcp/tmp/mmv
       - name: verify parfait
