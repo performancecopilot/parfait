@@ -20,7 +20,7 @@
 
   <groupId>io.pcp</groupId>
   <artifactId>parfait</artifactId>
-  <version>1.1.3-SNAPSHOT</version>
+  <version>1.1.2-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>parfait</name>
   <description>Java performance monitoring framework, including PCP bridge and agent</description>
@@ -105,7 +105,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <spring.version>5.3.27</spring.version>
     <slf4j.version>1.6.1</slf4j.version>
-    <jdk.version>11</jdk.version>
+    <jdk.version>1.8</jdk.version>
     <project.build.javaVersion>${jdk.version}</project.build.javaVersion>
     <maven.compile.targetLevel>${jdk.version}</maven.compile.targetLevel>
     <maven.compile.sourceLevel>${jdk.version}</maven.compile.sourceLevel>
@@ -229,7 +229,7 @@
                         <configuration>
                             <rules>
                                 <requireJavaVersion>
-                                    <version>${jdk.version}</version>
+                                    <version>1.8</version>
                                 </requireJavaVersion>
                             </rules>
                         </configuration>
@@ -535,7 +535,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>3.1.0</version>
+            <version>1.6</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
