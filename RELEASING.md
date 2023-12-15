@@ -16,7 +16,7 @@ You need to have access to OSS Sonatype repo to perform some manual actions duri
 
 The best place to start is to [read this Overview guide](http://central.sonatype.org/pages/ossrh-guide.html).
 
-It appears the account to be created _may_ need to be linked with access to the `io.pcp` project.  Create a new Sonatype JIRA Issue and add myself (`psmith@aconex.com`) as a watcher.
+It appears the account to be created _may_ need to be linked with access to the `io.pcp` project.  Create a new Sonatype JIRA Issue and add myself (`tallpsmith@gmail.com`) as a watcher.
 
 gpg
 ---
