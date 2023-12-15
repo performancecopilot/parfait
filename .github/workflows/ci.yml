@@ -6,25 +6,23 @@ jobs:
   java17:
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v2
-    - name: install pcp
-      run: |
-        wget -qO - https://pcp.io/GPG-KEY-PCP | sudo apt-key add -
-        #sudo add-apt-repository 'deb https://performancecopilot.jfrog.io/artifactory/pcp-deb-release focal main' -y
-        curl -s https://packagecloud.io/install/repositories/performancecopilot/pcp/script.deb.sh | sudo bash
-        sudo apt-get update -q
-        sudo apt-get install -y pcp-zeroconf pcp-gui
-    - name: verify pcp install
-      run: pcp
-    - name: install java17
-      run: sudo apt-get install -y openjdk-17-jdk
-    - name: list Java alternatives available
-      run: update-alternatives --config java
-    - name: Switch Java version to 17
-      run: sudo update-java-alternatives -s java-17-openjdk-amd64
-    - name: install maven
-      run: sudo apt-get install -y maven
-    - name: open up access
-      run: sudo chmod o+w /var/lib/pcp/tmp/mmv
-    - name: verify parfait
-      run: mvn -B -V clean install verify
+      - uses: actions/checkout@v2
+      - name: install pcp
+        run: |
+          wget -qO - https://pcp.io/GPG-KEY-PCP | sudo apt-key add -
+          #sudo add-apt-repository 'deb https://performancecopilot.jfrog.io/artifactory/pcp-deb-release focal main' -y
+          curl -s https://packagecloud.io/install/repositories/performancecopilot/pcp/script.deb.sh | sudo bash
+          sudo apt-get update -q
+          sudo apt-get install -y pcp-zeroconf pcp-gui
+      - name: verify pcp install
+        run: pcp
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: install maven
+        run: sudo apt-get install -y maven
+      - name: open up access
+        run: sudo chmod o+w /var/lib/pcp/tmp/mmv
+      - name: verify parfait
+        run: mvn -B -V clean install verify
