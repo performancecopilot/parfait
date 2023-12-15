@@ -16,7 +16,7 @@ You need to have access to OSS Sonatype repo to perform some manual actions duri
 
 The best place to start is to [read this Overview guide](http://central.sonatype.org/pages/ossrh-guide.html).
 
-It appears the account to be created _may_ need to be linked with access to the `io.pcp` project.  Create a new Sonatype JIRA Issue and add myself (`psmith@aconex.com`) as a watcher.
+It appears the account to be created _may_ need to be linked with access to the `io.pcp` project.  Create a new Sonatype JIRA Issue and add myself (`tallpsmith@gmail.com`) as a watcher.
 
 gpg
 ---
@@ -31,7 +31,8 @@ As outlined in the docs, to streamline the release process I recommend encoding 
       <profile>
          <id>gpg</id>
          <properties>
-            <gpg.executable>gpg2</gpg.executable>
+            <gpg.executable>gpg</gpg.executable>
+            <gpg.keyname>tallpsmith@gmail.com</gpg.keyname>
             <gpg.passphrase>..................</gpg.passphrase>
           </properties>
       </profile>
