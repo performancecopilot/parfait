@@ -3,7 +3,7 @@ name: ci
 on: [ push, pull_request ]
 
 jobs:
-  java8:
+  java17:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
@@ -16,8 +16,8 @@ jobs:
         sudo apt-get install -y pcp-zeroconf pcp-gui
     - name: verify pcp install
       run: pcp
-    - name: install java8
-      run: sudo apt-get install -y openjdk-8-jdk
+    - name: install java17
+      run: sudo apt-get install -y openjdk-17-jdk
     - name: install maven
       run: sudo apt-get install -y maven
     - name: open up access
