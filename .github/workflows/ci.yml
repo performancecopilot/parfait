@@ -3,7 +3,7 @@ name: ci
 on: [ push, pull_request ]
 
 jobs:
-  java17:
+  java:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
