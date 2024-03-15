@@ -22,7 +22,7 @@
     <version>1.2.1-SNAPSHOT</version>
   </parent>
   <properties>
-    <cxf.version>4.0.3</cxf.version>
+    <cxf.version>4.0.4</cxf.version>
   </properties>
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.pcp.parfait</groupId>
