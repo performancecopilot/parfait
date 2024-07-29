@@ -48,6 +48,7 @@ public class QuiescentRegistryListener implements MonitorableRegistryListener {
                 synchronized (lock) {
                     if (lastTimeMonitorableAdded > 0 && clock.get().longValue() >= (lastTimeMonitorableAdded + quietPeriodInMillis)) {
                         LOG.info(String.format("New Monitorables detected after quiet period of %dms", quietPeriodInMillis));
+                        cancel();
                         runnable.run();
                         lastTimeMonitorableAdded = 0;
                     }
