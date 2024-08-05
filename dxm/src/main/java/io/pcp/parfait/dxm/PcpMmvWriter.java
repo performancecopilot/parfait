@@ -340,6 +340,7 @@ public class PcpMmvWriter implements PcpWriter {
     public void reset() {
         started = false;
         metricData.clear();
+        perMetricByteBuffers.clear();
     }
 
     @Override
