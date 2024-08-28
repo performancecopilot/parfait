@@ -55,8 +55,6 @@ import io.pcp.parfait.dxm.types.MmvMetricType;
 import io.pcp.parfait.dxm.types.TypeHandler;
 import com.google.common.base.Preconditions;
 import net.jcip.annotations.GuardedBy;
-import org.apache.commons.lang.builder.ToStringBuilder;
-import org.apache.commons.lang.builder.ToStringStyle;
 
 /**
  * <p>
@@ -770,7 +768,6 @@ public class PcpMmvWriter implements PcpWriter {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("byteBufferFactory", this.byteBufferFactory).toString();
+        return "PcpMmvWriter[byteBufferFactory=" + byteBufferFactory + ']';
     }
-
 }

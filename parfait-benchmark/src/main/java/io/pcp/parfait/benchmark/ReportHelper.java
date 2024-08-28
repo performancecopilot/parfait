@@ -20,7 +20,7 @@ import static java.net.InetAddress.getLocalHost;
 
 import java.net.UnknownHostException;
 
-import org.apache.commons.lang.SystemUtils;
+import org.apache.commons.lang3.SystemUtils;
 
 public class ReportHelper {
     static void environmentReportHeader()  {
