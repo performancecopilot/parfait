@@ -40,7 +40,7 @@ import io.pcp.parfait.pcp.MetricNameMapper;
 import io.pcp.parfait.pcp.PcpMonitorBridge;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class StandardMetricThroughPutBenchmark {
 
