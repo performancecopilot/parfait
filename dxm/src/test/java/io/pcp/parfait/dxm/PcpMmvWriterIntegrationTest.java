@@ -21,11 +21,14 @@ import org.hamcrest.Matcher;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.lang.reflect.Field;
+
 import static io.pcp.parfait.dxm.IdentifierSourceSet.DEFAULT_SET;
 import static io.pcp.parfait.dxm.MmvVersion.MMV_VERSION1;
 import static io.pcp.parfait.dxm.MmvVersion.MMV_VERSION2;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertEquals;
 import static tech.units.indriya.AbstractUnit.ONE;
 
 public class PcpMmvWriterIntegrationTest {
@@ -79,9 +82,43 @@ public class PcpMmvWriterIntegrationTest {
         assertMetric("mmv.v2.integer[instance_name_over_63_characters_instance_name_over_63_characters_instance]", is("11.000"));
     }
 
+    @Test
+    public void resetShouldClearStrings() throws Exception {
+        pcpMmvWriterV1.reset();
+        assertStringsCount(pcpMmvWriterV1, 0);
+        pcpMmvWriterV1.addMetric(MetricName.parse("v1.string"), Semantics.DISCRETE, null, "test1");
+        pcpMmvWriterV1.start();
+
+        pcpMmvWriterV2.reset();
+        assertStringsCount(pcpMmvWriterV2, 0);
+        pcpMmvWriterV2.addMetric(MetricName.parse("v2.string"), Semantics.DISCRETE, null, "test2");
+        pcpMmvWriterV2.start();
+
+        waitForReload();
+
+        assertMetric("mmv.v1.string", is("\"test1\""));
+        assertMetric("mmv.v2.string", is("\"test2\""));
+
+        assertStringsCount(pcpMmvWriterV1, 1);
+        assertStringsCount(pcpMmvWriterV2, 2);
+
+        pcpMmvWriterV1.reset();
+        assertStringsCount(pcpMmvWriterV1, 0);
+
+        pcpMmvWriterV2.reset();
+        assertStringsCount(pcpMmvWriterV2, 0);
+    }
+
     private void assertMetric(String metricName, Matcher<String> expectedValue) throws Exception {
         String actual = pcpClient.getMetric(metricName);
         assertThat(actual, expectedValue);
+    }
+
+    private void assertStringsCount(PcpMmvWriter writer, int expectedCount) throws NoSuchFieldException, IllegalAccessException {
+        Field field = PcpMmvWriter.class.getDeclaredField("stringStore");
+        field.setAccessible(true);
+        PcpString.PcpStringStore stringStore = (PcpString.PcpStringStore) field.get(writer);
+        assertEquals(expectedCount, stringStore.getStrings().size());
     }
 
     private void waitForReload() throws InterruptedException {
