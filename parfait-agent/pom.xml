@@ -62,16 +62,15 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>3.2.4</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-          </execution>
-        </executions>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifestEntries>
+              <Premain-Class>io.pcp.parfait.ParfaitAgent</Premain-Class>
+              <Main-Class>io.pcp.parfait.ParfaitAgent</Main-Class>
+            </manifestEntries>
+          </archive>
+        </configuration>
       </plugin>
       <plugin>
 	<groupId>com.mycila</groupId>
