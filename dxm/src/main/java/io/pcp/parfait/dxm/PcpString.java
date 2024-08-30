@@ -81,6 +81,9 @@ final class PcpString implements PcpOffset,MmvWritable {
             return stringInfo;
         }
 
+        void clear() {
+            stringInfo.clear();
+        }
     }
 
 }

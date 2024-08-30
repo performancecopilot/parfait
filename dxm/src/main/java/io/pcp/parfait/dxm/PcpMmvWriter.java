@@ -339,6 +339,9 @@ public class PcpMmvWriter implements PcpWriter {
         started = false;
         metricData.clear();
         perMetricByteBuffers.clear();
+        instanceDomainStore.clear();
+        metricInfoStore.clear();
+        stringStore.clear();
     }
 
     @Override
@@ -763,6 +766,11 @@ public class PcpMmvWriter implements PcpWriter {
 
         synchronized int size() {
             return byName.size();
+        }
+
+        synchronized void clear() {
+            byId.clear();
+            byName.clear();
         }
     }
 
