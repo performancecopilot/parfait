@@ -10,7 +10,7 @@ Parfait is a performance monitoring library for Java which extracts metrics and 
 
 # Requirements
 
-Parfait requires Java 11 (as of Parfait 1.2.x).
+Parfait requires Java 11-17 (as of Parfait 1.2.x). While Parfait (the published library) should _run_ on newer JVMs, the current test code only successfully runs on Java versions 11-17. 
 
 # About parfait
 
