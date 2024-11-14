@@ -5,11 +5,12 @@ To release parfait out to the wider community, you will need the following:
 
    * checked out the Parfait git repo locally
    * Maven
-   * gpg
+   * gpg & a published GPG public key
    * An account on [OSS Sonatype Repo](https://oss.sonatype.org/)
 
 If you're releasing from a Mac/OSX, then you'll also need:
-   * Docker
+   * Docker/colima/Podman
+
 
 OSS Sonatype
 ------------
@@ -25,7 +26,7 @@ gpg
 
 Part of the Maven release process uses `gpg` to digitally sign the releases using a signature.  Please refer to the OSSRH Overview guide above in the OSS Sonatype section as most of the links stem from there.
 
-As outlined in the docs, to streamline the release process I recommend encoding your `gpg` password into ``~/.m2/settings.xml`:
+As outlined in the docs, to streamline the release process I recommend encoding your `gpg` details (but not your password) into ``~/.m2/settings.xml`:
 
     ...
     <profiles>
@@ -35,7 +36,6 @@ As outlined in the docs, to streamline the release process I recommend encoding 
          <properties>
             <gpg.executable>gpg</gpg.executable>
             <gpg.keyname>tallpsmith@gmail.com</gpg.keyname>
-            <gpg.passphrase>..................</gpg.passphrase>
           </properties>
       </profile>
     ...
@@ -46,6 +46,12 @@ As outlined in the docs, to streamline the release process I recommend encoding 
     ...
     </activeProfiles>
 
+You can configure your GPG passphrase via an environment variable before running the release process:
+
+```markdown
+
+export MAVEN_GPG_PASSPHRASE=....
+```
 
 Otherwise you will be asked for the passphrase for every single Parfait module (which is quite a few)....
 
@@ -89,74 +95,29 @@ Once the `Release` action is performed you & others in the OSS Sonatype group fo
 
 Releasing from OSX
 ==================
-There are some complications releasing from a computer with OSX.  As of December 2023, PCP doesn't have a supported OSX distribution,
+
+There are some complications releasing from a computer with OSX.  As of November 2024, PCP doesn't have a supported OSX distribution,
 and Parfait test harness require interaction with PCP locally to validate.  As the Maven release process involves running the
 tests locally to validate, this is problematic.
 
-To support the release process on OSX, there is a `Dockerfile` used _purely_ as a mechanism for releasing.  It is
+To support the release process on OSX, there is a release script that leverages a `Dockerfile` used _purely_ as a mechanism for releasing.  It is
 a quick'n'dirty mechanism, ugly and less than ideal, but works.
 
 Here's the steps:
 ```
 # Prerequisites:
 #   * ensure your current working directory is in the root of the Parfait repository
-#   * EXPORT your gpg PRIVATE key in armor format to directory ~/gpgkeyexport (used later)
-#       -  gpg --armor --export 21FFA5EB0E068E51 > ~/gpgkeyexport/tallpsmith@gmail.com.prvt.asc
+#   * EXPORT your gpg PRIVATE key in armor format to directory ~/gpgkeyexport (used during the build)
+#       -  gpg --armor --export-secret-key 21FFA5EB0E068E51 > ~/gpgkeyexport/gpgkey.prvt.asc
 
 # Make sure your ssh key needed for Github is added to a running `ssh-agent` on your local host.
 $ ssh-add
 
-# Build the Docker image used for running the release
-$ docker build .
+# Create a `.releasing.env` file (not part of SCM) that contains the following environment variables needed
+#GIT_USERNAME=<your Github username>
+#GIT_EMAIL=<your Github email address>
+#GPG_PASSPHRASE=<passphrase for your PRIVATE GPG key exported earlier>
 
-# Find the imageID you just built, it should be the one at the top
-$ docker images | head -2
-REPOSITORY                                        TAG                    IMAGE ID       CREATED         SIZE
-<none>                                            <none>                 b2de17c68635   17 hours ago    851MB
-
-# Grab that ImageID to set an environment variable
-$ IMAGEID=b2de17c68635
-
-# Run the Docker image
-#   - maps the ssh-agent on your host into the container
-#   - maps the Parfait codebase to /code in the container
-#   - maps your exported GPG key to a path needed later
-# The Docker image is a simple Ubuntu image with Java, PCP, git, and gpg installed
-$ docker run -e SSH_AUTH_SOCK="/run/host-services/ssh-auth.sock"  -v.:/code -v ~/.m2:/root/.m2 -v ~/gpgkeyexport:/root/gpgkeyexport --mount type=bind,src=/run/host-services/ssh-auth.sock,target=/run/host-services/ssh-auth.sock  -it $IMAGEID /bin/sh
-
-# Now we're in the running container, we need to import the GPG key
-# Import your private GPG key into the containers enviroment
-# I couldn't find a working way to reference my gpg setup from the container, so this is was a hacky way to solve it
-$ gpg --import /root/gpgkeyexport/tallpsmith@gmail.com.prvt.asc
-
-# start PCP, this is needed by the tests
-$ service pmcd start
-
-# setup git in the container to support the release process
-$ git config --global user.email “tallpsmith@gmail.com”
-$ git config --global user.name “Paul “Smith
-$ git config --global gpg.program gpg
-
-# change path to where the Parfait code is mapped into the container
-$ cd /code
-
-# This is needed otherwise you’ll get
-# gpg: signing failed: Inappropriate ioctl for device
-# the GPG signing process needs to prompt you for your passphrase
-# even though the Maven GPG plugin allows you to declare the password
-# this seems to still be needed...
-$ export GPG_TTY=$(tty)
-
-# The Maven JavaDoc plugin needs to set the JAVA_HOME..
-$ export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-arm64
-
-# Now we can finally start the release process itself!
-$ mvn release:prepare release:perform
-
-# You'll be prompted on screen for your GPG passphrase (if you have one)
-# Maven will build, test, verify, package and sign and push to OSS Sonatype
-# Follow the Standard OSS Sonatype release process from here
-# you can now exit the container
-$ exit
-
+# Run the Release script
+./releasing.sh
 ```

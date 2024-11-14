@@ -10,3 +10,4 @@ release.properties
 *.class
 *.iml
 *.swp
+.releasing.env
