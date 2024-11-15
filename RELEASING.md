@@ -9,7 +9,7 @@ To release parfait out to the wider community, you will need the following:
    * An account on [OSS Sonatype Repo](https://oss.sonatype.org/)
 
 If you're releasing from a Mac/OSX, then you'll also need:
-   * Docker/colima/Podman
+   * Docker Desktop (due to SSH_AGENT needs, Docker Desktop is the only one that works...)
 
 
 OSS Sonatype
