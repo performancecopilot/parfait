@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -47,6 +48,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.measure.Unit;
 
 import com.google.common.collect.Maps;
+import com.google.common.util.concurrent.Monitor;
 import io.pcp.parfait.dxm.PcpString.PcpStringStore;
 import io.pcp.parfait.dxm.semantics.Semantics;
 import io.pcp.parfait.dxm.types.AbstractTypeHandler;
@@ -115,6 +117,12 @@ public class PcpMmvWriter implements PcpWriter {
             return bitmask;
         }
     }
+
+    private enum State {
+        STOPPED,
+        STARTING,
+        STARTED
+    }
     
     private static final Set<MmvFlag> DEFAULT_FLAGS = Collections.unmodifiableSet(EnumSet.of(
             MmvFlag.MMV_FLAG_NOPREFIX, MmvFlag.MMV_FLAG_PROCESS));
@@ -156,7 +164,9 @@ public class PcpMmvWriter implements PcpWriter {
     private final Map<Class<?>, TypeHandler<?>> typeHandlers = new ConcurrentHashMap<Class<?>, TypeHandler<?>>(
             DefaultTypeHandlers.getDefaultMappings());
     private final PcpStringStore stringStore = new PcpStringStore();
-    private volatile boolean started = false;
+    private volatile State state = State.STOPPED;
+    private final Monitor stateMonitor = new Monitor();
+    private final Monitor.Guard isStarted = stateMonitor.newGuard(() -> state == State.STARTED);
     private volatile boolean usePerMetricLock = true;
     private final Map<PcpValueInfo,ByteBuffer> perMetricByteBuffers = newConcurrentMap();
     private final Object globalLock = new Object();
@@ -295,7 +305,7 @@ public class PcpMmvWriter implements PcpWriter {
      * io.pcp.parfait.pcp.types.TypeHandler)
      */
     public final <T> void registerType(Class<T> runtimeClass, TypeHandler<T> handler) {
-        if (started) {
+        if (state != State.STOPPED) {
             // Can't add any more metrics anyway; harmless
             return;
         }
@@ -307,9 +317,22 @@ public class PcpMmvWriter implements PcpWriter {
      * @see io.pcp.parfait.pcp.PcpWriter#updateMetric(java.lang.String, java.lang.Object)
      */
     public final void updateMetric(MetricName name, Object value) {
-        if (!started) {
-            return;
+        // If another thread has called start() we need to wait until the writer has completely started before
+        // proceeding to update the metric value. This is to avoid a race condition where start() has already written
+        // the old metric value, but has not yet finished writing all of the values, when the metric is updated. The
+        // implementation here is a little complicated to avoid taking a lock on the happy paths.
+        if (state == State.STARTED) {
+            doUpdateMetric(name, value);
+        } else if (state == State.STARTING) {
+            if (stateMonitor.enterWhenUninterruptibly(isStarted, Duration.ofSeconds(10))) {
+                // Leave the monitor immediately because we only care about being notified about the state change
+                stateMonitor.leave();
+                doUpdateMetric(name, value);
+            }
         }
+    }
+
+    private void doUpdateMetric(MetricName name, Object value) {
         PcpValueInfo info = metricData.get(name);
         if (info == null) {
             throw new IllegalArgumentException("Metric " + name
@@ -323,6 +346,8 @@ public class PcpMmvWriter implements PcpWriter {
      * @see io.pcp.parfait.pcp.PcpWriter#start()
      */
     public final void start() throws IOException {
+        updateState(State.STARTING);
+
         initialiseOffsets();
 
         dataFileBuffer = byteBufferFactory.build(getBufferLength());
@@ -331,12 +356,12 @@ public class PcpMmvWriter implements PcpWriter {
             preparePerMetricBufferSlices();
         }
 
-        started = true;
+        updateState(State.STARTED);
     }
 
     @Override
     public void reset() {
-        started = false;
+        updateState(State.STOPPED);
         metricData.clear();
         perMetricByteBuffers.clear();
         instanceDomainStore.clear();
@@ -384,7 +409,7 @@ public class PcpMmvWriter implements PcpWriter {
     }
 
     public void setPerMetricLock(boolean usePerMetricLock) {
-        Preconditions.checkState(!started, "Cannot change use of perMetricLock when started");
+        Preconditions.checkState(state == State.STOPPED, "Cannot change use of perMetricLock when started");
         this.usePerMetricLock = usePerMetricLock;
     }
 
@@ -464,11 +489,12 @@ public class PcpMmvWriter implements PcpWriter {
 
     private void writeValueWithLockPerMetric(PcpValueInfo info, Object value, TypeHandler rawHandler) {
         ByteBuffer perMetricByteBuffer = perMetricByteBuffers.get(info);
-        synchronized (perMetricByteBuffer) {
-            perMetricByteBuffer.position(0);
-            rawHandler.putBytes(perMetricByteBuffer, value);
+        if (perMetricByteBuffer != null) {
+            synchronized (perMetricByteBuffer) {
+                perMetricByteBuffer.position(0);
+                rawHandler.putBytes(perMetricByteBuffer, value);
+            }
         }
-
     }
 
     private void writeValueWithGlobalLock(PcpValueInfo info, Object value, TypeHandler rawHandler) {
@@ -653,6 +679,15 @@ public class PcpMmvWriter implements PcpWriter {
             processIdentifier = Integer.valueOf(processName.split("@")[0]);
         }
         return processIdentifier;
+    }
+
+    private void updateState(State newState) {
+        stateMonitor.enter();
+        try {
+            state = newState;
+        } finally {
+            stateMonitor.leave();
+        }
     }
 
     public static void main(String[] args) throws IOException {
