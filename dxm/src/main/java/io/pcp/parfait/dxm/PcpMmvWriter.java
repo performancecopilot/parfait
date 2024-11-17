@@ -348,12 +348,17 @@ public class PcpMmvWriter implements PcpWriter {
     public final void start() throws IOException {
         updateState(State.STARTING);
 
-        initialiseOffsets();
+        try {
+            initialiseOffsets();
 
-        dataFileBuffer = byteBufferFactory.build(getBufferLength());
-        synchronized (globalLock) {
-            populateDataBuffer(dataFileBuffer, metricData.values());
-            preparePerMetricBufferSlices();
+            dataFileBuffer = byteBufferFactory.build(getBufferLength());
+            synchronized (globalLock) {
+                populateDataBuffer(dataFileBuffer, metricData.values());
+                preparePerMetricBufferSlices();
+            }
+        } catch (IOException | RuntimeException e) {
+            updateState(State.STOPPED);
+            throw e;
         }
 
         updateState(State.STARTED);
