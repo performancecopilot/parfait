@@ -25,4 +25,4 @@ git config --global user.name "$GIT_USERNAME"
 git config --global --list
 
 echo "Building Parfait"
-mvn --batch-mode release:prepare release:perform -DreleaseVersion="${RELEASE_VERSION}" -DdevelopmentVersion="${DEVELOPMENT_VERSION}"
+MAVEN_GPG_PASSPHRASE=$MAVEN_GPG_PASSPHRASE mvn --batch-mode release:prepare release:perform -DreleaseVersion="${RELEASE_VERSION}" -DdevelopmentVersion="${DEVELOPMENT_VERSION}"
