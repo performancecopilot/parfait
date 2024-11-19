@@ -25,4 +25,4 @@ git config --global user.name "$GIT_USERNAME"
 git config --global --list
 
 echo "Building Parfait"
-mvn --batch-mode -DreleaseVersion="${RELEASE_VERSION}"  -DdevelopmentVersion="${DEVELOPMENT_VERSION}" release:prepare release:perform
+mvn --batch-mode release:prepare release:perform -DreleaseVersion="${RELEASE_VERSION}" -DdevelopmentVersion="${DEVELOPMENT_VERSION}"
