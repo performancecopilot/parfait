@@ -11,3 +11,4 @@ release.properties
 *.iml
 *.swp
 .releasing.env
+.DS_Store
