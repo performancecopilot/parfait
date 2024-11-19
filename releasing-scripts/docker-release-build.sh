@@ -25,4 +25,4 @@ git config --global user.name "$GIT_USERNAME"
 git config --global --list
 
 echo "Building Parfait"
-mvn clean verify gpg:sign
+mvn --batch-mode -DreleaseVersion="${RELEASE_VERSION}"  -DdevelopmentVersion="${DEVELOPMENT_VERSION}" release:prepare release:perform

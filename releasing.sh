@@ -9,6 +9,9 @@ source .releasing.env
 [ ! "$GIT_EMAIL" ] && echo "GIT_EMAIL is not set" && exit 1
 [ ! "$GPG_PASSPHRASE" ] && echo "GPG_PASSPHRASE is not set" && exit 1
 
+[ ! "$RELEASE_VERSION" ] && echo "RELEASE_VERSION is not set" && exit 1
+[ ! "$DEVELOPMENT_VERSION" ] && echo "DEVELOPMENT_VERSION is not set" && exit 1
+
 docker build . -t parfait-builder
 # This runs the Docker-based build:
 #   * sets up Git & PGP environment variables

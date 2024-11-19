@@ -117,6 +117,9 @@ $ ssh-add
 #GIT_USERNAME=<your Github username>
 #GIT_EMAIL=<your Github email address>
 #GPG_PASSPHRASE=<passphrase for your PRIVATE GPG key exported earlier>
+#These next 2 drive the Maven Release plugin
+#RELEASE_VERSION=1.2.1
+#DEVELOPMENT_VERSION=1.2.2-SNAPSHOT
 
 # Run the Release script
 ./releasing.sh
