@@ -167,6 +167,7 @@ public class PcpMmvWriter implements PcpWriter {
     private volatile State state = State.STOPPED;
     private final Monitor stateMonitor = new Monitor();
     private final Monitor.Guard isStarted = stateMonitor.newGuard(() -> state == State.STARTED);
+    private volatile Duration maxWaitStart = Duration.ofSeconds(10);
     private volatile boolean usePerMetricLock = true;
     private final Map<PcpValueInfo,ByteBuffer> perMetricByteBuffers = newConcurrentMap();
     private final Object globalLock = new Object();
@@ -231,7 +232,6 @@ public class PcpMmvWriter implements PcpWriter {
         this.instanceDomainStore = mmvVersion.createInstanceDomainStore(identifierSources, stringStore);
         this.mmvVersion = mmvVersion;
         this.metricNameValidator = mmvVersion.createMetricNameValidator();
-
         registerType(String.class, MMV_STRING_HANDLER);
     }
 
@@ -324,7 +324,7 @@ public class PcpMmvWriter implements PcpWriter {
         if (state == State.STARTED) {
             doUpdateMetric(name, value);
         } else if (state == State.STARTING) {
-            if (stateMonitor.enterWhenUninterruptibly(isStarted, Duration.ofSeconds(10))) {
+            if (stateMonitor.enterWhenUninterruptibly(isStarted, maxWaitStart)) {
                 // Leave the monitor immediately because we only care about being notified about the state change
                 stateMonitor.leave();
                 doUpdateMetric(name, value);
@@ -420,6 +420,15 @@ public class PcpMmvWriter implements PcpWriter {
 
     public void setFlags(Set<MmvFlag> flags) {
         this.flags = EnumSet.copyOf(flags);
+    }
+
+    /**
+     * Sets the maximum amount of time to wait for the writer to start when attempting to update a metric.
+     *
+     * @param maxWaitStart the maximum amount of time to wait
+     */
+    public void setMaxWaitStart(Duration maxWaitStart) {
+        this.maxWaitStart = Preconditions.checkNotNull(maxWaitStart, "maxWaitStart cannot be null");
     }
 
     private synchronized void addMetricInfo(MetricName name, Semantics semantics, Unit<?> unit,

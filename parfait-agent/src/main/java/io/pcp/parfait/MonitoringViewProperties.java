@@ -19,7 +19,6 @@ package io.pcp.parfait;
 import java.lang.management.ManagementFactory;
 import java.util.Collections;
 
-import io.pcp.parfait.DynamicMonitoringView;
 import io.pcp.parfait.dxm.HashingIdentifierSource;
 import io.pcp.parfait.dxm.IdentifierSource;
 
@@ -31,15 +30,18 @@ public class MonitoringViewProperties {
     private static final String INTERVAL = "interval";
     private static final String STARTUP = "startup";
     private static final String CONNECT = "connect";
+    private static final String WRITER_WAIT = "writer.wait";
 
     public static final String PARFAIT_NAME = PARFAIT + "." + NAME;
     public static final String PARFAIT_CLUSTER = PARFAIT + "." + CLUSTER;
     public static final String PARFAIT_INTERVAL = PARFAIT + "." + INTERVAL;
     public static final String PARFAIT_STARTUP = PARFAIT + "." + STARTUP;
     public static final String PARFAIT_CONNECT = PARFAIT + "." + CONNECT;
+    public static final String PARFAIT_WRITER_WAIT = PARFAIT + "." + WRITER_WAIT;
 
     private static final String DEFAULT_INTERVAL = "1000"; // milliseconds
     private static final String DEFAULT_CONNECT = "localhost:9875";
+    private static final String DEFAULT_WRITER_WAIT_MS = "10000";
 
     public static String getCommandBasename(String command) {
         // trim away arguments, produce a generally sanitized basename
@@ -139,6 +141,14 @@ public class MonitoringViewProperties {
         return connect;
     }
 
+    public static String getDefaultWriterWait() {
+        String writerWait = System.getProperty(PARFAIT_WRITER_WAIT);
+        if (writerWait == null || writerWait.isEmpty()) {
+            return DEFAULT_WRITER_WAIT_MS;
+        }
+        return writerWait;
+    }
+
     public static void setupProperties() {
         String name = getDefaultName(getParfaitName(), getDefaultCommand(), getRuntimeName());
         System.setProperty(PARFAIT_NAME, name);
@@ -154,6 +164,9 @@ public class MonitoringViewProperties {
 
         String connect = getDefaultConnection();
         System.setProperty(PARFAIT_CONNECT, connect);
+
+        String writerWait = getDefaultWriterWait();
+        System.setProperty(PARFAIT_WRITER_WAIT, writerWait);
     }
 
     //
@@ -173,5 +186,14 @@ public class MonitoringViewProperties {
     }
     public static String getConnection() {
         return System.getProperty(PARFAIT_CONNECT);
+    }
+
+    /**
+     * The maximum number of milliseconds to wait for PcpMmvWriter to start when attempting to update a metric.
+     *
+     * @return maximum number of milliseconds to wait
+     */
+    public static long getWriterWait() {
+        return Long.parseLong(System.getProperty(PARFAIT_WRITER_WAIT));
     }
 }
