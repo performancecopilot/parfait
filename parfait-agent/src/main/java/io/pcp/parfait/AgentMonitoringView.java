@@ -33,6 +33,7 @@ import io.pcp.parfait.pcp.PcpMonitorBridge;
 import io.pcp.parfait.ValueSemantics;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.EnumSet;
 
 import javax.management.AttributeNotFoundException;
@@ -73,6 +74,7 @@ class AgentMonitoringView {
         writer = new PcpMmvWriter(name, IdentifierSourceSet.DEFAULT_SET);
         writer.setClusterIdentifier(MonitoringViewProperties.getCluster());
         writer.setFlags(EnumSet.of(PcpMmvWriter.MmvFlag.MMV_FLAG_PROCESS));
+        writer.setMaxWaitStart(Duration.ofMillis(MonitoringViewProperties.getWriterWait()));
 
         DynamicMonitoringView view;
         view = new DynamicMonitoringView(registry, 
