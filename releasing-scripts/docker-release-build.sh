@@ -38,5 +38,5 @@ git config --global user.name "$GIT_USERNAME"
 git config --global --list
 
 echo "Building Parfait"
-MAVEN_GPG_PASSPHRASE=$GPG_PASSPHRASE mvn --batch-mode -DdryRun=${DRY_RUN} -DreleaseVersion="${RELEASE_VERSION}" -DdevelopmentVersion="${DEVELOPMENT_VERSION}" release:prepare
+MAVEN_GPG_PASSPHRASE=$GPG_PASSPHRASE mvn --batch-mode -DdryRun=${DRY_RUN} -DreleaseVersion="${RELEASE_VERSION}" -DdevelopmentVersion="${DEVELOPMENT_VERSION}" release:prepare release:perform
 
