@@ -120,6 +120,8 @@ $ ssh-add
 #These next 2 drive the Maven Release plugin
 #RELEASE_VERSION=1.2.1
 #DEVELOPMENT_VERSION=1.2.2-SNAPSHOT
+#SET this to  'true' if you want to perform a test/dry-run of the release process without actually doing it.
+#DRY_RUN=false 
 
 # Run the Release script
 ./releasing.sh

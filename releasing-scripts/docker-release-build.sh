@@ -13,12 +13,12 @@ echo allow-preset-passphrase  >> /root/.gnupg/gpg-agent.conf
 echo "Importing GPGKEY"
 # this trick allows the GPG secret key to be imported via the command line
 # thank goodness for Google
-echo $MAVEN_GPG_PASSPHRASE | gpg --batch --yes --passphrase-fd 0  --import  /root/gpgkeyexport/gpgkey.prvt.asc
+echo $GPG_PASSPHRASE | gpg --batch --yes --passphrase-fd 0  --import  /root/gpgkeyexport/gpgkey.prvt.asc
 
 # now iterate over each KEYGRIP you can see and preset the passphrase (one of them will be the right one)
 echo "Dumping keygrips"
 gpg --list-secret-keys --with-keygrip
-for KEYGRIP in `gpg --list-secret-keys --with-keygrip | grep Keygrip | awk -F = '{print $2}'`; do /usr/libexec/gpg-preset-passphrase --preset --passphrase $MAVEN_GPG_PASSPHRASE $KEYGRIP; done
+for KEYGRIP in `gpg --list-secret-keys --with-keygrip | grep Keygrip | awk -F = '{print $2}'`; do /usr/libexec/gpg-preset-passphrase --preset --passphrase $GPG_PASSPHRASE $KEYGRIP; done
 
 # now do a simple GPG sign to 'prime' the gpg to ensure when Maven ends up running this GPG cache thing is ready
 echo "Doing a fake GPG signing now to prime the GPG agent password cache"
@@ -38,4 +38,5 @@ git config --global user.name "$GIT_USERNAME"
 git config --global --list
 
 echo "Building Parfait"
-MAVEN_GPG_PASSPHRASE=$MAVEN_GPG_PASSPHRASE mvn --batch-mode release:prepare release:perform -DreleaseVersion="${RELEASE_VERSION}" -DdevelopmentVersion="${DEVELOPMENT_VERSION}"
+MAVEN_GPG_PASSPHRASE=$GPG_PASSPHRASE mvn --batch-mode -DdryRun=${DRY_RUN} -DreleaseVersion="${RELEASE_VERSION}" -DdevelopmentVersion="${DEVELOPMENT_VERSION}" release:prepare
+

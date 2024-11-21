@@ -19,7 +19,7 @@ docker build . -t parfait-builder
 #   * mounts your GPG exported key (see RELEASING.md for the requirements there)
 #   * mounts the SSH_AUTH_SOCK so you can leverage your local SSH agent
 #   * then launches the releasing-scripts/docker-release-build.sh to perform the build inside the container
-docker run --rm --env GIT_USERNAME="${GIT_USERNAME}" --env GIT_EMAIL="${GIT_EMAIL}" --env MAVEN_GPG_PASSPHRASE="${GPG_PASSPHRASE}" --env SSH_AUTH_SOCK="/run/host-services/ssh-auth.sock" --volume `pwd`:/parfait --volume ~/.m2:/root/.m2 --volume ~/gpgkeyexport:/root/gpgkeyexport --mount type=bind,src=/run/host-services/ssh-auth.sock,target=/run/host-services/ssh-auth.sock parfait-builder sh -c 'releasing-scripts/docker-release-build.sh'
+docker run --rm --env-file .releasing.env --env SSH_AUTH_SOCK="/run/host-services/ssh-auth.sock" --volume `pwd`:/parfait --volume ~/.m2:/root/.m2 --volume ~/gpgkeyexport:/root/gpgkeyexport --mount type=bind,src=/run/host-services/ssh-auth.sock,target=/run/host-services/ssh-auth.sock parfait-builder sh -c 'releasing-scripts/docker-release-build.sh'
 
 
 
