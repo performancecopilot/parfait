@@ -67,12 +67,13 @@ public class PcpMonitorBridge implements MonitoringView {
     private final TextSource shortTextSource;
     private final TextSource longTextSource;
 
-    private volatile PcpWriter pcpWriter;
+    private final PcpWriter pcpWriter;
     private volatile boolean started;
 
 
     public PcpMonitorBridge(PcpWriter writer) {
-        this(writer, MetricNameMapper.PASSTHROUGH_MAPPER, DEFAULT_SHORT_TEXT_SOURCE,
+        this(writer, new CachingMetricNameMapper(MetricNameMapper.PASSTHROUGH_MAPPER),
+                DEFAULT_SHORT_TEXT_SOURCE,
                 DEFAULT_LONG_TEXT_SOURCE);
     }
 

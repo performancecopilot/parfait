@@ -16,12 +16,16 @@
 
 package io.pcp.parfait.dxm;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import static io.pcp.parfait.dxm.PcpMmvWriter.PCP_CHARSET;
 
 class MetricNameValidator {
 
     private final int nameLimit;
     private final int domainLimit;
+    private final Set<MetricName> validNames = new HashSet<>();
 
     MetricNameValidator(int nameLimit, int domainLimit) {
         this.nameLimit = nameLimit;
@@ -29,8 +33,11 @@ class MetricNameValidator {
     }
 
     void validateNameConstraints(MetricName metricName) {
-        validateName(metricName);
-        validateInstance(metricName);
+        if (!validNames.contains(metricName)) {
+            validateName(metricName);
+            validateInstance(metricName);
+            validNames.add(metricName);
+        }
     }
 
     private void validateInstance(MetricName metricName) {
