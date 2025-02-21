@@ -203,6 +203,29 @@ public class PcpMmvWriterIntegrationTest {
         assertMetric("mmv." + order.get(0), is("10.000"));
     }
 
+    @Test
+    public void metricUpdatesWhileResettingWriterShouldNotBeLostWhenRecordedBeforeWriterStarted() throws Exception {
+        pcpMmvWriterV1.reset();
+        pcpMmvWriterV1.addMetric(MetricName.parse("value1"), Semantics.COUNTER, ONE, 1);
+
+        pcpMmvWriterV1.start();
+
+        waitForReload();
+
+        assertMetric("mmv.value1", is("1.000"));
+
+        pcpMmvWriterV1.reset();
+
+        pcpMmvWriterV1.addMetric(MetricName.parse("value1"), Semantics.COUNTER, ONE, 1);
+        pcpMmvWriterV1.updateMetric(MetricName.parse("value1"), 10);
+
+        pcpMmvWriterV1.start();
+
+        waitForReload();
+
+        assertMetric("mmv.value1", is("10.000"));
+    }
+
     private void assertMetric(String metricName, Matcher<String> expectedValue) throws Exception {
         String actual = pcpClient.getMetric(metricName);
         assertThat(actual, expectedValue);

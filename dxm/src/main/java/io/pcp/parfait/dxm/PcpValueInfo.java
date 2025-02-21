@@ -32,7 +32,7 @@ public final class PcpValueInfo implements PcpOffset,MmvWritable {
     private static final int VALUE_LENGTH = 32;
 
 	private final MetricName metricName;
-	private final Object initialValue;
+	private volatile Object initialValue;
 	private final PcpMetricInfo metricInfo;
 	private final Instance instance;
 	private final PcpString largeValue;
@@ -76,6 +76,10 @@ public final class PcpValueInfo implements PcpOffset,MmvWritable {
 
     private Object getInitialValue() {
         return initialValue;
+    }
+
+    public void setInitialValue(Object initialValue) {
+        this.initialValue = initialValue;
     }
 
     private int getInstanceOffset() {
