@@ -93,36 +93,9 @@ Once you have all the above components setup, the actual release process involve
 
 Once the `Release` action is performed you & others in the OSS Sonatype group for this project will receive an email from Nexus indicating the promotion is complete.  Once you receive this, the new version should be referencable in any POM.
 
-Releasing from OSX
-==================
+Releasing from macOS
+====================
 
-There are some complications releasing from a computer with OSX.  As of November 2024, PCP doesn't have a supported OSX distribution,
-and Parfait test harness require interaction with PCP locally to validate.  As the Maven release process involves running the
-tests locally to validate, this is problematic.
+PCP is now available on macOS via Homebrew. See [CONTRIBUTING.md](CONTRIBUTING.md) for installation instructions.
 
-To support the release process on OSX, there is a release script that leverages a `Dockerfile` used _purely_ as a mechanism for releasing.  It is
-a quick'n'dirty mechanism, ugly and less than ideal, but works.
-
-Here's the steps:
-```
-# Prerequisites:
-#   * ensure your current working directory is in the root of the Parfait repository
-#   * EXPORT your gpg PRIVATE key in armor format to directory ~/gpgkeyexport (used during the build)
-#       -  gpg --armor --export-secret-key 21FFA5EB0E068E51 > ~/gpgkeyexport/gpgkey.prvt.asc
-
-# Make sure your ssh key needed for Github is added to a running `ssh-agent` on your local host.
-$ ssh-add
-
-# Create a `.releasing.env` file (not part of SCM) that contains the following environment variables needed
-#GIT_USERNAME=<your Github username>
-#GIT_EMAIL=<your Github email address>
-#GPG_PASSPHRASE=<passphrase for your PRIVATE GPG key exported earlier>
-#These next 2 drive the Maven Release plugin
-#RELEASE_VERSION=1.2.1
-#DEVELOPMENT_VERSION=1.2.2-SNAPSHOT
-#SET this to  'true' if you want to perform a test/dry-run of the release process without actually doing it.
-#DRY_RUN=false 
-
-# Run the Release script
-./releasing.sh
-```
+With PCP installed locally, the release process works the same on macOS as on Linux — no Docker container required.
