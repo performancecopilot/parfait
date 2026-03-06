@@ -18,17 +18,22 @@ Parfait targets Java 8 source/target and is tested in CI against Java 11, 17, an
 brew install openjdk@11
 ```
 
-Homebrew installs Java but doesn't make it the default. To point Maven at it, set `JAVA_HOME` in your shell profile:
+Homebrew installs `openjdk@11` as keg-only, so macOS's `java_home` utility won't find it. You need to symlink it first:
+
+```bash
+sudo ln -sfn /opt/homebrew/opt/openjdk@11/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-11.jdk
+```
+
+Then set `JAVA_HOME` in your shell profile (e.g. `~/.zshrc`):
 
 ```bash
 export JAVA_HOME=$(/usr/libexec/java_home -v 11)
 ```
 
-Or if you use multiple Java versions, set it per-project in the parfait directory:
+Alternatively, skip the symlink and point directly at the Homebrew path:
 
 ```bash
-# Create a .env or use direnv, sdkman, jenv, etc.
-export JAVA_HOME=$(/usr/libexec/java_home -v 11)
+export JAVA_HOME=/opt/homebrew/opt/openjdk@11/libexec/openjdk.jdk/Contents/Home
 ```
 
 **Linux (Debian/Ubuntu):**
