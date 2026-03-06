@@ -4,9 +4,54 @@
 
 ### Prerequisites
 
-- Java 11 or later (11, 17, and 21 are tested in CI)
+- Java 11 (see below for setup — your system default is likely much newer)
 - Maven 3.1.0+
 - Performance Co-Pilot (PCP)
+
+### Installing and Configuring Java 11
+
+Parfait targets Java 8 source/target and is tested in CI against Java 11, 17, and 21. Your system likely ships with a much newer Java by default, which will cause build failures. You need Java 11 available and Maven configured to use it.
+
+**macOS (via Homebrew):**
+
+```bash
+brew install openjdk@11
+```
+
+Homebrew installs Java but doesn't make it the default. To point Maven at it, set `JAVA_HOME` in your shell profile:
+
+```bash
+export JAVA_HOME=$(/usr/libexec/java_home -v 11)
+```
+
+Or if you use multiple Java versions, set it per-project in the parfait directory:
+
+```bash
+# Create a .env or use direnv, sdkman, jenv, etc.
+export JAVA_HOME=$(/usr/libexec/java_home -v 11)
+```
+
+**Linux (Debian/Ubuntu):**
+
+```bash
+sudo apt-get install -y openjdk-11-jdk
+```
+
+If you have multiple JDKs installed, select Java 11:
+
+```bash
+sudo update-alternatives --set java /usr/lib/jvm/java-11-openjdk-amd64/bin/java
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+```
+
+**Verify:**
+
+```bash
+java -version   # Should show 11.x.x
+mvn -version    # "Java version" line should show 11.x.x
+```
+
+If `mvn -version` shows a different Java than `java -version`, Maven is picking up `JAVA_HOME` from somewhere else. Check your shell profile and ensure `JAVA_HOME` is set before Maven runs.
 
 ### Installing PCP
 

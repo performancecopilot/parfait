@@ -81,7 +81,7 @@ The `pcp-gui` package is required — it provides `pmdumptext` which is used by 
 
 ## Platform Requirements
 
-- Java 8 source/target (enforced by maven-enforcer-plugin), tested on Java 11-17 at runtime.
+- **Java 11 is required for building.** The source/target is Java 8, CI tests against 11, 17, and 21. Modern systems default to Java 21+ which will cause build failures. Ensure `JAVA_HOME` points to Java 11 and `mvn -version` confirms it. See CONTRIBUTING.md for setup instructions.
 - Maven 3.1.0+ required.
 - PCP must be installed for integration tests. See CONTRIBUTING.md for install instructions (macOS, Debian/Ubuntu, RHEL/Fedora). Requires writable `/var/lib/pcp/tmp/mmv`.
 
