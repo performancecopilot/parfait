@@ -12,7 +12,7 @@ Parfait is a Java performance monitoring library that extracts metrics and expor
 # Full build with tests (requires PCP installed and /var/lib/pcp/tmp/mmv writable)
 mvn clean install verify
 
-# Build without tests (useful on macOS where PCP isn't natively available)
+# Build without tests
 mvn clean install -DskipTests
 
 # Run unit tests only (integration tests excluded by default via surefire)
@@ -35,6 +35,12 @@ mvn license:check
 
 # Skip license check
 mvn install -Dlicense.skip=true
+
+# Run tests in a clean container (requires podman)
+./test-in-container.sh
+
+# Run specific module in container
+./test-in-container.sh mvn test -pl parfait-core
 ```
 
 ## Architecture
