@@ -86,11 +86,13 @@ sudo dnf install pcp pcp-zeroconf pcp-gui
 
 ### MMV Directory Permissions
 
-The PCP MMV agent needs a writable directory for memory-mapped files:
+PCP installs `/var/lib/pcp/tmp/mmv` with permissions `drwxrwxr-x` (only root and the pcp group can write). Parfait's integration tests need to create memory-mapped files in this directory, so your user needs write access:
 
 ```bash
 sudo chmod o+w /var/lib/pcp/tmp/mmv
 ```
+
+Without this, integration tests in the `dxm` module will fail with `Permission denied` on `/var/lib/pcp/tmp/mmv/`.
 
 ### Building and Testing
 

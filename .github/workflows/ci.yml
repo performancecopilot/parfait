@@ -22,9 +22,7 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: ${{ matrix.java-version }}
-      - name: check mmv permissions
-        run: ls -la /var/lib/pcp/tmp/ | grep mmv
-      - name: open up access
+      - name: open up mmv directory
         run: sudo chmod o+w /var/lib/pcp/tmp/mmv
       - name: verify parfait
         run: mvn -B -V clean install verify

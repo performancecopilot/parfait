@@ -34,9 +34,7 @@ jobs:
       - name: start pmcd
         run: sudo systemctl start pmcd
 
-      - name: check mmv permissions
-        run: ls -la /var/lib/pcp/tmp/ | grep mmv
-      - name: open up mmv access
+      - name: open up mmv directory
         run: sudo chmod o+w /var/lib/pcp/tmp/mmv
 
       - uses: actions/setup-java@v4
