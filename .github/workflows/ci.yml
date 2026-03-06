@@ -15,7 +15,7 @@ jobs:
         run: |
           curl -s https://packagecloud.io/install/repositories/performancecopilot/pcp/script.deb.sh | sudo bash
           sudo apt-get update -q
-          sudo apt-get install -y pcp pcp-zeroconf
+          sudo apt-get install -y pcp pcp-zeroconf pcp-gui
       - name: verify pcp install
         run: pcp
       - uses: actions/setup-java@v4
