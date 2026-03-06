@@ -29,11 +29,13 @@ jobs:
         run: |
           curl -s https://packagecloud.io/install/repositories/performancecopilot/pcp/script.deb.sh | sudo bash
           sudo apt-get update -q
-          sudo apt-get install -y pcp-zeroconf
+          sudo apt-get install -y pcp pcp-zeroconf
 
       - name: start pmcd
         run: sudo systemctl start pmcd
 
+      - name: check mmv permissions
+        run: ls -la /var/lib/pcp/tmp/ | grep mmv
       - name: open up mmv access
         run: sudo chmod o+w /var/lib/pcp/tmp/mmv
 

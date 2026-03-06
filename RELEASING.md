@@ -69,4 +69,4 @@ GPG Key Management
 The release signing key should be:
 - A dedicated key (not a personal key)
 - Published to a public keyserver (`gpg --keyserver keyserver.ubuntu.com --send-keys <KEY_ID>`)
-- Rotated periodically by updating the GitHub secret
+- Long-lived — only replace if compromised (consumers verify artifacts against this key)
