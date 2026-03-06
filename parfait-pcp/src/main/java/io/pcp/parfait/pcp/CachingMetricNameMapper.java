@@ -21,6 +21,11 @@ import io.pcp.parfait.dxm.MetricName;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Wrapper around a MetricNameMapper that caches the metric name string to MetricName object mapping.
+ * This cache is intended to improve performance by removing the need to parse a metric name every time it's
+ * mapped to a MetricName object.
+ */
 public class CachingMetricNameMapper implements MetricNameMapper {
 
     private final Map<String, MetricName> cache = new ConcurrentHashMap<>();

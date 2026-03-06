@@ -78,7 +78,7 @@ public final class PcpValueInfo implements PcpOffset,MmvWritable {
         return initialValue;
     }
 
-    public void setInitialValue(Object initialValue) {
+    void setInitialValue(Object initialValue) {
         this.initialValue = initialValue;
     }
 
