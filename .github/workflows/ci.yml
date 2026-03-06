@@ -4,16 +4,14 @@ on: [ push, pull_request ]
 
 jobs:
   java:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: install pcp
         run: |
-          wget -qO - https://pcp.io/GPG-KEY-PCP | sudo apt-key add -
-          #sudo add-apt-repository 'deb https://performancecopilot.jfrog.io/artifactory/pcp-deb-release focal main' -y
           curl -s https://packagecloud.io/install/repositories/performancecopilot/pcp/script.deb.sh | sudo bash
           sudo apt-get update -q
-          sudo apt-get install -y pcp-zeroconf pcp-gui
+          sudo apt-get install -y pcp-zeroconf
       - name: verify pcp install
         run: pcp
       - uses: actions/setup-java@v4
