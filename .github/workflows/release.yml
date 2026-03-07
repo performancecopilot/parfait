@@ -17,7 +17,7 @@ on:
 jobs:
   release:
     runs-on: ubuntu-24.04
-    environment: ${{ inputs.dry_run == false && 'release' || '' }}
+    environment: release
     permissions:
       contents: write
     steps:
@@ -42,11 +42,12 @@ jobs:
           distribution: 'zulu'
           java-version: '11'
 
-      - name: import gpg key
-        run: |
-          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
-        env:
-          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+      - uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
 
       - name: configure maven settings
         run: |

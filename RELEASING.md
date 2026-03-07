@@ -6,7 +6,7 @@ Parfait releases are performed via GitHub Actions and published to Maven Central
 Prerequisites
 -------------
 
-The following GitHub repository secrets must be configured (Settings > Secrets > Actions):
+A `release` environment must be configured (Settings > Environments) with required reviewers to prevent accidental releases. The following secrets must be set on this environment (Settings > Environments > release > Environment secrets):
 
 | Secret | Purpose |
 |---|---|
@@ -14,8 +14,6 @@ The following GitHub repository secrets must be configured (Settings > Secrets >
 | `GPG_PASSPHRASE` | Passphrase for the GPG key |
 | `CENTRAL_USERNAME` | Central Portal user token username |
 | `CENTRAL_PASSWORD` | Central Portal user token password |
-
-A `release` environment with required reviewers must be configured (Settings > Environments) to prevent accidental releases.
 
 You also need access to the [Central Portal](https://central.sonatype.com) to perform the final publish step. To generate user tokens: log in > Account > Generate User Token.
 
