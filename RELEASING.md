@@ -1,7 +1,7 @@
 Release Process
 ===============
 
-Parfait releases are performed via GitHub Actions.
+Parfait releases are performed via GitHub Actions and published to Maven Central via the [Central Portal](https://central.sonatype.com).
 
 Prerequisites
 -------------
@@ -12,12 +12,12 @@ The following GitHub repository secrets must be configured (Settings > Secrets >
 |---|---|
 | `GPG_PRIVATE_KEY` | Armored GPG private key for signing artifacts |
 | `GPG_PASSPHRASE` | Passphrase for the GPG key |
-| `SONATYPE_USERNAME` | OSS Sonatype account username |
-| `SONATYPE_PASSWORD` | OSS Sonatype account password |
+| `CENTRAL_USERNAME` | Central Portal user token username |
+| `CENTRAL_PASSWORD` | Central Portal user token password |
 
 A `release` environment with required reviewers must be configured (Settings > Environments) to prevent accidental releases.
 
-You also need access to [OSS Sonatype](https://oss.sonatype.org/) to perform the final promotion step. See the [OSSRH guide](https://central.sonatype.org/pages/ossrh-guide.html) for account setup.
+You also need access to the [Central Portal](https://central.sonatype.com) to perform the final publish step. To generate user tokens: log in > Account > Generate User Token.
 
 Performing a Release
 --------------------
@@ -45,18 +45,20 @@ The workflow will:
 - Run all tests
 - Update POM versions
 - Build and sign artifacts
-- Deploy to Sonatype staging
+- Upload deployment bundle to Central Portal
 - Push release commits and tag to GitHub
 
-### 3. Promote on Sonatype
+### 3. Publish on Central Portal
 
-1. Log into [OSS Sonatype](https://oss.sonatype.org/)
-2. Go to "Staging Repositories"
-3. Find the `io.pcp` staging repo
-4. Click "Close" — this runs Sonatype's validation rules
-5. Once closed successfully, click "Release"
+1. Log into the [Central Portal](https://central.sonatype.com)
+2. Go to "Deployments"
+3. Find the `io.pcp` deployment
+4. Review the validation status
+5. Click "Publish"
 
-You'll receive an email when promotion to Maven Central is complete.
+Artifacts typically appear on Maven Central within 30 minutes of publishing.
+
+> **Note:** The `autoPublish` setting in pom.xml is currently `false`, requiring this manual publish step. Once confident in the pipeline, set `autoPublish` to `true` in the `central-publishing-maven-plugin` configuration to eliminate this step.
 
 Tag Convention
 --------------
