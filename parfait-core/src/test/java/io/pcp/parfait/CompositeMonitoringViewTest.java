@@ -22,6 +22,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import static org.junit.Assert.assertFalse;
@@ -40,8 +41,7 @@ public class CompositeMonitoringViewTest {
 
     CompositeMonitoringView compositeMonitoringView;
 
-    @Mock
-    Collection<Monitorable<?>> monitorables;
+    Collection<Monitorable<?>> monitorables = new ArrayList<>();
 
     @Before
     public void setUp() {

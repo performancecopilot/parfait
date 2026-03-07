@@ -10,7 +10,7 @@
 
 ### Installing and Configuring Java 11
 
-Parfait targets Java 8 source/target and is tested in CI against Java 11, 17, and 21. Your system likely ships with a much newer Java by default, which will cause build failures. You need Java 11 available and Maven configured to use it.
+Parfait targets Java 8 source/target and is tested in CI against Java 11, 17, 21, and 25. Your system likely ships with a much newer Java by default, which will cause build failures. You need Java 11 available and Maven configured to use it.
 
 **macOS (via Homebrew):**
 
@@ -124,7 +124,10 @@ The fat JAR is produced at `parfait-agent/target/parfait-agent-jar-with-dependen
 
 ## Container-Based Testing
 
-If you don't want to install PCP locally, or want to validate in a clean environment:
+If you don't want to install PCP locally, or want to validate in a clean environment.
+
+> **Note:** The container uses JDK 21 because the PCP base image (Fedora) only ships JDK 21+.
+> The CI workflow (`.github/workflows/ci.yml`) tests the full JDK matrix (11, 17, 21, 25) and remains the authoritative source for version coverage.
 
 ```bash
 # Run full test suite in a container (requires docker or podman)

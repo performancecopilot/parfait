@@ -10,7 +10,16 @@ Parfait is a performance monitoring library for Java which extracts metrics and 
 
 # Requirements
 
-Parfait requires Java 11+ (as of Parfait 1.2.x). CI tests against Java 11, 17, and 21.
+Parfait targets Java 8 source/target and requires Java 11+ at runtime (as of Parfait 1.2.x).
+
+| JDK | CI Tested | Container (`test-in-container.sh`) |
+|-----|-----------|-------------------------------------|
+| 11  | Yes       | No (unavailable in Fedora base image) |
+| 17  | Yes       | No (unavailable in Fedora base image) |
+| 21  | Yes       | Yes (default)                         |
+| 25  | Yes       | No                                    |
+
+The CI workflow (`.github/workflows/ci.yml`) is the authoritative source for supported JDK versions.
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development environment setup, including PCP installation on macOS and Linux.
 
 # About parfait
