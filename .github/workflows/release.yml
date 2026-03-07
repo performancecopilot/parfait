@@ -29,7 +29,7 @@ jobs:
         run: |
           curl -s https://packagecloud.io/install/repositories/performancecopilot/pcp/script.deb.sh | sudo bash
           sudo apt-get update -q
-          sudo apt-get install -y pcp pcp-zeroconf pcp-gui
+          sudo apt-get install -y pcp pcp-zeroconf
 
       - name: start pmcd
         run: sudo systemctl start pmcd

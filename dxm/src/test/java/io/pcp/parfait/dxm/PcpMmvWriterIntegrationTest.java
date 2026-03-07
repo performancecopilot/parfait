@@ -63,8 +63,8 @@ public class PcpMmvWriterIntegrationTest {
 
         waitForReload();
 
-        assertMetric("mmv.v1.integer", is("3.000"));
-        assertMetric("mmv.v2.integer", is("3.000"));
+        assertMetric("mmv.v1.integer", is("3"));
+        assertMetric("mmv.v2.integer", is("3"));
     }
 
     @Test
@@ -75,7 +75,7 @@ public class PcpMmvWriterIntegrationTest {
 
         waitForReload();
 
-        assertMetric("mmv.v2.metric.that.is.longer.than.63.characters.v2.metric.that.is.longer.than.63.characters", is("10.000"));
+        assertMetric("mmv.v2.metric.that.is.longer.than.63.characters.v2.metric.that.is.longer.than.63.characters", is("10"));
     }
 
     @Test
@@ -86,7 +86,7 @@ public class PcpMmvWriterIntegrationTest {
 
         waitForReload();
 
-        assertMetric("mmv.v2.integer[instance_name_over_63_characters_instance_name_over_63_characters_instance]", is("11.000"));
+        assertMetric("mmv.v2.integer[instance_name_over_63_characters_instance_name_over_63_characters_instance]", is("11"));
     }
 
     @Test
@@ -103,8 +103,8 @@ public class PcpMmvWriterIntegrationTest {
 
         waitForReload();
 
-        assertMetric("mmv.v1.string", is("\"test1\""));
-        assertMetric("mmv.v2.string", is("\"test2\""));
+        assertMetric("mmv.v1.string", is("test1"));
+        assertMetric("mmv.v2.string", is("test2"));
 
         assertStringsCount(pcpMmvWriterV1, 1);
         assertStringsCount(pcpMmvWriterV2, 2);
@@ -142,8 +142,8 @@ public class PcpMmvWriterIntegrationTest {
 
         waitForReload();
 
-        assertMetric("mmv.value1", is("1.000"));
-        assertMetric("mmv.value2", is("2.000"));
+        assertMetric("mmv.value1", is("1"));
+        assertMetric("mmv.value2", is("2"));
 
         pcpMmvWriterV1.reset();
 
@@ -200,7 +200,7 @@ public class PcpMmvWriterIntegrationTest {
 
         waitForReload();
 
-        assertMetric("mmv." + order.get(0), is("10.000"));
+        assertMetric("mmv." + order.get(0), is("10"));
     }
 
     private void assertMetric(String metricName, Matcher<String> expectedValue) throws Exception {

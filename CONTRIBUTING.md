@@ -75,13 +75,13 @@ See [performancecopilot/homebrew-pcp](https://github.com/performancecopilot/home
 
 ```bash
 curl -s https://packagecloud.io/install/repositories/performancecopilot/pcp/script.deb.sh | sudo bash
-sudo apt-get install -y pcp pcp-zeroconf pcp-gui
+sudo apt-get install -y pcp pcp-zeroconf
 ```
 
 **RHEL/Fedora:**
 
 ```bash
-sudo dnf install pcp pcp-zeroconf pcp-gui
+sudo dnf install pcp pcp-zeroconf
 ```
 
 ### MMV Directory Permissions

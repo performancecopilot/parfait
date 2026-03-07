@@ -75,10 +75,6 @@ Multi-module Maven project. Dependency flow is roughly: `parfait-core` -> `dxm` 
 - The DXM module's `InMemoryByteBufferFactory` is the key test utility — allows testing MMV writing without filesystem/PCP dependencies.
 - PCP is available on macOS via Homebrew (`brew tap performancecopilot/pcp && brew install --cask pcp`). See CONTRIBUTING.md for full setup.
 
-## PCP Package Dependencies
-
-The `pcp-gui` package is required — it provides `pmdumptext` which is used by parfait integration tests. Do not remove it from CI or install instructions even though the name suggests it's only for GUI tools.
-
 ## Platform Requirements
 
 - **Java 11 is required for building.** The source/target is Java 8, CI tests against 11, 17, and 21. Modern systems default to Java 21+ which will cause build failures. Ensure `JAVA_HOME` points to Java 11 and `mvn -version` confirms it. See CONTRIBUTING.md for setup instructions.
