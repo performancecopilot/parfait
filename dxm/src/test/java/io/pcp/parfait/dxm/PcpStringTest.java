@@ -19,8 +19,6 @@ package io.pcp.parfait.dxm;
 import io.pcp.parfait.dxm.PcpString.PcpStringStore;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
-import org.mockito.InOrder;
-import org.mockito.Mockito;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -28,8 +26,6 @@ import java.nio.charset.Charset;
 import static io.pcp.parfait.dxm.Matchers.ReflectiveMatcher.reflectivelyEqualing;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.emptyCollectionOf;
-import static org.mockito.ArgumentMatchers.anyByte;
-import static org.mockito.Mockito.mock;
 
 public class PcpStringTest {
 
@@ -39,30 +35,38 @@ public class PcpStringTest {
 
     @Test
     public void shouldWriteToTheByteBufferWithANullTerminatingString() {
-        ByteBuffer byteBuffer = mock(ByteBuffer.class);
+        ByteBuffer byteBuffer = ByteBuffer.allocate(256);
 
         PcpString pcpString = new PcpString(MY_STRING);
 
         pcpString.writeToMmv(byteBuffer);
 
-        InOrder inOrder = Mockito.inOrder(byteBuffer);
-        inOrder.verify(byteBuffer).put(MY_STRING.getBytes(CHARSET));
-        inOrder.verify(byteBuffer).put((byte) 0);
+        byte[] expectedBytes = MY_STRING.getBytes(CHARSET);
+        byteBuffer.position(0);
+        byte[] writtenBytes = new byte[expectedBytes.length];
+        byteBuffer.get(writtenBytes);
+        assertThat(writtenBytes, CoreMatchers.equalTo(expectedBytes));
+        assertThat(byteBuffer.get(), CoreMatchers.equalTo((byte) 0));
     }
 
     @Test
     public void shouldSetTheByteBufferToTheCorrectOffsetBeforeWriting() {
-        ByteBuffer byteBuffer = mock(ByteBuffer.class);
+        ByteBuffer byteBuffer = ByteBuffer.allocate(256);
 
         PcpString pcpString = new PcpString(MY_STRING);
 
         pcpString.setOffset(BUFFER_POSITION);
         pcpString.writeToMmv(byteBuffer);
 
+        byte[] beforeOffset = new byte[BUFFER_POSITION];
+        byteBuffer.position(0);
+        byteBuffer.get(beforeOffset);
+        assertThat(beforeOffset, CoreMatchers.equalTo(new byte[BUFFER_POSITION]));
 
-        InOrder inOrder = Mockito.inOrder(byteBuffer);
-        inOrder.verify(byteBuffer).position(BUFFER_POSITION);
-        inOrder.verify(byteBuffer).put(anyByte());
+        byte[] expectedBytes = MY_STRING.getBytes(CHARSET);
+        byte[] writtenBytes = new byte[expectedBytes.length];
+        byteBuffer.get(writtenBytes);
+        assertThat(writtenBytes, CoreMatchers.equalTo(expectedBytes));
     }
 
     @Test

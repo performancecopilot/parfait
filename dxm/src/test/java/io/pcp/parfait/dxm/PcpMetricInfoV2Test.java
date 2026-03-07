@@ -25,16 +25,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
-import org.mockito.InOrder;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.nio.ByteBuffer;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -120,20 +117,29 @@ public class PcpMetricInfoV2Test {
 
     @Test
     public void writeToMmvShouldSetThePositionOfTheBufferBeforeWriting() {
-        ByteBuffer byteBuffer = mock(ByteBuffer.class);
+        ByteBuffer byteBuffer = ByteBuffer.allocate(THIS_PCP_METRIC_INFO_OFFSET + EXPECTED_PCP_METRIC_INFO_SIZE);
         TypeHandler<Object> typeHandler = mock(TypeHandler.class);
+        MmvMetricType mmvMetricType = mock(MmvMetricType.class);
+        Semantics semantics = mock(Semantics.class);
 
-        when(typeHandler.getMetricType()).thenReturn(mock(MmvMetricType.class));
+        when(typeHandler.getMetricType()).thenReturn(mmvMetricType);
+        when(semantics.getPcpValue()).thenReturn(0);
 
         pcpMetricInfoV2.setOffset(THIS_PCP_METRIC_INFO_OFFSET);
         pcpMetricInfoV2.setTypeHandler(typeHandler);
+        pcpMetricInfoV2.setSemantics(semantics);
 
         pcpMetricInfoV2.writeToMmv(byteBuffer);
 
-        InOrder inOrder = Mockito.inOrder(byteBuffer);
+        // Verify data was written at the offset (buffer position moved past it)
+        int positionAfterWrite = byteBuffer.position();
+        assertEquals(THIS_PCP_METRIC_INFO_OFFSET + EXPECTED_PCP_METRIC_INFO_SIZE, positionAfterWrite);
 
-        inOrder.verify(byteBuffer).position(THIS_PCP_METRIC_INFO_OFFSET);
-        inOrder.verify(byteBuffer).putLong(anyLong());
+        // Verify nothing was written before the offset
+        byteBuffer.position(0);
+        byte[] beforeOffset = new byte[THIS_PCP_METRIC_INFO_OFFSET];
+        byteBuffer.get(beforeOffset);
+        assertArrayEquals(new byte[THIS_PCP_METRIC_INFO_OFFSET], beforeOffset);
     }
 
     @Test

@@ -62,7 +62,6 @@ public class PcpMmvWriterTest {
     private Store<InstanceDomain> instanceDomainStore;
     @Mock
     private Store<PcpMetricInfo> metricInfoStore;
-    @Mock
     private ByteBuffer byteBuffer;
     @Mock
     private TypeHandler<CustomType> customTypeTypeHandler2;
@@ -74,6 +73,7 @@ public class PcpMmvWriterTest {
         when(mmvVersion.createInstanceDomainStore(eq(identifierSourceSet), any(PcpStringStore.class))).thenReturn(instanceDomainStore);
         when(mmvVersion.createMetricInfoStore(eq(identifierSourceSet), any(PcpStringStore.class))).thenReturn(metricInfoStore);
 
+        byteBuffer = ByteBuffer.allocate(8192);
         when(byteBufferFactory.build(anyInt())).thenReturn(byteBuffer);
 
         pcpMmvWriter = new PcpMmvWriter(byteBufferFactory, identifierSourceSet, mmvVersion);
@@ -158,7 +158,6 @@ public class PcpMmvWriterTest {
         when(metricInfoStore.byName(SOME_METRIC_NAME)).thenReturn(pcpMetricInfo);
         when(metricInfoStore.all()).thenReturn(singletonList(pcpMetricInfo));
         when(instanceDomainStore.all()).thenReturn(singletonList(instanceDomain));
-        when(byteBuffer.slice()).thenReturn(mock(ByteBuffer.class));
 
         pcpMmvWriter.addMetric(MetricName.parse(SOME_METRIC_NAME), Semantics.COUNTER, null, 1);
         pcpMmvWriter.setMetricHelpText(SOME_METRIC_NAME, "Short help", "Long help");
