@@ -167,6 +167,7 @@ public class PcpMmvWriter implements PcpWriter {
     private volatile State state = State.STOPPED;
     private final Monitor stateMonitor = new Monitor();
     private final Monitor.Guard isStarted = stateMonitor.newGuard(() -> state == State.STARTED);
+    private final Monitor.Guard isStopped = stateMonitor.newGuard(() -> state == State.STOPPED);
     private volatile Duration maxWaitStart = Duration.ofSeconds(10);
     private volatile boolean usePerMetricLock = true;
     private final Map<PcpValueInfo,ByteBuffer> perMetricByteBuffers = newConcurrentMap();
@@ -323,12 +324,23 @@ public class PcpMmvWriter implements PcpWriter {
         // implementation here is a little complicated to avoid taking a lock on the happy paths.
         if (state == State.STARTED) {
             doUpdateMetric(name, value);
-        } else if (state == State.STARTING) {
-            if (stateMonitor.enterWhenUninterruptibly(isStarted, maxWaitStart)) {
-                // Leave the monitor immediately because we only care about being notified about the state change
+        } else if (stateMonitor.enterIf(isStopped)) {
+            // In this case, the writer has not been started yet, but it's possible the monitorable has already been
+            // added back to the writer. If it has, we need to update the initial value so that it gets written
+            // correctly when the writer is started. If it's not present, then we don't need to do anything because the
+            // monitorable will be re-added in the future with the correct value.
+            try {
+                PcpValueInfo info = metricData.get(name);
+                if (info != null) {
+                    info.setInitialValue(value);
+                }
+            } finally {
                 stateMonitor.leave();
-                doUpdateMetric(name, value);
             }
+        } else if (stateMonitor.enterWhenUninterruptibly(isStarted, maxWaitStart)) {
+            // Leave the monitor immediately because we only care about being notified about the state change
+            stateMonitor.leave();
+            doUpdateMetric(name, value);
         }
     }
 
