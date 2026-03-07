@@ -10,7 +10,8 @@ Parfait is a performance monitoring library for Java which extracts metrics and 
 
 # Requirements
 
-Parfait requires Java 11-17 (as of Parfait 1.2.x). While Parfait (the published library) should _run_ on newer JVMs, the current test code only successfully runs on Java versions 11-17. 
+Parfait requires Java 11+ (as of Parfait 1.2.x). CI tests against Java 11, 17, and 21.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development environment setup, including PCP installation on macOS and Linux.
 
 # About parfait
 
@@ -21,25 +22,9 @@ Parfait consists of several modules:
 
 # Quickstart
 
-For a rapid deployment, the *parfait-agent* can be used in unmodified applications using the Java "-javaagent" command line option.
+For a rapid deployment, the *parfait-agent* can be used in unmodified applications using the Java `-javaagent` command line option. It accesses JMX and other metric values available from within the JVM and exports those as PCP Memory Mapped Value (MMV) metrics. This instrumentation mechanism is designed for use in production applications - it is proven, robust and very lightweight.
 
-This mode uses many of the *parfait* modules described below, internally, so that you don't have to use the API right away. It accesses JMX and other metric values available from within the JVM and exports those as PCP Memory Mapped Value (MMV) metrics. This instrumentation mechanism is designed for use in production applications - it is proven, robust and very lightweight.
-
-To build the standalone *parfait-agent* module, the Maven build contains an extra step:
-
-    $ mvn clean package install
-    $ pushd parfait-agent
-    $ mvn assembly:single
-    $ popd
-
-Install to a well-known place:
-
-    $ mkdir lib
-    $ cp parfait-agent/target/parfait-agent-jar-with-dependencies.jar lib/parfait.jar
-
-Ensure the target directory for memory-mapped files has been created according to the [security model](http://man7.org/linux/man-pages/man1/pmdammv.1.html#INSTALLATION) you wish to use.
-
-Then, to run an application with the *parfait-agent* loaded:
+Ensure the target directory for memory-mapped files has been created according to the [security model](http://man7.org/linux/man-pages/man1/pmdammv.1.html#INSTALLATION) you wish to use, then run:
 
     $ java -javaagent:./lib/parfait.jar MyApplication
 
@@ -47,6 +32,8 @@ Or use the helper script provided:
 
     $ export PARFAIT_HOME=`pwd`
     $ ./bin/parfait [.sh|.bat] -- MyApplication
+
+To build the agent from source, see [CONTRIBUTING.md](CONTRIBUTING.md#building-the-agent).
 
 New PCP **mmv** metrics will then appear automatically for the duration of the instrumented Java application - these metrics can be recorded, charted, used for automated live and historical analysis, and so on, using PCP tools.
 

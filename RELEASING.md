@@ -1,128 +1,74 @@
 Release Process
 ===============
 
-To release parfait out to the wider community, you will need the following:
+Parfait releases are performed via GitHub Actions and published to Maven Central via the [Central Portal](https://central.sonatype.com).
 
-   * checked out the Parfait git repo locally
-   * Maven
-   * gpg & a published GPG public key
-   * An account on [OSS Sonatype Repo](https://oss.sonatype.org/)
+Prerequisites
+-------------
 
-If you're releasing from a Mac/OSX, then you'll also need:
-   * Docker Desktop (due to SSH_AGENT needs, Docker Desktop is the only one that works...)
+The following GitHub repository secrets must be configured (Settings > Secrets > Actions):
 
+| Secret | Purpose |
+|---|---|
+| `GPG_PRIVATE_KEY` | Armored GPG private key for signing artifacts |
+| `GPG_PASSPHRASE` | Passphrase for the GPG key |
+| `CENTRAL_USERNAME` | Central Portal user token username |
+| `CENTRAL_PASSWORD` | Central Portal user token password |
 
-OSS Sonatype
-------------
+A `release` environment with required reviewers must be configured (Settings > Environments) to prevent accidental releases.
 
-You need to have access to OSS Sonatype repo to perform some manual actions during release.
+You also need access to the [Central Portal](https://central.sonatype.com) to perform the final publish step. To generate user tokens: log in > Account > Generate User Token.
 
-The best place to start is to [read this Overview guide](http://central.sonatype.org/pages/ossrh-guide.html).
+Performing a Release
+--------------------
 
-It appears the account to be created _may_ need to be linked with access to the `io.pcp` project.  Create a new Sonatype JIRA Issue and add myself (`tallpsmith@gmail.com`) as a watcher.
+### 1. Dry Run
 
-gpg
----
+Always do a dry run first:
 
-Part of the Maven release process uses `gpg` to digitally sign the releases using a signature.  Please refer to the OSSRH Overview guide above in the OSS Sonatype section as most of the links stem from there.
+1. Go to Actions > "release" workflow > "Run workflow"
+2. Enter the release version (e.g. `1.2.2`) and next development version (e.g. `1.2.3-SNAPSHOT`)
+3. Check "Dry run" (default is checked)
+4. Click "Run workflow"
 
-As outlined in the docs, to streamline the release process I recommend encoding your `gpg` details (but not your password) into ``~/.m2/settings.xml`:
+Verify the workflow completes successfully.
 
-    ...
-    <profiles>
-    ...
-      <profile>
-         <id>gpg</id>
-         <properties>
-            <gpg.executable>gpg</gpg.executable>
-            <gpg.keyname>tallpsmith@gmail.com</gpg.keyname>
-          </properties>
-      </profile>
-    ...
-    </profiles>
-    ...
-    <activeProfiles>
-      <activeProfile>gpg</activeProfile>
-    ...
-    </activeProfiles>
+### 2. Real Release
 
-You can configure your GPG passphrase via an environment variable before running the release process:
+1. Go to Actions > "release" workflow > "Run workflow"
+2. Enter the same versions as the dry run
+3. **Uncheck** "Dry run"
+4. Click "Run workflow"
+5. Approve the deployment when prompted (required reviewers gate)
 
-```markdown
+The workflow will:
+- Run all tests
+- Update POM versions
+- Build and sign artifacts
+- Upload deployment bundle to Central Portal
+- Push release commits and tag to GitHub
 
-export MAVEN_GPG_PASSPHRASE=....
-```
+### 3. Publish on Central Portal
 
-Otherwise you will be asked for the passphrase for every single Parfait module (which is quite a few)....
+1. Log into the [Central Portal](https://central.sonatype.com)
+2. Go to "Deployments"
+3. Find the `io.pcp` deployment
+4. Review the validation status
+5. Click "Publish"
 
-Maven
------
+Artifacts typically appear on Maven Central within 30 minutes of publishing.
 
-Along with the `gpg` key, you need to store your password for the OSS Sonatype account in the `~/.m2/settings.xml`:
+> **Note:** The `autoPublish` setting in pom.xml is currently `false`, requiring this manual publish step. Once confident in the pipeline, set `autoPublish` to `true` in the `central-publishing-maven-plugin` configuration to eliminate this step.
 
-    ...
-    <server>
-      <id>sonatype-nexus-snapshots</id>
-      <username>psmith@aconex.com</username>
-      <password>..................</password>
-    </server>
-    <server>
-      <id>sonatype-nexus-staging</id>
-      <username>psmith@aconex.com</username>
-      <password>..................</password>
-    </server>
+Tag Convention
+--------------
 
+Parfait uses version-number-only tags (e.g. `1.2.2`, not `parfait-1.2.2`). This produces clean source tarballs on GitHub.
 
-When Maven wants to push the artifacts to OSS Sonatype, it'll use this block.
+GPG Key Management
+------------------
 
-ACTUALLY doing the release
-==========================
-
-Once you have all the above components setup, the actual release process involves the following steps:
-
-  1. Invoke Maven's release process, a neat one-liner is this:
-  ```
-  mvn release:prepare release:perform
-  ```
-  Note: by default Parfait uses the tag convention of version number only - i.e. X.Y.Z only, without "parfait-" prefix -
-  as this results in generation of source tarballs on github with the appropriate contents.
-  This step publishes the artifacts to a _*temporary*_ holding area within OSS Sonatype.
-
-  2. The next step is outlined well here: [http://central.sonatype.org/pages/releasing-the-deployment.html]
-
-
-Once the `Release` action is performed you & others in the OSS Sonatype group for this project will receive an email from Nexus indicating the promotion is complete.  Once you receive this, the new version should be referencable in any POM.
-
-Releasing from OSX
-==================
-
-There are some complications releasing from a computer with OSX.  As of November 2024, PCP doesn't have a supported OSX distribution,
-and Parfait test harness require interaction with PCP locally to validate.  As the Maven release process involves running the
-tests locally to validate, this is problematic.
-
-To support the release process on OSX, there is a release script that leverages a `Dockerfile` used _purely_ as a mechanism for releasing.  It is
-a quick'n'dirty mechanism, ugly and less than ideal, but works.
-
-Here's the steps:
-```
-# Prerequisites:
-#   * ensure your current working directory is in the root of the Parfait repository
-#   * EXPORT your gpg PRIVATE key in armor format to directory ~/gpgkeyexport (used during the build)
-#       -  gpg --armor --export-secret-key 21FFA5EB0E068E51 > ~/gpgkeyexport/gpgkey.prvt.asc
-
-# Make sure your ssh key needed for Github is added to a running `ssh-agent` on your local host.
-$ ssh-add
-
-# Create a `.releasing.env` file (not part of SCM) that contains the following environment variables needed
-#GIT_USERNAME=<your Github username>
-#GIT_EMAIL=<your Github email address>
-#GPG_PASSPHRASE=<passphrase for your PRIVATE GPG key exported earlier>
-#These next 2 drive the Maven Release plugin
-#RELEASE_VERSION=1.2.1
-#DEVELOPMENT_VERSION=1.2.2-SNAPSHOT
-#SET this to  'true' if you want to perform a test/dry-run of the release process without actually doing it.
-#DRY_RUN=false 
-
-# Run the Release script
-./releasing.sh
-```
+The release signing key should be:
+- A dedicated key (not a personal key)
+- Published to a public keyserver (`gpg --keyserver keyserver.ubuntu.com --send-keys <KEY_ID>`)
+- Long-lived — only replace if compromised (consumers verify artifacts against this key)

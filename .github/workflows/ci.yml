@@ -4,23 +4,25 @@ on: [ push, pull_request ]
 
 jobs:
   java:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        java-version: ['11', '17', '21']
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: install pcp
         run: |
-          wget -qO - https://pcp.io/GPG-KEY-PCP | sudo apt-key add -
-          #sudo add-apt-repository 'deb https://performancecopilot.jfrog.io/artifactory/pcp-deb-release focal main' -y
           curl -s https://packagecloud.io/install/repositories/performancecopilot/pcp/script.deb.sh | sudo bash
           sudo apt-get update -q
-          sudo apt-get install -y pcp-zeroconf pcp-gui
+          sudo apt-get install -y pcp pcp-zeroconf
       - name: verify pcp install
         run: pcp
       - uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '11'
-      - name: open up access
+          java-version: ${{ matrix.java-version }}
+      - name: open up mmv directory
         run: sudo chmod o+w /var/lib/pcp/tmp/mmv
       - name: verify parfait
         run: mvn -B -V clean install verify

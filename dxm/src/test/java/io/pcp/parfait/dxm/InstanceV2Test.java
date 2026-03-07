@@ -19,15 +19,12 @@ package io.pcp.parfait.dxm;
 import io.pcp.parfait.dxm.PcpString.PcpStringStore;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
-import org.mockito.InOrder;
-import org.mockito.Mockito;
 
 import java.nio.ByteBuffer;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertArrayEquals;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -80,14 +77,20 @@ public class InstanceV2Test {
     @Test
     public void shouldPositionTheByteBufferBeforeWriting() {
         InstanceV2 instanceV2 = new InstanceV2(mock(InstanceDomain.class), INSTANCE_NAME, INSTANCE_DOMAIN_ID, mock(PcpString.class));
-        ByteBuffer byteBuffer = mock(ByteBuffer.class);
+        ByteBuffer byteBuffer = ByteBuffer.allocate(MY_OFFSET + EXPECTED_BYTE_SIZE);
 
         instanceV2.setOffset(MY_OFFSET);
         instanceV2.writeToMmv(byteBuffer);
 
-        InOrder inOrder = Mockito.inOrder(byteBuffer);
-        inOrder.verify(byteBuffer).position(MY_OFFSET);
-        inOrder.verify(byteBuffer).putLong(anyLong());
+        // Verify data was written at the offset (buffer position moved past it)
+        int positionAfterWrite = byteBuffer.position();
+        assertThat(positionAfterWrite, is(MY_OFFSET + EXPECTED_BYTE_SIZE));
+
+        // Verify nothing was written before the offset
+        byteBuffer.position(0);
+        byte[] beforeOffset = new byte[MY_OFFSET];
+        byteBuffer.get(beforeOffset);
+        assertArrayEquals(new byte[MY_OFFSET], beforeOffset);
     }
 
     @Test

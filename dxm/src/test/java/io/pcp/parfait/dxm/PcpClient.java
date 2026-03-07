@@ -20,25 +20,37 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 class PcpClient {
 
     String getMetric(String metricName) throws Exception {
-        Process exec = Runtime.getRuntime().exec("pmdumptext -s 1 -t 0.001 -r " + metricName);
+        String pmrepMetricSpec = toPmrepMetricSpec(metricName);
+        Process exec = Runtime.getRuntime().exec(new String[]{"pmrep", "-s", "1", "-r", "-H", pmrepMetricSpec});
         exec.waitFor();
         if (exec.exitValue() != 0) {
             throw new PcpFetchException(exec);
         }
 
-        String result = IOUtils.toString(exec.getInputStream(), Charset.defaultCharset());
-        Pattern pattern = Pattern.compile("\t(.*?)\n");
-        Matcher matcher = pattern.matcher(result);
-        if(matcher.find()) {
-            return matcher.group(1);
+        String result = IOUtils.toString(exec.getInputStream(), Charset.defaultCharset()).trim();
+        if (result.isEmpty()) {
+            throw new PcpFetchException("Could not find metric in the output: " + result);
         }
-        throw new PcpFetchException("Could not find metric in the output: " + result);
+        return result;
+    }
+
+    /**
+     * Converts PCP bracket instance syntax (metric[instance]) to pmrep's
+     * compact form (metric,,instance). Without this, pmrep doesn't know
+     * how to filter by instance name.
+     */
+    private String toPmrepMetricSpec(String metricName) {
+        int bracketStart = metricName.indexOf('[');
+        if (bracketStart < 0) {
+            return metricName;
+        }
+        String metric = metricName.substring(0, bracketStart);
+        String instance = metricName.substring(bracketStart + 1, metricName.length() - 1);
+        return metric + ",," + instance;
     }
 
     private static class PcpFetchException extends RuntimeException {

@@ -1,0 +1,93 @@
+name: release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: 'Release version (e.g. 1.2.2)'
+        required: true
+      next_dev_version:
+        description: 'Next development version (e.g. 1.2.3-SNAPSHOT)'
+        required: true
+      dry_run:
+        description: 'Dry run (no actual release)'
+        type: boolean
+        default: true
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    environment: ${{ inputs.dry_run == false && 'release' || '' }}
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: install pcp
+        run: |
+          curl -s https://packagecloud.io/install/repositories/performancecopilot/pcp/script.deb.sh | sudo bash
+          sudo apt-get update -q
+          sudo apt-get install -y pcp pcp-zeroconf
+
+      - name: start pmcd
+        run: sudo systemctl start pmcd
+
+      - name: open up mmv directory
+        run: sudo chmod o+w /var/lib/pcp/tmp/mmv
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '11'
+
+      - name: import gpg key
+        run: |
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+
+      - name: configure maven settings
+        run: |
+          mkdir -p ~/.m2
+          cat > ~/.m2/settings.xml << 'SETTINGS'
+          <settings>
+            <servers>
+              <server>
+                <id>central</id>
+                <username>${env.CENTRAL_USERNAME}</username>
+                <password>${env.CENTRAL_PASSWORD}</password>
+              </server>
+            </servers>
+            <profiles>
+              <profile>
+                <id>gpg</id>
+                <properties>
+                  <gpg.executable>gpg</gpg.executable>
+                  <gpg.passphrase>${env.MAVEN_GPG_PASSPHRASE}</gpg.passphrase>
+                </properties>
+              </profile>
+            </profiles>
+            <activeProfiles>
+              <activeProfile>gpg</activeProfile>
+            </activeProfiles>
+          </settings>
+          SETTINGS
+
+      - name: configure git
+        run: |
+          git config user.email "parfait-release@pcp.io"
+          git config user.name "Parfait Release Bot"
+
+      - name: maven release
+        env:
+          CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
+          CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          mvn --batch-mode \
+            -DdryRun=${{ inputs.dry_run }} \
+            -DreleaseVersion=${{ inputs.release_version }} \
+            -DdevelopmentVersion=${{ inputs.next_dev_version }} \
+            release:prepare release:perform
