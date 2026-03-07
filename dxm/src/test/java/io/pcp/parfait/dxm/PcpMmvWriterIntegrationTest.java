@@ -212,7 +212,7 @@ public class PcpMmvWriterIntegrationTest {
 
         waitForReload();
 
-        assertMetric("mmv.value1", is("1.000"));
+        assertMetric("mmv.value1", is("1"));
 
         pcpMmvWriterV1.reset();
 
@@ -223,7 +223,7 @@ public class PcpMmvWriterIntegrationTest {
 
         waitForReload();
 
-        assertMetric("mmv.value1", is("10.000"));
+        assertMetric("mmv.value1", is("10"));
     }
 
     private void assertMetric(String metricName, Matcher<String> expectedValue) throws Exception {
