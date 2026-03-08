@@ -8,11 +8,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java-version: ['11', '17', '21']
-        extra-maven-args: ['']
-        include:
-          - java-version: '25'
-            extra-maven-args: '-Dnet.bytebuddy.experimental=true'
+        java-version: ['11', '17', '21', '25']
     steps:
       - uses: actions/checkout@v4
       - name: install pcp
@@ -29,4 +25,4 @@ jobs:
       - name: open up mmv directory
         run: sudo chmod o+w /var/lib/pcp/tmp/mmv
       - name: verify parfait
-        run: mvn -B -V clean install verify ${{ matrix.extra-maven-args }}
+        run: mvn -B -V clean install verify
