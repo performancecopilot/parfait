@@ -157,6 +157,7 @@
                     <excludes>
                         <exclude>**/*IntegrationTest.java</exclude>
                     </excludes>
+                    <argLine>-Dnet.bytebuddy.experimental=true</argLine>
                 </configuration>
             </plugin>
             <plugin>
@@ -175,6 +176,7 @@
                     <includes>
                         <include>**/*IntegrationTest.java</include>
                     </includes>
+                    <argLine>-Dnet.bytebuddy.experimental=true</argLine>
                 </configuration>
             </plugin>
             <plugin>
