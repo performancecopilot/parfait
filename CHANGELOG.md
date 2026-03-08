@@ -14,7 +14,7 @@ While not ALL changes are outlined here, important changes that have potential i
 * Streamline README, move build-from-source details to CONTRIBUTING.md
 * Monitorable caching performance improvement
 * Fix race condition in metric updates with stopped writer
-* Default Byte Buddy experimental mode for JDK 25+ Mockito compatibility (#145)
+* Upgrade Mockito 5.13.0 → 5.22.0 for native JDK 25+ support, removing Byte Buddy experimental workaround (#145)
 * Bump Jackson 2.17.2 → 2.18.6
 * Bump CXF 4.0.5 → 4.0.7
 * Bump XStream 1.4.20 → 1.4.21
