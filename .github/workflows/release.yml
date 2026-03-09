@@ -49,26 +49,18 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
 
-      - name: configure headless pinentry for CI
+      - name: configure gpg wrapper for headless signing
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
           echo "$GPG_PASSPHRASE" > ~/.gnupg/.passphrase
           chmod 600 ~/.gnupg/.passphrase
-          cat > ~/.gnupg/pinentry-ci.sh << 'PINENTRY'
+          cat > /usr/local/bin/gpg-ci << 'WRAPPER'
           #!/bin/sh
-          echo "OK Pleased to meet you"
-          while IFS= read -r line; do
-            case "$line" in
-              GETPIN) echo "D $(cat ~/.gnupg/.passphrase)"; echo "OK";;
-              BYE) echo "OK"; exit 0;;
-              *) echo "OK";;
-            esac
-          done
-          PINENTRY
-          chmod +x ~/.gnupg/pinentry-ci.sh
-          echo "pinentry-program $HOME/.gnupg/pinentry-ci.sh" >> ~/.gnupg/gpg-agent.conf
-          gpg-connect-agent reloadagent /bye
+          exec gpg --batch --pinentry-mode loopback --passphrase-file "$HOME/.gnupg/.passphrase" --no-tty "$@"
+          WRAPPER
+          chmod +x /usr/local/bin/gpg-ci
+          git config --global gpg.program gpg-ci
 
       - name: configure maven settings
         run: |
@@ -86,7 +78,7 @@ jobs:
               <profile>
                 <id>gpg</id>
                 <properties>
-                  <gpg.executable>gpg</gpg.executable>
+                  <gpg.executable>gpg-ci</gpg.executable>
                   <gpg.passphrase>${env.MAVEN_GPG_PASSPHRASE}</gpg.passphrase>
                 </properties>
               </profile>
@@ -103,7 +95,7 @@ jobs:
           git config user.name "Parfait Release Bot"
 
       - name: verify gpg signing works
-        run: echo "test" | gpg --sign > /dev/null
+        run: echo "test" | gpg-ci --sign > /dev/null
 
       - name: maven release
         env:
