@@ -93,12 +93,29 @@ jobs:
         run: |
           git config user.email "parfait-release@pcp.io"
           git config user.name "Parfait Release Bot"
-          git config --global url."https://x-access-token:${{ github.token }}@github.com/".insteadOf "git@github.com:"
 
       - name: verify gpg signing works
         run: echo "test" | gpg-ci --sign > /dev/null
 
-      - name: maven release
+      # Why -DpushChanges=false and a manual git push?
+      #
+      # The maven-release-plugin reads the push URL from the POM's
+      # <developerConnection>, which uses SSH (git@github.com:...).
+      # CI runners don't have SSH keys — they authenticate via the
+      # GITHUB_TOKEN over HTTPS, which actions/checkout already
+      # configures on the 'origin' remote.
+      #
+      # The release plugin (2.5.3) ignores -D overrides for SCM URLs
+      # during release:prepare, so we can't simply swap the URL.
+      # Instead, we tell Maven to do everything locally:
+      #   -DpushChanges=false  — commit and tag, but don't push
+      #   -DlocalCheckout=true — release:perform checks out from the
+      #                          local repo instead of SCM URL
+      #
+      # Then we push commits and tags ourselves via the HTTPS remote
+      # that actions/checkout set up with token auth.
+
+      - name: maven release prepare and perform
         env:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
           CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
@@ -107,6 +124,13 @@ jobs:
         run: |
           mvn --batch-mode \
             -DdryRun=${{ inputs.dry_run }} \
+            -DpushChanges=false \
+            -DlocalCheckout=true \
             -DreleaseVersion=${{ inputs.release_version }} \
             -DdevelopmentVersion=${{ inputs.next_dev_version }} \
             release:prepare release:perform
+
+      - name: push release commits and tag
+        if: ${{ inputs.dry_run == false }}
+        run: |
+          git push origin main --follow-tags
