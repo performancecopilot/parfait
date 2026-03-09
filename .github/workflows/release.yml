@@ -93,25 +93,7 @@ jobs:
         run: |
           git config user.email "parfait-release@pcp.io"
           git config user.name "Parfait Release Bot"
-
-      - name: diagnose gpg setup
-        env:
-          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-        run: |
-          echo "=== gpg version ==="
-          gpg --version | head -2
-          echo "=== key info ==="
-          gpg --list-secret-keys --with-colons 2>/dev/null | grep -E '^(sec|uid)' | cut -d: -f1,5,10
-          echo "=== passphrase file size ==="
-          wc -c < ~/.gnupg/.passphrase
-          echo "=== test 1: direct passphrase via env ==="
-          echo "test" | gpg --batch --pinentry-mode loopback --passphrase "$GPG_PASSPHRASE" --sign > /dev/null 2>&1 && echo "PASS" || echo "FAIL"
-          echo "=== test 2: passphrase-file ==="
-          echo "test" | gpg --batch --pinentry-mode loopback --passphrase-file ~/.gnupg/.passphrase --sign > /dev/null 2>&1 && echo "PASS" || echo "FAIL"
-          echo "=== test 3: agent cache (no passphrase) ==="
-          echo "test" | gpg --sign > /dev/null 2>&1 && echo "PASS" || echo "FAIL"
-          echo "=== test 4: gpg-ci wrapper ==="
-          echo "test" | gpg-ci --sign > /dev/null 2>&1 && echo "PASS" || echo "FAIL"
+          git remote set-url origin https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
 
       - name: verify gpg signing works
         run: echo "test" | gpg-ci --sign > /dev/null
@@ -121,10 +103,13 @@ jobs:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
           CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+          GITHUB_TOKEN: ${{ github.token }}
           GPG_TTY: no-tty
         run: |
+          REPO_URL="scm:git:https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git"
           mvn --batch-mode \
             -DdryRun=${{ inputs.dry_run }} \
             -DreleaseVersion=${{ inputs.release_version }} \
             -DdevelopmentVersion=${{ inputs.next_dev_version }} \
+            -Dproject.scm.developerConnection="$REPO_URL" \
             release:prepare release:perform
