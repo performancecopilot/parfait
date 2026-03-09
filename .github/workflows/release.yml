@@ -49,6 +49,27 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
 
+      - name: configure headless pinentry for CI
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          echo "$GPG_PASSPHRASE" > ~/.gnupg/.passphrase
+          chmod 600 ~/.gnupg/.passphrase
+          cat > ~/.gnupg/pinentry-ci.sh << 'PINENTRY'
+          #!/bin/sh
+          echo "OK Pleased to meet you"
+          while IFS= read -r line; do
+            case "$line" in
+              GETPIN) echo "D $(cat ~/.gnupg/.passphrase)"; echo "OK";;
+              BYE) echo "OK"; exit 0;;
+              *) echo "OK";;
+            esac
+          done
+          PINENTRY
+          chmod +x ~/.gnupg/pinentry-ci.sh
+          echo "pinentry-program $HOME/.gnupg/pinentry-ci.sh" >> ~/.gnupg/gpg-agent.conf
+          gpg-connect-agent reloadagent /bye
+
       - name: configure maven settings
         run: |
           mkdir -p ~/.m2
