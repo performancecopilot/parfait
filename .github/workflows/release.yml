@@ -49,14 +49,6 @@ jobs:
           git_user_signingkey: true
           git_commit_gpgsign: true
 
-      - name: configure gpg-agent for non-interactive use
-        run: |
-          cat > ~/.gnupg/gpg-agent.conf << 'AGENT'
-          allow-preset-passphrase
-          allow-loopback-pinentry
-          AGENT
-          gpg-connect-agent reloadagent /bye
-
       - name: configure maven settings
         run: |
           mkdir -p ~/.m2
