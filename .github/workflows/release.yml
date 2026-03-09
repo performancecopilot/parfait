@@ -55,6 +55,7 @@ jobs:
           echo "use-agent" >> ~/.gnupg/gpg.conf
           echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
           gpgconf --kill gpg-agent
+          gpgconf --launch gpg-agent
 
       - name: configure maven settings
         run: |
@@ -87,6 +88,9 @@ jobs:
         run: |
           git config user.email "parfait-release@pcp.io"
           git config user.name "Parfait Release Bot"
+
+      - name: verify gpg signing works
+        run: echo "test" | gpg --batch --pinentry-mode loopback --sign > /dev/null
 
       - name: maven release
         env:
