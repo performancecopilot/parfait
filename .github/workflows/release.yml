@@ -53,7 +53,7 @@ jobs:
         env:
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         run: |
-          echo "$GPG_PASSPHRASE" > ~/.gnupg/.passphrase
+          printf '%s' "$GPG_PASSPHRASE" > ~/.gnupg/.passphrase
           chmod 600 ~/.gnupg/.passphrase
           cat > /usr/local/bin/gpg-ci << 'WRAPPER'
           #!/bin/sh
