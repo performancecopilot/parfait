@@ -93,7 +93,7 @@ jobs:
         run: |
           git config user.email "parfait-release@pcp.io"
           git config user.name "Parfait Release Bot"
-          git remote set-url origin https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git
+          git config --global url."https://x-access-token:${{ github.token }}@github.com/".insteadOf "git@github.com:"
 
       - name: verify gpg signing works
         run: echo "test" | gpg-ci --sign > /dev/null
@@ -103,13 +103,10 @@ jobs:
           CENTRAL_USERNAME: ${{ secrets.CENTRAL_USERNAME }}
           CENTRAL_PASSWORD: ${{ secrets.CENTRAL_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-          GITHUB_TOKEN: ${{ github.token }}
           GPG_TTY: no-tty
         run: |
-          REPO_URL="scm:git:https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git"
           mvn --batch-mode \
             -DdryRun=${{ inputs.dry_run }} \
             -DreleaseVersion=${{ inputs.release_version }} \
             -DdevelopmentVersion=${{ inputs.next_dev_version }} \
-            -Dproject.scm.developerConnection="$REPO_URL" \
             release:prepare release:perform
