@@ -288,14 +288,11 @@
                 </execution>
               </executions>
 	    </plugin>
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+            </plugin>
         </plugins>
-        <extensions>
-            <extension>
-                <groupId>org.apache.maven.wagon</groupId>
-                <artifactId>wagon-ftp</artifactId>
-                <version>1.0-alpha-6</version>
-            </extension>
-        </extensions>
     </build>
     <reporting>
         <plugins>
@@ -484,36 +481,6 @@
       <artifactId>jackson-databind</artifactId>
     </dependency>
   </dependencies>
-  <repositories>
-    <repository>
-      <id>sonatype-nexus-snapshots</id>
-      <name>Sonatype Nexus Snapshots</name>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-      <releases><enabled>false</enabled></releases>
-      <snapshots><enabled>true</enabled></snapshots>
-    </repository>
-    <repository>
-      <id>jcenter</id>
-      <name>JCenter</name>
-      <url>https://jcenter.bintray.com</url>
-    </repository>
-    <repository>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <id>bintray-release</id>
-      <name>libs-release</name>
-      <url>https://oss.jfrog.org/artifactory/libs-release</url>
-    </repository>
-    <repository>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <id>bintray-snapshot</id>
-      <name>libs-snapshot</name>
-      <url>https://oss.jfrog.org/artifactory/libs-snapshot</url>
-    </repository>
-  </repositories>
   <distributionManagement>
     <snapshotRepository>
       <id>central</id>
